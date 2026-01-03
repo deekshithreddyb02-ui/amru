@@ -13,9 +13,14 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ 
+        scale: 1.05, 
+        y: -8,
+        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)"
+      }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay }}
-      className="service-card h-full flex flex-col"
+      transition={{ duration: 0.3 }}
+      className="service-card h-full flex flex-col cursor-pointer"
     >
       <div className="aspect-[4/3] overflow-hidden">
         <img
