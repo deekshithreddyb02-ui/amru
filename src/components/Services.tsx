@@ -106,7 +106,7 @@ const Services = () => {
         </motion.div>
 
         {/* Main Services Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           {mainServices.map((service, index) => (
             <ServiceCard
               key={service.title}
@@ -126,7 +126,7 @@ const Services = () => {
               transition={{ duration: 0.4 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pt-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-6">
                 {extraServices.map((service, index) => (
                   <ServiceCard
                     key={service.title}
