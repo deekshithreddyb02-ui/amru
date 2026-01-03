@@ -1,0 +1,206 @@
+import { motion } from "framer-motion";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
+
+const offices = [
+  {
+    city: "Pune",
+    address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061",
+  },
+  {
+    city: "Hyderabad",
+    address: "Head Office - Hyderabad, Telangana",
+  },
+  {
+    city: "Mumbai",
+    address: "Branch Office - Mumbai, Maharashtra",
+  },
+  {
+    city: "Bangalore",
+    address: "Branch Office - Bangalore, Karnataka",
+  },
+];
+
+const Contact = () => {
+  return (
+    <section id="contact" className="py-20 md:py-28 bg-muted/30">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <h2 className="section-heading mb-4">Contact Us</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Get in touch with our team for consultations, quotes, or any inquiries.
+          </p>
+        </motion.div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Contact Info */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            {/* Phone & Email */}
+            <div className="bg-card p-6 rounded-xl border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
+              <h3 className="font-serif font-semibold text-xl text-foreground mb-4">
+                Get In Touch
+              </h3>
+              <div className="space-y-4">
+                <a
+                  href="tel:9966533554"
+                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Phone className="w-5 h-5 text-primary" />
+                  <span>+91 9966533554</span>
+                </a>
+                <a
+                  href="tel:9966533142"
+                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Phone className="w-5 h-5 text-primary" />
+                  <span>+91 9966533142</span>
+                </a>
+                <a
+                  href="mailto:info@amrutageo.com"
+                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Mail className="w-5 h-5 text-primary" />
+                  <span>info@amrutageo.com</span>
+                </a>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                  <Clock className="w-5 h-5 text-primary" />
+                  <span>Mon - Sat: 9:00 AM - 6:00 PM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Offices */}
+            <div className="bg-card p-6 rounded-xl border border-border" style={{ boxShadow: "var(--card-shadow)" }}>
+              <h3 className="font-serif font-semibold text-xl text-foreground mb-4">
+                Our Offices
+              </h3>
+              <div className="space-y-4">
+                {offices.map((office) => (
+                  <div key={office.city} className="flex gap-3">
+                    <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-foreground">{office.city}</div>
+                      <div className="text-sm text-muted-foreground">{office.address}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Contact Form */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-card p-6 md:p-8 rounded-xl border border-border"
+            style={{ boxShadow: "var(--card-shadow)" }}
+          >
+            <h3 className="font-serif font-semibold text-xl text-foreground mb-6">
+              Send Us a Message
+            </h3>
+            <form className="space-y-4" onSubmit={(e) => {
+              e.preventDefault();
+              alert("Thanks! Your request has been received. Our team will contact you shortly.");
+              (e.target as HTMLFormElement).reset();
+            }}>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+                    placeholder="+91 XXXXX XXXXX"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label htmlFor="service" className="block text-sm font-medium text-foreground mb-1">
+                  Service Interested In
+                </label>
+                <select
+                  id="service"
+                  name="service"
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+                >
+                  <option value="">Select a service</option>
+                  <option>Rainwater Harvesting</option>
+                  <option>Ground Water Survey</option>
+                  <option>Water Audit / ZLD</option>
+                  <option>EC & MEP Consulting</option>
+                  <option>STP / ETP Solutions</option>
+                  <option>GPR & Thermal Scanning</option>
+                  <option>CGWB Registration</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow resize-none"
+                  placeholder="Tell us about your project..."
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Send Enquiry
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Contact;
