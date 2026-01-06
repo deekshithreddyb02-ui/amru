@@ -60,10 +60,10 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
           />
         </div>
         <div className="p-5 flex flex-col flex-grow">
-          <h3 className="font-serif font-semibold text-lg text-foreground mb-2 leading-tight line-clamp-2 min-h-[3.5rem]">
+          <h3 className="font-serif font-semibold text-lg text-foreground mb-2 leading-tight">
             {title}
           </h3>
-          <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-3 min-h-[3.75rem]">
+          <p className="text-muted-foreground text-sm mb-4 flex-grow">
             {description}
           </p>
           <button
