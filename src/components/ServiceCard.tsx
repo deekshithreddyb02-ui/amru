@@ -31,10 +31,10 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
         />
       </div>
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="font-serif font-semibold text-lg text-foreground mb-2 leading-tight">
+        <h3 className="font-serif font-semibold text-lg text-foreground mb-2 leading-tight line-clamp-2 min-h-[3.5rem]">
           {title}
         </h3>
-        <p className="text-muted-foreground text-sm mb-4 flex-grow">
+        <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-3 min-h-[3.75rem]">
           {description}
         </p>
         <a
