@@ -126,7 +126,7 @@ const Services = () => {
               transition={{ duration: 0.4 }}
               className="overflow-hidden"
             >
-              <div className="flex flex-wrap justify-center gap-4 pt-6 [&>*]:w-[calc(50%-0.5rem)] [&>*]:md:w-[calc(33.333%-0.75rem)] [&>*]:lg:w-[calc(16.666%-0.85rem)]">
+              <div className="flex flex-wrap justify-center gap-4 [&>*]:w-[calc(50%-0.5rem)] [&>*]:md:w-[calc(33.333%-0.75rem)] [&>*]:lg:w-[calc(16.666%-0.85rem)]">
                 {extraServices.map((service, index) => (
                   <ServiceCard
                     key={service.title}
