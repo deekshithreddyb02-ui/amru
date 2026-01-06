@@ -140,7 +140,7 @@ const Services = () => {
         </AnimatePresence>
 
         {/* Toggle Button */}
-        <div className="text-center mt-10">
+        <div className="text-center mt-6">
           <button
             onClick={() => setShowMore(!showMore)}
             className="inline-flex items-center gap-2 text-primary font-medium hover:text-secondary transition-colors"
