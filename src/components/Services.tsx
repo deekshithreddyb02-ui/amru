@@ -88,7 +88,7 @@ const Services = () => {
         </motion.div>
 
         {/* Main Services Grid */}
-        <div className="flex-wrap gap-4 mb-8 [&>*]:w-[calc(50%-0.5rem)] [&>*]:md:w-[calc(33.333%-0.75rem)] [&>*]:lg:w-[calc(16.666%-0.85rem)] flex items-start justify-center">
+        <div className="flex flex-wrap gap-4 justify-center items-start [&>*]:w-[calc(50%-0.5rem)] [&>*]:md:w-[calc(33.333%-0.75rem)] [&>*]:lg:w-[calc(16.666%-0.85rem)]">
           {mainServices.map((service, index) => <ServiceCard key={service.title} {...service} delay={index * 0.1} />)}
         </div>
 
