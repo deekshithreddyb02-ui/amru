@@ -48,9 +48,9 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
         }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-t-[2rem] rounded-b-lg h-full flex flex-col cursor-pointer shadow-sm border border-border/50 overflow-hidden"
+        className="bg-white rounded-2xl h-full flex flex-col cursor-pointer shadow-sm border border-border/50 overflow-hidden"
       >
-        <div className="aspect-[4/3] overflow-hidden rounded-t-[2rem]">
+        <div className="aspect-[4/3] overflow-hidden rounded-t-2xl">
           <img
             src={image}
             alt={title}
