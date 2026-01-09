@@ -58,16 +58,16 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
             loading="lazy"
           />
         </div>
-        <div className="p-4 flex flex-col flex-grow">
+        <div className="p-4 flex flex-col flex-1">
           <h3 className="font-bold text-base text-primary mb-2 leading-tight">
             {title}
           </h3>
-          <p className="text-muted-foreground text-sm mb-4 flex-grow leading-relaxed">
+          <p className="text-muted-foreground text-sm leading-relaxed flex-1">
             {description}
           </p>
           <button
             onClick={() => setOpen(true)}
-            className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-auto"
+            className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-3 pt-2 border-t border-border/30"
           >
             Enquire →
           </button>
