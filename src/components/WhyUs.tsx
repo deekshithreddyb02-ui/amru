@@ -36,7 +36,7 @@ const reasons = [
 
 const WhyUs = () => {
   return (
-    <section id="why" className="py-20 md:py-28 bg-primary">
+    <section id="why" className="py-12 md:py-16 bg-primary">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
