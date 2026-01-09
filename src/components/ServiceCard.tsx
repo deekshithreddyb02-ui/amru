@@ -43,32 +43,31 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         whileHover={{ 
-          scale: 1.05, 
-          y: -8,
-          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)"
+          y: -4,
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)"
         }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.3 }}
-        className="service-card h-full flex flex-col cursor-pointer"
+        className="bg-white rounded-t-[2rem] rounded-b-lg h-full flex flex-col cursor-pointer shadow-sm border border-border/50 overflow-hidden"
       >
-        <div className="aspect-[4/3] overflow-hidden">
+        <div className="aspect-[4/3] overflow-hidden rounded-t-[2rem]">
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
         </div>
-        <div className="p-5 flex flex-col flex-grow">
-          <h3 className="font-serif font-semibold text-lg text-foreground mb-2 leading-tight">
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="font-bold text-base text-primary mb-2 leading-tight">
             {title}
           </h3>
-          <p className="text-muted-foreground text-sm mb-4 flex-grow">
+          <p className="text-muted-foreground text-sm mb-4 flex-grow leading-relaxed">
             {description}
           </p>
           <button
             onClick={() => setOpen(true)}
-            className="inline-flex items-center text-primary font-medium text-sm hover:text-secondary transition-colors text-left"
+            className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-auto"
           >
             Enquire →
           </button>
