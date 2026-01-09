@@ -20,7 +20,7 @@ const About = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="section-heading mb-6 text-center lg:text-left">About Us</h2>
+            <h2 className="section-heading mb-6 text-center">About Us</h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
                 Established in <strong className="text-foreground">1990</strong> at Hyderabad, 
