@@ -25,18 +25,44 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm text-background/70">
-              <li><a href="#home" className="hover:text-background transition-colors">Home</a></li>
-              <li><a href="#services" className="hover:text-background transition-colors">Services</a></li>
-              <li><a href="#about" className="hover:text-background transition-colors">About Us</a></li>
-              <li><a href="#contact" className="hover:text-background transition-colors">Contact</a></li>
               <li>
                 <a 
                   href="https://rain.amrutageo.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="hover:text-background transition-colors"
+                  className="hover:text-background transition-colors flex items-center gap-2"
                 >
-                  RWH SW HFL PMS Platform
+                  <span>📊</span> Simple Calculator
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://rain.amrutageo.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-background transition-colors flex items-center gap-2"
+                >
+                  <span>🔮</span> Expert Tool
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://rain.amrutageo.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-background transition-colors flex items-center gap-2"
+                >
+                  <span>📁</span> Project Dashboard
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://rain.amrutageo.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-background transition-colors flex items-center gap-2"
+                >
+                  <span>🔐</span> Login Portal
                 </a>
               </li>
             </ul>
