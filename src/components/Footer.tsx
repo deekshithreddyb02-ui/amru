@@ -139,19 +139,6 @@ const Footer = () => {
                 </p>
               </div>
               
-              {/* CTA Box */}
-              <div className="mt-6 bg-background/10 rounded-lg p-4 border border-background/20">
-                <p className="flex items-center gap-2 text-background/90 text-sm mb-3">
-                  <Phone className="w-4 h-4 text-green-400" /> Need professional hydrological design?
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="w-full bg-background text-foreground hover:bg-background/90 border-0"
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <span className="mr-2">🤝</span> Consult Our Experts
-                </Button>
-              </div>
             </div>
           </div>
         </div>
