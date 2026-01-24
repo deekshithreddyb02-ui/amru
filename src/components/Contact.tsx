@@ -53,25 +53,32 @@ const Contact = () => {
               </h3>
               <div className="space-y-4">
                 <a
-                  href="tel:9966533554"
+                  href="tel:+917410030418"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Phone className="w-5 h-5 text-primary" />
-                  <span>+91 9966533554</span>
+                  <span>+91-741-0030-418</span>
                 </a>
                 <a
-                  href="tel:9966533142"
+                  href="tel:+917410030417"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Phone className="w-5 h-5 text-primary" />
-                  <span>+91 9966533142</span>
+                  <span>+91-741-0030-417</span>
                 </a>
                 <a
-                  href="mailto:info@amrutageo.com"
+                  href="mailto:info@quickaxis.com"
                   className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Mail className="w-5 h-5 text-primary" />
-                  <span>info@amrutageo.com</span>
+                  <span>info@quickaxis.com</span>
+                </a>
+                <a
+                  href="mailto:rain@amrutawater.com"
+                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Mail className="w-5 h-5 text-primary" />
+                  <span>rain@amrutawater.com</span>
                 </a>
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <Clock className="w-5 h-5 text-primary" />
