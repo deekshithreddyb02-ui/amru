@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface ServiceCardProps {
   title: string;
@@ -23,6 +25,7 @@ interface ServiceCardProps {
 
 const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -30,11 +33,52 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Enquiry submitted successfully! We'll contact you soon.");
-    setFormData({ name: "", phone: "", email: "", message: "" });
-    setOpen(false);
+    setIsSubmitting(true);
+
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const phone = formData.phone.trim() || null;
+    const message = formData.message.trim() || '';
+
+    // Basic validation
+    if (!name || !email) {
+      toast.error("Please fill in all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name,
+          email,
+          phone,
+          service: title,
+          message,
+        });
+
+      if (error) throw error;
+
+      toast.success("Enquiry submitted successfully! We'll contact you soon.");
+      setFormData({ name: "", phone: "", email: "", message: "" });
+      setOpen(false);
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("Failed to submit. Please try calling us at +91-741-0030-418.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,17 +132,18 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
               <Input
                 id="name"
                 required
+                maxLength={100}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Your name"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
+              <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
-                required
+                maxLength={20}
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="Your phone number"
@@ -110,6 +155,7 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
                 id="email"
                 type="email"
                 required
+                maxLength={255}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="Your email"
@@ -120,13 +166,21 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
               <Textarea
                 id="message"
                 value={formData.message}
+                maxLength={2000}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Your message (optional)"
                 rows={3}
               />
             </div>
-            <Button type="submit" className="w-full">
-              Submit Enquiry
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Enquiry"
+              )}
             </Button>
           </form>
         </DialogContent>
