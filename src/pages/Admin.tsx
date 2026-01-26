@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface User {
@@ -172,7 +172,13 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
+              <Home className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+            <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
+          </div>
           <Button variant="secondary" size="sm" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
             Logout
