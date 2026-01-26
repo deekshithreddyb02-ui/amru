@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 type Message = {
   role: "user" | "assistant";
@@ -21,6 +23,7 @@ const ChatBot = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -38,18 +41,44 @@ const ChatBot = () => {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const streamChat = async (userMessages: Message[]) => {
+    // Get current session for auth token
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      throw new Error("Please log in to use the chat assistant.");
+    }
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ messages: userMessages }),
     });
 
     if (!resp.ok) {
       const errorData = await resp.json().catch(() => ({}));
+      if (resp.status === 401) {
+        throw new Error("Authentication required. Please log in to continue.");
+      }
       if (resp.status === 429) {
         throw new Error("Rate limit exceeded. Please wait a moment and try again.");
       }
@@ -109,6 +138,11 @@ const ChatBot = () => {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!user) {
+      toast.error("Please log in to use the chat assistant.");
+      return;
+    }
 
     const userMessage: Message = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMessage];
@@ -223,28 +257,38 @@ const ChatBot = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* Input or Login Prompt */}
             <div className="p-4 border-t border-border">
-              <div className="flex gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask about water solutions..."
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2 text-sm border border-border rounded-full bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-                />
-                <Button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
-                  size="icon"
-                  className="rounded-full w-10 h-10"
+              {user ? (
+                <div className="flex gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask about water solutions..."
+                    disabled={isLoading}
+                    className="flex-1 px-4 py-2 text-sm border border-border rounded-full bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+                  />
+                  <Button
+                    onClick={handleSend}
+                    disabled={!input.trim() || isLoading}
+                    size="icon"
+                    className="rounded-full w-10 h-10"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <a
+                  href="/auth"
+                  className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
                 >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
+                  <LogIn className="w-4 h-4" />
+                  Log in to chat with our assistant
+                </a>
+              )}
             </div>
           </motion.div>
         )}

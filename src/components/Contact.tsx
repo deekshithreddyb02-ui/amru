@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 const offices = [{
   city: "Pune",
   address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
@@ -13,8 +17,63 @@ const offices = [{
   city: "Bangalore",
   address: "Branch Office - Bangalore, Karnataka"
 }];
+
 const Contact = () => {
-  return <section id="contact" className="py-12 md:py-16 bg-muted/30">
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    const name = (formData.get('name') as string)?.trim();
+    const email = (formData.get('email') as string)?.trim();
+    const phone = (formData.get('phone') as string)?.trim() || null;
+    const service = (formData.get('service') as string)?.trim() || null;
+    const message = (formData.get('message') as string)?.trim() || '';
+
+    // Basic validation
+    if (!name || !email) {
+      toast.error("Please fill in all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name,
+          email,
+          phone,
+          service,
+          message,
+        });
+
+      if (error) throw error;
+
+      toast.success("Thank you! Your inquiry has been received. We will contact you shortly.");
+      form.reset();
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("Failed to submit. Please try calling us at +91-741-0030-418.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <section id="contact" className="py-12 md:py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <motion.div initial={{
         opacity: 0,
@@ -107,30 +166,49 @@ const Contact = () => {
             <h3 className="font-serif font-semibold text-xl text-foreground mb-6">
               Send Us a Message
             </h3>
-            <form className="space-y-4" onSubmit={e => {
-            e.preventDefault();
-            alert("Thanks! Your request has been received. Our team will contact you shortly.");
-            (e.target as HTMLFormElement).reset();
-          }}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
-                    Name
+                    Name *
                   </label>
-                  <input type="text" id="name" name="name" required className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" placeholder="Your name" />
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required 
+                    maxLength={100}
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" 
+                    placeholder="Your name" 
+                  />
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
                     Phone
                   </label>
-                  <input type="tel" id="phone" name="phone" required className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" placeholder="+91 XXXXX XXXXX" />
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    maxLength={20}
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" 
+                    placeholder="+91 XXXXX XXXXX" 
+                  />
                 </div>
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
-                  Email
+                  Email *
                 </label>
-                <input type="email" id="email" name="email" required className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" placeholder="you@example.com" />
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  required 
+                  maxLength={255}
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" 
+                  placeholder="you@example.com" 
+                />
               </div>
               <div>
                 <label htmlFor="service" className="block text-sm font-medium text-foreground mb-1">
@@ -152,15 +230,35 @@ const Contact = () => {
                 <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">
                   Message
                 </label>
-                <textarea id="message" name="message" rows={4} className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow resize-none" placeholder="Tell us about your project..." />
+                <textarea 
+                  id="message" 
+                  name="message" 
+                  rows={4} 
+                  maxLength={2000}
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow resize-none" 
+                  placeholder="Tell us about your project..." 
+                />
               </div>
-              <button type="submit" className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity">
-                Send Enquiry
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Enquiry"
+                )}
               </button>
             </form>
           </motion.div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Contact;
