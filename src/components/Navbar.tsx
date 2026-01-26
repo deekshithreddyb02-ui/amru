@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Menu, X, LogIn, LogOut } from "lucide-react";
+import { Menu, X, LogIn, LogOut, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { useAdmin } from "@/hooks/useAdmin";
 import logo from "@/assets/logo.png";
 
 const navLinks = [
@@ -16,6 +17,7 @@ const navLinks = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -63,6 +65,15 @@ const Navbar = () => {
             >
               RWH SW HFL PMS
             </a>
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="flex items-center gap-2 bg-accent/80 hover:bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Shield className="w-4 h-4" />
+                Admin
+              </a>
+            )}
             {user ? (
               <button
                 onClick={handleLogout}
@@ -121,6 +132,16 @@ const Navbar = () => {
               >
                 RWH SW HFL PMS
               </a>
+              {isAdmin && (
+                <a
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                >
+                  <Shield className="w-4 h-4" />
+                  Admin
+                </a>
+              )}
               {user ? (
                 <button
                   onClick={() => {
