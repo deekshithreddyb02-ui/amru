@@ -5,6 +5,7 @@ import About from "@/components/About";
 import WhyUs from "@/components/WhyUs";
 import Certifications from "@/components/Certifications";
 import Contact from "@/components/Contact";
+import LegalNotice from "@/components/LegalNotice";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
 
@@ -18,6 +19,7 @@ const Index = () => {
       <WhyUs />
       <Certifications />
       <Contact />
+      <LegalNotice />
       <Footer />
       <ChatBot />
     </div>
