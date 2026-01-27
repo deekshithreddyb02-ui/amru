@@ -1,17 +1,26 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User, Loader2, LogIn } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
+type Attachment = {
+  name: string;
+  url: string;
+  type: string;
+};
+
 type Message = {
   role: "user" | "assistant";
   content: string;
+  attachments?: Attachment[];
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,8 +33,11 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,6 +69,67 @@ const ChatBot = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (!user) {
+      toast.error("Please log in to upload files.");
+      return;
+    }
+
+    const file = files[0];
+
+    // Validate file type
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error("Only images (JPG, PNG, WebP) and PDFs are allowed.");
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size must be less than 5MB.");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("main")
+        .upload(`chat-uploads/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("main")
+        .getPublicUrl(`chat-uploads/${fileName}`);
+
+      setAttachments((prev) => [
+        ...prev,
+        { name: file.name, url: publicUrl, type: file.type },
+      ]);
+
+      toast.success("File uploaded successfully!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload file. Please try again.");
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const streamChat = async (userMessages: Message[]) => {
     // Get current session for auth token
     const { data: { session } } = await supabase.auth.getSession();
@@ -65,13 +138,27 @@ const ChatBot = () => {
       throw new Error("Please log in to use the chat assistant.");
     }
 
+    // Format messages for the API - include attachment info in content
+    const formattedMessages = userMessages.map((msg) => {
+      if (msg.attachments && msg.attachments.length > 0) {
+        const attachmentInfo = msg.attachments
+          .map((a) => `[Attached file: ${a.name} (${a.type})]`)
+          .join("\n");
+        return {
+          role: msg.role,
+          content: `${msg.content}\n\n${attachmentInfo}`,
+        };
+      }
+      return { role: msg.role, content: msg.content };
+    });
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ messages: userMessages }),
+      body: JSON.stringify({ messages: formattedMessages }),
     });
 
     if (!resp.ok) {
@@ -137,17 +224,22 @@ const ChatBot = () => {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && attachments.length === 0) || isLoading) return;
 
     if (!user) {
       toast.error("Please log in to use the chat assistant.");
       return;
     }
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    const userMessage: Message = {
+      role: "user",
+      content: input.trim() || (attachments.length > 0 ? "I've attached a file for you to review." : ""),
+      attachments: attachments.length > 0 ? [...attachments] : undefined,
+    };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
+    setAttachments([]);
     setIsLoading(true);
 
     try {
@@ -172,6 +264,13 @@ const ChatBot = () => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.startsWith("image/")) {
+      return <ImageIcon className="w-3 h-3" />;
+    }
+    return <FileText className="w-3 h-3" />;
   };
 
   return (
@@ -224,14 +323,33 @@ const ChatBot = () => {
                       <Bot className="w-4 h-4 text-primary" />
                     </div>
                   )}
-                  <div
-                    className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-muted text-foreground rounded-bl-md"
-                    }`}
-                  >
-                    {message.content}
+                  <div className="max-w-[80%] flex flex-col gap-1">
+                    {/* Show attachments if any */}
+                    {message.attachments && message.attachments.length > 0 && (
+                      <div className="flex flex-wrap gap-1 justify-end">
+                        {message.attachments.map((att, attIndex) => (
+                          <a
+                            key={attIndex}
+                            href={att.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-xs rounded-lg hover:bg-primary/30 transition-colors"
+                          >
+                            {getFileIcon(att.type)}
+                            <span className="truncate max-w-[100px]">{att.name}</span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    <div
+                      className={`px-4 py-2 rounded-2xl text-sm ${
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-muted text-foreground rounded-bl-md"
+                      }`}
+                    >
+                      {message.content}
+                    </div>
                   </div>
                   {message.role === "user" && (
                     <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
@@ -260,25 +378,70 @@ const ChatBot = () => {
             {/* Input or Login Prompt */}
             <div className="p-4 border-t border-border">
               {user ? (
-                <div className="flex gap-2">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask about water solutions..."
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-2 text-sm border border-border rounded-full bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-                  />
-                  <Button
-                    onClick={handleSend}
-                    disabled={!input.trim() || isLoading}
-                    size="icon"
-                    className="rounded-full w-10 h-10"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+                <div className="space-y-2">
+                  {/* Attachment Preview */}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((att, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 px-2 py-1 bg-muted rounded-lg text-xs"
+                        >
+                          {getFileIcon(att.type)}
+                          <span className="truncate max-w-[80px]">{att.name}</span>
+                          <button
+                            onClick={() => removeAttachment(index)}
+                            className="ml-1 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    {/* Attach button */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isLoading || isUploading}
+                      className="rounded-full w-10 h-10 flex-shrink-0"
+                    >
+                      {isUploading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Paperclip className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ask about water solutions..."
+                      disabled={isLoading}
+                      className="flex-1 px-4 py-2 text-sm border border-border rounded-full bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+                    />
+                    <Button
+                      onClick={handleSend}
+                      disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                      size="icon"
+                      className="rounded-full w-10 h-10"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <a
