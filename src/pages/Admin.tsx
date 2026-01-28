@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
+import ContentEditor from "@/components/admin/ContentEditor";
 
 interface User {
   id: string;
@@ -52,24 +53,21 @@ const Admin = () => {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      // Fetch users with roles
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role, created_at');
 
       if (rolesError) throw rolesError;
 
-      // Get user emails from auth (we'll show user_id as fallback)
       const usersWithRoles = rolesData?.map(r => ({
         id: r.user_id,
-        email: r.user_id, // Will be updated with actual email if available
+        email: r.user_id,
         created_at: r.created_at,
         role: r.role
       })) || [];
 
       setUsers(usersWithRoles);
 
-      // Fetch messages
       const { data: messagesData, error: messagesError } = await supabase
         .from('contact_messages')
         .select('*')
@@ -236,6 +234,10 @@ const Admin = () => {
               <TabsTrigger value="messages">
                 Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
               </TabsTrigger>
+              <TabsTrigger value="content">
+                <LayoutDashboard className="w-4 h-4 mr-1" />
+                Site Content
+              </TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
 
@@ -300,6 +302,10 @@ const Admin = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="content">
+              <ContentEditor />
             </TabsContent>
 
             <TabsContent value="users">
