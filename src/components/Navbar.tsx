@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useAdmin } from "@/hooks/useAdmin";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-optimized.webp";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -44,7 +44,15 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-12 md:h-14">
           {/* Logo */}
           <a href="#home" className="flex items-center gap-2">
-            <img src={logo} alt="Amruta Logo" className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full bg-white" />
+            <img 
+              src={logo} 
+              alt="Amruta Logo" 
+              width={48}
+              height={48}
+              className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full bg-white"
+              fetchPriority="high"
+              decoding="async"
+            />
             <span className="text-white font-serif text-sm md:text-lg font-semibold leading-tight">
               Amruta Integrated Water Solutions Pvt. Ltd.
             </span>
