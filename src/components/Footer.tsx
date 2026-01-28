@@ -1,5 +1,5 @@
 import { MapPin, Globe, Mail, Phone } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-optimized.webp";
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="Amruta Logo" className="w-12 h-12 object-contain rounded-full bg-white" />
+              <img src={logo} alt="Amruta Logo" width={48} height={48} loading="lazy" className="w-12 h-12 object-contain rounded-full bg-white" />
               <span className="font-serif text-lg font-semibold leading-tight">
                 Amruta Integrated Water Solutions Pvt. Ltd.
               </span>
