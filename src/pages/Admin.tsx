@@ -124,10 +124,10 @@ const Admin = () => {
 
   const makeAdmin = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('user_roles')
-        .update({ role: 'admin' })
-        .eq('user_id', userId);
+      const { error } = await supabase.rpc('admin_update_user_role', {
+        _target_user_id: userId,
+        _new_role: 'admin'
+      });
 
       if (error) throw error;
       
@@ -142,10 +142,10 @@ const Admin = () => {
 
   const removeAdmin = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('user_roles')
-        .update({ role: 'user' })
-        .eq('user_id', userId);
+      const { error } = await supabase.rpc('admin_update_user_role', {
+        _target_user_id: userId,
+        _new_role: 'user'
+      });
 
       if (error) throw error;
       

@@ -70,6 +70,40 @@ serve(async (req) => {
     console.log("Authenticated user:", userId);
 
     const { messages } = await req.json();
+
+    // Input validation
+    if (!Array.isArray(messages)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request: messages must be an array" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (messages.length === 0 || messages.length > 50) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request: messages must contain 1-50 items" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate each message structure
+    const validMessages = messages.every(
+      (msg: any) =>
+        msg &&
+        typeof msg === 'object' &&
+        typeof msg.role === 'string' &&
+        typeof msg.content === 'string' &&
+        ['user', 'assistant'].includes(msg.role) &&
+        msg.content.length <= 10000
+    );
+
+    if (!validMessages) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request: messages contain invalid format or excessive length" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {

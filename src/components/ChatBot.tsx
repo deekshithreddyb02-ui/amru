@@ -104,13 +104,16 @@ const ChatBot = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      // Use signed URL instead of public URL for security
+      const { data: signedUrlData, error: signError } = await supabase.storage
         .from("main")
-        .getPublicUrl(`chat-uploads/${fileName}`);
+        .createSignedUrl(`chat-uploads/${fileName}`, 3600); // 1 hour expiry
+
+      if (signError) throw signError;
 
       setAttachments((prev) => [
         ...prev,
-        { name: file.name, url: publicUrl, type: file.type },
+        { name: file.name, url: signedUrlData.signedUrl, type: file.type },
       ]);
 
       toast.success("File uploaded successfully!");
