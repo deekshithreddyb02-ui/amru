@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
-const services = [
+const defaultServices = [
   "EC Consulting Services",
   "Ground Water Survey",
   "Geo-Technical Services",
@@ -13,6 +14,13 @@ const services = [
 ];
 
 const Hero = () => {
+  const { data, loading } = useSiteContent("hero");
+
+  const metadata = data?.metadata as { backgroundImage?: string; services?: string[] } | null;
+  const title = data?.title || "Integrated Water & Environmental Solutions";
+  const backgroundImage = metadata?.backgroundImage || "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
+  const services = metadata?.services || defaultServices;
+
   return (
     <section
       id="home"
@@ -22,8 +30,7 @@ const Hero = () => {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage:
-            "url('https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png')",
+          backgroundImage: `url('${backgroundImage}')`,
         }}
       />
 
@@ -44,7 +51,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-8"
           >
-            Integrated Water & Environmental Solutions
+            {title}
           </motion.h1>
 
           <motion.div
