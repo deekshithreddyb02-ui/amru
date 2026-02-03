@@ -4,45 +4,52 @@ import { Award, GraduationCap, BadgeCheck, Users } from "lucide-react";
 const certifications = [
   {
     icon: Award,
-    title: "ISO 1901: 2015 Certified Company",
-    description: "ISO Certified Company, We follow the Global Compliance and Standards in the Business process - EURO Global Certified Company.",
+    title: "ISO 9001:2015 Certified",
+    subtitle: "Quality Management",
+    description: "Internationally recognized quality standards ensuring consistent, reliable service delivery.",
   },
   {
     icon: GraduationCap,
-    title: "Certified Engineers from IIT Bombay",
-    subtitle: "in Water Sustenance and Rainwater Harvesting",
-    description: "We have Certified Engineers in Rainwater Harvesting from IIT (INDIAN INSTITUTE OF TECHNOLOGY) Bombay.",
+    title: "IIT Bombay Certified Engineers",
+    subtitle: "Technical Excellence",
+    description: "Our engineers hold specialized certifications in rainwater harvesting from India's premier institution.",
   },
   {
     icon: BadgeCheck,
-    title: "Certified from State Govt of Maharashtra",
-    description: "We have the Qualified and Certified Engineers in Rainwater Harvesting Implementation and Practices.",
+    title: "Maharashtra State Certified",
+    subtitle: "Government Recognition",
+    description: "Officially certified consultants for rainwater harvesting implementation and compliance.",
   },
   {
     icon: Users,
-    title: "Association with Indian Water Works",
-    description: "Amruta Ground Water Discovery is Associated with Indian Water Works.",
+    title: "Indian Water Works Association",
+    subtitle: "Industry Partnership",
+    description: "Active member contributing to water management standards and best practices nationwide.",
   },
 ];
 
 const Certifications = () => {
   return (
-    <section id="certifications" className="py-12 md:py-16 bg-muted/30">
+    <section id="certifications" className="py-20 md:py-28 bg-muted/30">
       <div className="container mx-auto px-4">
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
         >
-          <h2 className="section-heading mb-4">Certifications, Associations & Partnerships</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Save time and money with our best Service prices, deals and offers.
+          <div className="section-divider mx-auto mb-6" />
+          <h2 className="section-heading mb-4">Trusted Credentials</h2>
+          <p className="section-subheading mx-auto">
+            Our certifications and partnerships ensure you work with qualified, 
+            recognized professionals.
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 gap-6">
+        {/* Grid */}
+        <div className="grid sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {certifications.map((cert, index) => (
             <motion.div
               key={cert.title}
@@ -50,20 +57,24 @@ const Certifications = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="bg-card p-6 rounded-xl border border-border flex gap-4 items-start hover:shadow-lg transition-shadow"
-              style={{ boxShadow: "var(--card-shadow)" }}
+              className="modern-card p-6 md:p-8 flex gap-5"
             >
-              <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                <cert.icon className="w-8 h-8 text-white" />
+              <div className="flex-shrink-0">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 
+                                flex items-center justify-center shadow-lg shadow-amber-500/20">
+                  <cert.icon className="w-7 h-7 text-white" />
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-serif font-semibold text-lg text-foreground mb-1">
+              <div>
+                <div className="text-xs font-semibold text-secondary uppercase tracking-wider mb-1">
+                  {cert.subtitle}
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">
                   {cert.title}
                 </h3>
-                {cert.subtitle && (
-                  <p className="text-primary font-medium text-sm mb-2">{cert.subtitle}</p>
-                )}
-                <p className="text-muted-foreground text-sm">{cert.description}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {cert.description}
+                </p>
               </div>
             </motion.div>
           ))}
