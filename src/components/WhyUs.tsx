@@ -1,88 +1,93 @@
 import { motion } from "framer-motion";
-import { 
-  Clock, 
-  ShieldCheck, 
-  Handshake, 
-  Microscope, 
-  Award,
-  Headphones
-} from "lucide-react";
+import { Users, Lightbulb, Search, Shield, Clock, HeartHandshake, LucideIcon } from "lucide-react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
-const reasons = [
+const iconMap: Record<string, LucideIcon> = {
+  Users,
+  Lightbulb,
+  Search,
+  Shield,
+  Clock,
+  HeartHandshake,
+};
+
+const defaultReasons = [
   {
-    icon: Award,
-    title: "Proven Track Record",
-    description: "35+ years and 1000+ successful projects across residential, commercial, and industrial sectors.",
+    icon: "Users",
+    title: "Expert Team",
+    description: "Experienced experts and committed professionals with decades of industry knowledge.",
   },
   {
-    icon: Microscope,
-    title: "Research-Backed Methods",
-    description: "We use geophysical surveys, AI-powered analysis, and IIT-certified methodologies for accurate results.",
+    icon: "Lightbulb",
+    title: "Quality Solutions",
+    description: "Qualitative, efficient, and cost-effective solutions tailored to your needs.",
   },
   {
-    icon: ShieldCheck,
-    title: "Full Compliance Guaranteed",
-    description: "From CGWB registration to environmental clearances, we handle all regulatory requirements.",
+    icon: "Search",
+    title: "Research-Backed",
+    description: "Detailed, research-backed technological surveys for accurate results.",
   },
   {
-    icon: Clock,
-    title: "On-Time Delivery",
-    description: "Project timelines you can count on, with transparent progress updates at every stage.",
+    icon: "Shield",
+    title: "Compliance Assured",
+    description: "Full regulatory compliance with CGWB, environmental, and building codes.",
   },
   {
-    icon: Handshake,
-    title: "End-to-End Partnership",
-    description: "From initial survey to final implementation and maintenance — we're with you throughout.",
+    icon: "Clock",
+    title: "Timely Delivery",
+    description: "On-time project completion with transparent progress updates.",
   },
   {
-    icon: Headphones,
-    title: "Dedicated Support",
-    description: "Single point of contact for all your queries with rapid response times.",
+    icon: "HeartHandshake",
+    title: "Client Focused",
+    description: "Absolute client satisfaction with personalized service and support.",
   },
 ];
 
 const WhyUs = () => {
+  const { data, loading } = useSiteContent("whyus");
+
+  const metadata = data?.metadata as { reasons?: typeof defaultReasons } | null;
+  const title = data?.title || "Why Choose Us";
+  const subtitle = data?.content || "Trusted by hundreds of clients across India for our expertise, reliability, and commitment to excellence.";
+  const reasons = metadata?.reasons || defaultReasons;
+
   return (
-    <section id="why" className="py-20 md:py-28 bg-primary">
+    <section id="why" className="py-12 md:py-16 bg-primary">
       <div className="container mx-auto px-4">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
         >
-          <div className="w-16 h-1 bg-white/30 rounded-full mx-auto mb-6" />
-          <h2 className="section-heading text-white mb-4">Why Partner With Us</h2>
-          <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto">
-            We deliver results, not just reports. Here's what sets us apart.
+          <h2 className="section-heading text-white mb-4">{title}</h2>
+          <p className="text-white/80 max-w-2xl mx-auto">
+            {subtitle}
           </p>
         </motion.div>
 
-        {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reasons.map((reason, index) => (
-            <motion.div
-              key={reason.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="p-6 md:p-8 rounded-2xl bg-white/5 border border-white/10 
-                         hover:bg-white/10 transition-colors duration-200"
-            >
-              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-5">
-                <reason.icon className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg md:text-xl font-bold text-white mb-3">
-                {reason.title}
-              </h3>
-              <p className="text-white/70 text-sm md:text-base leading-relaxed">
-                {reason.description}
-              </p>
-            </motion.div>
-          ))}
+          {reasons.map((reason, index) => {
+            const IconComponent = iconMap[reason.icon] || Users;
+            return (
+              <motion.div
+                key={reason.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 hover:bg-white/15 transition-colors"
+              >
+                <IconComponent className="w-10 h-10 text-secondary mb-4" />
+                <h3 className="font-serif font-semibold text-lg text-white mb-2">
+                  {reason.title}
+                </h3>
+                <p className="text-white/70 text-sm">{reason.description}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
