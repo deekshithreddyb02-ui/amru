@@ -2,13 +2,13 @@ import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 
-// Lazy load below-the-fold components to reduce initial JS bundle
+// Lazy load below-the-fold components
 const Services = lazy(() => import("@/components/Services"));
+const Stats = lazy(() => import("@/components/Stats"));
 const About = lazy(() => import("@/components/About"));
 const WhyUs = lazy(() => import("@/components/WhyUs"));
 const Certifications = lazy(() => import("@/components/Certifications"));
 const Contact = lazy(() => import("@/components/Contact"));
-const LegalNotice = lazy(() => import("@/components/LegalNotice"));
 const Footer = lazy(() => import("@/components/Footer"));
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 
@@ -19,11 +19,11 @@ const Index = () => {
       <Hero />
       <Suspense fallback={null}>
         <Services />
+        <Stats />
         <About />
         <WhyUs />
         <Certifications />
         <Contact />
-        <LegalNotice />
         <Footer />
         <ChatBot />
       </Suspense>

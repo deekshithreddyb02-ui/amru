@@ -1,107 +1,114 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { ArrowRight, Play, CheckCircle2 } from "lucide-react";
 
-const defaultServices = [
-  "EC Consulting Services",
-  "Ground Water Survey",
-  "Geo-Technical Services",
-  "Rainwater Harvesting",
-  "GPR & Thermal Scanning",
-  "STP, ETP & WTP",
-  "Energy Saving Solutions",
-  "CGWB Registration Services",
+const trustPoints = [
+  "35+ Years of Expertise",
+  "1000+ Projects Delivered",
+  "Pan-India Coverage",
 ];
 
 const Hero = () => {
-  const { data, loading } = useSiteContent("hero");
-
-  const metadata = data?.metadata as { backgroundImage?: string; services?: string[] } | null;
-  const title = data?.title || "Integrated Water & Environmental Solutions";
-  const backgroundImage = metadata?.backgroundImage || "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
-  const services = metadata?.services || defaultServices;
-
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center pt-16"
+      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
     >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url('${backgroundImage}')`,
-        }}
-      />
-
-      {/* Overlay */}
-      <div className="absolute inset-0 hero-overlay" />
+      {/* Background with gradient overlay */}
+      <div className="absolute inset-0">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80')`,
+          }}
+        />
+        <div className="hero-gradient absolute inset-0" />
+      </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-3xl"
-        >
+      <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
+        <div className="max-w-4xl">
+          {/* Trust badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-sm font-medium border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-secondary" />
+              ISO 9001:2015 Certified Company
+            </span>
+          </motion.div>
+
+          {/* Main headline - benefit-driven */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-8"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-6"
           >
-            {title}
+            Sustainable Water Solutions 
+            <span className="block mt-2 text-white/90">
+              That Save Resources & Costs
+            </span>
           </motion.h1>
 
+          {/* Subheading - impact focused */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg md:text-xl text-white/80 max-w-2xl mb-8 leading-relaxed"
+          >
+            From rainwater harvesting to environmental compliance, we help organizations 
+            reduce water dependency, meet regulations, and build sustainable infrastructure.
+          </motion.p>
+
+          {/* Trust points */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-wrap gap-4 md:gap-6 mb-10"
+          >
+            {trustPoints.map((point) => (
+              <span
+                key={point}
+                className="flex items-center gap-2 text-white/80 text-sm md:text-base"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                {point}
+              </span>
+            ))}
+          </motion.div>
+
+          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10"
+            className="flex flex-col sm:flex-row gap-4"
           >
-            {services.map((service, index) => (
-              <motion.div
-                key={service}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
-                className="flex items-center gap-2 text-white/90"
-              >
-                <span className="w-2 h-2 bg-secondary rounded-full flex-shrink-0" />
-                <span className="text-sm md:text-base">{service}</span>
-              </motion.div>
-            ))}
+            <a
+              href="#contact"
+              className="btn-primary text-base px-8 py-4 bg-white text-primary hover:bg-white/95"
+            >
+              Get Free Consultation
+              <ArrowRight className="w-5 h-5" />
+            </a>
+            <a
+              href="#services"
+              className="btn-secondary text-base px-8 py-4 bg-white/10 text-white border-white/20 hover:bg-white/20"
+            >
+              <Play className="w-5 h-5" />
+              Explore Services
+            </a>
           </motion.div>
-
-          <motion.a
-            href="#contact"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="btn-primary-hero inline-flex items-center gap-2"
-          >
-            Enquire Now
-            <ArrowRight className="w-5 h-5" />
-          </motion.a>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="w-6 h-10 border-2 border-white/50 rounded-full flex items-start justify-center p-1"
-        >
-          <div className="w-1.5 h-3 bg-white/70 rounded-full" />
-        </motion.div>
-      </motion.div>
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 };

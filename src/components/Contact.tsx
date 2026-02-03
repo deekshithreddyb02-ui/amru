@@ -1,22 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const offices = [{
-  city: "Pune",
-  address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
-}, {
-  city: "Hyderabad",
-  address: "Head Office - Hyderabad, Telangana"
-}, {
-  city: "Mumbai",
-  address: "Branch Office - Mumbai, Maharashtra"
-}, {
-  city: "Bangalore",
-  address: "Branch Office - Bangalore, Karnataka"
-}];
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,17 +17,14 @@ const Contact = () => {
     const name = (formData.get('name') as string)?.trim();
     const email = (formData.get('email') as string)?.trim();
     const phone = (formData.get('phone') as string)?.trim() || null;
-    const service = (formData.get('service') as string)?.trim() || null;
     const message = (formData.get('message') as string)?.trim() || '';
 
-    // Basic validation
     if (!name || !email) {
-      toast.error("Please fill in all required fields.");
+      toast.error("Please fill in your name and email.");
       setIsSubmitting(false);
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address.");
@@ -56,205 +39,188 @@ const Contact = () => {
           name,
           email,
           phone,
-          service,
-          message,
+          message: message || "General inquiry",
         });
 
       if (error) throw error;
 
-      toast.success("Thank you! Your inquiry has been received. We will contact you shortly.");
+      toast.success("Thank you! We'll get back to you within 24 hours.");
       form.reset();
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error("Failed to submit. Please try calling us at +91-741-0030-418.");
+      toast.error("Something went wrong. Please call us at +91-741-0030-418.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section id="contact" className="py-12 md:py-16 bg-muted/30">
+    <section id="contact" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
-        <motion.div initial={{
-        opacity: 0,
-        y: 20
-      }} whileInView={{
-        opacity: 1,
-        y: 0
-      }} viewport={{
-        once: true
-      }} transition={{
-        duration: 0.6
-      }} className="text-center mb-12">
-          <h2 className="section-heading mb-4">Contact Us</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Get in touch with our team for consultations, quotes, or any inquiries.
-          </p>
-        </motion.div>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
+            {/* Left - Info */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-2"
+            >
+              <div className="section-divider mb-6" />
+              <h2 className="section-heading mb-4">Let's Talk</h2>
+              <p className="text-muted-foreground text-lg mb-8">
+                Ready to optimize your water infrastructure? Get a free consultation.
+              </p>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Contact Info */}
-          <motion.div initial={{
-          opacity: 0,
-          x: -20
-        }} whileInView={{
-          opacity: 1,
-          x: 0
-        }} viewport={{
-          once: true
-        }} transition={{
-          duration: 0.6
-        }} className="space-y-6">
-            {/* Phone & Email */}
-            <div className="bg-card p-6 rounded-xl border border-border" style={{
-            boxShadow: "var(--card-shadow)"
-          }}>
-              <h3 className="font-serif font-semibold text-xl text-foreground mb-4">
-                Get In Touch
-              </h3>
-              <div className="space-y-4">
-                <a href="tel:+917410030418" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>+91-741-0030-418</span>
+              {/* Contact details */}
+              <div className="space-y-6">
+                <a 
+                  href="tel:+917410030418" 
+                  className="flex items-start gap-4 group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center 
+                                  group-hover:bg-primary transition-colors">
+                    <Phone className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">Call Us</div>
+                    <div className="text-muted-foreground">+91-741-0030-418</div>
+                  </div>
                 </a>
-                <a href="tel:+917410030417" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>+91-741-0030-417</span>
+
+                <a 
+                  href="mailto:rain@amrutawater.com" 
+                  className="flex items-start gap-4 group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center 
+                                  group-hover:bg-primary transition-colors">
+                    <Mail className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">Email Us</div>
+                    <div className="text-muted-foreground">rain@amrutawater.com</div>
+                  </div>
                 </a>
-                
-                <a href="mailto:rain@amrutawater.com" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                  <Mail className="w-5 h-5 text-primary" />
-                  <span>rain@amrutawater.com</span>
-                </a>
-                
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">Offices</div>
+                    <div className="text-muted-foreground">Pune • Mumbai • Hyderabad • Bangalore</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">Response Time</div>
+                    <div className="text-muted-foreground">Within 24 hours</div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Offices */}
-            <div className="bg-card p-6 rounded-xl border border-border" style={{
-            boxShadow: "var(--card-shadow)"
-          }}>
-              <h3 className="font-serif font-semibold text-xl text-foreground mb-4">
-                Our Offices
-              </h3>
-              <div className="space-y-4">
-                {offices.map(office => <div key={office.city} className="flex gap-3">
-                    <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            {/* Right - Form */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="lg:col-span-3"
+            >
+              <div className="modern-card p-6 md:p-8">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid sm:grid-cols-2 gap-5">
                     <div>
-                      <div className="font-medium text-foreground">{office.city}</div>
-                      <div className="text-sm text-muted-foreground">{office.address}</div>
+                      <label htmlFor="name" className="form-label">
+                        Name *
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        maxLength={100}
+                        className="form-input"
+                        placeholder="Your name"
+                      />
                     </div>
-                  </div>)}
-              </div>
-            </div>
-          </motion.div>
+                    <div>
+                      <label htmlFor="phone" className="form-label">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        maxLength={20}
+                        className="form-input"
+                        placeholder="+91 XXXXX XXXXX"
+                      />
+                    </div>
+                  </div>
 
-          {/* Contact Form */}
-          <motion.div initial={{
-          opacity: 0,
-          x: 20
-        }} whileInView={{
-          opacity: 1,
-          x: 0
-        }} viewport={{
-          once: true
-        }} transition={{
-          duration: 0.6
-        }} className="bg-card p-6 md:p-8 rounded-xl border border-border" style={{
-          boxShadow: "var(--card-shadow)"
-        }}>
-            <h3 className="font-serif font-semibold text-xl text-foreground mb-6">
-              Send Us a Message
-            </h3>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
-                    Name *
-                  </label>
-                  <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
-                    required 
-                    maxLength={100}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" 
-                    placeholder="Your name" 
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
-                    Phone
-                  </label>
-                  <input 
-                    type="tel" 
-                    id="phone" 
-                    name="phone" 
-                    maxLength={20}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" 
-                    placeholder="+91 XXXXX XXXXX" 
-                  />
-                </div>
+                  <div>
+                    <label htmlFor="email" className="form-label">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      maxLength={255}
+                      className="form-input"
+                      placeholder="you@company.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="message" className="form-label">
+                      How can we help? (Optional)
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      maxLength={2000}
+                      className="form-input resize-none"
+                      placeholder="Tell us briefly about your project or requirements..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-primary w-full py-4 text-base disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+
+                  {/* Trust text */}
+                  <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-secondary" />
+                    Your information is secure and never shared
+                  </p>
+                </form>
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
-                  Email *
-                </label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  name="email" 
-                  required 
-                  maxLength={255}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow" 
-                  placeholder="you@example.com" 
-                />
-              </div>
-              <div>
-                <label htmlFor="service" className="block text-sm font-medium text-foreground mb-1">
-                  Service Interested In
-                </label>
-                <select id="service" name="service" className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
-                  <option value="">Select a service</option>
-                  <option>Rainwater Harvesting</option>
-                  <option>Ground Water Survey</option>
-                  <option>Water Audit / ZLD</option>
-                  <option>EC & MEP Consulting</option>
-                  <option>STP / ETP Solutions</option>
-                  <option>GPR & Thermal Scanning</option>
-                  <option>CGWB Registration</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">
-                  Message
-                </label>
-                <textarea 
-                  id="message" 
-                  name="message" 
-                  rows={4} 
-                  maxLength={2000}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow resize-none" 
-                  placeholder="Tell us about your project..." 
-                />
-              </div>
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Enquiry"
-                )}
-              </button>
-            </form>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
