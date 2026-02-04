@@ -1,30 +1,33 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle, Play } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
-const defaultServices = [
-  "EC Consulting Services",
-  "Ground Water Survey",
-  "Geo-Technical Services",
-  "Rainwater Harvesting",
-  "GPR & Thermal Scanning",
-  "STP, ETP & WTP",
-  "Energy Saving Solutions",
-  "CGWB Registration Services",
+const defaultStats = [
+  "35+ Years of Expertise",
+  "1000+ Projects Delivered",
+  "Pan-India Coverage",
 ];
 
 const Hero = () => {
   const { data, loading } = useSiteContent("hero");
 
-  const metadata = data?.metadata as { backgroundImage?: string; services?: string[] } | null;
-  const title = data?.title || "Integrated Water & Environmental Solutions";
+  const metadata = data?.metadata as { 
+    backgroundImage?: string; 
+    stats?: string[];
+    description?: string;
+    certificationBadge?: string;
+  } | null;
+  
+  const title = data?.title || "Sustainable Water Solutions That Save Resources & Costs";
+  const description = metadata?.description || "From rainwater harvesting to environmental compliance, we help organizations reduce water dependency, meet regulations, and build sustainable infrastructure.";
   const backgroundImage = metadata?.backgroundImage || "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
-  const services = metadata?.services || defaultServices;
+  const stats = metadata?.stats || defaultStats;
+  const certificationBadge = metadata?.certificationBadge || "ISO 9001:2015 Certified Company";
 
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center pt-16"
+      className="relative min-h-screen flex items-center pt-16"
     >
       {/* Background Image */}
       <div
@@ -34,8 +37,8 @@ const Hero = () => {
         }}
       />
 
-      {/* Overlay */}
-      <div className="absolute inset-0 hero-overlay" />
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/85 to-primary/70" />
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
@@ -43,47 +46,76 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl"
+          className="max-w-2xl"
         >
+          {/* Certification Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6"
+          >
+            <CheckCircle className="w-4 h-4 text-secondary" />
+            <span className="text-sm text-white font-medium">{certificationBadge}</span>
+          </motion.div>
+
+          {/* Main Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-8"
+            className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-tight mb-6"
           >
             {title}
           </motion.h1>
 
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-lg text-white/80 leading-relaxed mb-8 max-w-xl"
+          >
+            {description}
+          </motion.p>
+
+          {/* Stats Row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10"
+            className="flex flex-wrap gap-x-6 gap-y-2 mb-10"
           >
-            {services.map((service, index) => (
-              <motion.div
-                key={service}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
-                className="flex items-center gap-2 text-white/90"
-              >
+            {stats.map((stat, index) => (
+              <div key={index} className="flex items-center gap-2 text-white/90">
                 <span className="w-2 h-2 bg-secondary rounded-full flex-shrink-0" />
-                <span className="text-sm md:text-base">{service}</span>
-              </motion.div>
+                <span className="text-sm md:text-base">{stat}</span>
+              </div>
             ))}
           </motion.div>
 
-          <motion.a
-            href="#contact"
+          {/* CTA Buttons */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="btn-primary-hero inline-flex items-center gap-2"
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-wrap gap-4"
           >
-            Enquire Now
-            <ArrowRight className="w-5 h-5" />
-          </motion.a>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 bg-white text-primary font-semibold px-6 py-3 rounded-lg hover:bg-white/90 transition-colors"
+            >
+              Get Free Consultation
+              <ArrowRight className="w-5 h-5" />
+            </a>
+            <a
+              href="#services"
+              className="inline-flex items-center gap-2 border-2 border-white/30 text-white font-semibold px-6 py-3 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <Play className="w-5 h-5" />
+              Explore Services
+            </a>
+          </motion.div>
         </motion.div>
       </div>
 
