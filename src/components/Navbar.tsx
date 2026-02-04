@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, LogIn, LogOut, Shield } from "lucide-react";
+import { Menu, X, LogIn, LogOut, Shield, User as UserIcon, FolderOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -7,9 +7,8 @@ import { useAdmin } from "@/hooks/useAdmin";
 import logo from "@/assets/logo-optimized.webp";
 
 const navLinks = [
-  { name: "Home", href: "#home" },
   { name: "Services", href: "#services" },
-  { name: "About Us", href: "#about" },
+  { name: "About", href: "#about" },
   { name: "Why Us", href: "#why" },
   { name: "Contact", href: "#contact" },
 ];
@@ -38,12 +37,26 @@ const Navbar = () => {
     setUser(null);
   };
 
+  // Extract user display name from email or metadata
+  const getUserDisplayName = () => {
+    if (!user) return "";
+    const metadata = user.user_metadata;
+    if (metadata?.full_name) return metadata.full_name;
+    if (metadata?.name) return metadata.name;
+    // Extract name from email (before @)
+    const emailName = user.email?.split("@")[0] || "";
+    // Capitalize first letter of each word
+    return emailName.split(/[._-]/).map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(" ");
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary shadow-lg">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-12 md:h-14">
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
-          <a href="#home" className="flex items-center gap-2">
+          <a href="#home" className="flex items-center gap-3">
             <img 
               src={logo} 
               alt="Amruta Logo" 
@@ -53,57 +66,100 @@ const Navbar = () => {
               fetchPriority="high"
               decoding="async"
             />
-            <span className="text-white font-serif text-sm md:text-lg font-semibold leading-tight">
-              Amruta Integrated Water Solutions Pvt. Ltd.
-            </span>
+            <div className="flex flex-col">
+              <span className="text-white font-serif text-sm md:text-base font-bold leading-tight uppercase tracking-wide">
+                Amruta Water Solutions
+              </span>
+              <span className="text-white/70 text-xs hidden sm:block">
+                35+ Years of Excellence
+              </span>
+            </div>
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a key={link.name} href={link.href} className="nav-link">
-                {link.name}
-              </a>
-            ))}
-            <a
-              href="https://rain.amrutageo.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              RWH SW HFL PMS
-            </a>
-            {isAdmin && (
-              <a
-                href="/admin"
-                className="flex items-center gap-2 bg-accent/80 hover:bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                <Shield className="w-4 h-4" />
-                Admin
-              </a>
+          <div className="hidden lg:flex items-center gap-6">
+            {/* Nav Links - only show when NOT logged in */}
+            {!user && (
+              <>
+                {navLinks.map((link) => (
+                  <a key={link.name} href={link.href} className="nav-link">
+                    {link.name}
+                  </a>
+                ))}
+              </>
             )}
+
             {user ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
+              <>
+                {/* Welcome message */}
+                <div className="text-right mr-2">
+                  <div className="text-white text-sm font-medium">
+                    Welcome, {getUserDisplayName()}
+                  </div>
+                  <div className="text-white/70 text-xs">
+                    {user.email}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <a
+                  href="/profile"
+                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <UserIcon className="w-4 h-4" />
+                  Profile
+                </a>
+
+                <a
+                  href="/projects"
+                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  My Projects
+                </a>
+
+                {isAdmin && (
+                  <a
+                    href="/admin"
+                    className="flex items-center gap-2 bg-accent/80 hover:bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </a>
+                )}
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </>
             ) : (
-              <a
-                href="/auth"
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                <LogIn className="w-4 h-4" />
-                Login
-              </a>
+              <>
+                {isAdmin && (
+                  <a
+                    href="/admin"
+                    className="flex items-center gap-2 bg-accent/80 hover:bg-accent text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </a>
+                )}
+                <a
+                  href="#contact"
+                  className="flex items-center gap-2 bg-white text-primary px-5 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-white/90"
+                >
+                  Get Quote
+                </a>
+              </>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-white p-2"
+            className="lg:hidden text-white p-2"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -119,10 +175,21 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-primary border-t border-white/10"
+            className="lg:hidden bg-primary border-t border-white/10"
           >
-            <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
-              {navLinks.map((link) => (
+            <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
+              {user && (
+                <div className="text-center py-2 border-b border-white/10 mb-2">
+                  <div className="text-white text-sm font-medium">
+                    Welcome, {getUserDisplayName()}
+                  </div>
+                  <div className="text-white/70 text-xs">
+                    {user.email}
+                  </div>
+                </div>
+              )}
+
+              {!user && navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
@@ -132,44 +199,69 @@ const Navbar = () => {
                   {link.name}
                 </a>
               ))}
-              <a
-                href="https://rain.amrutageo.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium text-center"
-              >
-                RWH SW HFL PMS
-              </a>
-              {isAdmin && (
-                <a
-                  href="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                >
-                  <Shield className="w-4 h-4" />
-                  Admin
-                </a>
-              )}
+
               {user ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
+                <>
+                  <a
+                    href="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    Profile
+                  </a>
+
+                  <a
+                    href="/projects"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    My Projects
+                  </a>
+
+                  {isAdmin && (
+                    <a
+                      href="/admin"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-center gap-2 bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </a>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </>
               ) : (
-                <a
-                  href="/auth"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Login
-                </a>
+                <>
+                  {isAdmin && (
+                    <a
+                      href="/admin"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center justify-center gap-2 bg-accent/80 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin
+                    </a>
+                  )}
+                  <a
+                    href="#contact"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-2 bg-white text-primary px-4 py-2 rounded-lg text-sm font-semibold"
+                  >
+                    Get Quote
+                  </a>
+                </>
               )}
             </div>
           </motion.div>
