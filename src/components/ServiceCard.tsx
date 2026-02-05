@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -13,7 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+ import { Loader2, Heart, Calendar, Star } from "lucide-react";
+ import { useSavedServices } from "@/hooks/useSavedServices";
+ import StarRating from "./StarRating";
+ import BookingDialog from "./BookingDialog";
+ import ReviewDialog from "./ReviewDialog";
 
 interface ServiceCardProps {
   title: string;
@@ -21,17 +25,46 @@ interface ServiceCardProps {
   image: string;
   link?: string;
   delay?: number;
+   id?: string;
+   rating?: number;
+   reviewCount?: number;
 }
 
-const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps) => {
+ const ServiceCard = ({ title, description, image, delay = 0, id, rating = 0, reviewCount = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
+   const [bookingOpen, setBookingOpen] = useState(false);
+   const [reviewOpen, setReviewOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     message: "",
   });
+ 
+   const { isServiceSaved, saveService, removeSavedService } = useSavedServices();
+   const isSaved = id ? isServiceSaved(id) : false;
+ 
+   useEffect(() => {
+     supabase.auth.getSession().then(({ data: { session } }) => {
+       setUser(session?.user ?? null);
+     });
+   }, []);
+ 
+   const handleSaveToggle = async () => {
+     if (!id || !user) {
+       toast.error("Please login to save services");
+       return;
+     }
+     if (isSaved) {
+       await removeSavedService(id);
+       toast.success("Removed from saved");
+     } else {
+       await saveService(id);
+       toast.success("Saved to wishlist");
+     }
+   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,27 +127,65 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
         transition={{ duration: 0.3 }}
         className="bg-white rounded-2xl h-full flex flex-col cursor-pointer shadow-sm border border-border/50 overflow-hidden"
       >
-        <div className="aspect-[4/3] overflow-hidden rounded-t-2xl">
+         <div className="aspect-[4/3] overflow-hidden rounded-t-2xl relative">
           <img
             src={image}
             alt={title}
             className="w-full h-full object-cover"
             loading="lazy"
           />
+           {id && user && (
+             <button
+               onClick={(e) => {
+                 e.stopPropagation();
+                 handleSaveToggle();
+               }}
+               className="absolute top-2 right-2 p-2 bg-white/90 rounded-full shadow-md hover:bg-white transition-colors"
+             >
+               <Heart className={`w-4 h-4 ${isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+             </button>
+           )}
         </div>
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-bold text-base text-primary mb-2 leading-tight">
             {title}
           </h3>
+           <StarRating rating={rating} reviewCount={reviewCount} />
           <p className="text-muted-foreground text-sm leading-relaxed flex-1">
             {description}
           </p>
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-3 pt-2 border-t border-border/30"
-          >
-            Enquire →
-          </button>
+           <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/30">
+             <button
+               onClick={() => setOpen(true)}
+               className="flex-1 text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left"
+             >
+               Enquire →
+             </button>
+             {id && user && (
+               <>
+                 <button
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setBookingOpen(true);
+                   }}
+                   className="p-1.5 text-muted-foreground hover:text-primary transition-colors"
+                   title="Book Consultation"
+                 >
+                   <Calendar className="w-4 h-4" />
+                 </button>
+                 <button
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setReviewOpen(true);
+                   }}
+                   className="p-1.5 text-muted-foreground hover:text-yellow-500 transition-colors"
+                   title="Write Review"
+                 >
+                   <Star className="w-4 h-4" />
+                 </button>
+               </>
+             )}
+           </div>
         </div>
       </motion.article>
 
@@ -185,6 +256,23 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
           </form>
         </DialogContent>
       </Dialog>
+ 
+       {id && (
+         <>
+           <BookingDialog
+             open={bookingOpen}
+             onOpenChange={setBookingOpen}
+             serviceId={id}
+             serviceName={title}
+           />
+           <ReviewDialog
+             open={reviewOpen}
+             onOpenChange={setReviewOpen}
+             serviceId={id}
+             serviceName={title}
+           />
+         </>
+       )}
     </>
   );
 };
