@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+ import CommunicationBar from "@/components/CommunicationBar";
+ import FloatingActions from "@/components/FloatingActions";
 
 // Lazy load below-the-fold components to reduce initial JS bundle
 const Services = lazy(() => import("@/components/Services"));
@@ -26,6 +28,8 @@ const Index = () => {
         <LegalNotice />
         <Footer />
         <ChatBot />
+         <CommunicationBar />
+         <FloatingActions />
       </Suspense>
     </div>
   );

@@ -7,6 +7,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import logo from "@/assets/logo-optimized.webp";
 
 const navLinks = [
+   { name: "Home", href: "/" },
   { name: "Services", href: "#services" },
   { name: "About", href: "#about" },
   { name: "Why Us", href: "#why" },
@@ -111,7 +112,7 @@ const Navbar = () => {
                 </a>
 
                 <a
-                  href="/projects"
+                   href="/dashboard"
                   className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
                   <FolderOpen className="w-4 h-4" />
@@ -138,6 +139,13 @@ const Navbar = () => {
               </>
             ) : (
               <>
+                 <a
+                   href="/auth"
+                   className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                 >
+                   <LogIn className="w-4 h-4" />
+                   Login
+                 </a>
                 {isAdmin && (
                   <a
                     href="/admin"
@@ -212,7 +220,7 @@ const Navbar = () => {
                   </a>
 
                   <a
-                    href="/projects"
+                     href="/dashboard"
                     onClick={() => setIsOpen(false)}
                     className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
                   >
@@ -244,6 +252,14 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
+                   <a
+                     href="/auth"
+                     onClick={() => setIsOpen(false)}
+                     className="flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                   >
+                     <LogIn className="w-4 h-4" />
+                     Login
+                   </a>
                   {isAdmin && (
                     <a
                       href="/admin"
