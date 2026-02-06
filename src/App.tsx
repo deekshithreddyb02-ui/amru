@@ -11,9 +11,6 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
- const Dashboard = lazy(() => import("./pages/Dashboard"));
- const Profile = lazy(() => import("./pages/Profile"));
- const ServicesPage = lazy(() => import("./pages/ServicesPage"));
 
 const queryClient = new QueryClient();
 
@@ -29,10 +26,6 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin-login" element={<AdminLogin />} />
-             <Route path="/dashboard" element={<Dashboard />} />
-             <Route path="/projects" element={<Dashboard />} />
-             <Route path="/profile" element={<Profile />} />
-             <Route path="/services" element={<ServicesPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

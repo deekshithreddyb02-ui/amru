@@ -128,73 +128,40 @@ const ContentEditor = () => {
 
               {/* Hero-specific fields */}
               {content.section_key === "hero" && (
-                <>
-                  <div>
-                    <Label>Certification Badge</Label>
-                    {isEditing ? (
-                      <Input
-                        value={metadata?.certificationBadge || ""}
-                        onChange={(e) => updateMetadataField("certificationBadge", e.target.value)}
-                        className="mt-1"
-                        placeholder="ISO 9001:2015 Certified Company"
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {(content.metadata as any)?.certificationBadge || "-"}
-                      </p>
-                    )}
-                  </div>
+                <div>
+                  <Label>Background Image URL</Label>
+                  {isEditing ? (
+                    <Input
+                      value={metadata?.backgroundImage || ""}
+                      onChange={(e) => updateMetadataField("backgroundImage", e.target.value)}
+                      className="mt-1"
+                      placeholder="https://..."
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1 truncate">
+                      {(content.metadata as any)?.backgroundImage || "-"}
+                    </p>
+                  )}
+                </div>
+              )}
 
-                  <div>
-                    <Label>Description</Label>
-                    {isEditing ? (
-                      <Textarea
-                        value={metadata?.description || ""}
-                        onChange={(e) => updateMetadataField("description", e.target.value)}
-                        className="mt-1 min-h-[80px]"
-                        placeholder="Hero section description..."
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {(content.metadata as any)?.description || "-"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label>Background Image URL</Label>
-                    {isEditing ? (
-                      <Input
-                        value={metadata?.backgroundImage || ""}
-                        onChange={(e) => updateMetadataField("backgroundImage", e.target.value)}
-                        className="mt-1"
-                        placeholder="https://..."
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-1 truncate">
-                        {(content.metadata as any)?.backgroundImage || "-"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label>Stats (one per line)</Label>
-                    {isEditing ? (
-                      <Textarea
-                        value={(metadata?.stats || []).join("\n")}
-                        onChange={(e) => updateMetadataField("stats", e.target.value.split("\n").filter(Boolean))}
-                        className="mt-1 min-h-[100px]"
-                        placeholder="35+ Years of Expertise&#10;1000+ Projects Delivered&#10;Pan-India Coverage"
-                      />
-                    ) : (
-                      <ul className="text-sm text-muted-foreground mt-1 list-disc list-inside">
-                        {((content.metadata as any)?.stats || []).map((s: string, i: number) => (
-                          <li key={i}>{s}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </>
+              {content.section_key === "hero" && (
+                <div>
+                  <Label>Services (one per line)</Label>
+                  {isEditing ? (
+                    <Textarea
+                      value={(metadata?.services || []).join("\n")}
+                      onChange={(e) => updateMetadataField("services", e.target.value.split("\n").filter(Boolean))}
+                      className="mt-1 min-h-[150px]"
+                    />
+                  ) : (
+                    <ul className="text-sm text-muted-foreground mt-1 list-disc list-inside">
+                      {((content.metadata as any)?.services || []).map((s: string, i: number) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
 
               <p className="text-xs text-muted-foreground">
