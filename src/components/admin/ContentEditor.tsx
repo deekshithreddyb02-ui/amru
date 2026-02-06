@@ -12,8 +12,14 @@ const sectionLabels: Record<string, string> = {
   hero: "Hero Section",
   about: "About Us",
   whyus: "Why Choose Us",
+  offices: "Our Offices",
   settings: "Site Settings",
 };
+
+interface Office {
+  city: string;
+  address: string;
+}
 
 const ContentEditor = () => {
   const { data: contents, loading, updateContent, refetch } = useAllSiteContent();
@@ -163,6 +169,78 @@ const ContentEditor = () => {
                     </ul>
                 )}
               </div>
+              )}
+
+              {/* Offices-specific fields */}
+              {content.section_key === "offices" && (
+                <div>
+                  <Label>Office Locations (JSON format)</Label>
+                  {isEditing ? (
+                    <div className="space-y-3 mt-2">
+                      {((metadata?.offices || []) as Office[]).map((office, index) => (
+                        <div key={index} className="p-3 border border-border rounded-lg space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Office {index + 1}</Label>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const offices = [...((metadata?.offices || []) as Office[])];
+                                offices.splice(index, 1);
+                                updateMetadataField("offices", offices);
+                              }}
+                              className="h-6 px-2 text-destructive"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                          <Input
+                            value={office.city}
+                            onChange={(e) => {
+                              const offices = [...((metadata?.offices || []) as Office[])];
+                              offices[index] = { ...offices[index], city: e.target.value };
+                              updateMetadataField("offices", offices);
+                            }}
+                            placeholder="City name"
+                            className="text-sm"
+                          />
+                          <Input
+                            value={office.address}
+                            onChange={(e) => {
+                              const offices = [...((metadata?.offices || []) as Office[])];
+                              offices[index] = { ...offices[index], address: e.target.value };
+                              updateMetadataField("offices", offices);
+                            }}
+                            placeholder="Full address"
+                            className="text-sm"
+                          />
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const offices = [...((metadata?.offices || []) as Office[])];
+                          offices.push({ city: "", address: "" });
+                          updateMetadataField("offices", offices);
+                        }}
+                      >
+                        + Add Office
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 mt-2">
+                      {((content.metadata as any)?.offices || []).map((office: Office, i: number) => (
+                        <div key={i} className="text-sm">
+                          <span className="font-medium">{office.city}:</span>{" "}
+                          <span className="text-muted-foreground">{office.address}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Settings-specific fields */}

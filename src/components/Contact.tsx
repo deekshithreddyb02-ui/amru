@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const offices = [{
+interface Office {
+  city: string;
+  address: string;
+}
+
+const defaultOffices: Office[] = [{
   city: "Pune",
   address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
 }, {
@@ -20,6 +25,30 @@ const offices = [{
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [offices, setOffices] = useState<Office[]>(defaultOffices);
+
+  useEffect(() => {
+    const fetchOffices = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("site_content")
+          .select("metadata")
+          .eq("section_key", "offices")
+          .maybeSingle();
+
+        if (!error && data?.metadata) {
+          const metadata = data.metadata as { offices?: Office[] };
+          if (metadata.offices && metadata.offices.length > 0) {
+            setOffices(metadata.offices);
+          }
+        }
+      } catch {
+        // Use default offices on error
+      }
+    };
+
+    fetchOffices();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
