@@ -104,6 +104,16 @@ const Footer = () => {
                   <span>🔐</span> Login Portal
                 </a>
               </li>
+              <li>
+                <a 
+                  href="https://www.justdial.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-background transition-colors flex items-center gap-2"
+                >
+                  <span>📞</span> JustDial
+                </a>
+              </li>
             </ul>
           </div>
 
