@@ -23,6 +23,16 @@ const LegalNotice = () => {
             <p className="font-medium text-foreground">
               Copyright © 2025 by AMRUTA INTEGRATED WATER SOLUTIONS PVT. LTD.
             </p>
+
+            <div className="bg-card/50 border border-border rounded-lg p-4 text-left">
+              <h3 className="font-semibold text-foreground mb-2">About the Company</h3>
+              <p className="mb-2">
+                AMRUTA INTEGRATED WATER SOLUTIONS PVT. LTD. is a pioneering organization with over <strong className="text-foreground">35 years of experience</strong> in sustainable water management solutions across India and beyond.
+              </p>
+              <p>
+                Headquartered in <strong className="text-foreground">Pune, Maharashtra</strong>, with offices in Mumbai, Hyderabad, and Bangalore, we specialize in groundwater exploration, rainwater harvesting, hydrogeological surveys, and integrated water resource management. Our mission is "Meeting the Challenge of Nature" — delivering innovative, eco-friendly water solutions to communities, industries, and governments.
+              </p>
+            </div>
             
             <p>
               (AMRUTA GROUND WATER DISCOVERY) is now an AMRUTA INTEGRATED WATER SOLUTIONS PVT. LTD. Company.
