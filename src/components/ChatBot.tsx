@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { useWhatsAppNumber } from "@/hooks/useWhatsAppNumber";
 
 type Attachment = {
   name: string;
@@ -38,6 +39,7 @@ const ChatBot = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { whatsappNumber } = useWhatsAppNumber();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -280,7 +282,7 @@ const ChatBot = () => {
     <>
       {/* WhatsApp Button */}
       <motion.a
-        href="https://wa.me/917410030418"
+        href={`https://wa.me/${whatsappNumber}`}
         target="_blank"
         rel="noopener noreferrer"
         initial={{ scale: 0 }}

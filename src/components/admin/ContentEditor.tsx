@@ -12,6 +12,7 @@ const sectionLabels: Record<string, string> = {
   hero: "Hero Section",
   about: "About Us",
   whyus: "Why Choose Us",
+  settings: "Site Settings",
 };
 
 const ContentEditor = () => {
@@ -160,6 +161,25 @@ const ContentEditor = () => {
                         <li key={i}>{s}</li>
                       ))}
                     </ul>
+                )}
+              </div>
+              )}
+
+              {/* Settings-specific fields */}
+              {content.section_key === "settings" && (
+                <div>
+                  <Label>WhatsApp Number (without + symbol, e.g., 917410030418)</Label>
+                  {isEditing ? (
+                    <Input
+                      value={metadata?.whatsapp_number || ""}
+                      onChange={(e) => updateMetadataField("whatsapp_number", e.target.value)}
+                      className="mt-1"
+                      placeholder="917410030418"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {(content.metadata as any)?.whatsapp_number || "-"}
+                    </p>
                   )}
                 </div>
               )}
