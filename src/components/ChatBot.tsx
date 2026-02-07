@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, User, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
+import { MessageCircle, X, Send, User, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon } from "lucide-react";
+import logoImg from "@/assets/logo-optimized.webp";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -322,8 +323,8 @@ const ChatBot = () => {
           >
             {/* Header */}
             <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-foreground/20 rounded-full flex items-center justify-center">
-                <Bot className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-primary-foreground/20">
+                <img src={logoImg} alt="AMRU" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h3 className="font-semibold text-sm">Water Solutions Assistant</h3>
@@ -341,8 +342,8 @@ const ChatBot = () => {
                   className={`flex gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {message.role === "assistant" && (
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 text-primary" />
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                      <img src={logoImg} alt="AMRU" className="w-full h-full object-cover" />
                     </div>
                   )}
                   <div className="max-w-[80%] flex flex-col gap-1">
@@ -386,8 +387,8 @@ const ChatBot = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex gap-2 justify-start"
                 >
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-primary" />
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <img src={logoImg} alt="AMRU" className="w-full h-full object-cover" />
                   </div>
                   <div className="bg-muted px-4 py-2 rounded-2xl rounded-bl-md">
                     <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
