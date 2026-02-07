@@ -13,6 +13,7 @@ const sectionLabels: Record<string, string> = {
   about: "About Us",
   whyus: "Why Choose Us",
   offices: "Our Offices",
+  contact_details: "Contact Details (Phone & Email)",
   settings: "Site Settings",
 };
 
@@ -243,7 +244,112 @@ const ContentEditor = () => {
                 </div>
               )}
 
-              {/* Settings-specific fields */}
+              {/* Contact Details fields */}
+              {content.section_key === "contact_details" && (
+                <div>
+                  <Label>Phone Numbers & Emails</Label>
+                  {isEditing ? (
+                    <div className="space-y-4 mt-2">
+                      <div>
+                        <Label className="text-xs">Phone Numbers</Label>
+                        {((metadata?.phones || []) as string[]).map((phone, index) => (
+                          <div key={index} className="flex gap-2 mt-1">
+                            <Input
+                              value={phone}
+                              onChange={(e) => {
+                                const phones = [...((metadata?.phones || []) as string[])];
+                                phones[index] = e.target.value;
+                                updateMetadataField("phones", phones);
+                              }}
+                              placeholder="+91-XXX-XXXX-XXX"
+                              className="text-sm"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const phones = [...((metadata?.phones || []) as string[])];
+                                phones.splice(index, 1);
+                                updateMetadataField("phones", phones);
+                              }}
+                              className="text-destructive shrink-0"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            const phones = [...((metadata?.phones || []) as string[])];
+                            phones.push("");
+                            updateMetadataField("phones", phones);
+                          }}
+                        >
+                          + Add Phone
+                        </Button>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Email Addresses</Label>
+                        {((metadata?.emails || []) as string[]).map((email, index) => (
+                          <div key={index} className="flex gap-2 mt-1">
+                            <Input
+                              value={email}
+                              onChange={(e) => {
+                                const emails = [...((metadata?.emails || []) as string[])];
+                                emails[index] = e.target.value;
+                                updateMetadataField("emails", emails);
+                              }}
+                              placeholder="email@example.com"
+                              className="text-sm"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const emails = [...((metadata?.emails || []) as string[])];
+                                emails.splice(index, 1);
+                                updateMetadataField("emails", emails);
+                              }}
+                              className="text-destructive shrink-0"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            const emails = [...((metadata?.emails || []) as string[])];
+                            emails.push("");
+                            updateMetadataField("emails", emails);
+                          }}
+                        >
+                          + Add Email
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 mt-2 text-sm text-muted-foreground">
+                      {((content.metadata as any)?.phones || []).map((p: string, i: number) => (
+                        <div key={`p${i}`}>📞 {p}</div>
+                      ))}
+                      {((content.metadata as any)?.emails || []).map((e: string, i: number) => (
+                        <div key={`e${i}`}>✉️ {e}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {content.section_key === "settings" && (
                 <div>
                   <Label>WhatsApp Number (without + symbol, e.g., 917410030418)</Label>
