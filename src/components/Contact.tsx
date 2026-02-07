@@ -9,6 +9,11 @@ interface Office {
   address: string;
 }
 
+interface ContactDetails {
+  phones: string[];
+  emails: string[];
+}
+
 const defaultOffices: Office[] = [{
   city: "Pune",
   address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
@@ -23,31 +28,46 @@ const defaultOffices: Office[] = [{
   address: "Branch Office - Bangalore, Karnataka"
 }];
 
+const defaultContactDetails: ContactDetails = {
+  phones: ["+91-741-0030-418", "+91-741-0030-417"],
+  emails: ["rain@amrutawater.com"],
+};
+
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [offices, setOffices] = useState<Office[]>(defaultOffices);
+  const [contactDetails, setContactDetails] = useState<ContactDetails>(defaultContactDetails);
 
   useEffect(() => {
-    const fetchOffices = async () => {
+    const fetchData = async () => {
       try {
         const { data, error } = await supabase
           .from("site_content")
-          .select("metadata")
-          .eq("section_key", "offices")
-          .maybeSingle();
+          .select("section_key, metadata")
+          .in("section_key", ["offices", "contact_details"]);
 
-        if (!error && data?.metadata) {
-          const metadata = data.metadata as { offices?: Office[] };
-          if (metadata.offices && metadata.offices.length > 0) {
-            setOffices(metadata.offices);
-          }
+        if (!error && data) {
+          data.forEach((row) => {
+            const metadata = row.metadata as Record<string, any>;
+            if (row.section_key === "offices" && metadata?.offices?.length > 0) {
+              setOffices(metadata.offices);
+            }
+            if (row.section_key === "contact_details") {
+              if (metadata?.phones?.length > 0 || metadata?.emails?.length > 0) {
+                setContactDetails({
+                  phones: metadata.phones || defaultContactDetails.phones,
+                  emails: metadata.emails || defaultContactDetails.emails,
+                });
+              }
+            }
+          });
         }
       } catch {
-        // Use default offices on error
+        // Use defaults on error
       }
     };
 
-    fetchOffices();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -142,20 +162,18 @@ const Contact = () => {
                 Get In Touch
               </h3>
               <div className="space-y-4">
-                <a href="tel:+917410030418" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>+91-741-0030-418</span>
-                </a>
-                <a href="tel:+917410030417" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>+91-741-0030-417</span>
-                </a>
-                
-                <a href="mailto:rain@amrutawater.com" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                  <Mail className="w-5 h-5 text-primary" />
-                  <span>rain@amrutawater.com</span>
-                </a>
-                
+                {contactDetails.phones.map((phone, i) => (
+                  <a key={i} href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
+                    <Phone className="w-5 h-5 text-primary" />
+                    <span>{phone}</span>
+                  </a>
+                ))}
+                {contactDetails.emails.map((email, i) => (
+                  <a key={i} href={`mailto:${email}`} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
+                    <Mail className="w-5 h-5 text-primary" />
+                    <span>{email}</span>
+                  </a>
+                ))}
               </div>
             </div>
 
