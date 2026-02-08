@@ -20,6 +20,8 @@ const sectionLabels: Record<string, string> = {
 interface Office {
   city: string;
   address: string;
+  whatsapp: string;
+  phone: string;
 }
 
 const ContentEditor = () => {
@@ -216,6 +218,26 @@ const ContentEditor = () => {
                             placeholder="Full address"
                             className="text-sm"
                           />
+                          <Input
+                            value={office.whatsapp || ""}
+                            onChange={(e) => {
+                              const offices = [...((metadata?.offices || []) as Office[])];
+                              offices[index] = { ...offices[index], whatsapp: e.target.value };
+                              updateMetadataField("offices", offices);
+                            }}
+                            placeholder="WhatsApp (e.g. 917410030418)"
+                            className="text-sm"
+                          />
+                          <Input
+                            value={office.phone || ""}
+                            onChange={(e) => {
+                              const offices = [...((metadata?.offices || []) as Office[])];
+                              offices[index] = { ...offices[index], phone: e.target.value };
+                              updateMetadataField("offices", offices);
+                            }}
+                            placeholder="Phone (e.g. +91-741-0030-418)"
+                            className="text-sm"
+                          />
                         </div>
                       ))}
                       <Button
@@ -224,7 +246,7 @@ const ContentEditor = () => {
                         size="sm"
                         onClick={() => {
                           const offices = [...((metadata?.offices || []) as Office[])];
-                          offices.push({ city: "", address: "" });
+                          offices.push({ city: "", address: "", whatsapp: "", phone: "" });
                           updateMetadataField("offices", offices);
                         }}
                       >
@@ -237,6 +259,8 @@ const ContentEditor = () => {
                         <div key={i} className="text-sm">
                           <span className="font-medium">{office.city}:</span>{" "}
                           <span className="text-muted-foreground">{office.address}</span>
+                          {office.whatsapp && <span className="text-muted-foreground ml-2">| WA: {office.whatsapp}</span>}
+                          {office.phone && <span className="text-muted-foreground ml-2">| ☎ {office.phone}</span>}
                         </div>
                       ))}
                     </div>
