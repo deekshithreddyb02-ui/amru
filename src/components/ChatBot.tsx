@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, User, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon, Phone, ChevronUp } from "lucide-react";
+import { MessageCircle, X, Send, User, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon, Phone, ChevronUp, Bot } from "lucide-react";
 import logoImg from "@/assets/logo-optimized.webp";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -358,7 +358,7 @@ const ChatBot = () => {
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity"
         aria-label={isOpen ? "Close chat" : "Open chat"}
       >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        {isOpen ? <X className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
       </motion.button>
 
       {/* Chat Window */}
