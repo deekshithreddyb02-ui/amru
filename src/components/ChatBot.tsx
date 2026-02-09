@@ -284,7 +284,7 @@ const ChatBot = () => {
         }} transition={{
           duration: 0.2
         }} className="absolute bottom-16 right-0 w-72 bg-card border border-border rounded-xl shadow-2xl overflow-hidden mb-2">
-              <div className="bg-[#25D366] text-white px-4 py-2.5 font-semibold text-sm flex items-center justify-between">
+              <div className="text-white px-4 py-2.5 font-semibold text-sm flex items-center justify-between bg-primary">
                 <span>Contact Us</span>
                 <button onClick={() => setShowContactMenu(false)} className="hover:opacity-80">
                   <X className="w-4 h-4" />
