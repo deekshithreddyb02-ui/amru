@@ -4,20 +4,38 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useAdmin } from "@/hooks/useAdmin";
-import logo from "@/assets/logo-optimized.webp";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import defaultLogo from "@/assets/logo-optimized.webp";
 
-const navLinks = [
-  { name: "Home", href: "#home" },
-  { name: "Services", href: "#services" },
-  { name: "About Us", href: "#about" },
-  { name: "Why Us", href: "#why" },
-  { name: "Contact", href: "#contact" },
-];
+interface NavLink {
+  name: string;
+  href: string;
+}
+
+interface NavbarMetadata {
+  company_name: string;
+  logo_url: string;
+  nav_links: NavLink[];
+  external_link: { name: string; url: string };
+}
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const { isAdmin } = useAdmin();
+  const { data: navbarContent } = useSiteContent("navbar");
+
+  const meta = navbarContent?.metadata as unknown as NavbarMetadata | undefined;
+  const companyName = meta?.company_name || "Amruta Integrated Water Solutions Pvt. Ltd.";
+  const logoSrc = meta?.logo_url || defaultLogo;
+  const navLinks = meta?.nav_links || [
+    { name: "Home", href: "#home" },
+    { name: "Services", href: "#services" },
+    { name: "About Us", href: "#about" },
+    { name: "Why Us", href: "#why" },
+    { name: "Contact", href: "#contact" },
+  ];
+  const externalLink = meta?.external_link || { name: "RWH SW HFL PMS", url: "https://rain.amrutageo.com/" };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -38,6 +56,20 @@ const Navbar = () => {
     setUser(null);
   };
 
+  const handleMobileNavClick = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    setIsOpen(false);
+    const targetId = href.replace('#', '');
+    setTimeout(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = href;
+      }
+    }, 300);
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary shadow-lg">
       <div className="container mx-auto px-4">
@@ -45,8 +77,8 @@ const Navbar = () => {
           {/* Logo */}
           <a href="#home" className="flex items-center gap-2">
             <img 
-              src={logo} 
-              alt="Amruta Logo" 
+              src={logoSrc} 
+              alt="Logo" 
               width={48}
               height={48}
               className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full bg-white"
@@ -54,7 +86,7 @@ const Navbar = () => {
               decoding="async"
             />
             <span className="text-white font-serif text-sm md:text-lg font-semibold leading-tight">
-              Amruta Integrated Water Solutions Pvt. Ltd.
+              {companyName}
             </span>
           </a>
 
@@ -65,14 +97,16 @@ const Navbar = () => {
                 {link.name}
               </a>
             ))}
-            <a
-              href="https://rain.amrutageo.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              RWH SW HFL PMS
-            </a>
+            {externalLink.url && (
+              <a
+                href={externalLink.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                {externalLink.name}
+              </a>
+            )}
             {isAdmin && (
               <a
                 href="/admin"
@@ -127,29 +161,21 @@ const Navbar = () => {
                   key={link.name}
                   href={link.href}
                   className="nav-link py-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsOpen(false);
-                    const targetId = link.href.replace('#', '');
-                    setTimeout(() => {
-                      const el = document.getElementById(targetId);
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }, 300);
-                  }}
+                  onClick={(e) => handleMobileNavClick(e, link.href)}
                 >
                   {link.name}
                 </a>
               ))}
-              <a
-                href="https://rain.amrutageo.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium text-center"
-              >
-                RWH SW HFL PMS
-              </a>
+              {externalLink.url && (
+                <a
+                  href={externalLink.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium text-center"
+                >
+                  {externalLink.name}
+                </a>
+              )}
               {isAdmin && (
                 <a
                   href="/admin"

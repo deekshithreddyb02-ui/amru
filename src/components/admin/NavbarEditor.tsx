@@ -1,0 +1,204 @@
+import { useState, useEffect } from "react";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/errors";
+import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink } from "lucide-react";
+
+interface NavLink {
+  name: string;
+  href: string;
+}
+
+interface ExternalLink {
+  name: string;
+  url: string;
+}
+
+interface NavbarMetadata {
+  company_name: string;
+  logo_url: string;
+  nav_links: NavLink[];
+  external_link: ExternalLink;
+}
+
+const NavbarEditor = () => {
+  const { data, loading, updateContent } = useSiteContent("navbar");
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [navLinks, setNavLinks] = useState<NavLink[]>([]);
+  const [externalLink, setExternalLink] = useState<ExternalLink>({ name: "", url: "" });
+
+  useEffect(() => {
+    if (data?.metadata) {
+      const meta = data.metadata as unknown as NavbarMetadata;
+      setCompanyName(meta.company_name || "");
+      setLogoUrl(meta.logo_url || "");
+      setNavLinks(meta.nav_links || []);
+      setExternalLink(meta.external_link || { name: "", url: "" });
+    }
+  }, [data]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const metadata = {
+        company_name: companyName,
+        logo_url: logoUrl,
+        nav_links: navLinks,
+        external_link: externalLink,
+      };
+      const result = await updateContent({ metadata: metadata as any });
+      if (result.error) throw new Error(result.error);
+      toast({ title: "Saved", description: "Navbar settings updated successfully" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addNavLink = () => {
+    setNavLinks([...navLinks, { name: "", href: "#" }]);
+  };
+
+  const removeNavLink = (index: number) => {
+    setNavLinks(navLinks.filter((_, i) => i !== index));
+  };
+
+  const updateNavLink = (index: number, field: keyof NavLink, value: string) => {
+    const updated = [...navLinks];
+    updated[index] = { ...updated[index], [field]: value };
+    setNavLinks(updated);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Company Branding */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Company Branding</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="company-name">Company Name</Label>
+            <Input
+              id="company-name"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Company name displayed in navbar"
+            />
+          </div>
+          <div>
+            <Label htmlFor="logo-url">Logo URL (leave empty to use default)</Label>
+            <Input
+              id="logo-url"
+              value={logoUrl}
+              onChange={(e) => setLogoUrl(e.target.value)}
+              placeholder="https://example.com/logo.png"
+            />
+            {logoUrl && (
+              <div className="mt-2">
+                <img src={logoUrl} alt="Logo preview" className="w-12 h-12 object-contain rounded-full bg-muted" />
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Navigation Links */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg">Navigation Links</CardTitle>
+          <Button size="sm" variant="outline" onClick={addNavLink}>
+            <Plus className="w-4 h-4 mr-1" />
+            Add Link
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {navLinks.map((link, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <Input
+                value={link.name}
+                onChange={(e) => updateNavLink(index, "name", e.target.value)}
+                placeholder="Link name"
+                className="flex-1"
+              />
+              <Input
+                value={link.href}
+                onChange={(e) => updateNavLink(index, "href", e.target.value)}
+                placeholder="#section or /page"
+                className="flex-1"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => removeNavLink(index)}
+                className="flex-shrink-0"
+              >
+                <Trash2 className="w-4 h-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          {navLinks.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No navigation links. Add one above.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* External Link */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ExternalLink className="w-4 h-4" />
+            External Link Button
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="ext-name">Button Text</Label>
+            <Input
+              id="ext-name"
+              value={externalLink.name}
+              onChange={(e) => setExternalLink({ ...externalLink, name: e.target.value })}
+              placeholder="Button label"
+            />
+          </div>
+          <div>
+            <Label htmlFor="ext-url">Button URL</Label>
+            <Input
+              id="ext-url"
+              value={externalLink.url}
+              onChange={(e) => setExternalLink({ ...externalLink, url: e.target.value })}
+              placeholder="https://example.com"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+          Save Navbar Settings
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default NavbarEditor;

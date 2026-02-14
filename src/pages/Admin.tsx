@@ -9,11 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation } from "lucide-react";
 import { motion } from "framer-motion";
 import ContentEditor from "@/components/admin/ContentEditor";
 import ServiceEditor from "@/components/admin/ServiceEditor";
 import GalleryEditor from "@/components/admin/GalleryEditor";
+import NavbarEditor from "@/components/admin/NavbarEditor";
 
 interface User {
   id: string;
@@ -249,6 +250,10 @@ const Admin = () => {
                 <Image className="w-4 h-4 mr-1" />
                 Gallery
               </TabsTrigger>
+              <TabsTrigger value="navbar">
+                <Navigation className="w-4 h-4 mr-1" />
+                Navbar
+              </TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
 
@@ -325,6 +330,10 @@ const Admin = () => {
 
             <TabsContent value="gallery">
               <GalleryEditor />
+            </TabsContent>
+
+            <TabsContent value="navbar">
+              <NavbarEditor />
             </TabsContent>
 
             <TabsContent value="users">
