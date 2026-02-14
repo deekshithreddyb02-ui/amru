@@ -353,6 +353,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_users_with_emails: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
