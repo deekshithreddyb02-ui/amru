@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search } from "lucide-react";
 import { motion } from "framer-motion";
 import ContentEditor from "@/components/admin/ContentEditor";
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -43,6 +43,7 @@ const Admin = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [userSearch, setUserSearch] = useState("");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -358,8 +359,18 @@ const Admin = () => {
 
             <TabsContent value="users">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>User Management</CardTitle>
+                  <div className="relative w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Search by email or ID..."
+                      value={userSearch}
+                      onChange={e => setUserSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {users.length === 0 ? (
@@ -376,7 +387,13 @@ const Admin = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {users.map((user) => (
+                        {users
+                          .filter(u => {
+                            if (!userSearch) return true;
+                            const q = userSearch.toLowerCase();
+                            return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.role.toLowerCase().includes(q);
+                          })
+                          .map((user) => (
                           <TableRow key={user.id}>
                             <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
                             <TableCell className="text-sm">{user.email}</TableCell>
