@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, Loader2 } from "lucide-react";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -58,7 +59,7 @@ const AdminLogin = () => {
       toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
       navigate("/admin");
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/errors";
 import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image } from "lucide-react";
 import { motion } from "framer-motion";
 import ContentEditor from "@/components/admin/ContentEditor";
@@ -78,7 +79,7 @@ const Admin = () => {
       if (messagesError) throw messagesError;
       setMessages(messagesData || []);
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setLoadingData(false);
     }
@@ -102,7 +103,7 @@ const Admin = () => {
         m.id === id ? { ...m, is_read: !isRead } : m
       ));
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 
@@ -118,7 +119,7 @@ const Admin = () => {
       setMessages(messages.filter(m => m.id !== id));
       toast({ title: "Success", description: "Message deleted" });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 
@@ -136,7 +137,7 @@ const Admin = () => {
       ));
       toast({ title: "Success", description: "User promoted to admin" });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 
@@ -154,7 +155,7 @@ const Admin = () => {
       ));
       toast({ title: "Success", description: "Admin privileges removed" });
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 

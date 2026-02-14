@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import logo from "@/assets/logo-optimized.webp";
@@ -71,11 +72,7 @@ const Auth = () => {
         toast({ title: "Account created!", description: "You have successfully signed up." });
       }
     } catch (error: any) {
-      let message = error.message;
-      if (error.message.includes("User already registered")) {
-        message = "This email is already registered. Please login instead.";
-      }
-      toast({ title: "Error", description: message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }

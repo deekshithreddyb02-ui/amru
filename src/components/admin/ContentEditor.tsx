@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/errors";
 import { Loader2, Save, Edit2, X } from "lucide-react";
 import { SiteContent, useAllSiteContent } from "@/hooks/useSiteContent";
 const sectionLabels: Record<string, string> = {
@@ -53,7 +54,7 @@ const ContentEditor = () => {
     if (result.error) {
       toast({
         title: "Error",
-        description: result.error,
+        description: sanitizeError(result.error),
         variant: "destructive"
       });
     } else {

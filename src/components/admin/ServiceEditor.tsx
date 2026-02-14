@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, Save, Trash2, Edit2, X, GripVertical } from "lucide-react";
 
@@ -43,7 +44,7 @@ const ServiceEditor = () => {
       .order("display_order");
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } else {
       setServices(data || []);
     }
@@ -80,7 +81,7 @@ const ServiceEditor = () => {
 
     setSaving(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Service updated" });
       setEditingId(null);
@@ -108,7 +109,7 @@ const ServiceEditor = () => {
 
     setSaving(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Service added" });
       setNewService({ title: "", description: "", image: "", link: "", is_main: false });
@@ -120,7 +121,7 @@ const ServiceEditor = () => {
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("services").delete().eq("id", id);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Service deleted" });
       fetchServices();
