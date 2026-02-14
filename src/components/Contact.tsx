@@ -1,10 +1,8 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const OfficeMap = lazy(() => import("@/components/OfficeMap"));
 
 interface Office {
   city: string;
@@ -201,17 +199,6 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Individual Maps */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              {offices.filter(o => typeof o.lat === 'number' && typeof o.lng === 'number').map(office => (
-                <Suspense key={office.city} fallback={<div className="h-[250px] bg-muted rounded-xl animate-pulse" />}>
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">{office.city}</h4>
-                    <OfficeMap office={office} />
-                  </div>
-                </Suspense>
-              ))}
-            </div>
           </motion.div>
 
           {/* Contact Form */}
