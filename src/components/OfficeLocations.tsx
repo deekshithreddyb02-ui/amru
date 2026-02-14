@@ -82,23 +82,31 @@ const OfficeLocations = () => {
               <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
                 <OfficeMap office={office} height="250px" />
               </Suspense>
-              <div className="p-4">
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+              >
                 <div className="flex items-start gap-2">
                   <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-semibold text-foreground">{office.city}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{office.address}</p>
+                    <span className="text-xs text-primary mt-2 inline-block">📍 Get Directions →</span>
                     {office.phone && (
-                      <a
-                        href={`tel:${office.phone.replace(/[^+\d]/g, "")}`}
-                        className="text-sm text-primary hover:underline mt-1 inline-block"
+                      <p
+                        className="text-sm text-primary mt-1 inline-block"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        📞 {office.phone}
-                      </a>
+                        <a href={`tel:${office.phone.replace(/[^+\d]/g, "")}`} className="hover:underline">
+                          📞 {office.phone}
+                        </a>
+                      </p>
                     )}
                   </div>
                 </div>
-              </div>
+              </a>
             </motion.div>
           ))}
         </div>
