@@ -127,7 +127,17 @@ const Navbar = () => {
                   key={link.name}
                   href={link.href}
                   className="nav-link py-2"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsOpen(false);
+                    const targetId = link.href.replace('#', '');
+                    setTimeout(() => {
+                      const el = document.getElementById(targetId);
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }, 300);
+                  }}
                 >
                   {link.name}
                 </a>
