@@ -21,6 +21,8 @@ interface Office {
   address: string;
   whatsapp: string;
   phone: string;
+  lat?: number;
+  lng?: number;
 }
 const ContentEditor = () => {
   const {
@@ -179,6 +181,24 @@ const ContentEditor = () => {
                   };
                   updateMetadataField("offices", offices);
                 }} placeholder="Phone (e.g. +91-741-0030-418)" className="text-sm" />
+                          <div className="grid grid-cols-2 gap-2">
+                            <Input value={office.lat ?? ""} onChange={e => {
+                    const offices = [...((metadata?.offices || []) as Office[])];
+                    offices[index] = {
+                      ...offices[index],
+                      lat: e.target.value ? parseFloat(e.target.value) : undefined
+                    };
+                    updateMetadataField("offices", offices);
+                  }} placeholder="Latitude (e.g. 18.5997)" className="text-sm" type="number" step="any" />
+                            <Input value={office.lng ?? ""} onChange={e => {
+                    const offices = [...((metadata?.offices || []) as Office[])];
+                    offices[index] = {
+                      ...offices[index],
+                      lng: e.target.value ? parseFloat(e.target.value) : undefined
+                    };
+                    updateMetadataField("offices", offices);
+                  }} placeholder="Longitude (e.g. 73.7997)" className="text-sm" type="number" step="any" />
+                          </div>
                         </div>)}
                       <Button type="button" variant="outline" size="sm" onClick={() => {
                 const offices = [...((metadata?.offices || []) as Office[])];
@@ -186,7 +206,9 @@ const ContentEditor = () => {
                   city: "",
                   address: "",
                   whatsapp: "",
-                  phone: ""
+                  phone: "",
+                  lat: undefined,
+                  lng: undefined
                 });
                 updateMetadataField("offices", offices);
               }}>
