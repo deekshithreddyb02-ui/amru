@@ -201,10 +201,15 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Map */}
-            <Suspense fallback={<div className="h-[400px] bg-muted rounded-xl animate-pulse" />}>
-              <OfficeMap offices={offices} />
-            </Suspense>
+            {/* Individual Maps */}
+            {offices.filter(o => typeof o.lat === 'number' && typeof o.lng === 'number').map(office => (
+              <Suspense key={office.city} fallback={<div className="h-[250px] bg-muted rounded-xl animate-pulse" />}>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">{office.city}</h4>
+                  <OfficeMap office={office} />
+                </div>
+              </Suspense>
+            ))}
           </motion.div>
 
           {/* Contact Form */}
