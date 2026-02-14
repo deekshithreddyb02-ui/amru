@@ -202,14 +202,16 @@ const Contact = () => {
             </div>
 
             {/* Individual Maps */}
-            {offices.filter(o => typeof o.lat === 'number' && typeof o.lng === 'number').map(office => (
-              <Suspense key={office.city} fallback={<div className="h-[250px] bg-muted rounded-xl animate-pulse" />}>
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">{office.city}</h4>
-                  <OfficeMap office={office} />
-                </div>
-              </Suspense>
-            ))}
+            <div className="grid sm:grid-cols-2 gap-4">
+              {offices.filter(o => typeof o.lat === 'number' && typeof o.lng === 'number').map(office => (
+                <Suspense key={office.city} fallback={<div className="h-[250px] bg-muted rounded-xl animate-pulse" />}>
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">{office.city}</h4>
+                    <OfficeMap office={office} />
+                  </div>
+                </Suspense>
+              ))}
+            </div>
           </motion.div>
 
           {/* Contact Form */}
