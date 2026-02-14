@@ -9,13 +9,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom } from "lucide-react";
 import { motion } from "framer-motion";
 import ContentEditor from "@/components/admin/ContentEditor";
 import ServiceEditor from "@/components/admin/ServiceEditor";
 import GalleryEditor from "@/components/admin/GalleryEditor";
 import NavbarEditor from "@/components/admin/NavbarEditor";
 import OfficeEditor from "@/components/admin/OfficeEditor";
+import FooterEditor from "@/components/admin/FooterEditor";
 
 interface User {
   id: string;
@@ -259,6 +260,10 @@ const Admin = () => {
                 <MapPin className="w-4 h-4 mr-1" />
                 Office Maps
               </TabsTrigger>
+              <TabsTrigger value="footer">
+                <PanelBottom className="w-4 h-4 mr-1" />
+                Footer
+              </TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
 
@@ -343,6 +348,10 @@ const Admin = () => {
 
             <TabsContent value="offices">
               <OfficeEditor />
+            </TabsContent>
+
+            <TabsContent value="footer">
+              <FooterEditor />
             </TabsContent>
 
             <TabsContent value="users">
