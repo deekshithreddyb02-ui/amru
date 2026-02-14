@@ -97,6 +97,36 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_images: {
+        Row: {
+          caption: string | null
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          is_visible: boolean
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          is_visible?: boolean
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_visible?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_tracking: {
         Row: {
           booking_id: string | null

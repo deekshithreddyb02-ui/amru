@@ -8,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image } from "lucide-react";
 import { motion } from "framer-motion";
 import ContentEditor from "@/components/admin/ContentEditor";
 import ServiceEditor from "@/components/admin/ServiceEditor";
+import GalleryEditor from "@/components/admin/GalleryEditor";
 
 interface User {
   id: string;
@@ -243,6 +244,10 @@ const Admin = () => {
                 <Wrench className="w-4 h-4 mr-1" />
                 Services
               </TabsTrigger>
+              <TabsTrigger value="gallery">
+                <Image className="w-4 h-4 mr-1" />
+                Gallery
+              </TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
 
@@ -315,6 +320,10 @@ const Admin = () => {
 
             <TabsContent value="services">
               <ServiceEditor />
+            </TabsContent>
+
+            <TabsContent value="gallery">
+              <GalleryEditor />
             </TabsContent>
 
             <TabsContent value="users">
