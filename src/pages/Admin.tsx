@@ -59,28 +59,30 @@ const Admin = () => {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role, created_at');
+      const [rolesRes, usersRes, messagesRes] = await Promise.all([
+        supabase.from('user_roles').select('user_id, role, created_at'),
+        supabase.rpc('get_users_with_emails'),
+        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
+      ]);
 
-      if (rolesError) throw rolesError;
+      if (rolesRes.error) throw rolesRes.error;
 
-      const usersWithRoles = rolesData?.map(r => ({
+      const emailMap = new Map<string, { email: string; created_at: string }>();
+      if (!usersRes.error && usersRes.data) {
+        usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at }));
+      }
+
+      const usersWithRoles = rolesRes.data?.map(r => ({
         id: r.user_id,
-        email: r.user_id,
-        created_at: r.created_at,
+        email: emailMap.get(r.user_id)?.email || r.user_id,
+        created_at: emailMap.get(r.user_id)?.created_at || r.created_at,
         role: r.role
       })) || [];
 
       setUsers(usersWithRoles);
 
-      const { data: messagesData, error: messagesError } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (messagesError) throw messagesError;
-      setMessages(messagesData || []);
+      if (messagesRes.error) throw messagesRes.error;
+      setMessages(messagesRes.data || []);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
@@ -365,8 +367,9 @@ const Admin = () => {
                   ) : (
                     <Table>
                       <TableHeader>
-                        <TableRow>
+                         <TableRow>
                           <TableHead>User ID</TableHead>
+                          <TableHead>Email</TableHead>
                           <TableHead>Role</TableHead>
                           <TableHead>Joined</TableHead>
                           <TableHead>Actions</TableHead>
@@ -376,6 +379,7 @@ const Admin = () => {
                         {users.map((user) => (
                           <TableRow key={user.id}>
                             <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
+                            <TableCell className="text-sm">{user.email}</TableCell>
                             <TableCell>
                               <Badge variant={user.role === 'admin' ? "default" : "secondary"}>
                                 {user.role}
