@@ -9,6 +9,7 @@ const WhyUs = lazy(() => import("@/components/WhyUs"));
 const Certifications = lazy(() => import("@/components/Certifications"));
 const Gallery = lazy(() => import("@/components/Gallery"));
 const Contact = lazy(() => import("@/components/Contact"));
+const OfficeLocations = lazy(() => import("@/components/OfficeLocations"));
 const LegalNotice = lazy(() => import("@/components/LegalNotice"));
 const Footer = lazy(() => import("@/components/Footer"));
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -25,6 +26,7 @@ const Index = () => {
         <Certifications />
         <Gallery />
         <Contact />
+        <OfficeLocations />
         <LegalNotice />
         <Footer />
         <ChatBot />
