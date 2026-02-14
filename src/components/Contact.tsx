@@ -225,9 +225,9 @@ const Contact = () => {
           once: true
         }} transition={{
           duration: 0.6
-        }} className="bg-card p-6 md:p-8 rounded-xl border border-border" style={{
-          boxShadow: "var(--card-shadow)"
-        }}>
+         }} className="bg-card p-6 md:p-8 rounded-xl border border-border h-fit" style={{
+           boxShadow: "var(--card-shadow)"
+         }}>
             <h3 className="font-serif font-semibold text-xl text-foreground mb-6">
               Send Us a Message
             </h3>
