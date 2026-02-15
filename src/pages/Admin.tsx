@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -17,6 +17,9 @@ import GalleryEditor from "@/components/admin/GalleryEditor";
 import NavbarEditor from "@/components/admin/NavbarEditor";
 import OfficeEditor from "@/components/admin/OfficeEditor";
 import FooterEditor from "@/components/admin/FooterEditor";
+import HeroEditor from "@/components/admin/HeroEditor";
+import AboutEditor from "@/components/admin/AboutEditor";
+import WhyUsEditor from "@/components/admin/WhyUsEditor";
 
 interface User {
   id: string;
@@ -243,6 +246,18 @@ const Admin = () => {
               <TabsTrigger value="messages">
                 Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
               </TabsTrigger>
+              <TabsTrigger value="hero">
+                <Sparkles className="w-4 h-4 mr-1" />
+                Hero
+              </TabsTrigger>
+              <TabsTrigger value="about">
+                <Info className="w-4 h-4 mr-1" />
+                About Us
+              </TabsTrigger>
+              <TabsTrigger value="whyus">
+                <HelpCircle className="w-4 h-4 mr-1" />
+                Why Us
+              </TabsTrigger>
               <TabsTrigger value="services">
                 <Wrench className="w-4 h-4 mr-1" />
                 Services
@@ -329,6 +344,17 @@ const Admin = () => {
               </Card>
             </TabsContent>
 
+            <TabsContent value="hero">
+              <HeroEditor />
+            </TabsContent>
+
+            <TabsContent value="about">
+              <AboutEditor />
+            </TabsContent>
+
+            <TabsContent value="whyus">
+              <WhyUsEditor />
+            </TabsContent>
 
             <TabsContent value="services">
               <ServiceEditor />
