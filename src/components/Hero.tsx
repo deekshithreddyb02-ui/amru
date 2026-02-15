@@ -75,13 +75,13 @@ const Hero = () => {
           </motion.div>
 
           <motion.a
-            href="#contact"
+            href="#services"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
             className="btn-primary-hero inline-flex items-center gap-2"
           >
-            Enquire Now
+            Our Services
             <ArrowRight className="w-5 h-5" />
           </motion.a>
         </motion.div>
