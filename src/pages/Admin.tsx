@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search } from "lucide-react";
 import { motion } from "framer-motion";
-import ContentEditor from "@/components/admin/ContentEditor";
+
 import ServiceEditor from "@/components/admin/ServiceEditor";
 import GalleryEditor from "@/components/admin/GalleryEditor";
 import NavbarEditor from "@/components/admin/NavbarEditor";
@@ -243,10 +243,6 @@ const Admin = () => {
               <TabsTrigger value="messages">
                 Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="content">
-                <LayoutDashboard className="w-4 h-4 mr-1" />
-                Site Content
-              </TabsTrigger>
               <TabsTrigger value="services">
                 <Wrench className="w-4 h-4 mr-1" />
                 Services
@@ -333,9 +329,6 @@ const Admin = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="content">
-              <ContentEditor />
-            </TabsContent>
 
             <TabsContent value="services">
               <ServiceEditor />
