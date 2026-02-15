@@ -166,11 +166,18 @@ const Contact = () => {
                 Get In Touch
               </h3>
               <div className="space-y-4">
-                {contactDetails.phones.map((phone, i) => (
-                  <a key={i} href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                    <Phone className="w-5 h-5 text-primary" />
-                    <span>{phone}</span>
-                  </a>
+                {offices.map(office => (
+                  <div key={office.city} className="flex items-start gap-3">
+                    <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="font-medium text-foreground">{office.city}</div>
+                      {office.phone && (
+                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                          {office.phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 ))}
                 {contactDetails.emails.map((email, i) => (
                   <a key={i} href={`mailto:${email}`} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
