@@ -95,7 +95,7 @@ const Services = () => {
           <div className="text-center mt-6">
             <button
               onClick={() => setShowMore(!showMore)}
-              className="inline-flex items-center gap-2 text-primary font-medium hover:text-secondary transition-colors"
+              className="inline-flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors"
             >
               {showMore ? (
                 <>
