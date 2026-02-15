@@ -23,7 +23,7 @@ interface ServiceCardProps {
   delay?: number;
 }
 
-const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps) => {
+const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -109,12 +109,23 @@ const ServiceCard = ({ title, description, image, delay = 0 }: ServiceCardProps)
           <p className="text-muted-foreground text-sm leading-relaxed flex-1">
             {description}
           </p>
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-3 pt-2 border-t border-border/30"
-          >
-            Enquire →
-          </button>
+          {link ? (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-3 pt-2 border-t border-border/30"
+            >
+              Visit App →
+            </a>
+          ) : (
+            <button
+              onClick={() => setOpen(true)}
+              className="inline-flex items-center text-primary font-semibold text-sm hover:text-primary/80 transition-colors text-left mt-3 pt-2 border-t border-border/30"
+            >
+              Enquire →
+            </button>
+          )}
         </div>
       </motion.article>
 
