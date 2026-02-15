@@ -51,16 +51,17 @@ const Services = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
           {mainServices.map((service, index) => (
-            <ServiceCard
-              key={service.id}
-              title={service.title}
-              description={service.description}
-              image={service.image}
-              link={service.link || undefined}
-              delay={index * 0.1}
-            />
+            <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(16.666%-0.85rem)]">
+              <ServiceCard
+                title={service.title}
+                description={service.description}
+                image={service.image}
+                link={service.link || undefined}
+                delay={index * 0.1}
+              />
+            </div>
           ))}
         </div>
 
@@ -73,16 +74,17 @@ const Services = () => {
               transition={{ duration: 0.4 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 {extraServices.map((service, index) => (
-                  <ServiceCard
-                    key={service.id}
-                    title={service.title}
-                    description={service.description}
-                    image={service.image}
-                    link={service.link || undefined}
-                    delay={index * 0.05}
-                  />
+                  <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(16.666%-0.85rem)]">
+                    <ServiceCard
+                      title={service.title}
+                      description={service.description}
+                      image={service.image}
+                      link={service.link || undefined}
+                      delay={index * 0.05}
+                    />
+                  </div>
                 ))}
               </div>
             </motion.div>
