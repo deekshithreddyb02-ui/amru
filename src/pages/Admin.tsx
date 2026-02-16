@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle } from "lucide-react";
-import { maskEmail, maskPhoneSimple, maskUserId } from "@/utils/piiMasking";
 import { motion } from "framer-motion";
 
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -313,8 +312,8 @@ const Admin = () => {
                               </Badge>
                             </TableCell>
                             <TableCell className="font-medium">{msg.name}</TableCell>
-                            <TableCell>{maskEmail(msg.email)}</TableCell>
-                            <TableCell>{msg.phone ? maskPhoneSimple(msg.phone) : "-"}</TableCell>
+                            <TableCell>{msg.email}</TableCell>
+                            <TableCell>{msg.phone || "-"}</TableCell>
                             <TableCell>{msg.service || "-"}</TableCell>
                             <TableCell className="max-w-xs truncate">{msg.message}</TableCell>
                             <TableCell>{new Date(msg.created_at).toLocaleDateString()}</TableCell>
@@ -415,8 +414,8 @@ const Admin = () => {
                           })
                           .map((user) => (
                           <TableRow key={user.id}>
-                            <TableCell className="font-mono text-xs">{maskUserId(user.id)}</TableCell>
-                            <TableCell className="text-sm">{maskEmail(user.email)}</TableCell>
+                            <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
+                            <TableCell className="text-sm">{user.email}</TableCell>
                             <TableCell>
                               <Badge variant={user.role === 'admin' ? "default" : "secondary"}>
                                 {user.role}
