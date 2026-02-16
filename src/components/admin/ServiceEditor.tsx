@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Save, Trash2, Edit2, X, GripVertical } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, Edit2, X, Upload, ImageIcon } from "lucide-react";
 
 interface Service {
   id: string;
@@ -27,6 +27,7 @@ const ServiceEditor = () => {
   const [editData, setEditData] = useState<Partial<Service>>({});
   const [saving, setSaving] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newService, setNewService] = useState({
     title: "",
     description: "",
@@ -34,7 +35,36 @@ const ServiceEditor = () => {
     link: "",
     is_main: false,
   });
+  const newFileRef = useRef<HTMLInputElement>(null);
+  const editFileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `services/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("main").upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from("main").getPublicUrl(path);
+      return data.publicUrl;
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: sanitizeError(error), variant: "destructive" });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileUpload = async (file: File, target: "new" | "edit") => {
+    const url = await uploadImage(file);
+    if (!url) return;
+    if (target === "new") {
+      setNewService((prev) => ({ ...prev, image: url }));
+    } else {
+      setEditData((prev) => ({ ...prev, image: url }));
+    }
+  };
 
   const fetchServices = async () => {
     setLoading(true);
@@ -159,8 +189,29 @@ const ServiceEditor = () => {
               <Textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>Image URL *</Label>
-              <Input value={newService.image} onChange={(e) => setNewService({ ...newService, image: e.target.value })} className="mt-1" placeholder="https://..." />
+              <Label>Image *</Label>
+              <div className="mt-1 space-y-2">
+                <input
+                  ref={newFileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file, "new");
+                  }}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={() => newFileRef.current?.click()} disabled={uploading}>
+                  {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                  Choose Image
+                </Button>
+                {newService.image && (
+                  <div className="flex items-center gap-2">
+                    <img src={newService.image} alt="Preview" className="w-16 h-12 object-cover rounded border" />
+                    <span className="text-xs text-muted-foreground truncate max-w-[200px]">{newService.image.split("/").pop()}</span>
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <Label>Link (optional)</Label>
@@ -195,8 +246,29 @@ const ServiceEditor = () => {
                     <Textarea value={editData.description || ""} onChange={(e) => setEditData({ ...editData, description: e.target.value })} className="mt-1" />
                   </div>
                   <div>
-                    <Label>Image URL</Label>
-                    <Input value={editData.image || ""} onChange={(e) => setEditData({ ...editData, image: e.target.value })} className="mt-1" />
+                    <Label>Image</Label>
+                    <div className="mt-1 space-y-2">
+                      <input
+                        ref={editFileRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file, "edit");
+                        }}
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={() => editFileRef.current?.click()} disabled={uploading}>
+                        {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                        Change Image
+                      </Button>
+                      {editData.image && (
+                        <div className="flex items-center gap-2">
+                          <img src={editData.image} alt="Preview" className="w-16 h-12 object-cover rounded border" />
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">{editData.image.split("/").pop()}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <Label>Link (optional)</Label>
