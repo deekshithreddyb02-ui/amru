@@ -388,6 +388,9 @@ const ChatBot = () => {
                       {message.role === "assistant" ? (
                         <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:my-2 [&>h4]:text-sm [&>h4]:my-1">
                           <ReactMarkdown>{message.content}</ReactMarkdown>
+                          {isLoading && index === messages.length - 1 && (
+                            <span className="inline-block w-1.5 h-4 bg-foreground/70 animate-pulse ml-0.5 align-middle rounded-sm" />
+                          )}
                         </div>
                       ) : (
                         message.content
