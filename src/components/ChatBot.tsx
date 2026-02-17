@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, User, Loader2, LogIn, Paperclip, FileText, Image as ImageIcon, Phone, ChevronUp, Bot } from "lucide-react";
 import logoImg from "@/assets/logo-optimized.webp";
@@ -384,7 +385,13 @@ const ChatBot = () => {
                           </a>)}
                       </div>}
                     <div className={`px-4 py-2 rounded-2xl text-sm ${message.role === "user" ? "bg-primary text-primary-foreground rounded-br-md" : "bg-muted text-foreground rounded-bl-md"}`}>
-                      {message.content}
+                      {message.role === "assistant" ? (
+                        <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:my-2 [&>h4]:text-sm [&>h4]:my-1">
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        message.content
+                      )}
                     </div>
                   </div>
                   {message.role === "user" && <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
