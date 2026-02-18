@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote } from "lucide-react";
 import { motion } from "framer-motion";
 
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -20,6 +20,7 @@ import FooterEditor from "@/components/admin/FooterEditor";
 import HeroEditor from "@/components/admin/HeroEditor";
 import AboutEditor from "@/components/admin/AboutEditor";
 import WhyUsEditor from "@/components/admin/WhyUsEditor";
+import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 
 interface User {
   id: string;
@@ -258,6 +259,10 @@ const Admin = () => {
                 <HelpCircle className="w-4 h-4 mr-1" />
                 Why Us
               </TabsTrigger>
+              <TabsTrigger value="testimonials">
+                <MessageSquareQuote className="w-4 h-4 mr-1" />
+                Testimonials
+              </TabsTrigger>
               <TabsTrigger value="services">
                 <Wrench className="w-4 h-4 mr-1" />
                 Services
@@ -354,6 +359,10 @@ const Admin = () => {
 
             <TabsContent value="whyus">
               <WhyUsEditor />
+            </TabsContent>
+
+            <TabsContent value="testimonials">
+              <TestimonialsEditor />
             </TabsContent>
 
             <TabsContent value="services">
