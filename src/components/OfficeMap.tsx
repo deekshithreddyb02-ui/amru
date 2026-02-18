@@ -1,4 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useRef, useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -24,6 +25,32 @@ interface OfficeMapProps {
   height?: string;
 }
 
+const AutoOpenMarker = ({ position, office }: { position: [number, number]; office: Office }) => {
+  const markerRef = useRef<L.Marker>(null);
+
+  useEffect(() => {
+    if (markerRef.current) {
+      markerRef.current.openPopup();
+    }
+  }, []);
+
+  return (
+    <Marker position={position} ref={markerRef}>
+      <Popup>
+        <div className="text-sm">
+          <strong>{office.city}</strong>
+          <p className="mt-1">{office.address}</p>
+          {office.phone && (
+            <p className="mt-1">
+              📞 <a href={`tel:${office.phone.replace(/[^+\d]/g, "")}`}>{office.phone}</a>
+            </p>
+          )}
+        </div>
+      </Popup>
+    </Marker>
+  );
+};
+
 const OfficeMap = ({ office, height = "250px" }: OfficeMapProps) => {
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
@@ -39,19 +66,7 @@ const OfficeMap = ({ office, height = "250px" }: OfficeMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <Marker position={[office.lat, office.lng]}>
-          <Popup>
-            <div className="text-sm">
-              <strong>{office.city}</strong>
-              <p className="mt-1">{office.address}</p>
-              {office.phone && (
-                <p className="mt-1">
-                  📞 <a href={`tel:${office.phone.replace(/[^+\d]/g, "")}`}>{office.phone}</a>
-                </p>
-              )}
-            </div>
-          </Popup>
-        </Marker>
+        <AutoOpenMarker position={[office.lat, office.lng]} office={office} />
       </MapContainer>
     </div>
   );
