@@ -2,7 +2,6 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useRef, useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import logoImg from "@/assets/logo-optimized.webp";
 
 // Fix default marker icon issue with webpack/vite
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -39,7 +38,6 @@ const AutoOpenMarker = ({ position, office }: { position: [number, number]; offi
     <Marker position={position} ref={markerRef}>
       <Popup>
         <div className="text-sm">
-          <img src={logoImg} alt="Amruta Logo" className="h-8 mb-1" />
           <strong>Amruta Integrated Water Solutions Pvt. Ltd.</strong>
           <p className="mt-1">{office.address}</p>
         </div>
