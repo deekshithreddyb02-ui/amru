@@ -38,13 +38,8 @@ const AutoOpenMarker = ({ position, office }: { position: [number, number]; offi
     <Marker position={position} ref={markerRef}>
       <Popup>
         <div className="text-sm">
-          <strong>{office.city}</strong>
+          <strong>Amruta Integrated Water Solutions Pvt. Ltd.</strong>
           <p className="mt-1">{office.address}</p>
-          {office.phone && (
-            <p className="mt-1">
-              📞 <a href={`tel:${office.phone.replace(/[^+\d]/g, "")}`}>{office.phone}</a>
-            </p>
-          )}
         </div>
       </Popup>
     </Marker>
