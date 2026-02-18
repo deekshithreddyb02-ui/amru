@@ -98,8 +98,11 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           <img
             src={image}
             alt={title}
+            width={400}
+            height={300}
             className="w-full h-full object-cover"
             loading="lazy"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
           />
         </div>
         <div className="p-4 flex flex-col flex-1">
