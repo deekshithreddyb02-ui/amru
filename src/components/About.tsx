@@ -40,9 +40,21 @@ const About = () => {
 
             <h2 className="section-heading mb-6 text-center">{title}</h2>
             <div className="space-y-4 text-muted-foreground">
-              {paragraphs.map((paragraph, index) =>
-              <p key={index} dangerouslySetInnerHTML={{ __html: paragraph.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground">$1</strong>') }} className="font-sans text-center" />
-              )}
+              {paragraphs.map((paragraph, index) => {
+                // Safely render bold markdown without dangerouslySetInnerHTML
+                const parts = paragraph.split(/\*\*(.*?)\*\*/g);
+                return (
+                  <p key={index} className="font-sans text-center">
+                    {parts.map((part, i) =>
+                      i % 2 === 1 ? (
+                        <strong key={i} className="text-foreground">{part}</strong>
+                      ) : (
+                        <span key={i}>{part}</span>
+                      )
+                    )}
+                  </p>
+                );
+              })}
             </div>
           </motion.div>
 

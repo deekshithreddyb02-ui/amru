@@ -63,7 +63,8 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error("Missing Supabase configuration");
+      console.error("Missing Supabase configuration");
+      throw new Error("Server configuration error");
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -89,15 +90,17 @@ serve(async (req) => {
 
     // Input validation
     if (!Array.isArray(messages)) {
+      console.error("Validation failed: messages is not an array");
       return new Response(
-        JSON.stringify({ error: "Invalid request: messages must be an array" }),
+        JSON.stringify({ error: "Invalid request format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (messages.length === 0 || messages.length > 50) {
+      console.error("Validation failed: message count out of range:", messages.length);
       return new Response(
-        JSON.stringify({ error: "Invalid request: messages must contain 1-50 items" }),
+        JSON.stringify({ error: "Invalid request format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -114,8 +117,9 @@ serve(async (req) => {
     );
 
     if (!validMessages) {
+      console.error("Validation failed: invalid message format");
       return new Response(
-        JSON.stringify({ error: "Invalid request: messages contain invalid format or excessive length" }),
+        JSON.stringify({ error: "Invalid request format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -123,7 +127,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY is not configured");
+      throw new Error("Server configuration error");
     }
 
     console.log("Processing chat request with", messages.length, "messages for user:", userId);
