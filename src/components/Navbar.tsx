@@ -82,8 +82,9 @@ const Navbar = () => {
               width={48}
               height={48}
               className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full bg-white"
-              fetchPriority="high"
+              fetchPriority="low"
               decoding="async"
+              loading="eager"
             />
             <span className="text-white font-serif text-sm md:text-lg font-semibold leading-tight">
               {companyName}
