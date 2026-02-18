@@ -27,11 +27,14 @@ const Hero = () => {
       className="relative min-h-screen flex items-center justify-center pt-16"
     >
       {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url('${backgroundImage}')`,
-        }}
+      <img
+        src={backgroundImage}
+        alt="Rooftop rainwater harvesting"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 w-full h-full object-cover"
+        fetchPriority="high"
+        decoding="async"
       />
 
       {/* Overlay */}

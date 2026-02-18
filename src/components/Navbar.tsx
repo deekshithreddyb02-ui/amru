@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useSiteContent } from "@/hooks/useSiteContent";
-import defaultLogo from "@/assets/logo-optimized.webp";
+import defaultLogo from "@/assets/logo-small.webp";
 
 interface NavLink {
   name: string;
