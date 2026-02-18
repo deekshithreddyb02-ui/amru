@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
+const DEFAULT_BG = "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
+
 const defaultServices = [
   "EC Consulting Services",
   "Ground Water Survey",
@@ -14,11 +16,11 @@ const defaultServices = [
 ];
 
 const Hero = () => {
-  const { data, loading } = useSiteContent("hero");
+  const { data } = useSiteContent("hero");
 
   const metadata = data?.metadata as { backgroundImage?: string; services?: string[] } | null;
   const title = data?.title || "Integrated Water & Environmental Solutions";
-  const backgroundImage = metadata?.backgroundImage || "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
+  const backgroundImage = metadata?.backgroundImage || DEFAULT_BG;
   const services = metadata?.services || defaultServices;
 
   return (
