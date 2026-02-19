@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale } from "lucide-react";
 import { motion } from "framer-motion";
 
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -21,6 +21,7 @@ import HeroEditor from "@/components/admin/HeroEditor";
 import AboutEditor from "@/components/admin/AboutEditor";
 import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
+import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 
 interface User {
   id: string;
@@ -283,6 +284,10 @@ const Admin = () => {
                 <PanelBottom className="w-4 h-4 mr-1" />
                 Footer
               </TabsTrigger>
+              <TabsTrigger value="legal">
+                <Scale className="w-4 h-4 mr-1" />
+                Legal Notice
+              </TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
 
@@ -383,6 +388,10 @@ const Admin = () => {
 
             <TabsContent value="footer">
               <FooterEditor />
+            </TabsContent>
+
+            <TabsContent value="legal">
+              <LegalNoticeEditor />
             </TabsContent>
 
             <TabsContent value="users">
