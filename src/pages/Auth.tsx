@@ -7,13 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
-import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, User, Phone } from "lucide-react";
 import logo from "@/assets/logo-optimized.webp";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
@@ -40,6 +42,18 @@ const Auth = () => {
   }, [navigate]);
 
   const validateForm = () => {
+    if (!isLogin && !fullName.trim()) {
+      toast({ title: "Error", description: "Please enter your name", variant: "destructive" });
+      return false;
+    }
+    if (!isLogin && !phone.trim()) {
+      toast({ title: "Error", description: "Please enter your phone number", variant: "destructive" });
+      return false;
+    }
+    if (!isLogin && phone.trim().length > 20) {
+      toast({ title: "Error", description: "Phone number is too long", variant: "destructive" });
+      return false;
+    }
     if (!email.trim()) {
       toast({ title: "Error", description: "Please enter your email", variant: "destructive" });
       return false;
@@ -69,7 +83,10 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` }
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: fullName.trim(), phone: phone.trim() },
+          }
         });
         if (error) throw error;
         toast({ title: "Account created!", description: "You have successfully signed up." });
@@ -150,6 +167,34 @@ const Auth = () => {
             ) : (
               <>
                 <form onSubmit={handleAuth} className="space-y-4">
+                  {!isLogin && (
+                    <>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Full Name"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="pl-10"
+                          disabled={loading}
+                          maxLength={100}
+                        />
+                      </div>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type="tel"
+                          placeholder="Phone Number"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="pl-10"
+                          disabled={loading}
+                          maxLength={20}
+                        />
+                      </div>
+                    </>
+                  )}
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
