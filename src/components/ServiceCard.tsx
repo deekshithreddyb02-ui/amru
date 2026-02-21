@@ -14,6 +14,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const LOCATION_OPTIONS = ["Pune", "Mumbai", "Hyderabad", "Bangalore", "Other"];
 
 interface ServiceCardProps {
   title: string;
@@ -31,6 +40,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     phone: "",
     email: "",
     message: "",
+    location: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,13 +75,13 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           email,
           phone,
           service: title,
-          message,
+          message: `${formData.location ? `[Location: ${formData.location}] ` : ''}${message}`,
         });
 
       if (error) throw error;
 
       toast.success("Enquiry submitted successfully! We'll contact you soon.");
-      setFormData({ name: "", phone: "", email: "", message: "" });
+      setFormData({ name: "", phone: "", email: "", message: "", location: "" });
       setOpen(false);
     } catch (error) {
       console.error('Submission error:', error);
@@ -151,6 +161,22 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Your name"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location *</Label>
+              <Select
+                value={formData.location}
+                onValueChange={(value) => setFormData({ ...formData, location: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCATION_OPTIONS.map((loc) => (
+                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
