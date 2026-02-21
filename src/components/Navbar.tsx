@@ -30,9 +30,12 @@ const Navbar = () => {
   const logoSrc = meta?.logo_url || defaultLogo;
   const navLinks = meta?.nav_links || [
     { name: "Home", href: "#home" },
-    { name: "Services", href: "#services" },
     { name: "About Us", href: "#about" },
     { name: "Why Us", href: "#why" },
+    { name: "Testimonials", href: "#testimonials" },
+    { name: "Services", href: "#services" },
+    { name: "Gallery", href: "#gallery" },
+    { name: "Office Maps", href: "#offices" },
     { name: "Contact", href: "#contact" },
   ];
   const externalLink = meta?.external_link || { name: "RWH SW HFL PMS", url: "https://rain.amrutageo.com/" };
