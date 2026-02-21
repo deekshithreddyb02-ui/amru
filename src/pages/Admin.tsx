@@ -9,7 +9,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion } from "framer-motion";
 
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -49,6 +56,7 @@ const Admin = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [userSearch, setUserSearch] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -293,8 +301,25 @@ const Admin = () => {
 
             <TabsContent value="messages">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>Contact Messages</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-muted-foreground" />
+                    <Select value={locationFilter} onValueChange={setLocationFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Locations</SelectItem>
+                        <SelectItem value="Pune">Pune</SelectItem>
+                        <SelectItem value="Mumbai">Mumbai</SelectItem>
+                        <SelectItem value="Hyderabad">Hyderabad</SelectItem>
+                        <SelectItem value="Bangalore">Bangalore</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                        <SelectItem value="none">No Location</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {messages.length === 0 ? (
@@ -307,6 +332,7 @@ const Admin = () => {
                           <TableHead>Name</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Phone</TableHead>
+                          <TableHead>Location</TableHead>
                           <TableHead>Service</TableHead>
                           <TableHead>Message</TableHead>
                           <TableHead>Date</TableHead>
@@ -314,7 +340,19 @@ const Admin = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {messages.map((msg) => (
+                        {messages
+                          .map((msg) => {
+                            const locationMatch = msg.message.match(/^\[Location: (.+?)\] /);
+                            const location = locationMatch ? locationMatch[1] : null;
+                            const cleanMessage = locationMatch ? msg.message.replace(locationMatch[0], '') : msg.message;
+                            return { ...msg, location, cleanMessage };
+                          })
+                          .filter((msg) => {
+                            if (locationFilter === "all") return true;
+                            if (locationFilter === "none") return !msg.location;
+                            return msg.location === locationFilter;
+                          })
+                          .map((msg) => (
                           <TableRow key={msg.id} className={!msg.is_read ? "bg-primary/5" : ""}>
                             <TableCell>
                               <Badge variant={msg.is_read ? "secondary" : "default"}>
@@ -324,8 +362,13 @@ const Admin = () => {
                             <TableCell className="font-medium">{msg.name}</TableCell>
                             <TableCell>{msg.email}</TableCell>
                             <TableCell>{msg.phone || "-"}</TableCell>
+                            <TableCell>
+                              {msg.location ? (
+                                <Badge variant="outline">{msg.location}</Badge>
+                              ) : "-"}
+                            </TableCell>
                             <TableCell>{msg.service || "-"}</TableCell>
-                            <TableCell className="max-w-xs truncate">{msg.message}</TableCell>
+                            <TableCell className="max-w-xs truncate">{msg.cleanMessage}</TableCell>
                             <TableCell>{new Date(msg.created_at).toLocaleDateString()}</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
