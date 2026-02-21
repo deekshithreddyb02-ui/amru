@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -301,22 +301,67 @@ const Admin = () => {
 
             <TabsContent value="messages">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
                   <CardTitle>Contact Messages</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-muted-foreground" />
-                    <Select value={locationFilter} onValueChange={setLocationFilter}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Filter by location" />
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-muted-foreground" />
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Filter by location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Locations</SelectItem>
+                          <SelectItem value="Pune">Pune</SelectItem>
+                          <SelectItem value="Mumbai">Mumbai</SelectItem>
+                          <SelectItem value="Hyderabad">Hyderabad</SelectItem>
+                          <SelectItem value="Bangalore">Bangalore</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="none">No Location</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Select onValueChange={(loc) => {
+                      const parsed = messages.map((msg) => {
+                        const match = msg.message.match(/^\[Location: (.+?)\] /);
+                        return {
+                          ...msg,
+                          location: match ? match[1] : null,
+                          cleanMessage: match ? msg.message.replace(match[0], '') : msg.message,
+                        };
+                      });
+                      const filtered = loc === "none"
+                        ? parsed.filter(m => !m.location)
+                        : parsed.filter(m => m.location === loc);
+                      if (filtered.length === 0) {
+                        toast({ title: "No data", description: `No messages found for ${loc}` });
+                        return;
+                      }
+                      const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
+                      const rows = filtered.map(m =>
+                        [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', `"${m.cleanMessage.replace(/"/g, '""')}"`, new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')
+                      ).join('\n');
+                      const blob = new Blob([header + rows], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `messages-${loc.toLowerCase()}.csv`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}>
+                      <SelectTrigger className="w-[200px]">
+                        <div className="flex items-center gap-2">
+                          <Download className="w-4 h-4" />
+                          <span>Download by Location</span>
+                        </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                        <SelectItem value="Pune">Pune</SelectItem>
-                        <SelectItem value="Mumbai">Mumbai</SelectItem>
-                        <SelectItem value="Hyderabad">Hyderabad</SelectItem>
-                        <SelectItem value="Bangalore">Bangalore</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                        <SelectItem value="none">No Location</SelectItem>
+                        <SelectItem value="Pune">Pune Messages</SelectItem>
+                        <SelectItem value="Mumbai">Mumbai Messages</SelectItem>
+                        <SelectItem value="Hyderabad">Hyderabad Messages</SelectItem>
+                        <SelectItem value="Bangalore">Bangalore Messages</SelectItem>
+                        <SelectItem value="Other">Other Messages</SelectItem>
+                        <SelectItem value="none">No Location Messages</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
