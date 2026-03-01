@@ -26,13 +26,21 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (session?.user) {
+        if (event === 'TOKEN_REFRESHED' && session?.user) {
+          navigate("/");
+        } else if (event === 'SIGNED_IN' && session?.user) {
           navigate("/");
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        // Clear stale session if refresh fails
+        console.warn("Session expired, clearing stale session");
+        supabase.auth.signOut();
+        return;
+      }
       if (session?.user) {
         navigate("/");
       }
