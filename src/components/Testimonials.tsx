@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import testimonialsBg from "@/assets/testimonials-bg.jpg";
@@ -19,8 +19,26 @@ const fallbackTestimonials = [
   },
 ];
 
+const swipeThreshold = 50;
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -300 : 300,
+    opacity: 0,
+  }),
+};
+
 const Testimonials = () => {
   const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [testimonials, setTestimonials] = useState(fallbackTestimonials);
 
   useEffect(() => {
@@ -38,14 +56,33 @@ const Testimonials = () => {
     fetchTestimonials();
   }, []);
 
+  const goTo = useCallback((index: number) => {
+    setDirection(index > current ? 1 : -1);
+    setCurrent(index);
+  }, [current]);
+
   const next = useCallback(() => {
+    setDirection(1);
     setCurrent((prev) => (prev + 1) % testimonials.length);
+  }, [testimonials.length]);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   }, [testimonials.length]);
 
   useEffect(() => {
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [next]);
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (info.offset.x < -swipeThreshold) {
+      next();
+    } else if (info.offset.x > swipeThreshold) {
+      prev();
+    }
+  };
 
   if (testimonials.length === 0) return null;
 
@@ -60,15 +97,23 @@ const Testimonials = () => {
           Testimonials
         </h2>
 
-        <div className="relative min-h-[260px] md:min-h-[220px] flex items-center justify-center">
-          <AnimatePresence mode="wait">
+        <div
+          className="relative min-h-[260px] md:min-h-[220px] flex items-center justify-center touch-pan-y"
+        >
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-3xl mx-auto"
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={handleDragEnd}
+              className="max-w-3xl mx-auto cursor-grab active:cursor-grabbing"
             >
               <p className="text-white/90 text-base md:text-lg leading-relaxed mb-6 italic line-clamp-[8]">
                 {testimonials[current].text}
@@ -83,14 +128,22 @@ const Testimonials = () => {
           </AnimatePresence>
         </div>
 
-        <div className="flex justify-center gap-2 mt-8">
+        <div className="flex justify-center gap-2.5 mt-8">
           {testimonials.map((_, i) => (
             <button
               key={i}
-              onClick={() => setCurrent(i)}
-              className={`w-3 h-3 rounded-full transition-colors ${i === current ? "bg-white" : "bg-white/40"}`}
+              onClick={() => goTo(i)}
+              className="group p-1"
               aria-label={`Go to testimonial ${i + 1}`}
-            />
+            >
+              <span
+                className={`block rounded-full transition-all duration-300 ${
+                  i === current
+                    ? "w-8 h-3 bg-white"
+                    : "w-3 h-3 bg-white/40 group-hover:bg-white/60"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>
