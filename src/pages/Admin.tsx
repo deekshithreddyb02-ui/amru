@@ -29,6 +29,7 @@ import AboutEditor from "@/components/admin/AboutEditor";
 import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
+import Navbar from "@/components/Navbar";
 
 interface User {
   id: string;
@@ -190,15 +191,10 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
       <header className="bg-primary text-primary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
-              <Home className="w-4 h-4 mr-2" />
-              Home
-            </Button>
-            <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
-          </div>
+          <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
           <Button variant="secondary" size="sm" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
             Logout
