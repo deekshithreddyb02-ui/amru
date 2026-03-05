@@ -178,6 +178,22 @@ const Admin = () => {
     }
   };
 
+  const deleteUser = async (userId: string, email: string) => {
+    if (!confirm(`Are you sure you want to delete user "${email}"? This cannot be undone.`)) return;
+    try {
+      const { error } = await supabase.rpc('admin_delete_user', {
+        _target_user_id: userId,
+      });
+
+      if (error) throw error;
+      
+      setUsers(users.filter(u => u.id !== userId));
+      toast({ title: "Success", description: "User deleted" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
   if (adminLoading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
