@@ -545,23 +545,32 @@ const Admin = () => {
                             </TableCell>
                             <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                             <TableCell>
-                              {user.role === 'admin' ? (
+                              <div className="flex gap-2">
+                                {user.role === 'admin' ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeAdmin(user.id)}
+                                  >
+                                    Remove Admin
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => makeAdmin(user.id)}
+                                  >
+                                    Make Admin
+                                  </Button>
+                                )}
                                 <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => removeAdmin(user.id)}
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => deleteUser(user.id, user.email)}
                                 >
-                                  Remove Admin
+                                  <Trash2 className="w-4 h-4 text-destructive" />
                                 </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => makeAdmin(user.id)}
-                                >
-                                  Make Admin
-                                </Button>
-                              )}
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
