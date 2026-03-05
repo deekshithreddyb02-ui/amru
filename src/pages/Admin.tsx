@@ -264,6 +264,7 @@ const Admin = () => {
                 </TabsTrigger>
               </TabsList>
 
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider self-center">Modify</span>
               <TabsList className="flex-wrap h-auto">
               <TabsTrigger value="hero">
                 <Sparkles className="w-4 h-4 mr-1" />
