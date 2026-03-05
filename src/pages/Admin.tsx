@@ -251,11 +251,16 @@ const Admin = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="messages">
-            <TabsList className="mb-4">
-              <TabsTrigger value="messages">
-                Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
-              </TabsTrigger>
+          <Tabs defaultValue="hero">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <TabsList className="h-auto">
+                <TabsTrigger value="messages" className="gap-1.5">
+                  <Mail className="w-4 h-4" />
+                  Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsList className="flex-wrap h-auto">
               <TabsTrigger value="hero">
                 <Sparkles className="w-4 h-4 mr-1" />
                 Hero
