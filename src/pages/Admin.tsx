@@ -258,6 +258,10 @@ const Admin = () => {
                   <Mail className="w-4 h-4" />
                   Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
                 </TabsTrigger>
+                <TabsTrigger value="users" className="gap-1.5">
+                  <Users className="w-4 h-4" />
+                  Users
+                </TabsTrigger>
               </TabsList>
 
               <TabsList className="flex-wrap h-auto">
