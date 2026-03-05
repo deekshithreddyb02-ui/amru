@@ -178,22 +178,6 @@ const Admin = () => {
     }
   };
 
-  const deleteUser = async (userId: string, email: string) => {
-    if (!confirm(`Are you sure you want to delete user "${email}"? This cannot be undone.`)) return;
-    try {
-      const { error } = await supabase.rpc('admin_delete_user', {
-        _target_user_id: userId,
-      });
-
-      if (error) throw error;
-      
-      setUsers(users.filter(u => u.id !== userId));
-      toast({ title: "Success", description: "User deleted" });
-    } catch (error: any) {
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
-    }
-  };
-
   if (adminLoading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -545,32 +529,23 @@ const Admin = () => {
                             </TableCell>
                             <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                             <TableCell>
-                              <div className="flex gap-2">
-                                {user.role === 'admin' ? (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => removeAdmin(user.id)}
-                                  >
-                                    Remove Admin
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => makeAdmin(user.id)}
-                                  >
-                                    Make Admin
-                                  </Button>
-                                )}
+                              {user.role === 'admin' ? (
                                 <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => deleteUser(user.id, user.email)}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => removeAdmin(user.id)}
                                 >
-                                  <Trash2 className="w-4 h-4 text-destructive" />
+                                  Remove Admin
                                 </Button>
-                              </div>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => makeAdmin(user.id)}
+                                >
+                                  Make Admin
+                                </Button>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
