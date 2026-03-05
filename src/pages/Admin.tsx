@@ -302,7 +302,8 @@ const Admin = () => {
                 Legal Notice
               </TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
 
             <TabsContent value="messages">
               <Card>
