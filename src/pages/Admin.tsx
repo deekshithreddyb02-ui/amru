@@ -557,9 +557,9 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
         </motion.div>
       </main>
+      </Tabs>
     </div>
   );
 };
