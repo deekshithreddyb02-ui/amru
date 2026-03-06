@@ -35,6 +35,10 @@ interface User {
   email: string;
   created_at: string;
   role: string;
+  full_name: string;
+  phone: string;
+  last_sign_in_at: string | null;
+  is_banned: boolean;
 }
 
 interface Message {
