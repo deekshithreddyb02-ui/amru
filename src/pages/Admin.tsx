@@ -427,44 +427,48 @@ const Admin = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="hero">
-              <HeroEditor />
-            </TabsContent>
-
-            <TabsContent value="about">
-              <AboutEditor />
-            </TabsContent>
-
-            <TabsContent value="whyus">
-              <WhyUsEditor />
-            </TabsContent>
-
-            <TabsContent value="testimonials">
-              <TestimonialsEditor />
-            </TabsContent>
-
-            <TabsContent value="services">
-              <ServiceEditor />
-            </TabsContent>
-
-            <TabsContent value="gallery">
-              <GalleryEditor />
-            </TabsContent>
-
-            <TabsContent value="navbar">
-              <NavbarEditor />
-            </TabsContent>
-
-            <TabsContent value="offices">
-              <OfficeEditor />
-            </TabsContent>
-
-            <TabsContent value="footer">
-              <FooterEditor />
-            </TabsContent>
-
-            <TabsContent value="legal">
-              <LegalNoticeEditor />
+            <TabsContent value="modify">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: "hero", label: "Hero", icon: Sparkles },
+                      { key: "about", label: "About Us", icon: Info },
+                      { key: "whyus", label: "Why Us", icon: HelpCircle },
+                      { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
+                      { key: "services", label: "Services", icon: Wrench },
+                      { key: "gallery", label: "Gallery", icon: Image },
+                      { key: "navbar", label: "Navbar", icon: Navigation },
+                      { key: "offices", label: "Office Maps", icon: MapPin },
+                      { key: "footer", label: "Footer", icon: PanelBottom },
+                      { key: "legal", label: "Legal Notice", icon: Scale },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <Button
+                        key={key}
+                        variant={modifySection === key ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setModifySection(key)}
+                        className="gap-1.5"
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {modifySection === "hero" && <HeroEditor />}
+                  {modifySection === "about" && <AboutEditor />}
+                  {modifySection === "whyus" && <WhyUsEditor />}
+                  {modifySection === "testimonials" && <TestimonialsEditor />}
+                  {modifySection === "services" && <ServiceEditor />}
+                  {modifySection === "gallery" && <GalleryEditor />}
+                  {modifySection === "navbar" && <NavbarEditor />}
+                  {modifySection === "offices" && <OfficeEditor />}
+                  {modifySection === "footer" && <FooterEditor />}
+                  {modifySection === "legal" && <LegalNoticeEditor />}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="users">
