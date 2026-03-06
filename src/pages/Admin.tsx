@@ -205,21 +205,38 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
-              <Home className="w-4 h-4 mr-2" />
-              Home
-            </Button>
-            <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
+      <Tabs defaultValue="messages">
+        <header className="bg-primary text-primary-foreground shadow-lg">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
+              <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <TabsList className="h-auto bg-primary-foreground/10">
+                <TabsTrigger value="messages" className="gap-1.5 text-primary-foreground data-[state=active]:bg-primary-foreground data-[state=active]:text-primary">
+                  <Mail className="w-4 h-4" />
+                  Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-1.5 text-primary-foreground data-[state=active]:bg-primary-foreground data-[state=active]:text-primary">
+                  <Users className="w-4 h-4" />
+                  Users
+                </TabsTrigger>
+                <TabsTrigger value="modify" className="gap-1.5 text-primary-foreground data-[state=active]:bg-primary-foreground data-[state=active]:text-primary">
+                  <Settings className="w-4 h-4" />
+                  Modify
+                </TabsTrigger>
+              </TabsList>
+              <Button variant="secondary" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
-          <Button variant="secondary" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
-        </div>
-      </header>
+        </header>
 
       <main className="container mx-auto px-4 py-8">
         <motion.div
@@ -264,25 +281,6 @@ const Admin = () => {
               </CardContent>
             </Card>
           </div>
-
-          {/* Tabs */}
-          <Tabs defaultValue="messages">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <TabsList className="h-auto">
-                <TabsTrigger value="messages" className="gap-1.5">
-                  <Mail className="w-4 h-4" />
-                  Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
-                </TabsTrigger>
-                <TabsTrigger value="users" className="gap-1.5">
-                  <Users className="w-4 h-4" />
-                  Users
-                </TabsTrigger>
-                <TabsTrigger value="modify" className="gap-1.5">
-                  <Settings className="w-4 h-4" />
-                  Modify
-                </TabsTrigger>
-              </TabsList>
-            </div>
 
             <TabsContent value="messages">
               <Card>
@@ -559,9 +557,9 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
         </motion.div>
       </main>
+      </Tabs>
     </div>
   );
 };
