@@ -266,66 +266,22 @@ const Admin = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="hero">
-            <div className="flex flex-col gap-3 mb-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <TabsList className="h-auto">
-                  <TabsTrigger value="messages" className="gap-1.5">
-                    <Mail className="w-4 h-4" />
-                    Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
-                  </TabsTrigger>
-                  <TabsTrigger value="users" className="gap-1.5">
-                    <Users className="w-4 h-4" />
-                    Users
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Modify</span>
-                <TabsList className="flex-wrap h-auto w-fit">
-                  <TabsTrigger value="hero">
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    Hero
-                  </TabsTrigger>
-                  <TabsTrigger value="about">
-                    <Info className="w-4 h-4 mr-1" />
-                    About Us
-                  </TabsTrigger>
-                  <TabsTrigger value="whyus">
-                    <HelpCircle className="w-4 h-4 mr-1" />
-                    Why Us
-                  </TabsTrigger>
-                  <TabsTrigger value="testimonials">
-                    <MessageSquareQuote className="w-4 h-4 mr-1" />
-                    Testimonials
-                  </TabsTrigger>
-                  <TabsTrigger value="services">
-                    <Wrench className="w-4 h-4 mr-1" />
-                    Services
-                  </TabsTrigger>
-                  <TabsTrigger value="gallery">
-                    <Image className="w-4 h-4 mr-1" />
-                    Gallery
-                  </TabsTrigger>
-                  <TabsTrigger value="navbar">
-                    <Navigation className="w-4 h-4 mr-1" />
-                    Navbar
-                  </TabsTrigger>
-                  <TabsTrigger value="offices">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    Office Maps
-                  </TabsTrigger>
-                  <TabsTrigger value="footer">
-                    <PanelBottom className="w-4 h-4 mr-1" />
-                    Footer
-                  </TabsTrigger>
-                  <TabsTrigger value="legal">
-                    <Scale className="w-4 h-4 mr-1" />
-                    Legal Notice
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+          <Tabs defaultValue="messages">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <TabsList className="h-auto">
+                <TabsTrigger value="messages" className="gap-1.5">
+                  <Mail className="w-4 h-4" />
+                  Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-1.5">
+                  <Users className="w-4 h-4" />
+                  Users
+                </TabsTrigger>
+                <TabsTrigger value="modify" className="gap-1.5">
+                  <Settings className="w-4 h-4" />
+                  Modify
+                </TabsTrigger>
+              </TabsList>
             </div>
 
             <TabsContent value="messages">
