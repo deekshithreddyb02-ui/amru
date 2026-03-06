@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -61,6 +61,7 @@ const Admin = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [userSearch, setUserSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
+  const [modifySection, setModifySection] = useState("hero");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -265,66 +266,22 @@ const Admin = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="hero">
-            <div className="flex flex-col gap-3 mb-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <TabsList className="h-auto">
-                  <TabsTrigger value="messages" className="gap-1.5">
-                    <Mail className="w-4 h-4" />
-                    Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
-                  </TabsTrigger>
-                  <TabsTrigger value="users" className="gap-1.5">
-                    <Users className="w-4 h-4" />
-                    Users
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Modify</span>
-                <TabsList className="flex-wrap h-auto w-fit">
-                  <TabsTrigger value="hero">
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    Hero
-                  </TabsTrigger>
-                  <TabsTrigger value="about">
-                    <Info className="w-4 h-4 mr-1" />
-                    About Us
-                  </TabsTrigger>
-                  <TabsTrigger value="whyus">
-                    <HelpCircle className="w-4 h-4 mr-1" />
-                    Why Us
-                  </TabsTrigger>
-                  <TabsTrigger value="testimonials">
-                    <MessageSquareQuote className="w-4 h-4 mr-1" />
-                    Testimonials
-                  </TabsTrigger>
-                  <TabsTrigger value="services">
-                    <Wrench className="w-4 h-4 mr-1" />
-                    Services
-                  </TabsTrigger>
-                  <TabsTrigger value="gallery">
-                    <Image className="w-4 h-4 mr-1" />
-                    Gallery
-                  </TabsTrigger>
-                  <TabsTrigger value="navbar">
-                    <Navigation className="w-4 h-4 mr-1" />
-                    Navbar
-                  </TabsTrigger>
-                  <TabsTrigger value="offices">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    Office Maps
-                  </TabsTrigger>
-                  <TabsTrigger value="footer">
-                    <PanelBottom className="w-4 h-4 mr-1" />
-                    Footer
-                  </TabsTrigger>
-                  <TabsTrigger value="legal">
-                    <Scale className="w-4 h-4 mr-1" />
-                    Legal Notice
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+          <Tabs defaultValue="messages">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <TabsList className="h-auto">
+                <TabsTrigger value="messages" className="gap-1.5">
+                  <Mail className="w-4 h-4" />
+                  Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+                </TabsTrigger>
+                <TabsTrigger value="users" className="gap-1.5">
+                  <Users className="w-4 h-4" />
+                  Users
+                </TabsTrigger>
+                <TabsTrigger value="modify" className="gap-1.5">
+                  <Settings className="w-4 h-4" />
+                  Modify
+                </TabsTrigger>
+              </TabsList>
             </div>
 
             <TabsContent value="messages">
@@ -470,44 +427,48 @@ const Admin = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="hero">
-              <HeroEditor />
-            </TabsContent>
-
-            <TabsContent value="about">
-              <AboutEditor />
-            </TabsContent>
-
-            <TabsContent value="whyus">
-              <WhyUsEditor />
-            </TabsContent>
-
-            <TabsContent value="testimonials">
-              <TestimonialsEditor />
-            </TabsContent>
-
-            <TabsContent value="services">
-              <ServiceEditor />
-            </TabsContent>
-
-            <TabsContent value="gallery">
-              <GalleryEditor />
-            </TabsContent>
-
-            <TabsContent value="navbar">
-              <NavbarEditor />
-            </TabsContent>
-
-            <TabsContent value="offices">
-              <OfficeEditor />
-            </TabsContent>
-
-            <TabsContent value="footer">
-              <FooterEditor />
-            </TabsContent>
-
-            <TabsContent value="legal">
-              <LegalNoticeEditor />
+            <TabsContent value="modify">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: "hero", label: "Hero", icon: Sparkles },
+                      { key: "about", label: "About Us", icon: Info },
+                      { key: "whyus", label: "Why Us", icon: HelpCircle },
+                      { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
+                      { key: "services", label: "Services", icon: Wrench },
+                      { key: "gallery", label: "Gallery", icon: Image },
+                      { key: "navbar", label: "Navbar", icon: Navigation },
+                      { key: "offices", label: "Office Maps", icon: MapPin },
+                      { key: "footer", label: "Footer", icon: PanelBottom },
+                      { key: "legal", label: "Legal Notice", icon: Scale },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <Button
+                        key={key}
+                        variant={modifySection === key ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setModifySection(key)}
+                        className="gap-1.5"
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {modifySection === "hero" && <HeroEditor />}
+                  {modifySection === "about" && <AboutEditor />}
+                  {modifySection === "whyus" && <WhyUsEditor />}
+                  {modifySection === "testimonials" && <TestimonialsEditor />}
+                  {modifySection === "services" && <ServiceEditor />}
+                  {modifySection === "gallery" && <GalleryEditor />}
+                  {modifySection === "navbar" && <NavbarEditor />}
+                  {modifySection === "offices" && <OfficeEditor />}
+                  {modifySection === "footer" && <FooterEditor />}
+                  {modifySection === "legal" && <LegalNoticeEditor />}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="users">
