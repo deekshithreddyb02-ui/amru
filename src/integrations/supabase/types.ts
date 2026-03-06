@@ -419,6 +419,8 @@ export type Database = {
         Returns: {
           created_at: string
           email: string
+          is_banned: boolean
+          last_sign_in_at: string
           user_id: string
         }[]
       }
