@@ -533,8 +533,11 @@ const Admin = () => {
                       <TableHeader>
                          <TableRow>
                           <TableHead>User ID</TableHead>
+                          <TableHead>Name</TableHead>
                           <TableHead>Email</TableHead>
-                          <TableHead>Role</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Last Login</TableHead>
+                          <TableHead>Status</TableHead>
                           <TableHead>Joined</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
@@ -544,16 +547,28 @@ const Admin = () => {
                           .filter(u => {
                             if (!userSearch) return true;
                             const q = userSearch.toLowerCase();
-                            return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.role.toLowerCase().includes(q);
+                            return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.role.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q);
                           })
                           .map((user) => (
                           <TableRow key={user.id}>
                             <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
+                            <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
                             <TableCell className="text-sm">{user.email}</TableCell>
+                            <TableCell className="text-sm">{user.phone || "-"}</TableCell>
+                            <TableCell className="text-sm">
+                              {user.last_sign_in_at
+                                ? new Date(user.last_sign_in_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+                                : "Never"}
+                            </TableCell>
                             <TableCell>
-                              <Badge variant={user.role === 'admin' ? "default" : "secondary"}>
-                                {user.role}
-                              </Badge>
+                              <div className="flex flex-col gap-1">
+                                <Badge variant={user.role === 'admin' ? "default" : "secondary"}>
+                                  {user.role}
+                                </Badge>
+                                {user.is_banned && (
+                                  <Badge variant="destructive" className="text-xs">Banned</Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                             <TableCell>
