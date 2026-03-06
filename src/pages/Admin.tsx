@@ -77,24 +77,34 @@ const Admin = () => {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [rolesRes, usersRes, messagesRes] = await Promise.all([
+      const [rolesRes, usersRes, messagesRes, profilesRes] = await Promise.all([
         supabase.from('user_roles').select('user_id, role, created_at'),
         supabase.rpc('get_users_with_emails'),
         supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('user_id, full_name, phone'),
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
 
-      const emailMap = new Map<string, { email: string; created_at: string }>();
+      const emailMap = new Map<string, { email: string; created_at: string; last_sign_in_at: string | null; is_banned: boolean }>();
       if (!usersRes.error && usersRes.data) {
-        usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at }));
+        usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
+      }
+
+      const profileMap = new Map<string, { full_name: string; phone: string }>();
+      if (!profilesRes.error && profilesRes.data) {
+        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '' }));
       }
 
       const usersWithRoles = rolesRes.data?.map(r => ({
         id: r.user_id,
         email: emailMap.get(r.user_id)?.email || r.user_id,
         created_at: emailMap.get(r.user_id)?.created_at || r.created_at,
-        role: r.role
+        role: r.role,
+        full_name: profileMap.get(r.user_id)?.full_name || '',
+        phone: profileMap.get(r.user_id)?.phone || '',
+        last_sign_in_at: emailMap.get(r.user_id)?.last_sign_in_at || null,
+        is_banned: emailMap.get(r.user_id)?.is_banned || false,
       })) || [];
 
       setUsers(usersWithRoles);
