@@ -230,10 +230,6 @@ const Admin = () => {
                   Modify
                 </TabsTrigger>
               </TabsList>
-              <Button variant="secondary" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
             </div>
           </div>
         </header>
