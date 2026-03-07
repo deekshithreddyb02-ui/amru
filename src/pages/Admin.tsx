@@ -62,6 +62,7 @@ const Admin = () => {
   const [userSearch, setUserSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [modifySection, setModifySection] = useState("hero");
+  const [userTab, setUserTab] = useState("active");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
