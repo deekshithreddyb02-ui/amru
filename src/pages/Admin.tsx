@@ -215,22 +215,6 @@ const Admin = () => {
               </Button>
               <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
             </div>
-            <div className="flex items-center gap-3">
-              <TabsList className="h-auto bg-primary-foreground/10">
-                <TabsTrigger value="messages" className="gap-1.5 text-primary-foreground data-[state=active]:bg-primary-foreground data-[state=active]:text-primary">
-                  <Mail className="w-4 h-4" />
-                  Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
-                </TabsTrigger>
-                <TabsTrigger value="users" className="gap-1.5 text-primary-foreground data-[state=active]:bg-primary-foreground data-[state=active]:text-primary">
-                  <Users className="w-4 h-4" />
-                  Users
-                </TabsTrigger>
-                <TabsTrigger value="modify" className="gap-1.5 text-primary-foreground data-[state=active]:bg-primary-foreground data-[state=active]:text-primary">
-                  <Settings className="w-4 h-4" />
-                  Modify
-                </TabsTrigger>
-              </TabsList>
-            </div>
           </div>
         </header>
 
@@ -240,6 +224,22 @@ const Admin = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          <div className="mb-8">
+            <TabsList className="w-full h-auto p-1.5 bg-primary/5 border border-primary/10 rounded-xl flex justify-center gap-1">
+              <TabsTrigger value="messages" className="flex-1 gap-2 py-3 px-6 rounded-lg text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <Mail className="w-4 h-4" />
+                Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="users" className="flex-1 gap-2 py-3 px-6 rounded-lg text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <Users className="w-4 h-4" />
+                User Management
+              </TabsTrigger>
+              <TabsTrigger value="modify" className="flex-1 gap-2 py-3 px-6 rounded-lg text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <Settings className="w-4 h-4" />
+                System Settings
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
             <TabsContent value="messages">
               <Card>
