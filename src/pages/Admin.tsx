@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -62,6 +62,7 @@ const Admin = () => {
   const [userSearch, setUserSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [modifySection, setModifySection] = useState("hero");
+  const [userTab, setUserTab] = useState("active");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -430,17 +431,56 @@ const Admin = () => {
 
             <TabsContent value="users">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>User Management</CardTitle>
-                   <div className="relative w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Search by name, email or ID..."
-                      value={userSearch}
-                      onChange={e => setUserSearch(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
+                <CardHeader className="space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Users className="w-6 h-6 text-primary" />
+                        <CardTitle className="text-xl">Users Management</CardTitle>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Comprehensive user management with advanced analytics and control features</p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      Refresh Database
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex-1 max-w-md">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Search users by name, email, phone..."
+                        value={userSearch}
+                        onChange={e => setUserSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div className="flex items-center gap-4 text-sm font-medium">
+                      <span className="text-foreground">{users.filter(u => !u.is_banned).length} active users</span>
+                      <span className="text-muted-foreground">{users.filter(u => u.is_banned).length} inactive users</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
+                    {[
+                      { key: "active", label: "Active", icon: UserCheck, count: users.filter(u => !u.is_banned).length },
+                      { key: "inactive", label: "Inactive", icon: UserX, count: users.filter(u => u.is_banned).length },
+                      { key: "all", label: "All Users", icon: Users, count: users.length },
+                      { key: "admins", label: "Admins", icon: ShieldCheck, count: users.filter(u => u.role === 'admin').length },
+                    ].map(({ key, label, icon: Icon, count }) => (
+                      <Button
+                        key={key}
+                        variant={userTab === key ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setUserTab(key)}
+                        className={`flex-1 gap-2 py-2.5 rounded-lg transition-all ${userTab === key ? "shadow-md" : "text-muted-foreground"}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label} ({count})
+                      </Button>
+                    ))}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -463,9 +503,15 @@ const Admin = () => {
                       <TableBody>
                         {users
                           .filter(u => {
+                            if (userTab === "active") return !u.is_banned;
+                            if (userTab === "inactive") return u.is_banned;
+                            if (userTab === "admins") return u.role === "admin";
+                            return true;
+                          })
+                          .filter(u => {
                             if (!userSearch) return true;
                             const q = userSearch.toLowerCase();
-                            return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.role.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q);
+                            return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q) || u.phone.toLowerCase().includes(q);
                           })
                           .map((user) => (
                           <TableRow key={user.id}>
