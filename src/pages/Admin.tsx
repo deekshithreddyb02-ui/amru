@@ -736,7 +736,7 @@ const Admin = () => {
                                     <div className="flex flex-col gap-1">
                                       <Badge variant={user.role === 'admin' ? "default" : "secondary"}>{user.role}</Badge>
                                       {user.is_banned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
-                                      {!user.is_approved && <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Pending</Badge>}
+                                      {!user.is_approved && <Badge variant="outline" className="text-xs text-warning border-warning/30">Pending</Badge>}
                                     </div>
                                   </TableCell>
                                   <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
