@@ -406,7 +406,7 @@ const Admin = () => {
                     const filtered = loc === "none" ? parsed.filter(m => !m.location) : parsed.filter(m => m.location === loc);
                     if (filtered.length === 0) { toast({ title: "No data", description: `No messages found for ${loc}` }); return; }
                     const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
-                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', `"${m.cleanMessage.replace(/"/g, '""')}"`, new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
+                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', '"' + m.cleanMessage.replace(/"/g, '""') + '"', new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
                     const blob = new Blob([header + rows], { type: 'text/csv' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a'); a.href = url; a.download = `messages-${loc.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url);
