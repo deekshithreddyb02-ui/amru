@@ -800,6 +800,7 @@ const Admin = () => {
                                       else if (action === "remove_admin") removeAdmin(user.id);
                                       else if (action === "activate") approveUser(user.id);
                                       else if (action === "deactivate") rejectUser(user.id);
+                                      else if (action === "reset_password") resetUserPassword(user.id);
                                       else if (action === "delete") deleteUser(user.id);
                                     }}>
                                       <SelectTrigger className="w-[160px] h-8 text-xs">
