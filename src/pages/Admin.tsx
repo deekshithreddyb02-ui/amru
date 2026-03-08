@@ -749,8 +749,24 @@ const Admin = () => {
                                 <TableRow key={user.id}>
                                   <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
                                   <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
-                                  <TableCell className="text-sm">{user.email}</TableCell>
-                                  <TableCell className="text-sm">{user.phone || "-"}</TableCell>
+                                  <TableCell className="text-sm">
+                                    <span className="inline-flex items-center gap-1">
+                                      {isRevealed(user.id, "email") ? user.email : maskEmail(user.email)}
+                                      <button onClick={() => toggleReveal(user.id, "email")} className="text-muted-foreground hover:text-foreground">
+                                        {isRevealed(user.id, "email") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                      </button>
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    <span className="inline-flex items-center gap-1">
+                                      {isRevealed(user.id, "phone") ? (user.phone || "-") : maskPhone(user.phone || "-")}
+                                      {user.phone && (
+                                        <button onClick={() => toggleReveal(user.id, "phone")} className="text-muted-foreground hover:text-foreground">
+                                          {isRevealed(user.id, "phone") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        </button>
+                                      )}
+                                    </span>
+                                  </TableCell>
                                   <TableCell className="text-sm">
                                     {user.last_sign_in_at
                                       ? new Date(user.last_sign_in_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
