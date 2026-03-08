@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,14 @@ import {
 } from "@/components/ui/select";
 
 const LOCATION_OPTIONS = ["Pune", "Mumbai", "Hyderabad", "Bangalore", "Other"];
+
+const matchCityToOption = (city: string): string => {
+  const lower = city.toLowerCase();
+  for (const opt of LOCATION_OPTIONS) {
+    if (lower.includes(opt.toLowerCase())) return opt;
+  }
+  return "Other";
+};
 
 interface ServiceCardProps {
   title: string;
@@ -35,6 +43,8 @@ interface ServiceCardProps {
 const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [detectedCity, setDetectedCity] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -42,6 +52,39 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     message: "",
     location: "",
   });
+
+  const detectLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
+          );
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.county || data.address?.state || "";
+          const matched = matchCityToOption(city);
+          setFormData((prev) => ({ ...prev, location: matched }));
+          setDetectedCity(city);
+          toast.success(`Location detected: ${city}`);
+        } catch {
+          toast.error("Could not detect location. Please select manually.");
+        } finally {
+          setDetectingLocation(false);
+        }
+      },
+      () => {
+        toast.error("Location access denied. Please select manually.");
+        setDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
