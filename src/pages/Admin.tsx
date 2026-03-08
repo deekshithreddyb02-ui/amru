@@ -237,7 +237,7 @@ const Admin = () => {
 
   const approveUser = async (userId: string) => {
     try {
-      const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('user_id', userId);
+      const { error } = await (supabase as any).from('profiles').update({ is_approved: true }).eq('user_id', userId);
       if (error) throw error;
       setUsers(users.map(u => u.id === userId ? { ...u, is_approved: true } : u));
       toast({ title: "Success", description: "User approved" });
