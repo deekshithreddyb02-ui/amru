@@ -458,15 +458,31 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="modify">
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex flex-wrap gap-2">
+              <div className="space-y-6">
+                {/* Two-row grid tabs like reference */}
+                <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
+                  <div className="grid grid-cols-5 gap-1 mb-1">
                     {[
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About Us", icon: Info },
                       { key: "whyus", label: "Why Us", icon: HelpCircle },
                       { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
                       { key: "services", label: "Services", icon: Wrench },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <Button
+                        key={key}
+                        variant={modifySection === key ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setModifySection(key)}
+                        className={`rounded-lg gap-1.5 justify-center ${modifySection === key ? "shadow-md" : ""}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
                       { key: "offices", label: "Office Maps", icon: MapPin },
@@ -475,30 +491,33 @@ const Admin = () => {
                     ].map(({ key, label, icon: Icon }) => (
                       <Button
                         key={key}
-                        variant={modifySection === key ? "default" : "outline"}
+                        variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className="gap-1.5"
+                        className={`rounded-lg gap-1.5 justify-center ${modifySection === key ? "shadow-md" : ""}`}
                       >
                         <Icon className="w-4 h-4" />
                         {label}
                       </Button>
                     ))}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {modifySection === "hero" && <HeroEditor />}
-                  {modifySection === "about" && <AboutEditor />}
-                  {modifySection === "whyus" && <WhyUsEditor />}
-                  {modifySection === "testimonials" && <TestimonialsEditor />}
-                  {modifySection === "services" && <ServiceEditor />}
-                  {modifySection === "gallery" && <GalleryEditor />}
-                  {modifySection === "navbar" && <NavbarEditor />}
-                  {modifySection === "offices" && <OfficeEditor />}
-                  {modifySection === "footer" && <FooterEditor />}
-                  {modifySection === "legal" && <LegalNoticeEditor />}
-                </CardContent>
-              </Card>
+                </div>
+
+                <Card>
+                  <CardContent className="pt-6">
+                    {modifySection === "hero" && <HeroEditor />}
+                    {modifySection === "about" && <AboutEditor />}
+                    {modifySection === "whyus" && <WhyUsEditor />}
+                    {modifySection === "testimonials" && <TestimonialsEditor />}
+                    {modifySection === "services" && <ServiceEditor />}
+                    {modifySection === "gallery" && <GalleryEditor />}
+                    {modifySection === "navbar" && <NavbarEditor />}
+                    {modifySection === "offices" && <OfficeEditor />}
+                    {modifySection === "footer" && <FooterEditor />}
+                    {modifySection === "legal" && <LegalNoticeEditor />}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="users">
