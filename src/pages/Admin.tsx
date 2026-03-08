@@ -71,6 +71,30 @@ const Admin = () => {
   const [verificationMode, setVerificationMode] = useState("admin_approval");
   const [savingVerification, setSavingVerification] = useState(false);
   const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
+  const [revealedFields, setRevealedFields] = useState<Set<string>>(new Set());
+
+  const maskEmail = (email: string) => {
+    const [local, domain] = email.split("@");
+    if (!domain) return "****";
+    return local.slice(0, 2) + "****@" + domain;
+  };
+
+  const maskPhone = (phone: string) => {
+    if (!phone || phone === "-") return "-";
+    if (phone.length <= 4) return "****";
+    return phone.slice(0, 2) + "****" + phone.slice(-2);
+  };
+
+  const toggleReveal = (id: string, field: string) => {
+    const key = `${id}-${field}`;
+    setRevealedFields(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const isRevealed = (id: string, field: string) => revealedFields.has(`${id}-${field}`);
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -725,8 +749,24 @@ const Admin = () => {
                                 <TableRow key={user.id}>
                                   <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
                                   <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
-                                  <TableCell className="text-sm">{user.email}</TableCell>
-                                  <TableCell className="text-sm">{user.phone || "-"}</TableCell>
+                                  <TableCell className="text-sm">
+                                    <span className="inline-flex items-center gap-1">
+                                      {isRevealed(user.id, "email") ? user.email : maskEmail(user.email)}
+                                      <button onClick={() => toggleReveal(user.id, "email")} className="text-muted-foreground hover:text-foreground">
+                                        {isRevealed(user.id, "email") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                      </button>
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    <span className="inline-flex items-center gap-1">
+                                      {isRevealed(user.id, "phone") ? (user.phone || "-") : maskPhone(user.phone || "-")}
+                                      {user.phone && (
+                                        <button onClick={() => toggleReveal(user.id, "phone")} className="text-muted-foreground hover:text-foreground">
+                                          {isRevealed(user.id, "phone") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        </button>
+                                      )}
+                                    </span>
+                                  </TableCell>
                                   <TableCell className="text-sm">
                                     {user.last_sign_in_at
                                       ? new Date(user.last_sign_in_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
@@ -856,8 +896,24 @@ const Admin = () => {
                                   {pendingUsers.map(user => (
                                     <TableRow key={user.id}>
                                       <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
-                                      <TableCell>{user.email}</TableCell>
-                                      <TableCell>{user.phone || "-"}</TableCell>
+                                      <TableCell>
+                                        <span className="inline-flex items-center gap-1">
+                                          {isRevealed(user.id, "email") ? user.email : maskEmail(user.email)}
+                                          <button onClick={() => toggleReveal(user.id, "email")} className="text-muted-foreground hover:text-foreground">
+                                            {isRevealed(user.id, "email") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                          </button>
+                                        </span>
+                                      </TableCell>
+                                      <TableCell>
+                                        <span className="inline-flex items-center gap-1">
+                                          {isRevealed(user.id, "phone") ? (user.phone || "-") : maskPhone(user.phone || "-")}
+                                          {user.phone && (
+                                            <button onClick={() => toggleReveal(user.id, "phone")} className="text-muted-foreground hover:text-foreground">
+                                              {isRevealed(user.id, "phone") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            </button>
+                                          )}
+                                        </span>
+                                      </TableCell>
                                       <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                                       <TableCell>
                                         <div className="flex gap-2">
@@ -917,8 +973,24 @@ const Admin = () => {
                               {deletedUsers.map(user => (
                                 <TableRow key={user.id}>
                                   <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
-                                  <TableCell>{user.email}</TableCell>
-                                  <TableCell>{user.phone || "-"}</TableCell>
+                                  <TableCell>
+                                    <span className="inline-flex items-center gap-1">
+                                      {isRevealed(user.id, "email") ? user.email : maskEmail(user.email)}
+                                      <button onClick={() => toggleReveal(user.id, "email")} className="text-muted-foreground hover:text-foreground">
+                                        {isRevealed(user.id, "email") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                      </button>
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="inline-flex items-center gap-1">
+                                      {isRevealed(user.id, "phone") ? (user.phone || "-") : maskPhone(user.phone || "-")}
+                                      {user.phone && (
+                                        <button onClick={() => toggleReveal(user.id, "phone")} className="text-muted-foreground hover:text-foreground">
+                                          {isRevealed(user.id, "phone") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                        </button>
+                                      )}
+                                    </span>
+                                  </TableCell>
                                   <TableCell><Badge variant="secondary">{user.role}</Badge></TableCell>
                                   <TableCell>{new Date(user.deleted_at).toLocaleDateString()}</TableCell>
                                   <TableCell>
