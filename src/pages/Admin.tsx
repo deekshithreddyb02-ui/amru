@@ -222,9 +222,9 @@ const Admin = () => {
   const saveVerificationMode = async () => {
     setSavingVerification(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('site_settings')
-        .update({ value: JSON.stringify(verificationMode) as any, updated_at: new Date().toISOString() })
+        .update({ value: JSON.stringify(verificationMode), updated_at: new Date().toISOString() })
         .eq('key', 'verification_mode');
       if (error) throw error;
       toast({ title: "Success", description: "Verification settings saved" });
