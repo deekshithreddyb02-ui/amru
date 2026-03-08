@@ -71,6 +71,30 @@ const Admin = () => {
   const [verificationMode, setVerificationMode] = useState("admin_approval");
   const [savingVerification, setSavingVerification] = useState(false);
   const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
+  const [revealedFields, setRevealedFields] = useState<Set<string>>(new Set());
+
+  const maskEmail = (email: string) => {
+    const [local, domain] = email.split("@");
+    if (!domain) return "****";
+    return local.slice(0, 2) + "****@" + domain;
+  };
+
+  const maskPhone = (phone: string) => {
+    if (!phone || phone === "-") return "-";
+    if (phone.length <= 4) return "****";
+    return phone.slice(0, 2) + "****" + phone.slice(-2);
+  };
+
+  const toggleReveal = (id: string, field: string) => {
+    const key = `${id}-${field}`;
+    setRevealedFields(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const isRevealed = (id: string, field: string) => revealedFields.has(`${id}-${field}`);
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
