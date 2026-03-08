@@ -896,8 +896,24 @@ const Admin = () => {
                                   {pendingUsers.map(user => (
                                     <TableRow key={user.id}>
                                       <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
-                                      <TableCell>{user.email}</TableCell>
-                                      <TableCell>{user.phone || "-"}</TableCell>
+                                      <TableCell>
+                                        <span className="inline-flex items-center gap-1">
+                                          {isRevealed(user.id, "email") ? user.email : maskEmail(user.email)}
+                                          <button onClick={() => toggleReveal(user.id, "email")} className="text-muted-foreground hover:text-foreground">
+                                            {isRevealed(user.id, "email") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                          </button>
+                                        </span>
+                                      </TableCell>
+                                      <TableCell>
+                                        <span className="inline-flex items-center gap-1">
+                                          {isRevealed(user.id, "phone") ? (user.phone || "-") : maskPhone(user.phone || "-")}
+                                          {user.phone && (
+                                            <button onClick={() => toggleReveal(user.id, "phone")} className="text-muted-foreground hover:text-foreground">
+                                              {isRevealed(user.id, "phone") ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                            </button>
+                                          )}
+                                        </span>
+                                      </TableCell>
                                       <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                                       <TableCell>
                                         <div className="flex gap-2">
