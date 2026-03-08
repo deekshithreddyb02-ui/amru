@@ -280,7 +280,7 @@ const Admin = () => {
 
   const permanentlyDeleteUser = async (id: string) => {
     try {
-      const { error } = await supabase.from('deleted_users').delete().eq('id', id);
+      const { error } = await (supabase as any).from('deleted_users').delete().eq('id', id);
       if (error) throw error;
       setDeletedUsers(deletedUsers.filter(u => u.id !== id));
       toast({ title: "Success", description: "Permanently deleted" });
