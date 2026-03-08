@@ -828,6 +828,9 @@ const Admin = () => {
                                           </SelectItem>
                                         )}
                                         <div className="px-2 py-1.5 text-xs font-semibold text-foreground border-t border-border mt-1 pt-1.5">Security Actions</div>
+                                        <SelectItem value="reset_password" className="text-xs">
+                                          <span className="flex items-center gap-2"><KeyRound className="w-3.5 h-3.5 text-muted-foreground" /> Reset Password</span>
+                                        </SelectItem>
                                         {user.role !== 'admin' && (
                                           <SelectItem value="delete" className="text-xs text-destructive">
                                             <span className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5" /> Delete User</span>
