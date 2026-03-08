@@ -290,12 +290,14 @@ const Admin = () => {
     try {
       const user = users.find(u => u.id === userId);
       if (!user) throw new Error("User not found");
-      const { error } = await supabase.functions.invoke('admin-reset-password', {
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
         body: { email: user.email },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       toast({ title: "Success", description: `Password reset email sent to ${user.email}` });
     } catch (error: any) {
+      console.error('Reset password error:', error);
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
@@ -304,14 +306,22 @@ const Admin = () => {
     try {
       const user = users.find(u => u.id === userId);
       if (user) {
-        await (supabase as any).from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role });
+        // Insert into recycle bin, ignore if already exists
+        await (supabase as any).from('deleted_users').insert({
+          original_user_id: userId,
+          email: user.email,
+          full_name: user.full_name || '',
+          phone: user.phone || '',
+          role: user.role
+        });
       }
       const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
       if (error) throw error;
-      setUsers(users.filter(u => u.id !== userId));
+      setUsers(prev => prev.filter(u => u.id !== userId));
       toast({ title: "Success", description: "User deleted and moved to recycle bin" });
       fetchData();
     } catch (error: any) {
+      console.error('Delete user error:', error);
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
