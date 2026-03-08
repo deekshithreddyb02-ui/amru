@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -63,6 +63,9 @@ const Admin = () => {
   const [locationFilter, setLocationFilter] = useState("all");
   const [modifySection, setModifySection] = useState("hero");
   const [userTab, setUserTab] = useState("active");
+  const [messageTab, setMessageTab] = useState("all");
+  const [messageSearch, setMessageSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -243,146 +246,215 @@ const Admin = () => {
           </div>
 
             <TabsContent value="messages">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
-                  <CardTitle>Contact Messages</CardTitle>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Filter className="w-4 h-4 text-muted-foreground" />
-                      <Select value={locationFilter} onValueChange={setLocationFilter}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Filter by location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Locations</SelectItem>
-                          <SelectItem value="Pune">Pune</SelectItem>
-                          <SelectItem value="Mumbai">Mumbai</SelectItem>
-                          <SelectItem value="Hyderabad">Hyderabad</SelectItem>
-                          <SelectItem value="Bangalore">Bangalore</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                          <SelectItem value="none">No Location</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Select onValueChange={(loc) => {
-                      const parsed = messages.map((msg) => {
-                        const match = msg.message.match(/^\[Location: (.+?)\] /);
-                        return {
-                          ...msg,
-                          location: match ? match[1] : null,
-                          cleanMessage: match ? msg.message.replace(match[0], '') : msg.message,
-                        };
-                      });
-                      const filtered = loc === "none"
-                        ? parsed.filter(m => !m.location)
-                        : parsed.filter(m => m.location === loc);
-                      if (filtered.length === 0) {
-                        toast({ title: "No data", description: `No messages found for ${loc}` });
-                        return;
-                      }
-                      const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
-                      const rows = filtered.map(m =>
-                        [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', `"${m.cleanMessage.replace(/"/g, '""')}"`, new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')
-                      ).join('\n');
-                      const blob = new Blob([header + rows], { type: 'text/csv' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `messages-${loc.toLowerCase()}.csv`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                    }}>
-                      <SelectTrigger className="w-[200px]">
-                        <div className="flex items-center gap-2">
-                          <Download className="w-4 h-4" />
-                          <span>Download by Location</span>
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Pune">Pune Messages</SelectItem>
-                        <SelectItem value="Mumbai">Mumbai Messages</SelectItem>
-                        <SelectItem value="Hyderabad">Hyderabad Messages</SelectItem>
-                        <SelectItem value="Bangalore">Bangalore Messages</SelectItem>
-                        <SelectItem value="Other">Other Messages</SelectItem>
-                        <SelectItem value="none">No Location Messages</SelectItem>
-                      </SelectContent>
-                    </Select>
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-primary">Contact Messages</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Manage and respond to enquiries from your website</p>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {messages.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">No messages yet</p>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead>Service</TableHead>
-                          <TableHead>Message</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {messages
-                          .map((msg) => {
-                            const locationMatch = msg.message.match(/^\[Location: (.+?)\] /);
-                            const location = locationMatch ? locationMatch[1] : null;
-                            const cleanMessage = locationMatch ? msg.message.replace(locationMatch[0], '') : msg.message;
-                            return { ...msg, location, cleanMessage };
-                          })
-                          .filter((msg) => {
-                            if (locationFilter === "all") return true;
-                            if (locationFilter === "none") return !msg.location;
-                            return msg.location === locationFilter;
-                          })
-                          .map((msg) => (
-                          <TableRow key={msg.id} className={!msg.is_read ? "bg-primary/5" : ""}>
-                            <TableCell>
-                              <Badge variant={msg.is_read ? "secondary" : "default"}>
-                                {msg.is_read ? "Read" : "New"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-medium">{msg.name}</TableCell>
-                            <TableCell>{msg.email}</TableCell>
-                            <TableCell>{msg.phone || "-"}</TableCell>
-                            <TableCell>
-                              {msg.location ? (
-                                <Badge variant="outline">{msg.location}</Badge>
-                              ) : "-"}
-                            </TableCell>
-                            <TableCell>{msg.service || "-"}</TableCell>
-                            <TableCell className="max-w-xs truncate">{msg.cleanMessage}</TableCell>
-                            <TableCell>{new Date(msg.created_at).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => toggleMessageRead(msg.id, msg.is_read)}
-                                >
-                                  {msg.is_read ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => deleteMessage(msg.id)}
-                                >
-                                  <Trash2 className="w-4 h-4 text-destructive" />
-                                </Button>
-                              </div>
-                            </TableCell>
+                  <Button variant="outline" onClick={fetchData} className="gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh Database
+                  </Button>
+                </div>
+
+                {/* Search & Filter Bar */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="relative flex-1 min-w-[280px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Search by name, email, phone, service..."
+                      value={messageSearch}
+                      onChange={(e) => setMessageSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => {
+                      const input = document.getElementById('msg-date-filter') as HTMLInputElement;
+                      input?.showPicker?.();
+                    }}>
+                      <Calendar className="w-4 h-4" />
+                      {dateFilter ? new Date(dateFilter).toLocaleDateString() : "Filter by date"}
+                    </Button>
+                    <input
+                      id="msg-date-filter"
+                      type="date"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="sr-only"
+                    />
+                    {dateFilter && (
+                      <Button variant="ghost" size="sm" onClick={() => setDateFilter("")} className="text-xs">Clear</Button>
+                    )}
+                  </div>
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Locations</SelectItem>
+                      <SelectItem value="Pune">Pune</SelectItem>
+                      <SelectItem value="Mumbai">Mumbai</SelectItem>
+                      <SelectItem value="Hyderabad">Hyderabad</SelectItem>
+                      <SelectItem value="Bangalore">Bangalore</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                      <SelectItem value="none">No Location</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select onValueChange={(loc) => {
+                    const parsed = messages.map((msg) => {
+                      const match = msg.message.match(/^\[Location: (.+?)\] /);
+                      return { ...msg, location: match ? match[1] : null, cleanMessage: match ? msg.message.replace(match[0], '') : msg.message };
+                    });
+                    const filtered = loc === "none" ? parsed.filter(m => !m.location) : parsed.filter(m => m.location === loc);
+                    if (filtered.length === 0) { toast({ title: "No data", description: `No messages found for ${loc}` }); return; }
+                    const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
+                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', `"${m.cleanMessage.replace(/"/g, '""')}"`, new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
+                    const blob = new Blob([header + rows], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `messages-${loc.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url);
+                  }}>
+                    <SelectTrigger className="w-[200px]">
+                      <div className="flex items-center gap-2"><Download className="w-4 h-4" /><span>Download CSV</span></div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pune">Pune Messages</SelectItem>
+                      <SelectItem value="Mumbai">Mumbai Messages</SelectItem>
+                      <SelectItem value="Hyderabad">Hyderabad Messages</SelectItem>
+                      <SelectItem value="Bangalore">Bangalore Messages</SelectItem>
+                      <SelectItem value="Other">Other Messages</SelectItem>
+                      <SelectItem value="none">No Location Messages</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Sub-tabs */}
+                {(() => {
+                  const parsed = messages.map((msg) => {
+                    const match = msg.message.match(/^\[Location: (.+?)\] /);
+                    return { ...msg, location: match ? match[1] : null, cleanMessage: match ? msg.message.replace(match[0], '') : msg.message };
+                  });
+                  const allCount = parsed.length;
+                  const unread = parsed.filter(m => !m.is_read).length;
+                  const read = parsed.filter(m => m.is_read).length;
+                  const tabs = [
+                    { key: "all", label: "All Messages", count: allCount },
+                    { key: "unread", label: "Unread", count: unread },
+                    { key: "read", label: "Read", count: read },
+                    { key: "pune", label: "Pune", count: parsed.filter(m => m.location === "Pune").length },
+                    { key: "mumbai", label: "Mumbai", count: parsed.filter(m => m.location === "Mumbai").length },
+                    { key: "hyderabad", label: "Hyderabad", count: parsed.filter(m => m.location === "Hyderabad").length },
+                    { key: "bangalore", label: "Bangalore", count: parsed.filter(m => m.location === "Bangalore").length },
+                  ];
+                  return (
+                    <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
+                      {tabs.map(tab => (
+                        <Button
+                          key={tab.key}
+                          variant={messageTab === tab.key ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setMessageTab(tab.key)}
+                          className={`rounded-lg text-xs gap-1.5 ${messageTab === tab.key ? "shadow-md" : ""}`}
+                        >
+                          {tab.label}
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${messageTab === tab.key ? "bg-primary-foreground/20" : "bg-muted"}`}>
+                            {tab.count}
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {/* Table */}
+                <Card>
+                  <CardContent className="pt-6">
+                    {messages.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">No messages yet</p>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Service</TableHead>
+                            <TableHead>Message</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
+                        </TableHeader>
+                        <TableBody>
+                          {messages
+                            .map((msg) => {
+                              const locationMatch = msg.message.match(/^\[Location: (.+?)\] /);
+                              const location = locationMatch ? locationMatch[1] : null;
+                              const cleanMessage = locationMatch ? msg.message.replace(locationMatch[0], '') : msg.message;
+                              return { ...msg, location, cleanMessage };
+                            })
+                            .filter((msg) => {
+                              // Sub-tab filter
+                              if (messageTab === "unread" && msg.is_read) return false;
+                              if (messageTab === "read" && !msg.is_read) return false;
+                              if (["pune", "mumbai", "hyderabad", "bangalore"].includes(messageTab)) {
+                                if (msg.location?.toLowerCase() !== messageTab) return false;
+                              }
+                              // Location dropdown filter
+                              if (locationFilter !== "all") {
+                                if (locationFilter === "none" && msg.location) return false;
+                                if (locationFilter !== "none" && msg.location !== locationFilter) return false;
+                              }
+                              // Date filter
+                              if (dateFilter) {
+                                const msgDate = new Date(msg.created_at).toISOString().split('T')[0];
+                                if (msgDate !== dateFilter) return false;
+                              }
+                              // Search filter
+                              if (messageSearch) {
+                                const q = messageSearch.toLowerCase();
+                                if (!msg.name.toLowerCase().includes(q) && !msg.email.toLowerCase().includes(q) && !(msg.phone || '').toLowerCase().includes(q) && !(msg.service || '').toLowerCase().includes(q) && !msg.cleanMessage.toLowerCase().includes(q)) return false;
+                              }
+                              return true;
+                            })
+                            .map((msg) => (
+                            <TableRow key={msg.id} className={!msg.is_read ? "bg-primary/5" : ""}>
+                              <TableCell>
+                                <Badge variant={msg.is_read ? "secondary" : "default"}>
+                                  {msg.is_read ? "Read" : "New"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="font-medium">{msg.name}</TableCell>
+                              <TableCell>{msg.email}</TableCell>
+                              <TableCell>{msg.phone || "-"}</TableCell>
+                              <TableCell>
+                                {msg.location ? <Badge variant="outline">{msg.location}</Badge> : "-"}
+                              </TableCell>
+                              <TableCell>{msg.service || "-"}</TableCell>
+                              <TableCell className="max-w-xs truncate">{msg.cleanMessage}</TableCell>
+                              <TableCell>{new Date(msg.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button variant="ghost" size="icon" onClick={() => toggleMessageRead(msg.id, msg.is_read)}>
+                                    {msg.is_read ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => deleteMessage(msg.id)}>
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="modify">
