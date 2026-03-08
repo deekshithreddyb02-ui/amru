@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -39,6 +39,7 @@ interface User {
   phone: string;
   last_sign_in_at: string | null;
   is_banned: boolean;
+  is_approved: boolean;
 }
 
 interface Message {
@@ -66,6 +67,10 @@ const Admin = () => {
   const [messageTab, setMessageTab] = useState("all");
   const [messageSearch, setMessageSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [userMgmtTab, setUserMgmtTab] = useState("users");
+  const [verificationMode, setVerificationMode] = useState("admin_approval");
+  const [savingVerification, setSavingVerification] = useState(false);
+  const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -86,7 +91,7 @@ const Admin = () => {
         supabase.from('user_roles').select('user_id, role, created_at'),
         supabase.rpc('get_users_with_emails'),
         supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('user_id, full_name, phone'),
+        supabase.from('profiles').select('user_id, full_name, phone') as any,
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
@@ -96,9 +101,9 @@ const Admin = () => {
         usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
       }
 
-      const profileMap = new Map<string, { full_name: string; phone: string }>();
+      const profileMap = new Map<string, { full_name: string; phone: string; is_approved: boolean }>();
       if (!profilesRes.error && profilesRes.data) {
-        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '' }));
+        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: p.is_approved !== false }));
       }
 
       const usersWithRoles = rolesRes.data?.map(r => ({
@@ -110,12 +115,31 @@ const Admin = () => {
         phone: profileMap.get(r.user_id)?.phone || '',
         last_sign_in_at: emailMap.get(r.user_id)?.last_sign_in_at || null,
         is_banned: emailMap.get(r.user_id)?.is_banned || false,
+        is_approved: profileMap.get(r.user_id)?.is_approved !== false,
       })) || [];
 
       setUsers(usersWithRoles);
 
       if (messagesRes.error) throw messagesRes.error;
       setMessages(messagesRes.data || []);
+
+      // Fetch verification settings
+      const { data: settingsData } = await (supabase as any)
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'verification_mode')
+        .maybeSingle();
+      if (settingsData?.value) {
+        const val = typeof settingsData.value === 'string' ? settingsData.value.replace(/"/g, '') : String(settingsData.value);
+        setVerificationMode(val);
+      }
+
+      // Fetch deleted users
+      const { data: deletedData } = await (supabase as any)
+        .from('deleted_users')
+        .select('*')
+        .order('deleted_at', { ascending: false });
+      setDeletedUsers(deletedData || []);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
@@ -195,7 +219,76 @@ const Admin = () => {
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
+  const saveVerificationMode = async () => {
+    setSavingVerification(true);
+    try {
+      const { error } = await (supabase as any)
+        .from('site_settings')
+        .update({ value: JSON.stringify(verificationMode), updated_at: new Date().toISOString() })
+        .eq('key', 'verification_mode');
+      if (error) throw error;
+      toast({ title: "Success", description: "Verification settings saved" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSavingVerification(false);
+    }
   };
+
+  const approveUser = async (userId: string) => {
+    try {
+      const { error } = await (supabase as any).from('profiles').update({ is_approved: true }).eq('user_id', userId);
+      if (error) throw error;
+      setUsers(users.map(u => u.id === userId ? { ...u, is_approved: true } : u));
+      toast({ title: "Success", description: "User approved" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const rejectUser = async (userId: string) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        await (supabase as any).from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role });
+      }
+      const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
+      if (error) throw error;
+      setUsers(users.filter(u => u.id !== userId));
+      toast({ title: "Success", description: "User rejected and removed" });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        await (supabase as any).from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role });
+      }
+      const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
+      if (error) throw error;
+      setUsers(users.filter(u => u.id !== userId));
+      toast({ title: "Success", description: "User deleted and moved to recycle bin" });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const permanentlyDeleteUser = async (id: string) => {
+    try {
+      const { error } = await (supabase as any).from('deleted_users').delete().eq('id', id);
+      if (error) throw error;
+      setDeletedUsers(deletedUsers.filter(u => u.id !== id));
+      toast({ title: "Success", description: "Permanently deleted" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
 
   if (adminLoading || loadingData) {
     return (
@@ -312,7 +405,7 @@ const Admin = () => {
                     const filtered = loc === "none" ? parsed.filter(m => !m.location) : parsed.filter(m => m.location === loc);
                     if (filtered.length === 0) { toast({ title: "No data", description: `No messages found for ${loc}` }); return; }
                     const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
-                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', `"${m.cleanMessage.replace(/"/g, '""')}"`, new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
+                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', '"' + m.cleanMessage.replace(/"/g, '""') + '"', new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
                     const blob = new Blob([header + rows], { type: 'text/csv' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a'); a.href = url; a.download = `messages-${loc.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url);
@@ -521,137 +614,328 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="users">
-              <Card>
-                <CardHeader className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Users className="w-6 h-6 text-primary" />
-                        <CardTitle className="text-xl">Users Management</CardTitle>
-                      </div>
-                      <p className="text-sm text-muted-foreground">Comprehensive user management with advanced analytics and control features</p>
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="w-6 h-6 text-primary" />
+                      <h2 className="text-2xl font-bold text-primary">Users Management</h2>
                     </div>
-                    <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-                      <RefreshCw className="w-4 h-4" />
-                      Refresh Database
+                    <p className="text-sm text-muted-foreground">Comprehensive user management with advanced analytics and control features</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh Database
+                  </Button>
+                </div>
+
+                {/* Top-level sub-tabs: Users / Verification / Recycle Bin */}
+                <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
+                  {[
+                    { key: "users", label: "Users", icon: Users },
+                    { key: "verification", label: "Verification", icon: CheckCircle2 },
+                    { key: "recycle", label: "Recycle Bin", icon: Trash },
+                  ].map(({ key, label, icon: Icon }) => (
+                    <Button
+                      key={key}
+                      variant={userMgmtTab === key ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setUserMgmtTab(key)}
+                      className={`flex-1 gap-2 py-2.5 rounded-lg transition-all ${userMgmtTab === key ? "shadow-md" : "text-muted-foreground"}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
                     </Button>
-                  </div>
+                  ))}
+                </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="relative flex-1 max-w-md">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input
-                        type="text"
-                        placeholder="Search users by name, email, phone..."
-                        value={userSearch}
-                        onChange={e => setUserSearch(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
+                {/* ===== USERS SUB-TAB ===== */}
+                {userMgmtTab === "users" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search users by name, email, phone..."
+                          value={userSearch}
+                          onChange={e => setUserSearch(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      <div className="flex items-center gap-4 text-sm font-medium">
+                        <span className="text-foreground">{users.filter(u => !u.is_banned).length} active</span>
+                        <span className="text-muted-foreground">{users.filter(u => u.is_banned).length} inactive</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4 text-sm font-medium">
-                      <span className="text-foreground">{users.filter(u => !u.is_banned).length} active users</span>
-                      <span className="text-muted-foreground">{users.filter(u => u.is_banned).length} inactive users</span>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
-                    {[
-                      { key: "active", label: "Active", icon: UserCheck, count: users.filter(u => !u.is_banned).length },
-                      { key: "inactive", label: "Inactive", icon: UserX, count: users.filter(u => u.is_banned).length },
-                      { key: "all", label: "All Users", icon: Users, count: users.length },
-                      { key: "admins", label: "Admins", icon: ShieldCheck, count: users.filter(u => u.role === 'admin').length },
-                    ].map(({ key, label, icon: Icon, count }) => (
-                      <Button
-                        key={key}
-                        variant={userTab === key ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setUserTab(key)}
-                        className={`flex-1 gap-2 py-2.5 rounded-lg transition-all ${userTab === key ? "shadow-md" : "text-muted-foreground"}`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {label} ({count})
-                      </Button>
-                    ))}
+                    <div className="flex flex-wrap gap-1 p-1.5 bg-muted/50 border border-border rounded-xl">
+                      {[
+                        { key: "active", label: "Active", icon: UserCheck, count: users.filter(u => !u.is_banned).length },
+                        { key: "inactive", label: "Inactive", icon: UserX, count: users.filter(u => u.is_banned).length },
+                        { key: "all", label: "All Users", icon: Users, count: users.length },
+                        { key: "admins", label: "Admins", icon: ShieldCheck, count: users.filter(u => u.role === 'admin').length },
+                      ].map(({ key, label, icon: Icon, count }) => (
+                        <Button
+                          key={key}
+                          variant={userTab === key ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setUserTab(key)}
+                          className={`flex-1 gap-2 py-2.5 rounded-lg transition-all ${userTab === key ? "shadow-md" : "text-muted-foreground"}`}
+                        >
+                          <Icon className="w-4 h-4" />
+                          {label} ({count})
+                        </Button>
+                      ))}
+                    </div>
+
+                    <Card>
+                      <CardContent className="pt-6">
+                        {users.length === 0 ? (
+                          <p className="text-muted-foreground text-center py-8">No users yet</p>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>User ID</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Phone</TableHead>
+                                <TableHead>Last Login</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Joined</TableHead>
+                                <TableHead>Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {users
+                                .filter(u => {
+                                  if (userTab === "active") return !u.is_banned;
+                                  if (userTab === "inactive") return u.is_banned;
+                                  if (userTab === "admins") return u.role === "admin";
+                                  return true;
+                                })
+                                .filter(u => {
+                                  if (!userSearch) return true;
+                                  const q = userSearch.toLowerCase();
+                                  return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q) || u.phone.toLowerCase().includes(q);
+                                })
+                                .map((user) => (
+                                <TableRow key={user.id}>
+                                  <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
+                                  <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
+                                  <TableCell className="text-sm">{user.email}</TableCell>
+                                  <TableCell className="text-sm">{user.phone || "-"}</TableCell>
+                                  <TableCell className="text-sm">
+                                    {user.last_sign_in_at
+                                      ? new Date(user.last_sign_in_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+                                      : "Never"}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex flex-col gap-1">
+                                      <Badge variant={user.role === 'admin' ? "default" : "secondary"}>{user.role}</Badge>
+                                      {user.is_banned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
+                                      {!user.is_approved && <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Pending</Badge>}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                                  <TableCell>
+                                    <div className="flex gap-2">
+                                      {user.role === 'admin' ? (
+                                        <Button variant="outline" size="sm" onClick={() => removeAdmin(user.id)}>Remove Admin</Button>
+                                      ) : (
+                                        <Button variant="outline" size="sm" onClick={() => makeAdmin(user.id)}>Make Admin</Button>
+                                      )}
+                                      {user.role !== 'admin' && (
+                                        <Button variant="ghost" size="icon" onClick={() => deleteUser(user.id)}>
+                                          <Trash2 className="w-4 h-4 text-destructive" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {users.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">No users yet</p>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                         <TableRow>
-                          <TableHead>User ID</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Phone</TableHead>
-                          <TableHead>Last Login</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Joined</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {users
-                          .filter(u => {
-                            if (userTab === "active") return !u.is_banned;
-                            if (userTab === "inactive") return u.is_banned;
-                            if (userTab === "admins") return u.role === "admin";
-                            return true;
-                          })
-                          .filter(u => {
-                            if (!userSearch) return true;
-                            const q = userSearch.toLowerCase();
-                            return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q) || u.phone.toLowerCase().includes(q);
-                          })
-                          .map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-mono text-xs">{user.id.slice(0, 8)}...</TableCell>
-                            <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
-                            <TableCell className="text-sm">{user.email}</TableCell>
-                            <TableCell className="text-sm">{user.phone || "-"}</TableCell>
-                            <TableCell className="text-sm">
-                              {user.last_sign_in_at
-                                ? new Date(user.last_sign_in_at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
-                                : "Never"}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-col gap-1">
-                                <Badge variant={user.role === 'admin' ? "default" : "secondary"}>
-                                  {user.role}
-                                </Badge>
-                                {user.is_banned && (
-                                  <Badge variant="destructive" className="text-xs">Banned</Badge>
-                                )}
+                )}
+
+                {/* ===== VERIFICATION SUB-TAB ===== */}
+                {userMgmtTab === "verification" && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardContent className="pt-6 space-y-6">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <CheckCircle2 className="w-5 h-5 text-primary" />
+                            <h3 className="text-lg font-semibold">Signup Verification Controls</h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Control how new user signups are verified and approved.</p>
+                        </div>
+
+                        {[
+                          { key: "email_only", label: "Email Verification Only", desc: "Users verify their email address to gain access. Standard signup flow.", icon: MailCheck },
+                          { key: "admin_approval", label: "Admin Approval Only", desc: "Users can sign up but need admin approval before accessing the app. Shows in Pending Approval tab.", icon: UserCog },
+                          { key: "email_and_approval", label: "Email + Admin Approval", desc: "Users must verify email AND receive admin approval. Maximum security.", icon: ShieldCheck },
+                        ].map(({ key, label, desc, icon: Icon }) => (
+                          <div
+                            key={key}
+                            onClick={() => setVerificationMode(key)}
+                            className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                              verificationMode === key
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/30"
+                            }`}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={`p-2 rounded-lg ${verificationMode === key ? "bg-primary/10" : "bg-muted"}`}>
+                                <Icon className={`w-5 h-5 ${verificationMode === key ? "text-primary" : "text-muted-foreground"}`} />
                               </div>
-                            </TableCell>
-                            <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              {user.role === 'admin' ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => removeAdmin(user.id)}
-                                >
-                                  Remove Admin
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => makeAdmin(user.id)}
-                                >
-                                  Make Admin
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{label}</span>
+                                  {verificationMode === key && (
+                                    <Badge className="bg-primary/20 text-primary text-xs border-0">Active</Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground">{desc}</p>
+                              </div>
+                            </div>
+                            <div className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
+                              verificationMode === key ? "bg-primary justify-end" : "bg-muted justify-start"
+                            }`}>
+                              <div className="w-5 h-5 rounded-full bg-background shadow-sm" />
+                            </div>
+                          </div>
                         ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
+
+                        <Button onClick={saveVerificationMode} disabled={savingVerification} className="w-full gap-2">
+                          {savingVerification ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                          Save Verification Settings
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Pending Approval Section */}
+                    <div className="border-t pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <UserCog className="w-5 h-5 text-primary" />
+                          <h3 className="text-lg font-semibold">Verification Pending Approval</h3>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                          <RefreshCw className="w-4 h-4" />
+                          Refresh
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Users who have signed up and are pending admin approval.</p>
+
+                      {(() => {
+                        const pendingUsers = users.filter(u => !u.is_approved && u.role !== 'admin');
+                        if (pendingUsers.length === 0) {
+                          return <Card><CardContent className="py-8 text-center text-muted-foreground">No pending approvals</CardContent></Card>;
+                        }
+                        return (
+                          <Card>
+                            <CardContent className="pt-6">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Phone</TableHead>
+                                    <TableHead>Signed Up</TableHead>
+                                    <TableHead>Actions</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {pendingUsers.map(user => (
+                                    <TableRow key={user.id}>
+                                      <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
+                                      <TableCell>{user.email}</TableCell>
+                                      <TableCell>{user.phone || "-"}</TableCell>
+                                      <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                                      <TableCell>
+                                        <div className="flex gap-2">
+                                          <Button size="sm" onClick={() => approveUser(user.id)} className="gap-1">
+                                            <CheckCircle2 className="w-3 h-3" /> Approve
+                                          </Button>
+                                          <Button size="sm" variant="destructive" onClick={() => rejectUser(user.id)} className="gap-1">
+                                            <XCircle className="w-3 h-3" /> Reject
+                                          </Button>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </CardContent>
+                          </Card>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {/* ===== RECYCLE BIN SUB-TAB ===== */}
+                {userMgmtTab === "recycle" && (
+                  <div className="space-y-4">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                              <Trash className="w-5 h-5 text-muted-foreground" />
+                              Deleted Users
+                            </h3>
+                            <p className="text-sm text-muted-foreground">Users that have been deleted. You can permanently remove them from here.</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Refresh
+                          </Button>
+                        </div>
+                        {deletedUsers.length === 0 ? (
+                          <p className="text-muted-foreground text-center py-8">Recycle bin is empty</p>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Phone</TableHead>
+                                <TableHead>Role</TableHead>
+                                <TableHead>Deleted At</TableHead>
+                                <TableHead>Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {deletedUsers.map(user => (
+                                <TableRow key={user.id}>
+                                  <TableCell className="font-medium">{user.full_name || "-"}</TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>{user.phone || "-"}</TableCell>
+                                  <TableCell><Badge variant="secondary">{user.role}</Badge></TableCell>
+                                  <TableCell>{new Date(user.deleted_at).toLocaleDateString()}</TableCell>
+                                  <TableCell>
+                                    <Button size="sm" variant="destructive" onClick={() => permanentlyDeleteUser(user.id)} className="gap-1">
+                                      <Trash2 className="w-3 h-3" /> Delete Permanently
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </TabsContent>
         </motion.div>
       </main>
