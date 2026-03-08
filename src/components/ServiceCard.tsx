@@ -67,11 +67,13 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
           );
           const data = await res.json();
-          const city = data.address?.city || data.address?.town || data.address?.county || data.address?.state || "";
-          const matched = matchCityToOption(city);
+          const city = data.address?.city || data.address?.town || data.address?.county || "";
+          const state = data.address?.state || "";
+          const displayLocation = [city, state].filter(Boolean).join(", ");
+          const matched = matchCityToOption(city || state);
           setFormData((prev) => ({ ...prev, location: matched }));
-          setDetectedCity(city);
-          toast.success(`Location detected: ${city}`);
+          setDetectedCity(displayLocation);
+          toast.success(`Location detected: ${displayLocation}`);
         } catch {
           toast.error("Could not detect location. Please select manually.");
         } finally {
