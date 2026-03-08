@@ -87,36 +87,34 @@ const Admin = () => {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [rolesRes, usersRes, messagesRes, profilesRes] = await Promise.all([
-        supabase.from('user_roles').select('user_id, role, created_at'),
-        supabase.rpc('get_users_with_emails'),
-        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('user_id, full_name, phone') as any,
-      ]);
+      const rolesRes = await supabase.from('user_roles').select('user_id, role, created_at');
+      const usersRes = await supabase.rpc('get_users_with_emails');
+      const messagesRes = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
+      const profilesRes = await supabase.from('profiles').select('*');
 
       if (rolesRes.error) throw rolesRes.error;
 
-      const emailMap = new Map<string, { email: string; created_at: string; last_sign_in_at: string | null; is_banned: boolean }>();
+      const emailMap = new Map();
       if (!usersRes.error && usersRes.data) {
-        usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
+        (usersRes.data as any[]).forEach((u) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
       }
 
-      const profileMap = new Map<string, { full_name: string; phone: string; is_approved: boolean }>();
+      const profileMap = new Map();
       if (!profilesRes.error && profilesRes.data) {
-        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: p.is_approved !== false }));
+        (profilesRes.data as any[]).forEach((p) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: p.is_approved !== false }));
       }
 
-      const usersWithRoles = rolesRes.data?.map(r => ({
+      const usersWithRoles: User[] = (rolesRes.data || []).map((r) => ({
         id: r.user_id,
         email: emailMap.get(r.user_id)?.email || r.user_id,
         created_at: emailMap.get(r.user_id)?.created_at || r.created_at,
-        role: r.role,
+        role: r.role as string,
         full_name: profileMap.get(r.user_id)?.full_name || '',
         phone: profileMap.get(r.user_id)?.phone || '',
         last_sign_in_at: emailMap.get(r.user_id)?.last_sign_in_at || null,
         is_banned: emailMap.get(r.user_id)?.is_banned || false,
         is_approved: profileMap.get(r.user_id)?.is_approved !== false,
-      })) || [];
+      }));
 
       setUsers(usersWithRoles);
 
@@ -219,6 +217,8 @@ const Admin = () => {
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
+  };
+
   const saveVerificationMode = async () => {
     setSavingVerification(true);
     try {
@@ -736,7 +736,7 @@ const Admin = () => {
                                     <div className="flex flex-col gap-1">
                                       <Badge variant={user.role === 'admin' ? "default" : "secondary"}>{user.role}</Badge>
                                       {user.is_banned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
-                                      {!user.is_approved && <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">Pending</Badge>}
+                                      {!user.is_approved && <Badge variant="outline" className="text-xs text-warning border-warning/30">Pending</Badge>}
                                     </div>
                                   </TableCell>
                                   <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
