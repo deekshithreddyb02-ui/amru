@@ -39,6 +39,7 @@ interface User {
   phone: string;
   last_sign_in_at: string | null;
   is_banned: boolean;
+  is_approved: boolean;
 }
 
 interface Message {
