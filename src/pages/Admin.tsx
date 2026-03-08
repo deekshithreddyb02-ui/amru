@@ -67,6 +67,10 @@ const Admin = () => {
   const [messageTab, setMessageTab] = useState("all");
   const [messageSearch, setMessageSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [userMgmtTab, setUserMgmtTab] = useState("users");
+  const [verificationMode, setVerificationMode] = useState("admin_approval");
+  const [savingVerification, setSavingVerification] = useState(false);
+  const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
