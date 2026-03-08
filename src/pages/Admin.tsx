@@ -286,6 +286,20 @@ const Admin = () => {
     }
   };
 
+  const resetUserPassword = async (userId: string) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (!user) throw new Error("User not found");
+      const { error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { email: user.email },
+      });
+      if (error) throw error;
+      toast({ title: "Success", description: `Password reset email sent to ${user.email}` });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
   const deleteUser = async (userId: string) => {
     try {
       const user = users.find(u => u.id === userId);
