@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -281,6 +281,20 @@ const Admin = () => {
       setUsers(users.filter(u => u.id !== userId));
       toast({ title: "Success", description: "User rejected and removed" });
       fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const resetUserPassword = async (userId: string) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (!user) throw new Error("User not found");
+      const { error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { email: user.email },
+      });
+      if (error) throw error;
+      toast({ title: "Success", description: `Password reset email sent to ${user.email}` });
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
@@ -786,6 +800,7 @@ const Admin = () => {
                                       else if (action === "remove_admin") removeAdmin(user.id);
                                       else if (action === "activate") approveUser(user.id);
                                       else if (action === "deactivate") rejectUser(user.id);
+                                      else if (action === "reset_password") resetUserPassword(user.id);
                                       else if (action === "delete") deleteUser(user.id);
                                     }}>
                                       <SelectTrigger className="w-[160px] h-8 text-xs">
@@ -813,6 +828,9 @@ const Admin = () => {
                                           </SelectItem>
                                         )}
                                         <div className="px-2 py-1.5 text-xs font-semibold text-foreground border-t border-border mt-1 pt-1.5">Security Actions</div>
+                                        <SelectItem value="reset_password" className="text-xs">
+                                          <span className="flex items-center gap-2"><KeyRound className="w-3.5 h-3.5 text-muted-foreground" /> Reset Password</span>
+                                        </SelectItem>
                                         {user.role !== 'admin' && (
                                           <SelectItem value="delete" className="text-xs text-destructive">
                                             <span className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5" /> Delete User</span>
