@@ -207,19 +207,38 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             </div>
             <div className="space-y-2">
               <Label htmlFor="location">Location *</Label>
-              <Select
-                value={formData.location}
-                onValueChange={(value) => setFormData({ ...formData, location: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your location" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LOCATION_OPTIONS.map((loc) => (
-                    <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select
+                  value={formData.location}
+                  onValueChange={(value) => setFormData({ ...formData, location: value })}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select your location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCATION_OPTIONS.map((loc) => (
+                      <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={detectLocation}
+                  disabled={detectingLocation}
+                  title="Detect my location"
+                >
+                  {detectingLocation ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              {detectedCity && (
+                <p className="text-xs text-muted-foreground">📍 Detected: {detectedCity}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
