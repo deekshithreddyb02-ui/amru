@@ -122,6 +122,23 @@ const Admin = () => {
 
       if (messagesRes.error) throw messagesRes.error;
       setMessages(messagesRes.data || []);
+
+      // Fetch verification settings
+      const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'verification_mode')
+        .maybeSingle();
+      if (settingsData?.value) {
+        setVerificationMode(typeof settingsData.value === 'string' ? settingsData.value : String(settingsData.value));
+      }
+
+      // Fetch deleted users
+      const { data: deletedData } = await supabase
+        .from('deleted_users')
+        .select('*')
+        .order('deleted_at', { ascending: false });
+      setDeletedUsers(deletedData || []);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
