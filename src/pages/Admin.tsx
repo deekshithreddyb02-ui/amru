@@ -124,17 +124,18 @@ const Admin = () => {
       setMessages(messagesRes.data || []);
 
       // Fetch verification settings
-      const { data: settingsData } = await supabase
+      const { data: settingsData } = await (supabase as any)
         .from('site_settings')
         .select('*')
         .eq('key', 'verification_mode')
         .maybeSingle();
       if (settingsData?.value) {
-        setVerificationMode(typeof settingsData.value === 'string' ? settingsData.value : String(settingsData.value));
+        const val = typeof settingsData.value === 'string' ? settingsData.value.replace(/"/g, '') : String(settingsData.value);
+        setVerificationMode(val);
       }
 
       // Fetch deleted users
-      const { data: deletedData } = await supabase
+      const { data: deletedData } = await (supabase as any)
         .from('deleted_users')
         .select('*')
         .order('deleted_at', { ascending: false });
