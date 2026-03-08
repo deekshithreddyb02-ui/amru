@@ -266,7 +266,7 @@ const Admin = () => {
     try {
       const user = users.find(u => u.id === userId);
       if (user) {
-        await supabase.from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role } as any);
+        await (supabase as any).from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role });
       }
       const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
       if (error) throw error;
