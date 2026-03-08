@@ -217,6 +217,8 @@ const Admin = () => {
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
+  };
+
   const saveVerificationMode = async () => {
     setSavingVerification(true);
     try {
