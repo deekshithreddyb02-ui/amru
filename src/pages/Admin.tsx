@@ -87,12 +87,10 @@ const Admin = () => {
   const fetchData = async () => {
     setLoadingData(true);
     try {
-      const [rolesRes, usersRes, messagesRes, profilesRes] = await Promise.all([
-        supabase.from('user_roles').select('user_id, role, created_at'),
-        supabase.rpc('get_users_with_emails'),
-        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('user_id, full_name, phone') as any,
-      ]);
+      const rolesRes = await supabase.from('user_roles').select('user_id, role, created_at');
+      const usersRes = await supabase.rpc('get_users_with_emails');
+      const messagesRes = await supabase.from('contact_messages').select('*').order('created_at', { ascending: false });
+      const profilesRes = await supabase.from('profiles').select('*');
 
       if (rolesRes.error) throw rolesRes.error;
 
