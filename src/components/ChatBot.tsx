@@ -98,14 +98,14 @@ const ChatBot = () => {
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       const {
         error: uploadError
-      } = await supabase.storage.from("main").upload(`chat-uploads/${fileName}`, file);
+      } = await supabase.storage.from("chat-uploads").upload(fileName, file);
       if (uploadError) throw uploadError;
 
-      // Use signed URL instead of public URL for security
+      // Use signed URL for private bucket access
       const {
         data: signedUrlData,
         error: signError
-      } = await supabase.storage.from("main").createSignedUrl(`chat-uploads/${fileName}`, 3600); // 1 hour expiry
+      } = await supabase.storage.from("chat-uploads").createSignedUrl(fileName, 3600); // 1 hour expiry
 
       if (signError) throw signError;
       setAttachments(prev => [...prev, {
