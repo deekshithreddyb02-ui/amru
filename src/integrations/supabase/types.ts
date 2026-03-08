@@ -97,6 +97,39 @@ export type Database = {
         }
         Relationships: []
       }
+      deleted_users: {
+        Row: {
+          deleted_at: string
+          deleted_by: string | null
+          email: string
+          full_name: string | null
+          id: string
+          original_user_id: string
+          phone: string | null
+          role: string | null
+        }
+        Insert: {
+          deleted_at?: string
+          deleted_by?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          original_user_id: string
+          phone?: string | null
+          role?: string | null
+        }
+        Update: {
+          deleted_at?: string
+          deleted_by?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          original_user_id?: string
+          phone?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           caption: string | null
@@ -183,6 +216,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          is_approved: boolean
           phone: string | null
           updated_at: string
           user_id: string
@@ -191,6 +225,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          is_approved?: boolean
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -199,6 +234,7 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          is_approved?: boolean
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -344,6 +380,30 @@ export type Database = {
           title?: string | null
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
