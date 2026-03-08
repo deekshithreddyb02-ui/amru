@@ -97,9 +97,9 @@ const Admin = () => {
         usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
       }
 
-      const profileMap = new Map<string, { full_name: string; phone: string }>();
+      const profileMap = new Map<string, { full_name: string; phone: string; is_approved: boolean }>();
       if (!profilesRes.error && profilesRes.data) {
-        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '' }));
+        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: p.is_approved !== false }));
       }
 
       const usersWithRoles = rolesRes.data?.map(r => ({
