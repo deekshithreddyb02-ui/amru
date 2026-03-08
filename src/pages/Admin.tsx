@@ -94,27 +94,27 @@ const Admin = () => {
 
       if (rolesRes.error) throw rolesRes.error;
 
-      const emailMap: Map<string, { email: string; created_at: string; last_sign_in_at: string | null; is_banned: boolean }> = new Map();
+      const emailMap = new Map();
       if (!usersRes.error && usersRes.data) {
-        usersRes.data.forEach((u: any) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
+        (usersRes.data as any[]).forEach((u) => emailMap.set(u.user_id, { email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at, is_banned: u.is_banned }));
       }
 
-      const profileMap: Map<string, { full_name: string; phone: string; is_approved: boolean }> = new Map();
+      const profileMap = new Map();
       if (!profilesRes.error && profilesRes.data) {
-        profilesRes.data.forEach((p: any) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: (p as any).is_approved !== false }));
+        (profilesRes.data as any[]).forEach((p) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: p.is_approved !== false }));
       }
 
-      const usersWithRoles = rolesRes.data?.map(r => ({
+      const usersWithRoles: User[] = (rolesRes.data || []).map((r) => ({
         id: r.user_id,
         email: emailMap.get(r.user_id)?.email || r.user_id,
         created_at: emailMap.get(r.user_id)?.created_at || r.created_at,
-        role: r.role,
+        role: r.role as string,
         full_name: profileMap.get(r.user_id)?.full_name || '',
         phone: profileMap.get(r.user_id)?.phone || '',
         last_sign_in_at: emailMap.get(r.user_id)?.last_sign_in_at || null,
         is_banned: emailMap.get(r.user_id)?.is_banned || false,
         is_approved: profileMap.get(r.user_id)?.is_approved !== false,
-      })) || [];
+      }));
 
       setUsers(usersWithRoles);
 
