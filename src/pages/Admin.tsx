@@ -111,6 +111,7 @@ const Admin = () => {
         phone: profileMap.get(r.user_id)?.phone || '',
         last_sign_in_at: emailMap.get(r.user_id)?.last_sign_in_at || null,
         is_banned: emailMap.get(r.user_id)?.is_banned || false,
+        is_approved: profileMap.get(r.user_id)?.is_approved !== false,
       })) || [];
 
       setUsers(usersWithRoles);
