@@ -59,14 +59,23 @@ Deno.serve(async (req) => {
       redirectTo: `${req.headers.get("origin") || "https://amrutahydrogeoservices.lovable.app"}/auth`,
     });
 
-    if (error) throw error;
+    if (error) {
+      // Handle rate limit errors gracefully
+      if (error.status === 429 || error.code === "over_email_send_rate_limit" || (error.message && error.message.includes("rate limit"))) {
+        return new Response(JSON.stringify({ error: "Please wait a few minutes before requesting another password reset." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw error;
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
     console.error("Reset password error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Internal error" }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again later." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
