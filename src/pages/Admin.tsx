@@ -218,7 +218,76 @@ const Admin = () => {
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
+  const saveVerificationMode = async () => {
+    setSavingVerification(true);
+    try {
+      const { error } = await supabase
+        .from('site_settings')
+        .update({ value: JSON.stringify(verificationMode) as any, updated_at: new Date().toISOString() })
+        .eq('key', 'verification_mode');
+      if (error) throw error;
+      toast({ title: "Success", description: "Verification settings saved" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSavingVerification(false);
+    }
   };
+
+  const approveUser = async (userId: string) => {
+    try {
+      const { error } = await supabase.from('profiles').update({ is_approved: true }).eq('user_id', userId);
+      if (error) throw error;
+      setUsers(users.map(u => u.id === userId ? { ...u, is_approved: true } : u));
+      toast({ title: "Success", description: "User approved" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const rejectUser = async (userId: string) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        await supabase.from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role } as any);
+      }
+      const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
+      if (error) throw error;
+      setUsers(users.filter(u => u.id !== userId));
+      toast({ title: "Success", description: "User rejected and removed" });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        await supabase.from('deleted_users').insert({ original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role } as any);
+      }
+      const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
+      if (error) throw error;
+      setUsers(users.filter(u => u.id !== userId));
+      toast({ title: "Success", description: "User deleted and moved to recycle bin" });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const permanentlyDeleteUser = async (id: string) => {
+    try {
+      const { error } = await supabase.from('deleted_users').delete().eq('id', id);
+      if (error) throw error;
+      setDeletedUsers(deletedUsers.filter(u => u.id !== id));
+      toast({ title: "Success", description: "Permanently deleted" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
 
   if (adminLoading || loadingData) {
     return (
