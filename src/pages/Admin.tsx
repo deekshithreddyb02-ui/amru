@@ -87,7 +87,7 @@ const Admin = () => {
         supabase.from('user_roles').select('user_id, role, created_at'),
         supabase.rpc('get_users_with_emails'),
         supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('user_id, full_name, phone'),
+        supabase.from('profiles').select('user_id, full_name, phone, is_approved'),
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
