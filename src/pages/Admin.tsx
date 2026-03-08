@@ -781,18 +781,45 @@ const Admin = () => {
                                   </TableCell>
                                   <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                                   <TableCell>
-                                    <div className="flex gap-2">
-                                      {user.role === 'admin' ? (
-                                        <Button variant="outline" size="sm" onClick={() => removeAdmin(user.id)}>Remove Admin</Button>
-                                      ) : (
-                                        <Button variant="outline" size="sm" onClick={() => makeAdmin(user.id)}>Make Admin</Button>
-                                      )}
-                                      {user.role !== 'admin' && (
-                                        <Button variant="ghost" size="icon" onClick={() => deleteUser(user.id)}>
-                                          <Trash2 className="w-4 h-4 text-destructive" />
-                                        </Button>
-                                      )}
-                                    </div>
+                                    <Select onValueChange={(action) => {
+                                      if (action === "make_admin") makeAdmin(user.id);
+                                      else if (action === "remove_admin") removeAdmin(user.id);
+                                      else if (action === "activate") approveUser(user.id);
+                                      else if (action === "deactivate") rejectUser(user.id);
+                                      else if (action === "delete") deleteUser(user.id);
+                                    }}>
+                                      <SelectTrigger className="w-[160px] h-8 text-xs">
+                                        <SelectValue placeholder="Actions" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <div className="px-2 py-1.5 text-xs font-semibold text-foreground">User Actions</div>
+                                        {!user.is_approved && (
+                                          <SelectItem value="activate" className="text-xs">
+                                            <span className="flex items-center gap-2"><UserCheck className="w-3.5 h-3.5 text-primary" /> Activate User</span>
+                                          </SelectItem>
+                                        )}
+                                        {user.is_approved && user.role !== 'admin' && (
+                                          <SelectItem value="deactivate" className="text-xs">
+                                            <span className="flex items-center gap-2"><UserX className="w-3.5 h-3.5 text-muted-foreground" /> Deactivate User</span>
+                                          </SelectItem>
+                                        )}
+                                        {user.role !== 'admin' ? (
+                                          <SelectItem value="make_admin" className="text-xs">
+                                            <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-muted-foreground" /> Make Admin</span>
+                                          </SelectItem>
+                                        ) : (
+                                          <SelectItem value="remove_admin" className="text-xs">
+                                            <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-muted-foreground" /> Remove Admin</span>
+                                          </SelectItem>
+                                        )}
+                                        <div className="px-2 py-1.5 text-xs font-semibold text-foreground border-t border-border mt-1 pt-1.5">Security Actions</div>
+                                        {user.role !== 'admin' && (
+                                          <SelectItem value="delete" className="text-xs text-destructive">
+                                            <span className="flex items-center gap-2"><Trash2 className="w-3.5 h-3.5" /> Delete User</span>
+                                          </SelectItem>
+                                        )}
+                                      </SelectContent>
+                                    </Select>
                                   </TableCell>
                                 </TableRow>
                               ))}
