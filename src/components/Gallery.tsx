@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useGallery } from "@/hooks/useGallery";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const Gallery = () => {
   const { images, loading } = useGallery();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const visibleImages = images.filter(img => img.is_visible);
 
@@ -45,8 +43,7 @@ const Gallery = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="relative group cursor-pointer overflow-hidden rounded-xl aspect-square"
-              onClick={() => setSelectedImage(image.image_url)}
+              className="relative group overflow-hidden rounded-xl aspect-square"
             >
               <img
                 src={image.image_url}
@@ -65,35 +62,6 @@ const Gallery = () => {
           ))}
         </div>
       </div>
-
-      {/* Lightbox */}
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-foreground/90 flex items-center justify-center p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 text-background hover:text-background/80 transition-colors"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <motion.img
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              src={selectedImage}
-              alt="Gallery preview"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };
