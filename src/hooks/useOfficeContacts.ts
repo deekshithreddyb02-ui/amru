@@ -3,9 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface OfficeContact {
   city: string;
-  address: string;
   whatsapp: string;
   phone: string;
+  email?: string;
 }
 
 export const useOfficeContacts = () => {
@@ -18,7 +18,7 @@ export const useOfficeContacts = () => {
         const { data, error } = await supabase
           .from("site_content")
           .select("metadata")
-          .eq("section_key", "offices")
+          .eq("section_key", "contact_details")
           .maybeSingle();
 
         if (!error && data?.metadata) {
@@ -33,6 +33,7 @@ export const useOfficeContacts = () => {
         setLoading(false);
       }
     };
+
     fetch();
   }, []);
 
