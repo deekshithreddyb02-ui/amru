@@ -156,7 +156,7 @@ const GalleryEditor = () => {
           {images.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">No images yet</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {images.map((image) => (
                 <div
                   key={image.id}
