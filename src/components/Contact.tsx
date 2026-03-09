@@ -21,16 +21,20 @@ interface ContactDetails {
 
 const defaultOffices: Office[] = [{
   city: "Pune",
-  address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
+  address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061",
+  email: "rain@amrutawater.com"
 }, {
   city: "Hyderabad",
-  address: "Head Office - Hyderabad, Telangana"
+  address: "Head Office - Hyderabad, Telangana",
+  email: "rain@amrutawater.com"
 }, {
   city: "Mumbai",
-  address: "Branch Office - Mumbai, Maharashtra"
+  address: "Branch Office - Mumbai, Maharashtra",
+  email: "rain@amrutawater.com"
 }, {
   city: "Bangalore",
-  address: "Branch Office - Bangalore, Karnataka"
+  address: "Branch Office - Bangalore, Karnataka",
+  email: "rain@amrutawater.com"
 }];
 
 const defaultContactDetails: ContactDetails = {
