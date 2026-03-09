@@ -45,6 +45,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [detectedCity, setDetectedCity] = useState("");
+  const [locationMapUrl, setLocationMapUrl] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -63,6 +64,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
           );
@@ -73,6 +75,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           const matched = matchCityToOption(city || state);
           setFormData((prev) => ({ ...prev, location: matched }));
           setDetectedCity(displayLocation);
+          setLocationMapUrl(mapsUrl);
           toast.success(`Location detected: ${displayLocation}`);
         } catch {
           toast.error("Could not detect location. Please select manually.");
@@ -120,13 +123,15 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           email,
           phone,
           service: title,
-          message: `${formData.location ? `[Location: ${formData.location}] ` : ''}${message}`,
+          message: `${formData.location ? `[Location: ${formData.location}]` : ''}${locationMapUrl ? ` [Map: ${locationMapUrl}]` : ''} ${message}`.trim(),
         });
 
       if (error) throw error;
 
       toast.success("Enquiry submitted successfully! We'll contact you soon.");
       setFormData({ name: "", phone: "", email: "", message: "", location: "" });
+      setLocationMapUrl("");
+      setDetectedCity("");
       setOpen(false);
     } catch (error) {
       console.error('Submission error:', error);
