@@ -489,8 +489,12 @@ const Admin = () => {
                 {/* Sub-tabs */}
                 {(() => {
                   const parsed = messages.map((msg) => {
-                    const match = msg.message.match(/^\[Location: (.+?)\] /);
-                    return { ...msg, location: match ? match[1] : null, cleanMessage: match ? msg.message.replace(match[0], '') : msg.message };
+                    const locMatch = msg.message.match(/\[Location: (.+?)\]\s?/);
+                    let clean = msg.message;
+                    if (locMatch) clean = clean.replace(locMatch[0], '');
+                    const mapMatch = clean.match(/\[Map: (https?:\/\/[^\]]+)\]\s?/);
+                    if (mapMatch) clean = clean.replace(mapMatch[0], '');
+                    return { ...msg, location: locMatch ? locMatch[1] : null, cleanMessage: clean.trim() };
                   });
                   const allCount = parsed.length;
                   const unread = parsed.filter(m => !m.is_read).length;
