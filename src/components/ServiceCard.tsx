@@ -45,6 +45,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [detectedCity, setDetectedCity] = useState("");
+  const [locationMapUrl, setLocationMapUrl] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
