@@ -11,6 +11,7 @@ interface Office {
   lng?: number;
   phone?: string;
   whatsapp?: string;
+  email?: string;
 }
 
 interface ContactDetails {
