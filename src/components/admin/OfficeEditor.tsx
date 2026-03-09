@@ -14,8 +14,6 @@ const OfficeMap = lazy(() => import("@/components/OfficeMap"));
 interface Office {
   city: string;
   address: string;
-  phone: string;
-  whatsapp: string;
   lat?: number;
   lng?: number;
 }
