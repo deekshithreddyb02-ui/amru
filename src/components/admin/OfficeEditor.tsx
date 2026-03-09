@@ -44,7 +44,7 @@ const OfficeEditor = () => {
 
   const addOffice = () => {
     if (!offices) startEditing();
-    setOffices(prev => [...(prev || currentOffices), { city: "", address: "", phone: "", whatsapp: "" }]);
+    setOffices(prev => [...(prev || currentOffices), { city: "", address: "" }]);
   };
 
   const removeOffice = (index: number) => {
