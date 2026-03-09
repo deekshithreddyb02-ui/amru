@@ -591,6 +591,13 @@ const Admin = () => {
                               <TableCell>
                                 {msg.location ? <Badge variant="outline">{msg.location}</Badge> : "-"}
                               </TableCell>
+                              <TableCell>
+                                {msg.mapUrl ? (
+                                  <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" /> View Map
+                                  </a>
+                                ) : "-"}
+                              </TableCell>
                               <TableCell>{msg.service || "-"}</TableCell>
                               <TableCell className="max-w-xs truncate">{msg.cleanMessage}</TableCell>
                               <TableCell>{new Date(msg.created_at).toLocaleDateString()}</TableCell>
