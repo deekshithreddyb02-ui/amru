@@ -11,6 +11,7 @@ interface Office {
   lng?: number;
   phone?: string;
   whatsapp?: string;
+  email?: string;
 }
 
 interface ContactDetails {
@@ -20,16 +21,20 @@ interface ContactDetails {
 
 const defaultOffices: Office[] = [{
   city: "Pune",
-  address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
+  address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061",
+  email: "rain@amrutawater.com"
 }, {
   city: "Hyderabad",
-  address: "Head Office - Hyderabad, Telangana"
+  address: "Head Office - Hyderabad, Telangana",
+  email: "rain@amrutawater.com"
 }, {
   city: "Mumbai",
-  address: "Branch Office - Mumbai, Maharashtra"
+  address: "Branch Office - Mumbai, Maharashtra",
+  email: "rain@amrutawater.com"
 }, {
   city: "Bangalore",
-  address: "Branch Office - Bangalore, Karnataka"
+  address: "Branch Office - Bangalore, Karnataka",
+  email: "rain@amrutawater.com"
 }];
 
 const defaultContactDetails: ContactDetails = {
@@ -172,18 +177,18 @@ const Contact = () => {
                     <div>
                       <div className="font-medium text-foreground">{office.city}</div>
                       {office.phone && (
-                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
                           {office.phone}
+                        </a>
+                      )}
+                      {office.email && (
+                        <a href={`mailto:${office.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {office.email}
                         </a>
                       )}
                     </div>
                   </div>
-                ))}
-                {contactDetails.emails.map((email, i) => (
-                  <a key={i} href={`mailto:${email}`} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                    <Mail className="w-5 h-5 text-primary" />
-                    <span>{email}</span>
-                  </a>
                 ))}
               </div>
             </div>
