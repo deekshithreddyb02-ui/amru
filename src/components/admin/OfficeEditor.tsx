@@ -145,8 +145,6 @@ const OfficeEditor = () => {
               ) : (
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>{office.address}</p>
-                  {office.phone && <p>📞 {office.phone}</p>}
-                  {office.whatsapp && <p>💬 WA: {office.whatsapp}</p>}
                   {office.lat && office.lng && <p className="text-xs">📍 {office.lat}, {office.lng}</p>}
                 </div>
               )}
