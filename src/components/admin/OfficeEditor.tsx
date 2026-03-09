@@ -133,16 +133,6 @@ const OfficeEditor = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label className="text-xs">Phone</Label>
-                      <Input value={office.phone || ""} onChange={e => updateOffice(index, "phone", e.target.value)} className="mt-1" placeholder="+91-XXX-XXX" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">WhatsApp</Label>
-                      <Input value={office.whatsapp || ""} onChange={e => updateOffice(index, "whatsapp", e.target.value)} className="mt-1" placeholder="917410030418" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
                       <Label className="text-xs">Latitude</Label>
                       <Input value={office.lat ?? ""} onChange={e => updateOffice(index, "lat", e.target.value)} className="mt-1" placeholder="18.5997" type="number" step="any" />
                     </div>
