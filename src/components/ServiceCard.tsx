@@ -64,6 +64,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
           );
@@ -74,6 +75,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           const matched = matchCityToOption(city || state);
           setFormData((prev) => ({ ...prev, location: matched }));
           setDetectedCity(displayLocation);
+          setLocationMapUrl(mapsUrl);
           toast.success(`Location detected: ${displayLocation}`);
         } catch {
           toast.error("Could not detect location. Please select manually.");
