@@ -457,13 +457,17 @@ const Admin = () => {
                   </Select>
                   <Select onValueChange={(loc) => {
                     const parsed = messages.map((msg) => {
-                      const match = msg.message.match(/^\[Location: (.+?)\] /);
-                      return { ...msg, location: match ? match[1] : null, cleanMessage: match ? msg.message.replace(match[0], '') : msg.message };
+                      const locMatch = msg.message.match(/\[Location: (.+?)\]\s?/);
+                      const mapMatch = msg.message.match(/\[Map: (https?:\/\/[^\]]+)\]\s?/);
+                      let clean = msg.message;
+                      if (locMatch) clean = clean.replace(locMatch[0], '');
+                      if (mapMatch) clean = clean.replace(mapMatch[0], '');
+                      return { ...msg, location: locMatch ? locMatch[1] : null, mapUrl: mapMatch ? mapMatch[1] : null, cleanMessage: clean.trim() };
                     });
                     const filtered = loc === "none" ? parsed.filter(m => !m.location) : parsed.filter(m => m.location === loc);
                     if (filtered.length === 0) { toast({ title: "No data", description: `No messages found for ${loc}` }); return; }
-                    const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
-                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', '"' + m.cleanMessage.replace(/"/g, '""') + '"', new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
+                    const header = "Name,Email,Phone,Service,Location,Map Link,Message,Date,Status\n";
+                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', m.mapUrl || '', '"' + m.cleanMessage.replace(/"/g, '""') + '"', new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
                     const blob = new Blob([header + rows], { type: 'text/csv' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a'); a.href = url; a.download = `messages-${loc.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url);
@@ -485,8 +489,12 @@ const Admin = () => {
                 {/* Sub-tabs */}
                 {(() => {
                   const parsed = messages.map((msg) => {
-                    const match = msg.message.match(/^\[Location: (.+?)\] /);
-                    return { ...msg, location: match ? match[1] : null, cleanMessage: match ? msg.message.replace(match[0], '') : msg.message };
+                    const locMatch = msg.message.match(/\[Location: (.+?)\]\s?/);
+                    let clean = msg.message;
+                    if (locMatch) clean = clean.replace(locMatch[0], '');
+                    const mapMatch = clean.match(/\[Map: (https?:\/\/[^\]]+)\]\s?/);
+                    if (mapMatch) clean = clean.replace(mapMatch[0], '');
+                    return { ...msg, location: locMatch ? locMatch[1] : null, cleanMessage: clean.trim() };
                   });
                   const allCount = parsed.length;
                   const unread = parsed.filter(m => !m.is_read).length;
@@ -534,6 +542,7 @@ const Admin = () => {
                             <TableHead>Email</TableHead>
                             <TableHead>Phone</TableHead>
                             <TableHead>Location</TableHead>
+                            <TableHead>Map Link</TableHead>
                             <TableHead>Service</TableHead>
                             <TableHead>Message</TableHead>
                             <TableHead>Date</TableHead>
@@ -543,10 +552,15 @@ const Admin = () => {
                         <TableBody>
                           {messages
                             .map((msg) => {
-                              const locationMatch = msg.message.match(/^\[Location: (.+?)\] /);
+                              const locationMatch = msg.message.match(/\[Location: (.+?)\]\s?/);
                               const location = locationMatch ? locationMatch[1] : null;
-                              const cleanMessage = locationMatch ? msg.message.replace(locationMatch[0], '') : msg.message;
-                              return { ...msg, location, cleanMessage };
+                              const mapMatch = msg.message.match(/\[Map: (https?:\/\/[^\]]+)\]\s?/);
+                              const mapUrl = mapMatch ? mapMatch[1] : null;
+                              let cleanMessage = msg.message;
+                              if (locationMatch) cleanMessage = cleanMessage.replace(locationMatch[0], '');
+                              if (mapMatch) cleanMessage = cleanMessage.replace(mapMatch[0], '');
+                              cleanMessage = cleanMessage.trim();
+                              return { ...msg, location, mapUrl, cleanMessage };
                             })
                             .filter((msg) => {
                               // Sub-tab filter
@@ -584,6 +598,13 @@ const Admin = () => {
                               <TableCell>{msg.phone || "-"}</TableCell>
                               <TableCell>
                                 {msg.location ? <Badge variant="outline">{msg.location}</Badge> : "-"}
+                              </TableCell>
+                              <TableCell>
+                                {msg.mapUrl ? (
+                                  <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" /> View Map
+                                  </a>
+                                ) : "-"}
                               </TableCell>
                               <TableCell>{msg.service || "-"}</TableCell>
                               <TableCell className="max-w-xs truncate">{msg.cleanMessage}</TableCell>
