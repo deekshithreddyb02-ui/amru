@@ -534,6 +534,7 @@ const Admin = () => {
                             <TableHead>Email</TableHead>
                             <TableHead>Phone</TableHead>
                             <TableHead>Location</TableHead>
+                            <TableHead>Map Link</TableHead>
                             <TableHead>Service</TableHead>
                             <TableHead>Message</TableHead>
                             <TableHead>Date</TableHead>
