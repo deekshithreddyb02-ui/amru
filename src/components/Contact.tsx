@@ -190,13 +190,6 @@ const Contact = () => {
                     </div>
                   </div>
                 ))}
-                {contactDetails.emails.map((email, i) => (
-                  <a key={i} href={`mailto:${email}`} className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
-                    <Mail className="w-5 h-5 text-primary" />
-                    <span>{email}</span>
-                  </a>
-                ))}
-              </div>
             </div>
 
             {/* Offices */}
