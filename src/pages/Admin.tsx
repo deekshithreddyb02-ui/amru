@@ -457,13 +457,17 @@ const Admin = () => {
                   </Select>
                   <Select onValueChange={(loc) => {
                     const parsed = messages.map((msg) => {
-                      const match = msg.message.match(/^\[Location: (.+?)\] /);
-                      return { ...msg, location: match ? match[1] : null, cleanMessage: match ? msg.message.replace(match[0], '') : msg.message };
+                      const locMatch = msg.message.match(/\[Location: (.+?)\]\s?/);
+                      const mapMatch = msg.message.match(/\[Map: (https?:\/\/[^\]]+)\]\s?/);
+                      let clean = msg.message;
+                      if (locMatch) clean = clean.replace(locMatch[0], '');
+                      if (mapMatch) clean = clean.replace(mapMatch[0], '');
+                      return { ...msg, location: locMatch ? locMatch[1] : null, mapUrl: mapMatch ? mapMatch[1] : null, cleanMessage: clean.trim() };
                     });
                     const filtered = loc === "none" ? parsed.filter(m => !m.location) : parsed.filter(m => m.location === loc);
                     if (filtered.length === 0) { toast({ title: "No data", description: `No messages found for ${loc}` }); return; }
-                    const header = "Name,Email,Phone,Service,Location,Message,Date,Status\n";
-                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', '"' + m.cleanMessage.replace(/"/g, '""') + '"', new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
+                    const header = "Name,Email,Phone,Service,Location,Map Link,Message,Date,Status\n";
+                    const rows = filtered.map(m => [m.name, m.email, m.phone || '', m.service || '', m.location || 'N/A', m.mapUrl || '', '"' + m.cleanMessage.replace(/"/g, '""') + '"', new Date(m.created_at).toLocaleDateString(), m.is_read ? 'Read' : 'New'].join(',')).join('\n');
                     const blob = new Blob([header + rows], { type: 'text/csv' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a'); a.href = url; a.download = `messages-${loc.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url);
