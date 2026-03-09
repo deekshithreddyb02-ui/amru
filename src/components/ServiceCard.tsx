@@ -123,13 +123,15 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           email,
           phone,
           service: title,
-          message: `${formData.location ? `[Location: ${formData.location}] ` : ''}${message}`,
+          message: `${formData.location ? `[Location: ${formData.location}]` : ''}${locationMapUrl ? ` [Map: ${locationMapUrl}]` : ''} ${message}`.trim(),
         });
 
       if (error) throw error;
 
       toast.success("Enquiry submitted successfully! We'll contact you soon.");
       setFormData({ name: "", phone: "", email: "", message: "", location: "" });
+      setLocationMapUrl("");
+      setDetectedCity("");
       setOpen(false);
     } catch (error) {
       console.error('Submission error:', error);
