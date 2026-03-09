@@ -544,10 +544,15 @@ const Admin = () => {
                         <TableBody>
                           {messages
                             .map((msg) => {
-                              const locationMatch = msg.message.match(/^\[Location: (.+?)\] /);
+                              const locationMatch = msg.message.match(/\[Location: (.+?)\]\s?/);
                               const location = locationMatch ? locationMatch[1] : null;
-                              const cleanMessage = locationMatch ? msg.message.replace(locationMatch[0], '') : msg.message;
-                              return { ...msg, location, cleanMessage };
+                              const mapMatch = msg.message.match(/\[Map: (https?:\/\/[^\]]+)\]\s?/);
+                              const mapUrl = mapMatch ? mapMatch[1] : null;
+                              let cleanMessage = msg.message;
+                              if (locationMatch) cleanMessage = cleanMessage.replace(locationMatch[0], '');
+                              if (mapMatch) cleanMessage = cleanMessage.replace(mapMatch[0], '');
+                              cleanMessage = cleanMessage.trim();
+                              return { ...msg, location, mapUrl, cleanMessage };
                             })
                             .filter((msg) => {
                               // Sub-tab filter
