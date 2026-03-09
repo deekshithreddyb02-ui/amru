@@ -177,8 +177,14 @@ const Contact = () => {
                     <div>
                       <div className="font-medium text-foreground">{office.city}</div>
                       {office.phone && (
-                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
                           {office.phone}
+                        </a>
+                      )}
+                      {office.email && (
+                        <a href={`mailto:${office.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {office.email}
                         </a>
                       )}
                     </div>
