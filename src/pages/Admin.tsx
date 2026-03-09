@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -29,6 +29,7 @@ import AboutEditor from "@/components/admin/AboutEditor";
 import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
+import ContactEditor from "@/components/admin/ContactEditor";
 
 interface User {
   id: string;
@@ -631,11 +632,12 @@ const Admin = () => {
                       </Button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-5 gap-1">
+                  <div className="grid grid-cols-6 gap-1">
                     {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
                       { key: "offices", label: "Office Maps", icon: MapPin },
+                      { key: "contacts", label: "Contacts", icon: Phone },
                       { key: "footer", label: "Footer", icon: PanelBottom },
                       { key: "legal", label: "Legal Notice", icon: Scale },
                     ].map(({ key, label, icon: Icon }) => (
@@ -663,6 +665,7 @@ const Admin = () => {
                     {modifySection === "gallery" && <GalleryEditor />}
                     {modifySection === "navbar" && <NavbarEditor />}
                     {modifySection === "offices" && <OfficeEditor />}
+                    {modifySection === "contacts" && <ContactEditor />}
                     {modifySection === "footer" && <FooterEditor />}
                     {modifySection === "legal" && <LegalNoticeEditor />}
                   </CardContent>

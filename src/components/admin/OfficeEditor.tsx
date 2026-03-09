@@ -14,8 +14,6 @@ const OfficeMap = lazy(() => import("@/components/OfficeMap"));
 interface Office {
   city: string;
   address: string;
-  phone: string;
-  whatsapp: string;
   lat?: number;
   lng?: number;
 }
@@ -46,7 +44,7 @@ const OfficeEditor = () => {
 
   const addOffice = () => {
     if (!offices) startEditing();
-    setOffices(prev => [...(prev || currentOffices), { city: "", address: "", phone: "", whatsapp: "" }]);
+    setOffices(prev => [...(prev || currentOffices), { city: "", address: "" }]);
   };
 
   const removeOffice = (index: number) => {
@@ -135,16 +133,6 @@ const OfficeEditor = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label className="text-xs">Phone</Label>
-                      <Input value={office.phone || ""} onChange={e => updateOffice(index, "phone", e.target.value)} className="mt-1" placeholder="+91-XXX-XXX" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">WhatsApp</Label>
-                      <Input value={office.whatsapp || ""} onChange={e => updateOffice(index, "whatsapp", e.target.value)} className="mt-1" placeholder="917410030418" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
                       <Label className="text-xs">Latitude</Label>
                       <Input value={office.lat ?? ""} onChange={e => updateOffice(index, "lat", e.target.value)} className="mt-1" placeholder="18.5997" type="number" step="any" />
                     </div>
@@ -157,8 +145,6 @@ const OfficeEditor = () => {
               ) : (
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>{office.address}</p>
-                  {office.phone && <p>📞 {office.phone}</p>}
-                  {office.whatsapp && <p>💬 WA: {office.whatsapp}</p>}
                   {office.lat && office.lng && <p className="text-xs">📍 {office.lat}, {office.lng}</p>}
                 </div>
               )}

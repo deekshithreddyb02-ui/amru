@@ -9,43 +9,40 @@ interface Office {
   address: string;
   lat?: number;
   lng?: number;
+}
+
+interface OfficeContact {
+  city: string;
   phone?: string;
   whatsapp?: string;
   email?: string;
 }
 
-interface ContactDetails {
-  phones: string[];
-  emails: string[];
-}
-
 const defaultOffices: Office[] = [{
   city: "Pune",
   address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061",
-  email: "rain@amrutawater.com"
 }, {
   city: "Hyderabad",
   address: "Head Office - Hyderabad, Telangana",
-  email: "rain@amrutawater.com"
 }, {
   city: "Mumbai",
   address: "Branch Office - Mumbai, Maharashtra",
-  email: "rain@amrutawater.com"
 }, {
   city: "Bangalore",
   address: "Branch Office - Bangalore, Karnataka",
-  email: "rain@amrutawater.com"
 }];
 
-const defaultContactDetails: ContactDetails = {
-  phones: ["+91-741-0030-418", "+91-741-0030-417"],
-  emails: ["rain@amrutawater.com"],
-};
+const defaultOfficeContacts: OfficeContact[] = [
+  { city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
+  { city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+  { city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
+  { city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+];
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [offices, setOffices] = useState<Office[]>(defaultOffices);
-  const [contactDetails, setContactDetails] = useState<ContactDetails>(defaultContactDetails);
+  const [officeContacts, setOfficeContacts] = useState<OfficeContact[]>(defaultOfficeContacts);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,11 +59,8 @@ const Contact = () => {
               setOffices(metadata.offices);
             }
             if (row.section_key === "contact_details") {
-              if (metadata?.phones?.length > 0 || metadata?.emails?.length > 0) {
-                setContactDetails({
-                  phones: metadata.phones || defaultContactDetails.phones,
-                  emails: metadata.emails || defaultContactDetails.emails,
-                });
+              if (Array.isArray(metadata?.offices) && metadata.offices.length > 0) {
+                setOfficeContacts(metadata.offices);
               }
             }
           });
@@ -171,20 +165,20 @@ const Contact = () => {
                 Get In Touch
               </h3>
               <div className="space-y-4">
-                {offices.map(office => (
-                  <div key={office.city} className="flex items-start gap-3">
+                {officeContacts.map(contact => (
+                  <div key={contact.city} className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <div className="font-medium text-foreground">{office.city}</div>
-                      {office.phone && (
-                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
-                          {office.phone}
+                      <div className="font-medium text-foreground">{contact.city}</div>
+                      {contact.phone && (
+                        <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
+                          {contact.phone}
                         </a>
                       )}
-                      {office.email && (
-                        <a href={`mailto:${office.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                      {contact.email && (
+                        <a href={`mailto:${contact.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                           <Mail className="w-3 h-3" />
-                          {office.email}
+                          {contact.email}
                         </a>
                       )}
                     </div>
