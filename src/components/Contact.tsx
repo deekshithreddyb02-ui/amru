@@ -165,20 +165,20 @@ const Contact = () => {
                 Get In Touch
               </h3>
               <div className="space-y-4">
-                {offices.map(office => (
-                  <div key={office.city} className="flex items-start gap-3">
+                {officeContacts.map(contact => (
+                  <div key={contact.city} className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <div className="font-medium text-foreground">{office.city}</div>
-                      {office.phone && (
-                        <a href={`tel:${office.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
-                          {office.phone}
+                      <div className="font-medium text-foreground">{contact.city}</div>
+                      {contact.phone && (
+                        <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
+                          {contact.phone}
                         </a>
                       )}
-                      {office.email && (
-                        <a href={`mailto:${office.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                      {contact.email && (
+                        <a href={`mailto:${contact.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                           <Mail className="w-3 h-3" />
-                          {office.email}
+                          {contact.email}
                         </a>
                       )}
                     </div>
