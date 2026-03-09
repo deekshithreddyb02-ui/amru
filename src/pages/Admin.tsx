@@ -632,11 +632,12 @@ const Admin = () => {
                       </Button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-5 gap-1">
+                  <div className="grid grid-cols-6 gap-1">
                     {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
                       { key: "offices", label: "Office Maps", icon: MapPin },
+                      { key: "contacts", label: "Contacts", icon: Phone },
                       { key: "footer", label: "Footer", icon: PanelBottom },
                       { key: "legal", label: "Legal Notice", icon: Scale },
                     ].map(({ key, label, icon: Icon }) => (
@@ -664,6 +665,7 @@ const Admin = () => {
                     {modifySection === "gallery" && <GalleryEditor />}
                     {modifySection === "navbar" && <NavbarEditor />}
                     {modifySection === "offices" && <OfficeEditor />}
+                    {modifySection === "contacts" && <ContactEditor />}
                     {modifySection === "footer" && <FooterEditor />}
                     {modifySection === "legal" && <LegalNoticeEditor />}
                   </CardContent>
