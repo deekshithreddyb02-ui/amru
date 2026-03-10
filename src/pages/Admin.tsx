@@ -691,6 +691,7 @@ const Admin = () => {
                     {modifySection === "testimonials" && <TestimonialsEditor />}
                     {modifySection === "services" && <ServiceEditor />}
                     {modifySection === "gallery" && <GalleryEditor />}
+                    {modifySection === "feedback" && <FeedbackEditor />}
                     {modifySection === "navbar" && <NavbarEditor />}
                     {modifySection === "offices" && <OfficeEditor />}
                     {modifySection === "contacts" && <ContactEditor />}
