@@ -10,6 +10,7 @@ const Certifications = lazy(() => import("@/components/Certifications"));
 const Testimonials = lazy(() => import("@/components/Testimonials"));
 const Gallery = lazy(() => import("@/components/Gallery"));
 const Contact = lazy(() => import("@/components/Contact"));
+const CustomerFeedback = lazy(() => import("@/components/CustomerFeedback"));
 const OfficeLocations = lazy(() => import("@/components/OfficeLocations"));
 const LegalNotice = lazy(() => import("@/components/LegalNotice"));
 const Footer = lazy(() => import("@/components/Footer"));
@@ -28,6 +29,7 @@ const Index = () => {
         <Testimonials />
         <Gallery />
         <Contact />
+        <CustomerFeedback />
         <OfficeLocations />
         <LegalNotice />
         <Footer />
