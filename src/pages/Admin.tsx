@@ -30,6 +30,7 @@ import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
+import FeedbackEditor from "@/components/admin/FeedbackEditor";
 
 interface User {
   id: string;
@@ -638,13 +639,14 @@ const Admin = () => {
               <div className="space-y-6">
                 {/* Two-row grid tabs like reference */}
                 <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="grid grid-cols-5 gap-1 mb-1">
+                  <div className="grid grid-cols-6 gap-1 mb-1">
                     {[
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About Us", icon: Info },
                       { key: "whyus", label: "Why Us", icon: HelpCircle },
                       { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
                       { key: "services", label: "Services", icon: Wrench },
+                      { key: "feedback", label: "Feedback", icon: BarChart3 },
                     ].map(({ key, label, icon: Icon }) => (
                       <Button
                         key={key}
@@ -689,6 +691,7 @@ const Admin = () => {
                     {modifySection === "testimonials" && <TestimonialsEditor />}
                     {modifySection === "services" && <ServiceEditor />}
                     {modifySection === "gallery" && <GalleryEditor />}
+                    {modifySection === "feedback" && <FeedbackEditor />}
                     {modifySection === "navbar" && <NavbarEditor />}
                     {modifySection === "offices" && <OfficeEditor />}
                     {modifySection === "contacts" && <ContactEditor />}
