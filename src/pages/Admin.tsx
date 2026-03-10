@@ -601,9 +601,14 @@ const Admin = () => {
                               </TableCell>
                               <TableCell>
                                 {msg.mapUrl ? (
-                                  <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" /> View Map
-                                  </a>
+                                  <div className="flex flex-col gap-1">
+                                    <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
+                                      <MapPin className="w-3 h-3" /> View Map
+                                    </a>
+                                    <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground hover:underline break-all max-w-[150px]">
+                                      {msg.mapUrl}
+                                    </a>
+                                  </div>
                                 ) : "-"}
                               </TableCell>
                               <TableCell>{msg.service || "-"}</TableCell>
