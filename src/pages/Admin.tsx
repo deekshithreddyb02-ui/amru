@@ -30,6 +30,7 @@ import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
+import FeedbackEditor from "@/components/admin/FeedbackEditor";
 
 interface User {
   id: string;
