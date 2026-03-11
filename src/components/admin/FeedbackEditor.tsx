@@ -1,115 +1,110 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, Star, CheckCircle2, XCircle, Eye, EyeOff, RefreshCw } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Loader2, Trash2, Plus, Eye, EyeOff, RefreshCw, Upload, Image, Video, GripVertical } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
-interface Review {
+interface FeedbackItem {
   id: string;
-  user_id: string;
-  service_id: string;
-  rating: number;
   title: string | null;
-  content: string | null;
-  is_verified: boolean | null;
-  is_published: boolean | null;
-  created_at: string;
-  service_title?: string;
+  description: string | null;
+  media_type: string;
+  media_url: string;
+  display_order: number;
+  is_visible: boolean;
 }
 
 const FeedbackEditor = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [filter, setFilter] = useState<"all" | "pending" | "verified">("all");
+  const [items, setItems] = useState<FeedbackItem[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({ title: "", description: "", media_type: "image" as "image" | "video" });
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
-  const fetchReviews = async () => {
+  const fetchItems = async () => {
     setLoading(true);
+    const { data, error } = await supabase
+      .from("customer_feedback")
+      .select("*")
+      .order("display_order");
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setItems(data || []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchItems(); }, []);
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile) {
+      toast({ title: "Error", description: "Please select a file", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
     try {
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      const ext = selectedFile.name.split(".").pop();
+      const fileName = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      // Fetch service titles
-      const serviceIds = [...new Set((data || []).map((r) => r.service_id).filter(Boolean))];
-      let serviceMap: Record<string, string> = {};
-      if (serviceIds.length > 0) {
-        const { data: svcData } = await supabase
-          .from("services")
-          .select("id, title")
-          .in("id", serviceIds);
-        if (svcData) {
-          serviceMap = Object.fromEntries(svcData.map((s) => [s.id, s.title]));
-        }
-      }
+      const { error: uploadError } = await supabase.storage
+        .from("main")
+        .upload(fileName, selectedFile);
+      if (uploadError) throw uploadError;
 
-      setReviews(
-        (data || []).map((r) => ({
-          ...r,
-          service_title: serviceMap[r.service_id] || "Unknown",
-        }))
-      );
+      const { data: urlData } = supabase.storage.from("main").getPublicUrl(fileName);
+
+      const { error: insertError } = await supabase.from("customer_feedback").insert({
+        title: formData.title || null,
+        description: formData.description || null,
+        media_type: formData.media_type,
+        media_url: urlData.publicUrl,
+        display_order: items.length,
+      });
+      if (insertError) throw insertError;
+
+      toast({ title: "Feedback added successfully" });
+      setFormData({ title: "", description: "", media_type: "image" });
+      setSelectedFile(null);
+      setShowForm(false);
+      fetchItems();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
-  const toggleVerified = async (id: string, current: boolean) => {
+  const toggleVisibility = async (id: string, current: boolean) => {
     const { error } = await supabase
-      .from("reviews")
-      .update({ is_verified: !current })
+      .from("customer_feedback")
+      .update({ is_visible: !current })
       .eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, is_verified: !current } : r)));
-      toast({ title: !current ? "Review verified" : "Verification removed" });
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, is_visible: !current } : i)));
     }
   };
 
-  const togglePublished = async (id: string, current: boolean) => {
-    const { error } = await supabase
-      .from("reviews")
-      .update({ is_published: !current })
-      .eq("id", id);
+  const deleteItem = async (id: string) => {
+    if (!confirm("Delete this feedback item?")) return;
+    const { error } = await supabase.from("customer_feedback").delete().eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, is_published: !current } : r)));
-      toast({ title: !current ? "Review published" : "Review hidden" });
+      setItems((prev) => prev.filter((i) => i.id !== id));
+      toast({ title: "Deleted" });
     }
   };
-
-  const deleteReview = async (id: string) => {
-    if (!confirm("Delete this review permanently?")) return;
-    const { error } = await supabase.from("reviews").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setReviews((prev) => prev.filter((r) => r.id !== id));
-      toast({ title: "Review deleted" });
-    }
-  };
-
-  const filtered = reviews.filter((r) => {
-    if (filter === "pending") return !r.is_verified;
-    if (filter === "verified") return r.is_verified;
-    return true;
-  });
-
-  const pendingCount = reviews.filter((r) => !r.is_verified).length;
 
   if (loading) {
     return (
@@ -124,127 +119,124 @@ const FeedbackEditor = () => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Customer Feedback</h3>
-          <p className="text-sm text-muted-foreground">
-            {reviews.length} total reviews · {pendingCount} pending verification
-          </p>
+          <p className="text-sm text-muted-foreground">{items.length} items · Upload images & videos</p>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchReviews} className="gap-2">
-          <RefreshCw className="w-4 h-4" /> Refresh
-        </Button>
-      </div>
-
-      {/* Filter tabs */}
-      <div className="flex gap-2">
-        {(["all", "pending", "verified"] as const).map((f) => (
-          <Button
-            key={f}
-            variant={filter === f ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(f)}
-            className="capitalize"
-          >
-            {f}
-            {f === "pending" && pendingCount > 0 && (
-              <Badge variant="destructive" className="ml-1.5 text-[10px] px-1.5 py-0">
-                {pendingCount}
-              </Badge>
-            )}
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={fetchItems} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Refresh
           </Button>
-        ))}
+          <Button size="sm" onClick={() => setShowForm(!showForm)} className="gap-2">
+            <Plus className="w-4 h-4" /> Add
+          </Button>
+        </div>
       </div>
 
-      {filtered.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8">No reviews found.</p>
+      {showForm && (
+        <form onSubmit={handleUpload} className="bg-muted/50 rounded-xl p-5 border border-border space-y-4">
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant={formData.media_type === "image" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFormData({ ...formData, media_type: "image" })}
+              className="gap-2"
+            >
+              <Image className="w-4 h-4" /> Image
+            </Button>
+            <Button
+              type="button"
+              variant={formData.media_type === "video" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFormData({ ...formData, media_type: "video" })}
+              className="gap-2"
+            >
+              <Video className="w-4 h-4" /> Video
+            </Button>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">
+              {formData.media_type === "image" ? "Image" : "Video"} File *
+            </label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept={formData.media_type === "image" ? "image/*" : "video/*"}
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              className="w-full text-sm border border-input rounded-md p-2 bg-background"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Title (optional)</label>
+            <Input
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="E.g. Project completion at Site X"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block">Description (optional)</label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Brief description..."
+              rows={2}
+            />
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <Button type="button" variant="outline" onClick={() => { setShowForm(false); setSelectedFile(null); }}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={uploading} className="gap-2">
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              Upload
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {items.length === 0 ? (
+        <p className="text-center text-muted-foreground py-8">No feedback items yet. Click "Add" to upload.</p>
       ) : (
-        <div className="border rounded-lg overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Rating</TableHead>
-                <TableHead>Title / Content</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Verified</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((review) => (
-                <TableRow key={review.id}>
-                  <TableCell>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-3.5 h-3.5 ${s <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground/20"}`}
-                        />
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-[250px]">
-                    {review.title && <p className="font-medium text-sm truncate">{review.title}</p>}
-                    {review.content && (
-                      <p className="text-xs text-muted-foreground line-clamp-2">{review.content}</p>
-                    )}
-                    {!review.title && !review.content && (
-                      <span className="text-xs text-muted-foreground italic">No text</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs">{review.service_title}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(review.created_at).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleVerified(review.id, !!review.is_verified)}
-                      className={review.is_verified ? "text-green-600" : "text-muted-foreground"}
-                    >
-                      {review.is_verified ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : (
-                        <XCircle className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => togglePublished(review.id, !!review.is_published)}
-                      className={review.is_published ? "text-blue-600" : "text-muted-foreground"}
-                    >
-                      {review.is_published ? (
-                        <Eye className="w-4 h-4" />
-                      ) : (
-                        <EyeOff className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteReview(review.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item) => (
+            <div key={item.id} className="bg-card rounded-lg border border-border overflow-hidden">
+              <div className="aspect-video bg-muted relative">
+                {item.media_type === "video" ? (
+                  <video src={item.media_url} className="w-full h-full object-cover" muted preload="metadata" />
+                ) : (
+                  <img src={item.media_url} alt={item.title || ""} className="w-full h-full object-cover" />
+                )}
+                <div className="absolute top-2 right-2 bg-background/80 rounded px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+                  {item.media_type}
+                </div>
+              </div>
+              <div className="p-3 space-y-2">
+                {item.title && <p className="font-medium text-sm truncate">{item.title}</p>}
+                {item.description && <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>}
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={item.is_visible}
+                      onCheckedChange={() => toggleVisibility(item.id, item.is_visible)}
+                    />
+                    <span className="text-xs text-muted-foreground">{item.is_visible ? "Visible" : "Hidden"}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteItem(item.id)}
+                    className="text-destructive hover:text-destructive h-8 w-8"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
