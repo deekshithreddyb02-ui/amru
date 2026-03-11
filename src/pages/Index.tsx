@@ -29,9 +29,9 @@ const Index = () => {
         <Testimonials />
         <Gallery />
         <Contact />
-        <CustomerFeedback />
         <OfficeLocations />
         <LegalNotice />
+        <CustomerFeedback />
         <Footer />
         <ChatBot />
       </Suspense>
