@@ -97,6 +97,42 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_feedback: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_visible: boolean
+          media_type: string
+          media_url: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_visible?: boolean
+          media_type?: string
+          media_url: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_visible?: boolean
+          media_type?: string
+          media_url?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deleted_users: {
         Row: {
           deleted_at: string
