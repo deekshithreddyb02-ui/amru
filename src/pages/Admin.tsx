@@ -601,16 +601,17 @@ const Admin = () => {
                                 {msg.location ? <Badge variant="outline">{msg.location}</Badge> : "-"}
                               </TableCell>
                               <TableCell>
-                                {msg.mapUrl ? (
-                                  <div className="flex flex-col gap-1">
+                                {msg.mapUrl ? (() => {
+                                  const coordMatch = msg.mapUrl.match(/([-\d.]+),\s*([-\d.]+)/);
+                                  const lat = coordMatch ? coordMatch[1] : null;
+                                  const lng = coordMatch ? coordMatch[2] : null;
+                                  return (
                                     <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1">
-                                      <MapPin className="w-3 h-3" /> View Map
+                                      <MapPin className="w-3 h-3" />
+                                      {lat && lng ? `${lat}, ${lng}` : "View Map"}
                                     </a>
-                                    <a href={msg.mapUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-muted-foreground hover:underline break-all max-w-[150px]">
-                                      {msg.mapUrl}
-                                    </a>
-                                  </div>
-                                ) : "-"}
+                                  );
+                                })() : "-"}
                               </TableCell>
                               <TableCell>{msg.service || "-"}</TableCell>
                               <TableCell className="max-w-xs truncate">{msg.cleanMessage}</TableCell>
