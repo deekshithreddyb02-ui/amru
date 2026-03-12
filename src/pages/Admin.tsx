@@ -638,9 +638,9 @@ const Admin = () => {
 
             <TabsContent value="modify">
               <div className="space-y-6">
-                {/* Section navigation */}
+                {/* Two-row grid tabs like reference */}
                 <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="flex flex-wrap gap-1">
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mb-1">
                     {[
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About Us", icon: Info },
@@ -648,6 +648,21 @@ const Admin = () => {
                       { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
                       { key: "services", label: "Services", icon: Wrench },
                       { key: "feedback", label: "Feedback", icon: BarChart3 },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <Button
+                        key={key}
+                        variant={modifySection === key ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setModifySection(key)}
+                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{label}</span>
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
+                    {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
                       { key: "offices", label: "Office Maps", icon: MapPin },
@@ -660,10 +675,10 @@ const Admin = () => {
                         variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1.5 text-xs md:text-sm px-2 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
+                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
                       >
                         <Icon className="w-4 h-4 shrink-0" />
-                        {label}
+                        <span className="truncate">{label}</span>
                       </Button>
                     ))}
                   </div>
