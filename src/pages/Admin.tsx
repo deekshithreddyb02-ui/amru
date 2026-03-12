@@ -675,10 +675,10 @@ const Admin = () => {
                         variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1.5 justify-center ${modifySection === key ? "shadow-md" : ""}`}
+                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
                       >
-                        <Icon className="w-4 h-4" />
-                        {label}
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{label}</span>
                       </Button>
                     ))}
                   </div>
