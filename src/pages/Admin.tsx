@@ -640,7 +640,7 @@ const Admin = () => {
               <div className="space-y-6">
                 {/* Two-row grid tabs like reference */}
                 <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="grid grid-cols-6 gap-1 mb-1">
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mb-1">
                     {[
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About Us", icon: Info },
