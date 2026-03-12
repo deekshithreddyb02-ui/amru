@@ -640,7 +640,7 @@ const Admin = () => {
               <div className="space-y-6">
                 {/* Two-row grid tabs like reference */}
                 <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="grid grid-cols-6 gap-1 mb-1">
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mb-1">
                     {[
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About Us", icon: Info },
@@ -654,14 +654,14 @@ const Admin = () => {
                         variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1.5 justify-center ${modifySection === key ? "shadow-md" : ""}`}
+                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
                       >
-                        <Icon className="w-4 h-4" />
-                        {label}
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{label}</span>
                       </Button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-6 gap-1">
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
                     {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
@@ -675,10 +675,10 @@ const Admin = () => {
                         variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1.5 justify-center ${modifySection === key ? "shadow-md" : ""}`}
+                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
                       >
-                        <Icon className="w-4 h-4" />
-                        {label}
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{label}</span>
                       </Button>
                     ))}
                   </div>
