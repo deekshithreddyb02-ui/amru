@@ -185,7 +185,7 @@ const ContactEditor = () => {
         <div className="space-y-3">
           <Label className="text-sm">Location-wise Contacts</Label>
           {(isEditing ? editData.offices : contacts.offices).map((office, index) => (
-            <div key={`${office.city}-${index}`} className="grid md:grid-cols-4 gap-2 p-3 border border-border rounded-lg">
+            <div key={index} className="grid md:grid-cols-4 gap-2 p-3 border border-border rounded-lg">
               <Input
                 value={office.city}
                 onChange={(e) => updateOffice(index, "city", e.target.value)}
