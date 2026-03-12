@@ -661,7 +661,7 @@ const Admin = () => {
                       </Button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-6 gap-1">
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
                     {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
