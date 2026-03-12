@@ -382,17 +382,17 @@ const Admin = () => {
         >
           <div className="mb-8">
             <TabsList className="w-full h-auto p-1.5 bg-primary/5 border border-primary/10 rounded-xl flex justify-center gap-1">
-              <TabsTrigger value="messages" className="flex-1 gap-2 py-3 px-6 rounded-lg text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
-                <Mail className="w-4 h-4" />
-                Messages {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+              <TabsTrigger value="messages" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
+                <Mail className="w-4 h-4 shrink-0" />
+                <span className="truncate">Messages</span> {unreadCount > 0 && <Badge variant="destructive" className="ml-0.5 text-xs shrink-0">{unreadCount}</Badge>}
               </TabsTrigger>
-              <TabsTrigger value="users" className="flex-1 gap-2 py-3 px-6 rounded-lg text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
-                <Users className="w-4 h-4" />
-                User Management
+              <TabsTrigger value="users" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
+                <Users className="w-4 h-4 shrink-0" />
+                <span className="truncate">Users</span>
               </TabsTrigger>
-              <TabsTrigger value="modify" className="flex-1 gap-2 py-3 px-6 rounded-lg text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
-                <Settings className="w-4 h-4" />
-                System Settings
+              <TabsTrigger value="modify" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
+                <Settings className="w-4 h-4 shrink-0" />
+                <span className="truncate">Settings</span>
               </TabsTrigger>
             </TabsList>
           </div>
