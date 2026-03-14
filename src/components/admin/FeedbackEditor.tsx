@@ -26,6 +26,8 @@ const FeedbackEditor = () => {
   const [formData, setFormData] = useState({ title: "", description: "", media_type: "image" as "image" | "video" });
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
+  const [mediaUrl, setMediaUrl] = useState("");
 
   const fetchItems = async () => {
     setLoading(true);
