@@ -130,17 +130,29 @@ const Admin = () => {
         (profilesRes.data as any[]).forEach((p) => profileMap.set(p.user_id, { full_name: p.full_name || '', phone: p.phone || '', is_approved: p.is_approved !== false }));
       }
 
-      const usersWithRoles: User[] = (rolesRes.data || []).map((r) => ({
-        id: r.user_id,
-        email: emailMap.get(r.user_id)?.email || r.user_id,
-        created_at: emailMap.get(r.user_id)?.created_at || r.created_at,
-        role: r.role as string,
-        full_name: profileMap.get(r.user_id)?.full_name || '',
-        phone: profileMap.get(r.user_id)?.phone || '',
-        last_sign_in_at: emailMap.get(r.user_id)?.last_sign_in_at || null,
-        is_banned: emailMap.get(r.user_id)?.is_banned || false,
-        is_approved: profileMap.get(r.user_id)?.is_approved !== false,
-      }));
+      // Deduplicate users by user_id, keeping highest role (admin > user)
+      const userRoleMap = new Map<string, string>();
+      (rolesRes.data || []).forEach((r) => {
+        const existing = userRoleMap.get(r.user_id);
+        if (!existing || r.role === 'admin') {
+          userRoleMap.set(r.user_id, r.role as string);
+        }
+      });
+
+      const usersWithRoles: User[] = Array.from(userRoleMap.entries()).map(([userId, role]) => {
+        const firstRole = (rolesRes.data || []).find(r => r.user_id === userId);
+        return {
+          id: userId,
+          email: emailMap.get(userId)?.email || userId,
+          created_at: emailMap.get(userId)?.created_at || firstRole?.created_at || '',
+          role,
+          full_name: profileMap.get(userId)?.full_name || '',
+          phone: profileMap.get(userId)?.phone || '',
+          last_sign_in_at: emailMap.get(userId)?.last_sign_in_at || null,
+          is_banned: emailMap.get(userId)?.is_banned || false,
+          is_approved: profileMap.get(userId)?.is_approved !== false,
+        };
+      });
 
       setUsers(usersWithRoles);
 
