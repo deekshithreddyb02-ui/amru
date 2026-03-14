@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, Plus, Eye, EyeOff, RefreshCw, Upload, Image, Video, GripVertical } from "lucide-react";
+import { Loader2, Trash2, Plus, Eye, EyeOff, RefreshCw, Upload, Image, Video, GripVertical, Link } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface FeedbackItem {
