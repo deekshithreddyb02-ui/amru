@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trash2, Plus, Eye, EyeOff, RefreshCw, Upload, Image, Video, GripVertical } from "lucide-react";
+import { Loader2, Trash2, Plus, Eye, EyeOff, RefreshCw, Upload, Image, Video, GripVertical, Link } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface FeedbackItem {
@@ -26,6 +26,8 @@ const FeedbackEditor = () => {
   const [formData, setFormData] = useState({ title: "", description: "", media_type: "image" as "image" | "video" });
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
+  const [mediaUrl, setMediaUrl] = useState("");
 
   const fetchItems = async () => {
     setLoading(true);
@@ -45,28 +47,34 @@ const FeedbackEditor = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) {
+
+    if (uploadMode === "file" && !selectedFile) {
       toast({ title: "Error", description: "Please select a file", variant: "destructive" });
+      return;
+    }
+    if (uploadMode === "url" && !mediaUrl.trim()) {
+      toast({ title: "Error", description: "Please enter a URL", variant: "destructive" });
       return;
     }
 
     setUploading(true);
     try {
-      const ext = selectedFile.name.split(".").pop();
-      const fileName = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      let finalUrl = mediaUrl.trim();
 
-      const { error: uploadError } = await supabase.storage
-        .from("main")
-        .upload(fileName, selectedFile);
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.from("main").getPublicUrl(fileName);
+      if (uploadMode === "file" && selectedFile) {
+        const ext = selectedFile.name.split(".").pop();
+        const fileName = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from("main").upload(fileName, selectedFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("main").getPublicUrl(fileName);
+        finalUrl = urlData.publicUrl;
+      }
 
       const { error: insertError } = await supabase.from("customer_feedback").insert({
         title: formData.title || null,
         description: formData.description || null,
         media_type: formData.media_type,
-        media_url: urlData.publicUrl,
+        media_url: finalUrl,
         display_order: items.length,
       });
       if (insertError) throw insertError;
@@ -74,6 +82,7 @@ const FeedbackEditor = () => {
       toast({ title: "Feedback added successfully" });
       setFormData({ title: "", description: "", media_type: "image" });
       setSelectedFile(null);
+      setMediaUrl("");
       setShowForm(false);
       fetchItems();
     } catch (err: any) {
@@ -154,18 +163,52 @@ const FeedbackEditor = () => {
             </Button>
           </div>
 
-          <div>
-            <label className="text-sm font-medium mb-1 block">
-              {formData.media_type === "image" ? "Image" : "Video"} File *
-            </label>
-            <input
-              ref={fileRef}
-              type="file"
-              accept={formData.media_type === "image" ? "image/*" : "video/*"}
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              className="w-full text-sm border border-input rounded-md p-2 bg-background"
-            />
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant={uploadMode === "file" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setUploadMode("file")}
+              className="gap-2"
+            >
+              <Upload className="w-4 h-4" /> From File
+            </Button>
+            <Button
+              type="button"
+              variant={uploadMode === "url" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setUploadMode("url")}
+              className="gap-2"
+            >
+              <Link className="w-4 h-4" /> From URL
+            </Button>
           </div>
+
+          {uploadMode === "file" ? (
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                {formData.media_type === "image" ? "Image" : "Video"} File *
+              </label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept={formData.media_type === "image" ? "image/*" : "video/*"}
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                className="w-full text-sm border border-input rounded-md p-2 bg-background"
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                {formData.media_type === "image" ? "Image" : "Video"} URL *
+              </label>
+              <Input
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                placeholder="https://example.com/media.jpg"
+              />
+            </div>
+          )}
 
           <div>
             <label className="text-sm font-medium mb-1 block">Title (optional)</label>
