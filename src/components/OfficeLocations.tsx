@@ -79,26 +79,27 @@ const OfficeLocations = () => {
               className="bg-card rounded-xl border border-border overflow-hidden"
               style={{ boxShadow: "var(--card-shadow)" }}
             >
-              <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
-                <OfficeMap office={office} height="250px" />
-              </Suspense>
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block p-4 hover:bg-accent/50 transition-colors cursor-pointer"
-              >
+              <div className="relative">
+                <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
+                  <OfficeMap office={office} height="250px" />
+                </Suspense>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-3 left-3 z-[1000] flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
+                >
+                  Get Direction <MapPin className="w-4 h-4" />
+                </a>
+              </div>
+              <div className="p-4">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="font-semibold text-foreground">{office.city}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{office.address}</p>
-                    <span className="text-xs text-primary mt-2 inline-block">📍 Get Directions →</span>
                     {office.phone && (
-                      <p
-                        className="text-sm text-primary mt-1 inline-block"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <p className="text-sm text-primary mt-1">
                         <a href={`tel:${office.phone.replace(/[^+\d]/g, "")}`} className="hover:underline">
                           📞 {office.phone}
                         </a>
@@ -106,7 +107,7 @@ const OfficeLocations = () => {
                     )}
                   </div>
                 </div>
-              </a>
+              </div>
             </motion.div>
           ))}
         </div>
