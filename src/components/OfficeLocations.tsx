@@ -15,11 +15,11 @@ interface Office {
 }
 
 const defaultOffices: Office[] = [
-  { city: "Pune", address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061" },
-  { city: "Hyderabad", address: "Head Office - Hyderabad, Telangana" },
-  { city: "Mumbai", address: "Branch Office - Mumbai, Maharashtra" },
-  { city: "Bangalore", address: "Branch Office - Bangalore, Karnataka" },
-];
+{ city: "Pune", address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061" },
+{ city: "Hyderabad", address: "Head Office - Hyderabad, Telangana" },
+{ city: "Mumbai", address: "Branch Office - Mumbai, Maharashtra" },
+{ city: "Bangalore", address: "Branch Office - Bangalore, Karnataka" }];
+
 
 const OfficeLocations = () => {
   const [offices, setOffices] = useState<Office[]>(defaultOffices);
@@ -27,11 +27,11 @@ const OfficeLocations = () => {
   useEffect(() => {
     const fetchOffices = async () => {
       try {
-        const { data, error } = await supabase
-          .from("site_content")
-          .select("metadata")
-          .eq("section_key", "offices")
-          .single();
+        const { data, error } = await supabase.
+        from("site_content").
+        select("metadata").
+        eq("section_key", "offices").
+        single();
 
         if (!error && data) {
           const meta = data.metadata as Record<string, any>;
@@ -40,9 +40,9 @@ const OfficeLocations = () => {
           }
         }
       } catch {
+
         // Use defaults
-      }
-    };
+      }};
     fetchOffices();
   }, []);
 
@@ -60,8 +60,8 @@ const OfficeLocations = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
-        >
+          className="text-center mb-10">
+          
           <h2 className="section-heading mb-4">Office Locations</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Find us at our offices across India.
@@ -69,26 +69,26 @@ const OfficeLocations = () => {
         </motion.div>
 
         <div className="grid sm:grid-cols-2 gap-6">
-          {officesWithCoords.map((office, i) => (
-            <motion.div
-              key={office.city}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-card rounded-xl border border-border overflow-hidden"
-              style={{ boxShadow: "var(--card-shadow)" }}
-            >
+          {officesWithCoords.map((office, i) =>
+          <motion.div
+            key={office.city}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            className="bg-card rounded-xl border border-border overflow-hidden"
+            style={{ boxShadow: "var(--card-shadow)" }}>
+            
               <div className="relative">
                 <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
                   <OfficeMap office={office} height="250px" />
                 </Suspense>
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-3 left-3 z-[1000] flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
-                >
+                href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-3 left-3 z-[1000] flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                
                   Get Direction <MapPin className="w-4 h-4" />
                 </a>
               </div>
@@ -98,22 +98,22 @@ const OfficeLocations = () => {
                   <div>
                     <h3 className="font-semibold text-foreground">{office.city}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{office.address}</p>
-                    {office.phone && (
-                      <p className="text-sm text-primary mt-1">
-                        <a href={`tel:${office.phone.replace(/[^+\d]/g, "")}`} className="hover:underline">
-                          📞 {office.phone}
-                        </a>
+                    {office.phone &&
+                  <p className="text-sm text-primary mt-1">
+                        
+
+                    
                       </p>
-                    )}
+                  }
                   </div>
                 </div>
               </div>
             </motion.div>
-          ))}
+          )}
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default OfficeLocations;
