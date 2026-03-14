@@ -47,28 +47,34 @@ const FeedbackEditor = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) {
+
+    if (uploadMode === "file" && !selectedFile) {
       toast({ title: "Error", description: "Please select a file", variant: "destructive" });
+      return;
+    }
+    if (uploadMode === "url" && !mediaUrl.trim()) {
+      toast({ title: "Error", description: "Please enter a URL", variant: "destructive" });
       return;
     }
 
     setUploading(true);
     try {
-      const ext = selectedFile.name.split(".").pop();
-      const fileName = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      let finalUrl = mediaUrl.trim();
 
-      const { error: uploadError } = await supabase.storage
-        .from("main")
-        .upload(fileName, selectedFile);
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.from("main").getPublicUrl(fileName);
+      if (uploadMode === "file" && selectedFile) {
+        const ext = selectedFile.name.split(".").pop();
+        const fileName = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from("main").upload(fileName, selectedFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("main").getPublicUrl(fileName);
+        finalUrl = urlData.publicUrl;
+      }
 
       const { error: insertError } = await supabase.from("customer_feedback").insert({
         title: formData.title || null,
         description: formData.description || null,
         media_type: formData.media_type,
-        media_url: urlData.publicUrl,
+        media_url: finalUrl,
         display_order: items.length,
       });
       if (insertError) throw insertError;
@@ -76,6 +82,7 @@ const FeedbackEditor = () => {
       toast({ title: "Feedback added successfully" });
       setFormData({ title: "", description: "", media_type: "image" });
       setSelectedFile(null);
+      setMediaUrl("");
       setShowForm(false);
       fetchItems();
     } catch (err: any) {
