@@ -326,20 +326,39 @@ const Admin = () => {
   };
 
   const deleteUser = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      toast({ title: "Error", description: "User not found", variant: "destructive" });
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete user "${user.full_name || user.email}"? They will be moved to the Recycle Bin.`)) {
+      return;
+    }
+
     try {
-      const user = users.find(u => u.id === userId);
-      if (user) {
-        // Insert into recycle bin, ignore if already exists
-        await (supabase as any).from('deleted_users').insert({
+      // First, insert into recycle bin
+      const { error: insertError } = await supabase
+        .from('deleted_users')
+        .insert({
           original_user_id: userId,
           email: user.email,
           full_name: user.full_name || '',
           phone: user.phone || '',
-          role: user.role
+          role: user.role,
+          deleted_by: (await supabase.auth.getUser()).data.user?.id || null,
         });
+
+      if (insertError) {
+        console.error('Insert to recycle bin error:', insertError);
+        toast({ title: "Error", description: "Failed to move user to recycle bin: " + sanitizeError(insertError), variant: "destructive" });
+        return;
       }
+
+      // Then delete the user from auth
       const { error } = await supabase.rpc('admin_delete_user', { _target_user_id: userId });
       if (error) throw error;
+
       setUsers(prev => prev.filter(u => u.id !== userId));
       toast({ title: "Success", description: "User deleted and moved to recycle bin" });
       fetchData();
