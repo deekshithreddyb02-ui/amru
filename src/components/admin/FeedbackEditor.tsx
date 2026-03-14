@@ -163,18 +163,52 @@ const FeedbackEditor = () => {
             </Button>
           </div>
 
-          <div>
-            <label className="text-sm font-medium mb-1 block">
-              {formData.media_type === "image" ? "Image" : "Video"} File *
-            </label>
-            <input
-              ref={fileRef}
-              type="file"
-              accept={formData.media_type === "image" ? "image/*" : "video/*"}
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              className="w-full text-sm border border-input rounded-md p-2 bg-background"
-            />
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant={uploadMode === "file" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setUploadMode("file")}
+              className="gap-2"
+            >
+              <Upload className="w-4 h-4" /> From File
+            </Button>
+            <Button
+              type="button"
+              variant={uploadMode === "url" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setUploadMode("url")}
+              className="gap-2"
+            >
+              <Link className="w-4 h-4" /> From URL
+            </Button>
           </div>
+
+          {uploadMode === "file" ? (
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                {formData.media_type === "image" ? "Image" : "Video"} File *
+              </label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept={formData.media_type === "image" ? "image/*" : "video/*"}
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                className="w-full text-sm border border-input rounded-md p-2 bg-background"
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                {formData.media_type === "image" ? "Image" : "Video"} URL *
+              </label>
+              <Input
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                placeholder="https://example.com/media.jpg"
+              />
+            </div>
+          )}
 
           <div>
             <label className="text-sm font-medium mb-1 block">Title (optional)</label>
