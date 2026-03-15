@@ -55,12 +55,6 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     location: "",
   });
 
-  useEffect(() => {
-    const el = descRef.current;
-    if (el) {
-      setIsClamped(el.scrollHeight > el.clientHeight);
-    }
-  }, [description]);
 
   const detectLocation = useCallback(() => {
     if (!navigator.geolocation) {
