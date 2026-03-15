@@ -156,7 +156,7 @@ const Contact = () => {
             once: true
           }} transition={{
             duration: 0.6
-          }} className="space-y-6">
+          }} className="space-y-6 h-full">
             {/* Phone & Email */}
             <div className="bg-card p-6 rounded-xl border border-border" style={{
               boxShadow: "var(--card-shadow)"
