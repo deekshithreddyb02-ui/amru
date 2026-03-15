@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -42,13 +42,11 @@ interface ServiceCardProps {
 
 const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [detectedCity, setDetectedCity] = useState("");
   const [locationMapUrl, setLocationMapUrl] = useState("");
-  const [expanded, setExpanded] = useState(false);
-  const [isClamped, setIsClamped] = useState(false);
-  const descRef = useRef<HTMLParagraphElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -57,12 +55,6 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     location: "",
   });
 
-  useEffect(() => {
-    const el = descRef.current;
-    if (el) {
-      setIsClamped(el.scrollHeight > el.clientHeight);
-    }
-  }, [description]);
 
   const detectLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -179,19 +171,11 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           </h3>
           <div className="flex-1">
             <p
-              ref={descRef}
-              className={`text-muted-foreground text-sm leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}
+              className="text-muted-foreground text-sm leading-relaxed line-clamp-3 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
             >
               {description}
             </p>
-            {isClamped && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className="text-primary text-xs font-medium mt-1 hover:underline"
-              >
-                {expanded ? 'Show less' : 'Read more'}
-              </button>
-            )}
           </div>
           {link ? (
             <a
@@ -212,6 +196,17 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           )}
         </div>
       </motion.article>
+
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-serif">{title}</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
+              {description}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
