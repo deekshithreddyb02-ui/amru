@@ -46,6 +46,9 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [detectedCity, setDetectedCity] = useState("");
   const [locationMapUrl, setLocationMapUrl] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -53,6 +56,13 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     message: "",
     location: "",
   });
+
+  useEffect(() => {
+    const el = descRef.current;
+    if (el) {
+      setIsClamped(el.scrollHeight > el.clientHeight);
+    }
+  }, [description]);
 
   const detectLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -91,56 +101,6 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     );
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const name = formData.name.trim();
-    const email = formData.email.trim();
-    const phone = formData.phone.trim() || null;
-    const message = formData.message.trim() || '';
-
-    // Basic validation
-    if (!name || !email) {
-      toast.error("Please fill in all required fields.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert({
-          name,
-          email,
-          phone,
-          service: title,
-          message: `${formData.location ? `[Location: ${formData.location}]` : ''}${locationMapUrl ? ` [Map: ${locationMapUrl}]` : ''} ${message}`.trim(),
-        });
-
-      if (error) throw error;
-
-      toast.success("Enquiry submitted successfully! We'll contact you soon.");
-      setFormData({ name: "", phone: "", email: "", message: "", location: "" });
-      setLocationMapUrl("");
-      setDetectedCity("");
-      setOpen(false);
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast.error("Failed to submit. Please try calling us at +91-741-0030-418.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <>
       <motion.article
@@ -154,13 +114,13 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
         transition={{ duration: 0.3 }}
         className="bg-white rounded-2xl h-full flex flex-col cursor-pointer shadow-sm border border-border/50 overflow-hidden"
       >
-        <div className="overflow-hidden rounded-t-2xl">
+        <div className="overflow-hidden rounded-t-2xl aspect-[4/3] bg-muted/20">
           <img
             src={image}
             alt={title}
             width={400}
             height={300}
-            className="w-full h-auto object-contain"
+            className="w-full h-full object-cover"
             loading="lazy"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
           />
@@ -169,9 +129,22 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           <h3 className="font-bold text-base text-primary mb-2 leading-tight">
             {title}
           </h3>
-          <p className="text-muted-foreground text-sm leading-relaxed flex-1">
-            {description}
-          </p>
+          <div className="flex-1">
+            <p
+              ref={descRef}
+              className={`text-muted-foreground text-sm leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}
+            >
+              {description}
+            </p>
+            {isClamped && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+                className="text-primary text-xs font-medium mt-1 hover:underline"
+              >
+                {expanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </div>
           {link ? (
             <a
               href={link}
