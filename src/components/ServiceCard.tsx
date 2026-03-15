@@ -149,6 +149,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     }
   };
 
+  return (
     <>
       <motion.article
         initial={{ opacity: 0, y: 20 }}
