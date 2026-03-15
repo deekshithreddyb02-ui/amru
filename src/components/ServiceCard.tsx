@@ -42,13 +42,11 @@ interface ServiceCardProps {
 
 const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [detectedCity, setDetectedCity] = useState("");
   const [locationMapUrl, setLocationMapUrl] = useState("");
-  const [expanded, setExpanded] = useState(false);
-  const [isClamped, setIsClamped] = useState(false);
-  const descRef = useRef<HTMLParagraphElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
