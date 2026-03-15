@@ -171,19 +171,11 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           </h3>
           <div className="flex-1">
             <p
-              ref={descRef}
-              className={`text-muted-foreground text-sm leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}
+              className="text-muted-foreground text-sm leading-relaxed line-clamp-3 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
             >
               {description}
             </p>
-            {isClamped && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-                className="text-primary text-xs font-medium mt-1 hover:underline"
-              >
-                {expanded ? 'Show less' : 'Read more'}
-              </button>
-            )}
           </div>
           {link ? (
             <a
