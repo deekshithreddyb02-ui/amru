@@ -101,7 +101,54 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
     );
   }, []);
 
-  return (
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const phone = formData.phone.trim() || null;
+    const message = formData.message.trim() || '';
+
+    if (!name || !email) {
+      toast.error("Please fill in all required fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert({
+          name,
+          email,
+          phone,
+          service: title,
+          message: `${formData.location ? `[Location: ${formData.location}]` : ''}${locationMapUrl ? ` [Map: ${locationMapUrl}]` : ''} ${message}`.trim(),
+        });
+
+      if (error) throw error;
+
+      toast.success("Enquiry submitted successfully! We'll contact you soon.");
+      setFormData({ name: "", phone: "", email: "", message: "", location: "" });
+      setLocationMapUrl("");
+      setDetectedCity("");
+      setOpen(false);
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("Failed to submit. Please try calling us at +91-741-0030-418.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
     <>
       <motion.article
         initial={{ opacity: 0, y: 20 }}
