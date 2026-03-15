@@ -156,9 +156,9 @@ const Contact = () => {
             once: true
           }} transition={{
             duration: 0.6
-          }} className="space-y-6">
+          }} className="space-y-6 h-full">
             {/* Phone & Email */}
-            <div className="bg-card p-6 rounded-xl border border-border" style={{
+            <div className="bg-card p-6 rounded-xl border border-border h-full" style={{
               boxShadow: "var(--card-shadow)"
             }}>
               <h3 className="font-serif font-semibold text-xl text-foreground mb-4">
@@ -225,7 +225,7 @@ const Contact = () => {
             once: true
           }} transition={{
             duration: 0.6
-          }} className="bg-card p-6 md:p-8 rounded-xl border border-border h-fit" style={{
+          }} className="bg-card p-6 md:p-8 rounded-xl border border-border h-full" style={{
             boxShadow: "var(--card-shadow)"
           }}>
             <h3 className="font-serif font-semibold text-xl text-foreground mb-6">
