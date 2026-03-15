@@ -154,13 +154,13 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
         transition={{ duration: 0.3 }}
         className="bg-white rounded-2xl h-full flex flex-col cursor-pointer shadow-sm border border-border/50 overflow-hidden"
       >
-        <div className="aspect-[4/3] overflow-hidden rounded-t-2xl">
+        <div className="overflow-hidden rounded-t-2xl">
           <img
             src={image}
             alt={title}
             width={400}
             height={300}
-            className="w-full h-full object-cover"
+            className="w-full h-auto object-contain"
             loading="lazy"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
           />
