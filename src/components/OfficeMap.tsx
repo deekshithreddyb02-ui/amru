@@ -61,10 +61,10 @@ const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated 
         className="w-full h-full z-0"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution={`&copy; ${companyName} ${new Date().getFullYear()}`}
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} />
+        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} popupBgColor={popupBgColor} />
       </MapContainer>
     </div>
   );
