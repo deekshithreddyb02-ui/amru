@@ -25,6 +25,7 @@ interface OfficeMapProps {
   office: Office;
   height?: string;
   companyName?: string;
+  popupBgColor?: string;
 }
 
 const AutoOpenMarker = ({ position, office, companyName }: { position: [number, number]; office: Office; companyName: string }) => {
