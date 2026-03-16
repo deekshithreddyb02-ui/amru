@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ServiceCard from "./ServiceCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Service {
   id: string;
@@ -11,13 +12,43 @@ interface Service {
   image: string;
   link: string | null;
   is_main: boolean;
+  is_main_tablet: boolean;
+  is_main_mobile: boolean;
   display_order: number;
+  display_order_tablet: number;
+  display_order_mobile: number;
 }
+
+type DeviceType = "laptop" | "tablet" | "mobile";
+
+const useDeviceType = (): DeviceType => {
+  const [device, setDevice] = useState<DeviceType>("laptop");
+
+  useEffect(() => {
+    const check = () => {
+      const w = window.innerWidth;
+      if (w < 768) setDevice("mobile");
+      else if (w < 1024) setDevice("tablet");
+      else setDevice("laptop");
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  return device;
+};
+
+const DEVICE_FIELDS: Record<DeviceType, { main: keyof Service; order: keyof Service }> = {
+  laptop: { main: "is_main", order: "display_order" },
+  tablet: { main: "is_main_tablet", order: "display_order_tablet" },
+  mobile: { main: "is_main_mobile", order: "display_order_mobile" },
+};
 
 const Services = () => {
   const [showMore, setShowMore] = useState(false);
-  const [mainServices, setMainServices] = useState<Service[]>([]);
-  const [extraServices, setExtraServices] = useState<Service[]>([]);
+  const [allServices, setAllServices] = useState<Service[]>([]);
+  const device = useDeviceType();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -27,12 +58,18 @@ const Services = () => {
         .order("display_order");
 
       if (data) {
-        setMainServices(data.filter((s) => s.is_main));
-        setExtraServices(data.filter((s) => !s.is_main));
+        setAllServices(data as Service[]);
       }
     };
     fetchServices();
   }, []);
+
+  const { main: mainField, order: orderField } = DEVICE_FIELDS[device];
+  const sorted = [...allServices].sort(
+    (a, b) => (a[orderField] as number) - (b[orderField] as number)
+  );
+  const mainServices = sorted.filter((s) => s[mainField]);
+  const extraServices = sorted.filter((s) => !s[mainField]);
 
   return (
     <section id="services" className="py-12 md:py-16 bg-muted/30">
