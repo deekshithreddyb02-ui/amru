@@ -23,27 +23,29 @@ const defaultOffices: Office[] = [
 
 const OfficeLocations = () => {
   const [offices, setOffices] = useState<Office[]>(defaultOffices);
+  const [companyName, setCompanyName] = useState("Amruta Integrated Water Solutions Pvt. Ltd.");
 
   useEffect(() => {
-    const fetchOffices = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase.
-        from("site_content").
-        select("metadata").
-        eq("section_key", "offices").
-        single();
+        const [officesRes, navbarRes] = await Promise.all([
+          supabase.from("site_content").select("metadata").eq("section_key", "offices").single(),
+          supabase.from("site_content").select("metadata").eq("section_key", "navbar").single(),
+        ]);
 
-        if (!error && data) {
-          const meta = data.metadata as Record<string, any>;
-          if (meta?.offices?.length > 0) {
-            setOffices(meta.offices);
-          }
+        if (!officesRes.error && officesRes.data) {
+          const meta = officesRes.data.metadata as Record<string, any>;
+          if (meta?.offices?.length > 0) setOffices(meta.offices);
+        }
+        if (!navbarRes.error && navbarRes.data) {
+          const meta = navbarRes.data.metadata as Record<string, any>;
+          if (meta?.company_name) setCompanyName(meta.company_name);
         }
       } catch {
-
         // Use defaults
-      }};
-    fetchOffices();
+      }
+    };
+    fetchData();
   }, []);
 
   const officesWithCoords = offices.filter(
@@ -81,7 +83,7 @@ const OfficeLocations = () => {
             
               <div className="relative">
                 <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
-                  <OfficeMap office={office} height="250px" />
+                  <OfficeMap office={office} height="250px" companyName={companyName} />
                 </Suspense>
                 <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}

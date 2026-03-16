@@ -23,9 +23,10 @@ interface Office {
 interface OfficeMapProps {
   office: Office;
   height?: string;
+  companyName?: string;
 }
 
-const AutoOpenMarker = ({ position, office }: { position: [number, number]; office: Office }) => {
+const AutoOpenMarker = ({ position, office, companyName }: { position: [number, number]; office: Office; companyName: string }) => {
   const markerRef = useRef<L.Marker>(null);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const AutoOpenMarker = ({ position, office }: { position: [number, number]; offi
     <Marker position={position} ref={markerRef}>
       <Popup>
         <div className="text-sm">
-          <strong>Amruta Integrated Water Solutions Pvt. Ltd.</strong>
+          <strong>{companyName}</strong>
           <p className="mt-1">{office.address}</p>
         </div>
       </Popup>
@@ -46,7 +47,7 @@ const AutoOpenMarker = ({ position, office }: { position: [number, number]; offi
   );
 };
 
-const OfficeMap = ({ office, height = "250px" }: OfficeMapProps) => {
+const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd." }: OfficeMapProps) => {
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
   return (
@@ -61,7 +62,7 @@ const OfficeMap = ({ office, height = "250px" }: OfficeMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <AutoOpenMarker position={[office.lat, office.lng]} office={office} />
+        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} />
       </MapContainer>
     </div>
   );
