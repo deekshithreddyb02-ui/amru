@@ -68,6 +68,7 @@ const OfficeEditor = () => {
       if (error) throw error;
       toast({ title: "Success", description: "Office locations updated" });
       setOffices(null);
+      setPopupBgColor("");
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
