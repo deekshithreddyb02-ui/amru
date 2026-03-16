@@ -358,9 +358,13 @@ export type Database = {
           created_at: string
           description: string
           display_order: number
+          display_order_mobile: number
+          display_order_tablet: number
           id: string
           image: string
           is_main: boolean
+          is_main_mobile: boolean
+          is_main_tablet: boolean
           link: string | null
           title: string
           updated_at: string
@@ -369,9 +373,13 @@ export type Database = {
           created_at?: string
           description: string
           display_order?: number
+          display_order_mobile?: number
+          display_order_tablet?: number
           id?: string
           image: string
           is_main?: boolean
+          is_main_mobile?: boolean
+          is_main_tablet?: boolean
           link?: string | null
           title: string
           updated_at?: string
@@ -380,9 +388,13 @@ export type Database = {
           created_at?: string
           description?: string
           display_order?: number
+          display_order_mobile?: number
+          display_order_tablet?: number
           id?: string
           image?: string
           is_main?: boolean
+          is_main_mobile?: boolean
+          is_main_tablet?: boolean
           link?: string | null
           title?: string
           updated_at?: string

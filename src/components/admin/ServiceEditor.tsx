@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, Save, Trash2, Edit2, X, Upload, ImageIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ServiceDeviceConfig from "./ServiceDeviceConfig";
 
 interface Service {
   id: string;
@@ -168,6 +170,15 @@ const ServiceEditor = () => {
 
   return (
     <div className="space-y-4">
+      <Tabs defaultValue="manage">
+        <TabsList className="w-full">
+          <TabsTrigger value="manage" className="flex-1">Manage Services</TabsTrigger>
+          <TabsTrigger value="device" className="flex-1">Device Views</TabsTrigger>
+        </TabsList>
+        <TabsContent value="device">
+          <ServiceDeviceConfig />
+        </TabsContent>
+        <TabsContent value="manage">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Services ({services.length})</h3>
         <Button size="sm" onClick={() => setAdding(!adding)}>
@@ -317,6 +328,8 @@ const ServiceEditor = () => {
           </Card>
         );
       })}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
