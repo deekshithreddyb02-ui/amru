@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -105,7 +105,7 @@ const AdminResetPassword = () => {
         <CardContent>
           {success ? (
             <div className="text-center py-6 space-y-4">
-              <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
+              <CheckCircle2 className="w-16 h-16 text-primary mx-auto" />
               <div>
                 <h3 className="text-lg font-semibold">Password Updated!</h3>
                 <p className="text-sm text-muted-foreground mt-1">
