@@ -30,6 +30,7 @@ const OfficeEditor = () => {
   const currentOffices: Office[] = offices ?? 
     ((officesContent?.metadata as any)?.offices || []);
   const currentPopupBgColor = popupBgColor || (officesContent?.metadata as any)?.popupBgColor || "";
+  const currentPopupTextColor = popupTextColor || (officesContent?.metadata as any)?.popupTextColor || "";
 
   const startEditing = () => {
     setOffices([...currentOffices]);
