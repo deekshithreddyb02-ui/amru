@@ -47,7 +47,7 @@ const AutoOpenMarker = ({ position, office, companyName }: { position: [number, 
   );
 };
 
-const OfficeMap = ({ office, height = "250px" }: OfficeMapProps) => {
+const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd." }: OfficeMapProps) => {
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
   return (
@@ -62,7 +62,7 @@ const OfficeMap = ({ office, height = "250px" }: OfficeMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <AutoOpenMarker position={[office.lat, office.lng]} office={office} />
+        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} />
       </MapContainer>
     </div>
   );
