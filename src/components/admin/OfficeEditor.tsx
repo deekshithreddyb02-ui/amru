@@ -112,6 +112,31 @@ const OfficeEditor = () => {
         </div>
       </div>
 
+      {isEditing && (
+        <Card className="mb-4">
+          <CardContent className="pt-4 flex items-center gap-4">
+            <Label className="text-sm font-medium whitespace-nowrap">Popup Background Color</Label>
+            <input
+              type="color"
+              value={popupBgColor || "#ffffff"}
+              onChange={e => setPopupBgColor(e.target.value)}
+              className="h-9 w-14 rounded border border-border cursor-pointer"
+            />
+            <Input
+              value={popupBgColor}
+              onChange={e => setPopupBgColor(e.target.value)}
+              placeholder="#ffffff"
+              className="w-32"
+            />
+            {popupBgColor && (
+              <Button variant="ghost" size="sm" onClick={() => setPopupBgColor("")}>
+                Reset
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6">
         {currentOffices.map((office, index) => (
           <Card key={index}>
