@@ -328,6 +328,8 @@ const ServiceEditor = () => {
           </Card>
         );
       })}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
