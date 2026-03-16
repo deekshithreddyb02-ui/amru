@@ -41,7 +41,10 @@ const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupText
   return (
     <Marker position={position} ref={markerRef}>
       <Popup>
-        <div className="text-sm p-1 rounded" style={popupBgColor ? { backgroundColor: popupBgColor } : undefined}>
+        <div className="text-sm p-1 rounded" style={{ 
+          ...(popupBgColor ? { backgroundColor: popupBgColor } : {}),
+          ...(popupTextColor ? { color: popupTextColor } : {})
+        }}>
           <strong>{office.label || companyName}</strong>
           <p className="mt-1">{office.address}</p>
         </div>
