@@ -53,7 +53,7 @@ const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupText
   );
 };
 
-const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor }: OfficeMapProps) => {
+const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor, popupTextColor }: OfficeMapProps) => {
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
   return (
