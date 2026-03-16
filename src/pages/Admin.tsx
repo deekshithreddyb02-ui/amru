@@ -302,27 +302,18 @@ const Admin = () => {
 
   const [resetCooldowns, setResetCooldowns] = useState<Record<string, number>>({});
 
-  const resetUserPassword = async (userId: string) => {
-    const now = Date.now();
-    if (resetCooldowns[userId] && now - resetCooldowns[userId] < 60000) {
-      const remaining = Math.ceil((60000 - (now - resetCooldowns[userId])) / 1000);
-      toast({ title: "Please wait", description: `You can reset this password again in ${remaining}s`, variant: "destructive" });
+  const resetUserPassword = (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      toast({ title: "Error", description: "User not found", variant: "destructive" });
       return;
     }
-    try {
-      const user = users.find(u => u.id === userId);
-      if (!user) throw new Error("User not found");
-      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
-        body: { email: user.email },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setResetCooldowns(prev => ({ ...prev, [userId]: Date.now() }));
-      toast({ title: "Success", description: `Password reset email sent to ${user.email}` });
-    } catch (error: any) {
-      console.error('Reset password error:', error);
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
-    }
+    const params = new URLSearchParams({
+      userId: user.id,
+      name: user.full_name || user.email,
+      email: user.email,
+    });
+    window.open(`/admin/reset-password?${params.toString()}`, '_blank');
   };
 
   const deleteUser = async (userId: string) => {
