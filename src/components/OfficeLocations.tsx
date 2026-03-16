@@ -25,6 +25,7 @@ const defaultOffices: Office[] = [
 const OfficeLocations = () => {
   const [offices, setOffices] = useState<Office[]>(defaultOffices);
   const [companyName, setCompanyName] = useState("Amruta Integrated Water Solutions Pvt. Ltd.");
+  const [popupBgColor, setPopupBgColor] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const fetchData = async () => {
