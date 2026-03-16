@@ -86,7 +86,7 @@ const OfficeLocations = () => {
             
               <div className="relative">
                 <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
-                  <OfficeMap office={office} height="250px" companyName={companyName} />
+                  <OfficeMap office={office} height="250px" companyName={companyName} popupBgColor={popupBgColor} />
                 </Suspense>
                 <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
