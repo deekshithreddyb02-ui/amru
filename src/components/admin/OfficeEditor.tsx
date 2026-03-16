@@ -23,6 +23,7 @@ const OfficeEditor = () => {
   const { data: officesContent, loading: isLoading } = useSiteContent("offices");
   const [offices, setOffices] = useState<Office[] | null>(null);
   const [popupBgColor, setPopupBgColor] = useState<string>("");
+  const [popupTextColor, setPopupTextColor] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
