@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, Save, Trash2, Edit2, X, Upload, ImageIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ServiceDeviceConfig from "./ServiceDeviceConfig";
 
 interface Service {
   id: string;
