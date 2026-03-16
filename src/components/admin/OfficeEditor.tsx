@@ -118,24 +118,55 @@ const OfficeEditor = () => {
 
       {isEditing && (
         <Card className="mb-4">
-          <CardContent className="pt-4 flex items-center gap-4">
-            <Label className="text-sm font-medium whitespace-nowrap">Popup Background Color</Label>
-            <input
-              type="color"
-              value={popupBgColor || "#ffffff"}
-              onChange={e => setPopupBgColor(e.target.value)}
-              className="h-9 w-14 rounded border border-border cursor-pointer"
-            />
-            <Input
-              value={popupBgColor}
-              onChange={e => setPopupBgColor(e.target.value)}
-              placeholder="#ffffff"
-              className="w-32"
-            />
-            {popupBgColor && (
-              <Button variant="ghost" size="sm" onClick={() => setPopupBgColor("")}>
-                Reset
-              </Button>
+          <CardContent className="pt-4 space-y-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Label className="text-sm font-medium whitespace-nowrap">Popup Background Color</Label>
+              <input
+                type="color"
+                value={popupBgColor || "#ffffff"}
+                onChange={e => setPopupBgColor(e.target.value)}
+                className="h-9 w-14 rounded border border-border cursor-pointer"
+              />
+              <Input
+                value={popupBgColor}
+                onChange={e => setPopupBgColor(e.target.value)}
+                placeholder="#ffffff"
+                className="w-32"
+              />
+              {popupBgColor && (
+                <Button variant="ghost" size="sm" onClick={() => setPopupBgColor("")}>
+                  Reset
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-4 flex-wrap">
+              <Label className="text-sm font-medium whitespace-nowrap">Popup Text Color</Label>
+              <input
+                type="color"
+                value={popupTextColor || "#000000"}
+                onChange={e => setPopupTextColor(e.target.value)}
+                className="h-9 w-14 rounded border border-border cursor-pointer"
+              />
+              <Input
+                value={popupTextColor}
+                onChange={e => setPopupTextColor(e.target.value)}
+                placeholder="#000000"
+                className="w-32"
+              />
+              {popupTextColor && (
+                <Button variant="ghost" size="sm" onClick={() => setPopupTextColor("")}>
+                  Reset
+                </Button>
+              )}
+            </div>
+            {/* Preview */}
+            {(popupBgColor || popupTextColor) && (
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground">Preview:</Label>
+                <div className="text-sm px-3 py-2 rounded border" style={{ backgroundColor: popupBgColor || "#fff", color: popupTextColor || "#000" }}>
+                  Sample Popup Text
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
