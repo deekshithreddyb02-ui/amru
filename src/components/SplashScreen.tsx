@@ -23,14 +23,14 @@ const SplashScreen = ({ onFinished }: { onFinished: () => void }) => {
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[hsl(210,40%,96%)]">
       <div className="flex flex-col items-center gap-6">
-        <div className="rounded-xl bg-white p-4 shadow-lg">
-          <img src={logo} alt="Amruta Logo" className="h-24 w-24 object-contain" />
+        <div className="rounded-full bg-white p-3 shadow-lg">
+          <img src={logo} alt="Amruta Logo" className="h-24 w-24 rounded-full object-cover" />
         </div>
         <h1
-          className="text-2xl font-bold tracking-wide"
+          className="text-2xl font-bold tracking-wide text-center"
           style={{ fontFamily: "'Playfair Display', serif", color: "hsl(224, 76%, 48%)" }}
         >
-          Rain GEO
+          Amruta Hydrogeo Services
         </h1>
         <div className="w-64">
           <div className="h-2 w-full overflow-hidden rounded-full bg-[hsl(210,30%,88%)]">
