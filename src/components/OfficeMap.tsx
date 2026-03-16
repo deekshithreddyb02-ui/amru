@@ -29,7 +29,7 @@ interface OfficeMapProps {
   popupTextColor?: string;
 }
 
-const AutoOpenMarker = ({ position, office, companyName, popupBgColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string }) => {
+const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupTextColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string; popupTextColor?: string }) => {
   const markerRef = useRef<L.Marker>(null);
 
   useEffect(() => {
