@@ -28,7 +28,7 @@ interface OfficeMapProps {
   popupBgColor?: string;
 }
 
-const AutoOpenMarker = ({ position, office, companyName }: { position: [number, number]; office: Office; companyName: string }) => {
+const AutoOpenMarker = ({ position, office, companyName, popupBgColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string }) => {
   const markerRef = useRef<L.Marker>(null);
 
   useEffect(() => {
