@@ -170,6 +170,15 @@ const ServiceEditor = () => {
 
   return (
     <div className="space-y-4">
+      <Tabs defaultValue="manage">
+        <TabsList className="w-full">
+          <TabsTrigger value="manage" className="flex-1">Manage Services</TabsTrigger>
+          <TabsTrigger value="device" className="flex-1">Device Views</TabsTrigger>
+        </TabsList>
+        <TabsContent value="device">
+          <ServiceDeviceConfig />
+        </TabsContent>
+        <TabsContent value="manage">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Services ({services.length})</h3>
         <Button size="sm" onClick={() => setAdding(!adding)}>
