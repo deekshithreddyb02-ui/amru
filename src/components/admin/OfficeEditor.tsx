@@ -23,16 +23,19 @@ const OfficeEditor = () => {
   const { data: officesContent, loading: isLoading } = useSiteContent("offices");
   const [offices, setOffices] = useState<Office[] | null>(null);
   const [popupBgColor, setPopupBgColor] = useState<string>("");
+  const [popupTextColor, setPopupTextColor] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const currentOffices: Office[] = offices ?? 
     ((officesContent?.metadata as any)?.offices || []);
   const currentPopupBgColor = popupBgColor || (officesContent?.metadata as any)?.popupBgColor || "";
+  const currentPopupTextColor = popupTextColor || (officesContent?.metadata as any)?.popupTextColor || "";
 
   const startEditing = () => {
     setOffices([...currentOffices]);
     setPopupBgColor(currentPopupBgColor);
+    setPopupTextColor(currentPopupTextColor);
   };
 
   const updateOffice = (index: number, field: keyof Office, value: string) => {
@@ -62,13 +65,14 @@ const OfficeEditor = () => {
     try {
       const { error } = await supabase
         .from("site_content")
-        .update({ metadata: { offices, popupBgColor: popupBgColor || undefined } as unknown as Record<string, any>, updated_at: new Date().toISOString() })
+        .update({ metadata: { offices, popupBgColor: popupBgColor || undefined, popupTextColor: popupTextColor || undefined } as unknown as Record<string, any>, updated_at: new Date().toISOString() })
         .eq("section_key", "offices");
 
       if (error) throw error;
       toast({ title: "Success", description: "Office locations updated" });
       setOffices(null);
       setPopupBgColor("");
+      setPopupTextColor("");
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
@@ -100,7 +104,7 @@ const OfficeEditor = () => {
             </Button>
           ) : (
             <>
-              <Button variant="outline" size="sm" onClick={() => { setOffices(null); setPopupBgColor(""); }}>
+              <Button variant="outline" size="sm" onClick={() => { setOffices(null); setPopupBgColor(""); setPopupTextColor(""); }}>
                 Cancel
               </Button>
               <Button size="sm" onClick={handleSave} disabled={saving}>
@@ -114,24 +118,55 @@ const OfficeEditor = () => {
 
       {isEditing && (
         <Card className="mb-4">
-          <CardContent className="pt-4 flex items-center gap-4">
-            <Label className="text-sm font-medium whitespace-nowrap">Popup Background Color</Label>
-            <input
-              type="color"
-              value={popupBgColor || "#ffffff"}
-              onChange={e => setPopupBgColor(e.target.value)}
-              className="h-9 w-14 rounded border border-border cursor-pointer"
-            />
-            <Input
-              value={popupBgColor}
-              onChange={e => setPopupBgColor(e.target.value)}
-              placeholder="#ffffff"
-              className="w-32"
-            />
-            {popupBgColor && (
-              <Button variant="ghost" size="sm" onClick={() => setPopupBgColor("")}>
-                Reset
-              </Button>
+          <CardContent className="pt-4 space-y-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Label className="text-sm font-medium whitespace-nowrap">Popup Background Color</Label>
+              <input
+                type="color"
+                value={popupBgColor || "#ffffff"}
+                onChange={e => setPopupBgColor(e.target.value)}
+                className="h-9 w-14 rounded border border-border cursor-pointer"
+              />
+              <Input
+                value={popupBgColor}
+                onChange={e => setPopupBgColor(e.target.value)}
+                placeholder="#ffffff"
+                className="w-32"
+              />
+              {popupBgColor && (
+                <Button variant="ghost" size="sm" onClick={() => setPopupBgColor("")}>
+                  Reset
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-4 flex-wrap">
+              <Label className="text-sm font-medium whitespace-nowrap">Popup Text Color</Label>
+              <input
+                type="color"
+                value={popupTextColor || "#000000"}
+                onChange={e => setPopupTextColor(e.target.value)}
+                className="h-9 w-14 rounded border border-border cursor-pointer"
+              />
+              <Input
+                value={popupTextColor}
+                onChange={e => setPopupTextColor(e.target.value)}
+                placeholder="#000000"
+                className="w-32"
+              />
+              {popupTextColor && (
+                <Button variant="ghost" size="sm" onClick={() => setPopupTextColor("")}>
+                  Reset
+                </Button>
+              )}
+            </div>
+            {/* Preview */}
+            {(popupBgColor || popupTextColor) && (
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground">Preview:</Label>
+                <div className="text-sm px-3 py-2 rounded border" style={{ backgroundColor: popupBgColor || "#fff", color: popupTextColor || "#000" }}>
+                  Sample Popup Text
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

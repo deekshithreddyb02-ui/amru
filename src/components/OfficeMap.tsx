@@ -26,9 +26,10 @@ interface OfficeMapProps {
   height?: string;
   companyName?: string;
   popupBgColor?: string;
+  popupTextColor?: string;
 }
 
-const AutoOpenMarker = ({ position, office, companyName, popupBgColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string }) => {
+const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupTextColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string; popupTextColor?: string }) => {
   const markerRef = useRef<L.Marker>(null);
 
   useEffect(() => {
@@ -40,7 +41,10 @@ const AutoOpenMarker = ({ position, office, companyName, popupBgColor }: { posit
   return (
     <Marker position={position} ref={markerRef}>
       <Popup>
-        <div className="text-sm p-1 rounded" style={popupBgColor ? { backgroundColor: popupBgColor } : undefined}>
+        <div className="text-sm p-1 rounded" style={{ 
+          ...(popupBgColor ? { backgroundColor: popupBgColor } : {}),
+          ...(popupTextColor ? { color: popupTextColor } : {})
+        }}>
           <strong>{office.label || companyName}</strong>
           <p className="mt-1">{office.address}</p>
         </div>
@@ -49,7 +53,7 @@ const AutoOpenMarker = ({ position, office, companyName, popupBgColor }: { posit
   );
 };
 
-const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor }: OfficeMapProps) => {
+const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor, popupTextColor }: OfficeMapProps) => {
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
   return (
@@ -61,10 +65,10 @@ const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated 
         className="w-full h-full z-0"
       >
         <TileLayer
-          attribution={`&copy; ${companyName} ${new Date().getFullYear()}`}
+          attribution={`&copy; ${companyName} ${new Date().getFullYear()} | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`}
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} popupBgColor={popupBgColor} />
+        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} popupBgColor={popupBgColor} popupTextColor={popupTextColor} />
       </MapContainer>
     </div>
   );

@@ -26,6 +26,7 @@ const OfficeLocations = () => {
   const [offices, setOffices] = useState<Office[]>(defaultOffices);
   const [companyName, setCompanyName] = useState("Amruta Integrated Water Solutions Pvt. Ltd.");
   const [popupBgColor, setPopupBgColor] = useState<string | undefined>(undefined);
+  const [popupTextColor, setPopupTextColor] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +40,7 @@ const OfficeLocations = () => {
           const meta = officesRes.data.metadata as Record<string, any>;
           if (meta?.offices?.length > 0) setOffices(meta.offices);
           if (meta?.popupBgColor) setPopupBgColor(meta.popupBgColor);
+          if (meta?.popupTextColor) setPopupTextColor(meta.popupTextColor);
         }
         if (!navbarRes.error && navbarRes.data) {
           const meta = navbarRes.data.metadata as Record<string, any>;
@@ -86,7 +88,7 @@ const OfficeLocations = () => {
             
               <div className="relative">
                 <Suspense fallback={<div className="h-[250px] bg-muted animate-pulse" />}>
-                  <OfficeMap office={office} height="250px" companyName={companyName} popupBgColor={popupBgColor} />
+                  <OfficeMap office={office} height="250px" companyName={companyName} popupBgColor={popupBgColor} popupTextColor={popupTextColor} />
                 </Suspense>
                 <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
