@@ -300,7 +300,7 @@ const Admin = () => {
     }
   };
 
-  const [resetCooldowns, setResetCooldowns] = useState<Record<string, number>>({});
+  
 
   const resetUserPassword = (userId: string) => {
     const user = users.find(u => u.id === userId);
