@@ -12,6 +12,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword"));
 
 const queryClient = new QueryClient();
 
