@@ -22,11 +22,13 @@ interface Office {
 const OfficeEditor = () => {
   const { data: officesContent, loading: isLoading } = useSiteContent("offices");
   const [offices, setOffices] = useState<Office[] | null>(null);
+  const [popupBgColor, setPopupBgColor] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const currentOffices: Office[] = offices ?? 
     ((officesContent?.metadata as any)?.offices || []);
+  const currentPopupBgColor = popupBgColor || (officesContent?.metadata as any)?.popupBgColor || "";
 
   const startEditing = () => {
     setOffices([...currentOffices]);
