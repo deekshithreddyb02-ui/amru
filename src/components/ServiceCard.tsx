@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -7,30 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const LOCATION_OPTIONS = ["Pune", "Mumbai", "Hyderabad", "Bangalore", "Other"];
-
-const matchCityToOption = (city: string): string => {
-  const lower = city.toLowerCase();
-  for (const opt of LOCATION_OPTIONS) {
-    if (lower.includes(opt.toLowerCase())) return opt;
-  }
-  return "Other";
-};
+import EnquiryForm from "@/components/EnquiryForm";
 
 interface ServiceCardProps {
   title: string;
