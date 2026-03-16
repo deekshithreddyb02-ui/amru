@@ -281,14 +281,6 @@ const ServiceEditor = () => {
                     <Label>Link (optional)</Label>
                     <Input value={editData.link || ""} onChange={(e) => setEditData({ ...editData, link: e.target.value })} className="mt-1" />
                   </div>
-                  <div>
-                    <Label>Display Order</Label>
-                    <Input type="number" value={editData.display_order || 0} onChange={(e) => setEditData({ ...editData, display_order: parseInt(e.target.value) })} className="mt-1 w-24" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch checked={editData.is_main || false} onCheckedChange={(v) => setEditData({ ...editData, is_main: v })} />
-                    <Label>Show in main row</Label>
-                  </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleSave(service.id)} disabled={saving}>
                       {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
