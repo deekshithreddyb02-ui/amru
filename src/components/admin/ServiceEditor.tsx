@@ -290,24 +290,18 @@ const ServiceEditor = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-start gap-4">
-                  <img src={service.image} alt={service.title} className="w-16 h-12 object-cover rounded" />
+                <div className="flex items-center gap-4">
+                  <img src={service.image} alt={service.title} className="w-14 h-14 object-cover rounded-lg border border-border/50 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm truncate">{service.title}</h4>
-                      {service.is_main && (
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Main</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">{service.description}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Order: {service.display_order}</p>
+                    <h4 className="font-semibold text-sm truncate">{service.title}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{service.description}</p>
                   </div>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => startEdit(service)}>
-                      <Edit2 className="w-4 h-4" />
+                  <div className="flex gap-1 shrink-0">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => startEdit(service)}>
+                      <Edit2 className="w-3.5 h-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(service.id)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
+                    <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleDelete(service.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
