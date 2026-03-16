@@ -62,7 +62,7 @@ const OfficeEditor = () => {
     try {
       const { error } = await supabase
         .from("site_content")
-        .update({ metadata: { offices } as unknown as Record<string, any>, updated_at: new Date().toISOString() })
+        .update({ metadata: { offices, popupBgColor: popupBgColor || undefined } as unknown as Record<string, any>, updated_at: new Date().toISOString() })
         .eq("section_key", "offices");
 
       if (error) throw error;
