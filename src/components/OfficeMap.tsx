@@ -14,6 +14,7 @@ L.Icon.Default.mergeOptions({
 interface Office {
   city: string;
   address: string;
+  label?: string;
   phone?: string;
   whatsapp?: string;
   lat?: number;
