@@ -38,6 +38,7 @@ const OfficeLocations = () => {
         if (!officesRes.error && officesRes.data) {
           const meta = officesRes.data.metadata as Record<string, any>;
           if (meta?.offices?.length > 0) setOffices(meta.offices);
+          if (meta?.popupBgColor) setPopupBgColor(meta.popupBgColor);
         }
         if (!navbarRes.error && navbarRes.data) {
           const meta = navbarRes.data.metadata as Record<string, any>;
