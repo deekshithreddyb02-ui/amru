@@ -45,35 +45,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    const body = await req.json();
-    const { target_user_id, new_password } = body;
-
-    if (!target_user_id || !new_password) {
-      return new Response(JSON.stringify({ error: "User ID and new password are required" }), {
+    const { email } = await req.json();
+    if (!email) {
+      return new Response(JSON.stringify({ error: "Email is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (new_password.length < 6) {
-      return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Use service role client to update the user's password directly
+    // Use service role client to send password reset
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const { error } = await adminClient.auth.admin.updateUserById(target_user_id, {
-      password: new_password,
+    const { error } = await adminClient.auth.resetPasswordForEmail(email, {
+      redirectTo: `${req.headers.get("origin") || "https://amrutahydrogeoservices.lovable.app"}/auth`,
     });
 
     if (error) {
-      console.error("Update password error:", error);
-      return new Response(JSON.stringify({ error: error.message || "Failed to update password" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Handle rate limit errors gracefully
+      if (error.status === 429 || error.code === "over_email_send_rate_limit" || (error.message && error.message.includes("rate limit"))) {
+        return new Response(JSON.stringify({ error: "Please wait a few minutes before requesting another password reset." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw error;
     }
 
     return new Response(JSON.stringify({ success: true }), {
