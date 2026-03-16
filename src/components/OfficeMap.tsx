@@ -14,6 +14,7 @@ L.Icon.Default.mergeOptions({
 interface Office {
   city: string;
   address: string;
+  label?: string;
   phone?: string;
   whatsapp?: string;
   lat?: number;
@@ -39,7 +40,7 @@ const AutoOpenMarker = ({ position, office, companyName }: { position: [number, 
     <Marker position={position} ref={markerRef}>
       <Popup>
         <div className="text-sm">
-          <strong>{companyName}</strong>
+          <strong>{office.label || companyName}</strong>
           <p className="mt-1">{office.address}</p>
         </div>
       </Popup>

@@ -8,6 +8,7 @@ const OfficeMap = lazy(() => import("@/components/OfficeMap"));
 interface Office {
   city: string;
   address: string;
+  label?: string;
   lat?: number;
   lng?: number;
   phone?: string;

@@ -14,6 +14,7 @@ const OfficeMap = lazy(() => import("@/components/OfficeMap"));
 interface Office {
   city: string;
   address: string;
+  label?: string;
   lat?: number;
   lng?: number;
 }
@@ -123,6 +124,10 @@ const OfficeEditor = () => {
             <CardContent className="space-y-3">
               {isEditing ? (
                 <>
+                  <div>
+                    <Label className="text-xs">Display Name (shown in map popup)</Label>
+                    <Input value={office.label || ""} onChange={e => updateOffice(index, "label", e.target.value)} className="mt-1" placeholder="e.g. Amruta Integrated Water Solutions Pvt. Ltd." />
+                  </div>
                   <div>
                     <Label className="text-xs">City</Label>
                     <Input value={office.city} onChange={e => updateOffice(index, "city", e.target.value)} className="mt-1" placeholder="City name" />
