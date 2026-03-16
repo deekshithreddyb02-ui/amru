@@ -25,9 +25,10 @@ interface OfficeMapProps {
   office: Office;
   height?: string;
   companyName?: string;
+  popupBgColor?: string;
 }
 
-const AutoOpenMarker = ({ position, office, companyName }: { position: [number, number]; office: Office; companyName: string }) => {
+const AutoOpenMarker = ({ position, office, companyName, popupBgColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string }) => {
   const markerRef = useRef<L.Marker>(null);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const AutoOpenMarker = ({ position, office, companyName }: { position: [number, 
   return (
     <Marker position={position} ref={markerRef}>
       <Popup>
-        <div className="text-sm">
+        <div className="text-sm p-1 rounded" style={popupBgColor ? { backgroundColor: popupBgColor } : undefined}>
           <strong>{office.label || companyName}</strong>
           <p className="mt-1">{office.address}</p>
         </div>
@@ -48,7 +49,7 @@ const AutoOpenMarker = ({ position, office, companyName }: { position: [number, 
   );
 };
 
-const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd." }: OfficeMapProps) => {
+const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor }: OfficeMapProps) => {
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
   return (
@@ -60,10 +61,10 @@ const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated 
         className="w-full h-full z-0"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution={`&copy; ${companyName} ${new Date().getFullYear()}`}
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} />
+        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} popupBgColor={popupBgColor} />
       </MapContainer>
     </div>
   );
