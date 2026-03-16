@@ -228,11 +228,7 @@ const ServiceEditor = () => {
               <Label>Link (optional)</Label>
               <Input value={newService.link} onChange={(e) => setNewService({ ...newService, link: e.target.value })} className="mt-1" placeholder="https://..." />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={newService.is_main} onCheckedChange={(v) => setNewService({ ...newService, is_main: v })} />
-              <Label>Show in main row</Label>
-            </div>
-            <Button onClick={handleAdd} disabled={saving}>
+            <Button onClick={handleAdd} disabled={saving} className="w-full">
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               Save Service
             </Button>
