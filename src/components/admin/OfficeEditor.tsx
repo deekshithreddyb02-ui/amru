@@ -32,6 +32,7 @@ const OfficeEditor = () => {
 
   const startEditing = () => {
     setOffices([...currentOffices]);
+    setPopupBgColor(currentPopupBgColor);
   };
 
   const updateOffice = (index: number, field: keyof Office, value: string) => {
