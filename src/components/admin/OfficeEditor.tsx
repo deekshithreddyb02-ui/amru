@@ -104,7 +104,7 @@ const OfficeEditor = () => {
             </Button>
           ) : (
             <>
-              <Button variant="outline" size="sm" onClick={() => { setOffices(null); setPopupBgColor(""); }}>
+              <Button variant="outline" size="sm" onClick={() => { setOffices(null); setPopupBgColor(""); setPopupTextColor(""); }}>
                 Cancel
               </Button>
               <Button size="sm" onClick={handleSave} disabled={saving}>
