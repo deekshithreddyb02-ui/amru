@@ -2,89 +2,65 @@ import { motion } from "framer-motion";
 import { Users, Lightbulb, Search, Shield, Clock, HeartHandshake, LucideIcon } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 
-const iconMap: Record<string, LucideIcon> = {
-  Users,
-  Lightbulb,
-  Search,
-  Shield,
-  Clock,
-  HeartHandshake,
-};
+const iconMap: Record<string, LucideIcon> = { Users, Lightbulb, Search, Shield, Clock, HeartHandshake };
 
 const defaultReasons = [
-  {
-    icon: "Users",
-    title: "Expert Team",
-    description: "Experienced experts and committed professionals with decades of industry knowledge.",
-  },
-  {
-    icon: "Lightbulb",
-    title: "Quality Solutions",
-    description: "Qualitative, efficient, and cost-effective solutions tailored to your needs.",
-  },
-  {
-    icon: "Search",
-    title: "Research-Backed",
-    description: "Detailed, research-backed technological surveys for accurate results.",
-  },
-  {
-    icon: "Shield",
-    title: "Compliance Assured",
-    description: "Full regulatory compliance with CGWB, environmental, and building codes.",
-  },
-  {
-    icon: "Clock",
-    title: "Timely Delivery",
-    description: "On-time project completion with transparent progress updates.",
-  },
-  {
-    icon: "HeartHandshake",
-    title: "Client Focused",
-    description: "Absolute client satisfaction with personalized service and support.",
-  },
+  { icon: "Users", title: "Expert Team", description: "Experienced experts and committed professionals with decades of industry knowledge." },
+  { icon: "Lightbulb", title: "Quality Solutions", description: "Qualitative, efficient, and cost-effective solutions tailored to your needs." },
+  { icon: "Search", title: "Research-Backed", description: "Detailed, research-backed technological surveys for accurate results." },
+  { icon: "Shield", title: "Compliance Assured", description: "Full regulatory compliance with CGWB, environmental, and building codes." },
+  { icon: "Clock", title: "Timely Delivery", description: "On-time project completion with transparent progress updates." },
+  { icon: "HeartHandshake", title: "Client Focused", description: "Absolute client satisfaction with personalized service and support." },
 ];
 
 const WhyUs = () => {
-  const { data, loading } = useSiteContent("whyus");
-
+  const { data } = useSiteContent("whyus");
   const metadata = data?.metadata as { reasons?: typeof defaultReasons } | null;
   const title = data?.title || "Why Choose Us";
   const subtitle = data?.content || "Trusted by hundreds of clients across India for our expertise, reliability, and commitment to excellence.";
   const reasons = metadata?.reasons || defaultReasons;
 
   return (
-    <section id="why" className="py-12 md:py-16 bg-primary">
-      <div className="container mx-auto px-4">
+    <section id="why" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'hsl(var(--ocean-deep))' }}>
+      {/* Decorative gradient orbs */}
+      <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ background: 'hsl(var(--teal))' }} />
+      <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full opacity-10 blur-3xl" style={{ background: 'hsl(var(--secondary))' }} />
+
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-14"
         >
+          <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading text-white mb-4">{title}</h2>
-          <p className="text-white/80 max-w-2xl mx-auto">
-            {subtitle}
-          </p>
+          <p className="text-white/60 max-w-2xl mx-auto text-lg leading-relaxed">{subtitle}</p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {reasons.map((reason, index) => {
             const IconComponent = iconMap[reason.icon] || Users;
             return (
               <motion.div
                 key={reason.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 hover:bg-white/15 transition-colors"
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="group p-6 rounded-2xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:border-white/20"
+                style={{ background: 'hsl(0 0% 100% / 0.04)' }}
               >
-                <IconComponent className="w-10 h-10 text-secondary mb-4" />
-                <h3 className="font-serif font-semibold text-lg text-white mb-2">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-300"
+                  style={{ background: 'hsl(var(--secondary) / 0.12)' }}>
+                  <IconComponent className="w-6 h-6" style={{ color: 'hsl(var(--secondary))' }} />
+                </div>
+                <h3 className="font-bold text-lg text-white mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
                   {reason.title}
                 </h3>
-                <p className="text-white/70 text-sm">{reason.description}</p>
+                <p className="text-white/55 text-sm leading-relaxed">{reason.description}</p>
               </motion.div>
             );
           })}

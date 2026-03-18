@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ServiceCard from "./ServiceCard";
 import { supabase } from "@/integrations/supabase/client";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Service {
   id: string;
@@ -23,7 +22,6 @@ type DeviceType = "laptop" | "tablet" | "mobile";
 
 const useDeviceType = (): DeviceType => {
   const [device, setDevice] = useState<DeviceType>("laptop");
-
   useEffect(() => {
     const check = () => {
       const w = window.innerWidth;
@@ -35,7 +33,6 @@ const useDeviceType = (): DeviceType => {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
-
   return device;
 };
 
@@ -52,75 +49,49 @@ const Services = () => {
 
   useEffect(() => {
     const fetchServices = async () => {
-      const { data } = await supabase
-        .from("services")
-        .select("*")
-        .order("display_order");
-
-      if (data) {
-        setAllServices(data as Service[]);
-      }
+      const { data } = await supabase.from("services").select("*").order("display_order");
+      if (data) setAllServices(data as Service[]);
     };
     fetchServices();
   }, []);
 
   const { main: mainField, order: orderField } = DEVICE_FIELDS[device];
-  const sorted = [...allServices].sort(
-    (a, b) => (a[orderField] as number) - (b[orderField] as number)
-  );
+  const sorted = [...allServices].sort((a, b) => (a[orderField] as number) - (b[orderField] as number));
   const mainServices = sorted.filter((s) => s[mainField]);
   const extraServices = sorted.filter((s) => !s[mainField]);
 
   return (
-    <section id="services" className="py-12 md:py-16 bg-muted/30">
+    <section id="services" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-14"
         >
+          <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Our Services</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive water management and environmental consulting solutions
-            backed by 35 years of expertise.
+          <p className="section-subheading">
+            Comprehensive water management and environmental consulting solutions backed by 35 years of expertise.
           </p>
         </motion.div>
 
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           {mainServices.map((service, index) => (
             <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.85rem)]">
-              <ServiceCard
-                title={service.title}
-                description={service.description}
-                image={service.image}
-                link={service.link || undefined}
-                delay={index * 0.1}
-              />
+              <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={index * 0.08} />
             </div>
           ))}
         </div>
 
         <AnimatePresence>
           {showMore && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4 }}
-              className="overflow-hidden"
-            >
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="overflow-hidden">
               <div className="flex flex-wrap justify-center gap-4">
                 {extraServices.map((service, index) => (
                   <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.85rem)]">
-                    <ServiceCard
-                      title={service.title}
-                      description={service.description}
-                      image={service.image}
-                      link={service.link || undefined}
-                      delay={index * 0.05}
-                    />
+                    <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={index * 0.04} />
                   </div>
                 ))}
               </div>
@@ -129,19 +100,15 @@ const Services = () => {
         </AnimatePresence>
 
         {extraServices.length > 0 && (
-          <div className="text-center mt-6">
+          <div className="text-center mt-8">
             <button
               onClick={() => setShowMore(!showMore)}
-              className="inline-flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors"
+              className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 border border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground"
             >
               {showMore ? (
-                <>
-                  Show Less <ChevronUp className="w-5 h-5" />
-                </>
+                <>Show Less <ChevronUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" /></>
               ) : (
-                <>
-                  Show More Services <ChevronDown className="w-5 h-5" />
-                </>
+                <>Show More Services <ChevronDown className="w-4 h-4 transition-transform group-hover:translate-y-0.5" /></>
               )}
             </button>
           </div>

@@ -1,285 +1,136 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
+import { MapPin, Phone, Mail, Loader2, Send, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface Office {
-  city: string;
-  address: string;
-  lat?: number;
-  lng?: number;
-}
+interface Office { city: string; address: string; lat?: number; lng?: number; }
+interface OfficeContact { city: string; phone?: string; whatsapp?: string; email?: string; }
 
-interface OfficeContact {
-  city: string;
-  phone?: string;
-  whatsapp?: string;
-  email?: string;
-}
-
-const defaultOffices: Office[] = [{
-  city: "Pune",
-  address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061"
-}, {
-  city: "Hyderabad",
-  address: "Head Office - Hyderabad, Telangana"
-}, {
-  city: "Mumbai",
-  address: "Branch Office - Mumbai, Maharashtra"
-}, {
-  city: "Bangalore",
-  address: "Branch Office - Bangalore, Karnataka"
-}];
+const defaultOffices: Office[] = [
+  { city: "Pune", address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061" },
+  { city: "Hyderabad", address: "Head Office - Hyderabad, Telangana" },
+  { city: "Mumbai", address: "Branch Office - Mumbai, Maharashtra" },
+  { city: "Bangalore", address: "Branch Office - Bangalore, Karnataka" },
+];
 
 const defaultOfficeContacts: OfficeContact[] = [
-{ city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
-{ city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
-{ city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
-{ city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" }];
+  { city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
+  { city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+  { city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
+  { city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+];
 
+const inputCls = "w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-300 placeholder:text-muted-foreground/60";
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [offices, setOffices] = useState<Office[]>(defaultOffices);
   const [officeContacts, setOfficeContacts] = useState<OfficeContact[]>(defaultOfficeContacts);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data, error } = await supabase.
-        from("site_content").
-        select("section_key, metadata").
-        in("section_key", ["offices", "contact_details"]);
-
+        const { data, error } = await supabase.from("site_content").select("section_key, metadata").in("section_key", ["offices", "contact_details"]);
         if (!error && data) {
           data.forEach((row) => {
-            const metadata = row.metadata as Record<string, any>;
-            if (row.section_key === "offices" && metadata?.offices?.length > 0) {
-              setOffices(metadata.offices);
-            }
-            if (row.section_key === "contact_details") {
-              if (Array.isArray(metadata?.offices) && metadata.offices.length > 0) {
-                setOfficeContacts(metadata.offices);
-              }
+            const metadata = row.metadata as Record<string, unknown>;
+            if (row.section_key === "contact_details" && Array.isArray(metadata?.offices) && (metadata.offices as OfficeContact[]).length > 0) {
+              setOfficeContacts(metadata.offices as OfficeContact[]);
             }
           });
         }
-      } catch {
-
-        // Use defaults on error
-      }};
-
+      } catch { /* defaults */ }
+    };
     fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     const form = e.currentTarget;
-    const formData = new FormData(form);
+    const fd = new FormData(form);
+    const name = (fd.get('name') as string)?.trim();
+    const email = (fd.get('email') as string)?.trim();
+    const phone = (fd.get('phone') as string)?.trim() || null;
+    const service = (fd.get('service') as string)?.trim() || null;
+    const message = (fd.get('message') as string)?.trim() || '';
 
-    const name = (formData.get('name') as string)?.trim();
-    const email = (formData.get('email') as string)?.trim();
-    const phone = (formData.get('phone') as string)?.trim() || null;
-    const service = (formData.get('service') as string)?.trim() || null;
-    const message = (formData.get('message') as string)?.trim() || '';
-
-    // Basic validation
-    if (!name || !email) {
-      toast.error("Please fill in all required fields.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address.");
-      setIsSubmitting(false);
-      return;
-    }
+    if (!name || !email) { toast.error("Please fill in all required fields."); setIsSubmitting(false); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("Please enter a valid email address."); setIsSubmitting(false); return; }
 
     try {
-      const { error } = await supabase.
-      from('contact_messages').
-      insert({
-        name,
-        email,
-        phone,
-        service,
-        message
-      });
-
+      const { error } = await supabase.from('contact_messages').insert({ name, email, phone, service, message });
       if (error) throw error;
-
-      toast.success("Thank you! Your inquiry has been received. We will contact you shortly.");
+      toast.success("Thank you! Your inquiry has been received.");
       form.reset();
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error("Failed to submit. Please try calling us at +91-741-0030-418.");
+      toast.error("Failed to submit. Please try calling us.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section id="contact" className="py-12 md:py-16 bg-muted/30">
+    <section id="contact" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
-        <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} viewport={{
-          once: true
-        }} transition={{
-          duration: 0.6
-        }} className="text-center mb-12">
-          <h2 className="section-heading mb-4">Contact Us</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Get in touch with our team for consultations, quotes, or any inquiries.
-          </p>
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-14">
+          <div className="gold-accent mx-auto mb-6" />
+          <h2 className="section-heading mb-4">Get In Touch</h2>
+          <p className="section-subheading">Ready to start your project? Contact our team for consultations, quotes, or any inquiries.</p>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Contact Info */}
-          <motion.div initial={{
-            opacity: 0,
-            x: -20
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} viewport={{
-            once: true
-          }} transition={{
-            duration: 0.6
-          }} className="space-y-6 h-full">
-            {/* Phone & Email */}
-            <div className="bg-card p-6 rounded-xl border border-border h-full" style={{
-              boxShadow: "var(--card-shadow)"
-            }}>
-              <h3 className="font-serif font-semibold text-xl text-foreground mb-4">
-                Get In Touch
-              </h3>
-              <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-primary flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-5">
+            <div className="bg-card p-6 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+              <h3 className="font-bold text-lg text-foreground mb-4" style={{ fontFamily: 'var(--font-serif)' }}>Contact Information</h3>
+              <div className="flex items-center gap-3 mb-5 p-3 rounded-xl border border-border" style={{ background: 'hsl(var(--primary) / 0.04)' }}>
+                <Clock className="w-5 h-5 text-primary flex-shrink-0" />
                 <div>
-                  <div className="font-medium text-sm text-foreground">Business Hours</div>
-                  <div className="text-sm text-muted-foreground">Mon – Sun: 9:00 AM to 6:00 PM</div>
+                  <div className="font-semibold text-sm text-foreground">Business Hours</div>
+                  <div className="text-xs text-muted-foreground">Mon – Sun: 9:00 AM to 6:00 PM</div>
                 </div>
               </div>
               <div className="space-y-4">
-                {officeContacts.map((contact) =>
-                <div key={contact.city} className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                {officeContacts.map((contact) => (
+                  <div key={contact.city} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'hsl(var(--primary) / 0.08)' }}>
+                      <Phone className="w-4 h-4 text-primary" />
+                    </div>
                     <div>
-                      <div className="font-medium text-foreground">{contact.city}</div>
-                      {contact.phone &&
-                    <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="text-sm text-muted-foreground hover:text-primary transition-colors block">
-                          {contact.phone}
-                        </a>
-                    }
-                      {contact.email &&
-                    <a href={`mailto:${contact.email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                          <Mail className="w-3 h-3" />
-                          {contact.email}
-                        </a>
-                    }
+                      <div className="font-semibold text-sm text-foreground">{contact.city}</div>
+                      {contact.phone && <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="text-xs text-muted-foreground hover:text-primary transition-colors block">{contact.phone}</a>}
+                      {contact.email && <a href={`mailto:${contact.email}`} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"><Mail className="w-3 h-3" />{contact.email}</a>}
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
-
-            {/* Offices */}
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-
           </motion.div>
 
-          {/* Contact Form */}
-          <motion.div initial={{
-            opacity: 0,
-            x: 20
-          }} whileInView={{
-            opacity: 1,
-            x: 0
-          }} viewport={{
-            once: true
-          }} transition={{
-            duration: 0.6
-          }} className="bg-card p-6 md:p-8 rounded-xl border border-border h-full" style={{
-            boxShadow: "var(--card-shadow)"
-          }}>
-            <h3 className="font-serif font-semibold text-xl text-foreground mb-6">
-              Send Us a Message
-            </h3>
+          {/* Form */}
+          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+            className="bg-card p-6 md:p-8 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+            <h3 className="font-bold text-lg text-foreground mb-6" style={{ fontFamily: 'var(--font-serif)' }}>Send Us a Message</h3>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
-                    Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    maxLength={100}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
-                    placeholder="Your name" />
-                  
+                  <label htmlFor="name" className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">Name *</label>
+                  <input type="text" id="name" name="name" required maxLength={100} className={inputCls} placeholder="Your name" />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    maxLength={20}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
-                    placeholder="+91 XXXXX XXXXX" />
-                  
+                  <label htmlFor="phone" className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">Phone</label>
+                  <input type="tel" id="phone" name="phone" maxLength={20} className={inputCls} placeholder="+91 XXXXX XXXXX" />
                 </div>
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  maxLength={255}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
-                  placeholder="you@example.com" />
-                
+                <label htmlFor="email" className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">Email *</label>
+                <input type="email" id="email" name="email" required maxLength={255} className={inputCls} placeholder="you@example.com" />
               </div>
               <div>
-                <label htmlFor="service" className="block text-sm font-medium text-foreground mb-1">
-                  Service Interested In
-                </label>
-                <select id="service" name="service" className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+                <label htmlFor="service" className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">Service</label>
+                <select id="service" name="service" className={inputCls}>
                   <option value="">Select a service</option>
                   <option>Rainwater Harvesting</option>
                   <option>Ground Water Survey</option>
@@ -292,38 +143,20 @@ const Contact = () => {
                 </select>
               </div>
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={4}
-                  maxLength={2000}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow resize-none"
-                  placeholder="Tell us about your project..." />
-                
+                <label htmlFor="message" className="block text-xs font-semibold text-foreground mb-1.5 uppercase tracking-wider">Message</label>
+                <textarea id="message" name="message" rows={4} maxLength={2000} className={`${inputCls} resize-none`} placeholder="Tell us about your project..." />
               </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2">
-                
-                {isSubmitting ?
-                <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending...
-                  </> :
-
-                "Send Enquiry"
-                }
+              <button type="submit" disabled={isSubmitting}
+                className="w-full font-semibold py-3.5 px-6 rounded-xl text-sm transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(200 60% 35%))', color: 'white', boxShadow: '0 4px 14px hsl(var(--primary) / 0.3)' }}>
+                {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />Sending...</> : <><Send className="w-4 h-4" />Send Enquiry</>}
               </button>
             </form>
           </motion.div>
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 };
 
 export default Contact;
