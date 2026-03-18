@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
   User,
@@ -20,6 +21,10 @@ import {
   Copy,
   Check,
   ExternalLink,
+  Navigation,
+  Sparkles,
+  Send,
+  LandPlot,
 } from "lucide-react";
 import {
   Select,
@@ -72,6 +77,15 @@ interface EnquiryFormProps {
   serviceTitle: string;
   onSuccess: () => void;
 }
+
+const stagger = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.04, duration: 0.3, ease: "easeOut" },
+  }),
+};
 
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -170,7 +184,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           );
           setFullAddress(data.display_name || "");
 
-          // Auto-set country code
           if (detectedCountry && COUNTRY_CODES[detectedCountry]) {
             setCountryCode(COUNTRY_CODES[detectedCountry]);
           }
@@ -261,20 +274,23 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const conversions = getConversions();
 
   const fieldIcon =
-    "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none";
-  const inputWithIcon = "pl-10";
+    "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none";
+  const inputCls =
+    "pl-10 bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] hover:border-primary/30";
+
+  let fieldIndex = 0;
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 mt-4 max-h-[65vh] overflow-y-auto pr-1"
+      className="space-y-3.5 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin"
     >
-      {/* Name */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-name" className="flex items-center gap-1.5 text-sm font-medium">
+      {/* ── Name ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+        <Label htmlFor="enq-name" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
           <User className="h-3.5 w-3.5 text-primary" /> Name <span className="text-destructive">*</span>
         </Label>
-        <div className="relative">
+        <div className="relative group">
           <User className={fieldIcon} />
           <Input
             id="enq-name"
@@ -283,221 +299,225 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your full name"
-            className={inputWithIcon}
+            className={inputCls}
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Auto-Fill */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/5 hover:text-primary"
-        onClick={detectLocation}
-        disabled={detectingLocation}
+      {/* ── Auto-Fill GPS Button ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full gap-2.5 h-11 relative overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 via-primary/[0.02] to-transparent hover:from-primary/10 hover:via-primary/5 hover:to-primary/[0.02] hover:border-primary/40 text-primary font-semibold transition-all duration-300 hover:shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.25)]"
+          onClick={detectLocation}
+          disabled={detectingLocation}
+        >
+          {detectingLocation ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Detecting Location…</span>
+            </>
+          ) : (
+            <>
+              <div className="relative">
+                <Navigation className="w-4 h-4" />
+                <Sparkles className="w-2.5 h-2.5 absolute -top-1 -right-1.5 text-primary/70" />
+              </div>
+              <span>Auto-Fill Location</span>
+            </>
+          )}
+        </Button>
+      </motion.div>
+
+      {/* ── Location Fields Grid ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible"
+        className="grid grid-cols-2 gap-3"
       >
-        {detectingLocation ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Detecting Location...
-          </>
-        ) : (
-          <>
-            <Locate className="w-4 h-4" />
-            Auto-Fill Location
-          </>
-        )}
-      </Button>
-
-      {/* Country */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-country" className="flex items-center gap-1.5 text-sm font-medium">
-          <Globe className="h-3.5 w-3.5 text-primary" /> Country <span className="text-destructive">*</span>
-        </Label>
-        <div className="relative">
-          <Globe className={fieldIcon} />
-          <Input
-            id="enq-country"
-            required
-            maxLength={100}
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            placeholder="Country"
-            className={inputWithIcon}
-          />
+        {/* Country */}
+        <div className="space-y-1.5">
+          <Label htmlFor="enq-country" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
+            <Globe className="h-3 w-3 text-primary" /> Country <span className="text-destructive">*</span>
+          </Label>
+          <div className="relative group">
+            <Globe className={fieldIcon} />
+            <Input id="enq-country" required maxLength={100} value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" className={inputCls} />
+          </div>
         </div>
-      </div>
 
-      {/* State */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-state" className="flex items-center gap-1.5 text-sm font-medium">
-          <MapPin className="h-3.5 w-3.5 text-primary" /> State / Province <span className="text-destructive">*</span>
-        </Label>
-        <div className="relative">
-          <MapPin className={fieldIcon} />
-          <Input
-            id="enq-state"
-            required
-            maxLength={100}
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            placeholder="State / Province"
-            className={inputWithIcon}
-          />
+        {/* State */}
+        <div className="space-y-1.5">
+          <Label htmlFor="enq-state" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
+            <MapPin className="h-3 w-3 text-primary" /> State <span className="text-destructive">*</span>
+          </Label>
+          <div className="relative group">
+            <MapPin className={fieldIcon} />
+            <Input id="enq-state" required maxLength={100} value={state} onChange={(e) => setState(e.target.value)} placeholder="State / Province" className={inputCls} />
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* City */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-city" className="flex items-center gap-1.5 text-sm font-medium">
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+        <Label htmlFor="enq-city" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
           <Building2 className="h-3.5 w-3.5 text-primary" /> City <span className="text-destructive">*</span>
         </Label>
-        <div className="relative">
+        <div className="relative group">
           <Building2 className={fieldIcon} />
-          <Input
-            id="enq-city"
-            required
-            maxLength={100}
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="City"
-            className={inputWithIcon}
-          />
+          <Input id="enq-city" required maxLength={100} value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className={inputCls} />
         </div>
-      </div>
+      </motion.div>
 
       {/* Full Address */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-address" className="flex items-center gap-1.5 text-sm font-medium">
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+        <Label htmlFor="enq-address" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
           <Home className="h-3.5 w-3.5 text-primary" /> Full Address <span className="text-destructive">*</span>
         </Label>
-        <div className="relative">
+        <div className="relative group">
           <Home className={fieldIcon} />
-          <Input
-            id="enq-address"
-            required
-            maxLength={500}
-            value={fullAddress}
-            onChange={(e) => setFullAddress(e.target.value)}
-            placeholder="Full address"
-            className={inputWithIcon}
-          />
+          <Input id="enq-address" required maxLength={500} value={fullAddress} onChange={(e) => setFullAddress(e.target.value)} placeholder="Full address" className={inputCls} />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Lat / Lon with Google Maps link */}
-      {lat && lon && (
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <MapPin className="h-3 w-3" /> GPS Coordinates
-            </span>
-            <div className="flex items-center gap-1">
-              <a
-                href={googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary hover:underline flex items-center gap-1"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Open in Maps
-              </a>
-              <button
-                type="button"
-                onClick={copyCoordLink}
-                className="ml-2 p-1 rounded hover:bg-muted transition-colors"
-                title="Copy map link"
-              >
-                {copied ? (
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
+      {/* ── GPS Coordinates Panel ── */}
+      <AnimatePresence>
+        {lat && lon && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, scale: 0.95 }}
+            animate={{ opacity: 1, height: "auto", scale: 1 }}
+            exit={{ opacity: 0, height: 0, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] via-transparent to-accent/[0.03] p-3.5 space-y-2.5 backdrop-blur-sm shadow-[inset_0_1px_0_0_hsl(var(--primary)/0.06)]"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-primary/70 flex items-center gap-1.5">
+                <Locate className="h-3 w-3" /> GPS Coordinates
+              </span>
+              <div className="flex items-center gap-1.5">
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors px-2 py-1 rounded-md hover:bg-primary/5"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Maps
+                </a>
+                <button
+                  type="button"
+                  onClick={copyCoordLink}
+                  className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md transition-all duration-200 hover:bg-primary/5 text-muted-foreground hover:text-primary"
+                  title="Copy map link"
+                >
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-xs">
-              <span className="text-muted-foreground">Lat:</span>{" "}
-              <span className="font-mono font-medium">{lat}</span>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-background/50 rounded-lg px-3 py-1.5 border border-border/30">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Lat</span>
+                <p className="font-mono text-sm font-semibold text-foreground">{lat}</p>
+              </div>
+              <div className="bg-background/50 rounded-lg px-3 py-1.5 border border-border/30">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Lon</span>
+                <p className="font-mono text-sm font-semibold text-foreground">{lon}</p>
+              </div>
             </div>
-            <div className="text-xs">
-              <span className="text-muted-foreground">Lon:</span>{" "}
-              <span className="font-mono font-medium">{lon}</span>
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Area Type */}
-      <div className="space-y-1.5">
-        <Label className="flex items-center gap-1.5 text-sm font-medium">
-          <Building2 className="h-3.5 w-3.5 text-primary" /> Area Type <span className="text-destructive">*</span>
-        </Label>
-        <Select value={areaType} onValueChange={setAreaType} required>
-          <SelectTrigger>
-            <SelectValue placeholder="Select area type" />
-          </SelectTrigger>
-          <SelectContent>
-            {AREA_TYPES.map((t) => (
-              <SelectItem key={t} value={t}>
-                {t}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Area + Unit */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-area" className="flex items-center gap-1.5 text-sm font-medium">
-          <Ruler className="h-3.5 w-3.5 text-primary" /> Area <span className="text-destructive">*</span>
-        </Label>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Ruler className={fieldIcon} />
-            <Input
-              id="enq-area"
-              type="number"
-              min="0"
-              step="any"
-              required
-              className={inputWithIcon}
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-              placeholder="e.g. 2400"
-            />
-          </div>
-          <Select value={areaUnit} onValueChange={setAreaUnit}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue />
+      {/* ── Area Type & Area ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible"
+        className="grid grid-cols-2 gap-3"
+      >
+        {/* Area Type */}
+        <div className="space-y-1.5">
+          <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
+            <LandPlot className="h-3 w-3 text-primary" /> Area Type <span className="text-destructive">*</span>
+          </Label>
+          <Select value={areaType} onValueChange={setAreaType} required>
+            <SelectTrigger className="bg-background/60 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]">
+              <SelectValue placeholder="Select type" />
             </SelectTrigger>
-            <SelectContent>
-              {AREA_UNITS.map((u) => (
-                <SelectItem key={u} value={u}>
-                  {u}
-                </SelectItem>
+            <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
+              {AREA_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        {conversions && (
-          <p className="text-xs text-muted-foreground mt-1 bg-muted/30 rounded px-2 py-1">
-            ≈ {conversions.map((c) => `${c.value} ${c.unit}`).join(" · ")}
-          </p>
-        )}
-      </div>
 
-      {/* Phone */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-phone" className="flex items-center gap-1.5 text-sm font-medium">
-          <Phone className="h-3.5 w-3.5 text-primary" /> Phone Number <span className="text-destructive">*</span>
+        {/* Area + Unit */}
+        <div className="space-y-1.5">
+          <Label htmlFor="enq-area" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
+            <Ruler className="h-3 w-3 text-primary" /> Area <span className="text-destructive">*</span>
+          </Label>
+          <div className="flex gap-1.5">
+            <div className="relative flex-1">
+              <Ruler className={fieldIcon} />
+              <Input
+                id="enq-area"
+                type="number"
+                min="0"
+                step="any"
+                required
+                className={inputCls}
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="2400"
+              />
+            </div>
+            <Select value={areaUnit} onValueChange={setAreaUnit}>
+              <SelectTrigger className="w-[80px] bg-background/60 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
+                {AREA_UNITS.map((u) => (
+                  <SelectItem key={u} value={u}>{u}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Area Conversion */}
+      <AnimatePresence>
+        {conversions && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex flex-wrap gap-2 -mt-1"
+          >
+            {conversions.map((c) => (
+              <span
+                key={c.unit}
+                className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-primary/[0.06] text-primary/80 border border-primary/10"
+              >
+                ≈ {c.value} <span className="text-primary/50">{c.unit}</span>
+              </span>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Phone ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+        <Label htmlFor="enq-phone" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
+          <Phone className="h-3.5 w-3.5 text-primary" /> Phone <span className="text-destructive">*</span>
         </Label>
         <div className="flex gap-2">
-          <div className="relative w-[80px]">
-            <Phone className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <div className="relative w-[76px]">
+            <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary/60 pointer-events-none" />
             <Input
-              className="pl-7 text-center text-sm"
+              className="pl-7 text-center text-sm font-mono bg-background/60 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all"
               value={countryCode}
               onChange={(e) => setCountryCode(e.target.value)}
               maxLength={6}
@@ -508,20 +528,20 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             type="tel"
             required
             maxLength={15}
-            className="flex-1"
+            className={`flex-1 ${inputCls.replace("pl-10 ", "")}`}
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Phone number"
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Email */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-email" className="flex items-center gap-1.5 text-sm font-medium">
+      {/* ── Email ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+        <Label htmlFor="enq-email" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
           <Mail className="h-3.5 w-3.5 text-primary" /> Email <span className="text-destructive">*</span>
         </Label>
-        <div className="relative">
+        <div className="relative group">
           <Mail className={fieldIcon} />
           <Input
             id="enq-email"
@@ -530,15 +550,15 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             maxLength={255}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Your email address"
-            className={inputWithIcon}
+            placeholder="your@email.com"
+            className={inputCls}
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Message */}
-      <div className="space-y-1.5">
-        <Label htmlFor="enq-message" className="flex items-center gap-1.5 text-sm font-medium">
+      {/* ── Message ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+        <Label htmlFor="enq-message" className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/70">
           <MessageSquare className="h-3.5 w-3.5 text-primary" /> Message <span className="text-destructive">*</span>
         </Label>
         <Textarea
@@ -548,28 +568,31 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           maxLength={2000}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Auto-generated based on your inputs"
-          rows={4}
+          rows={3}
+          className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.08)] hover:border-primary/30 text-sm resize-none"
         />
-      </div>
+      </motion.div>
 
-      <Button
-        type="submit"
-        className="w-full gap-2 font-semibold"
-        disabled={isSubmitting}
-        size="lg"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Submitting...
-          </>
-        ) : (
-          <>
-            <Mail className="w-4 h-4" />
-            Submit Enquiry
-          </>
-        )}
-      </Button>
+      {/* ── Submit ── */}
+      <motion.div custom={fieldIndex++} variants={stagger} initial="hidden" animate="visible" className="pt-1">
+        <Button
+          type="submit"
+          className="w-full gap-2.5 h-12 font-bold text-sm relative overflow-hidden bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 rounded-xl"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Submitting…
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4" />
+              Submit Enquiry
+            </>
+          )}
+        </Button>
+      </motion.div>
     </form>
   );
 };

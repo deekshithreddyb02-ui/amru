@@ -89,17 +89,25 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
       </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-serif">Enquire About</DialogTitle>
-            <DialogDescription className="text-primary font-medium">
-              {title}
-            </DialogDescription>
-          </DialogHeader>
-          <EnquiryForm
-            serviceTitle={title}
-            onSuccess={() => setOpen(false)}
-          />
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-border/30 shadow-[0_25px_60px_-15px_hsl(var(--primary)/0.15)] bg-gradient-to-b from-background via-background to-muted/20">
+          {/* Header band */}
+          <div className="relative px-6 pt-6 pb-4 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent border-b border-border/30">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
+            <DialogHeader className="relative">
+              <DialogTitle className="text-lg font-serif tracking-tight text-foreground">
+                Enquire About
+              </DialogTitle>
+              <DialogDescription className="text-primary font-semibold text-base">
+                {title}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-6 pb-6">
+            <EnquiryForm
+              serviceTitle={title}
+              onSuccess={() => setOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </>
