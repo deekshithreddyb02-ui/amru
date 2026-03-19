@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Building2, Users, Award, MapPin, LucideIcon } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 const iconMap: Record<string, LucideIcon> = { Award, Building2, Users, MapPin };
 
@@ -18,20 +19,17 @@ const About = () => {
   const content = data?.content || "";
   const stats = metadata?.stats || defaultStats;
   const paragraphs = content.split("\n\n").filter(Boolean);
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   return (
     <section id="about" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient)' }}>
-      {/* Decorative */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03] blur-3xl" style={{ background: 'hsl(var(--primary))' }} />
 
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Text */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+            {...m({ initial: { opacity: 0, x: -40 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.7 } })}
           >
             <div className="gold-accent mb-6" />
             <h2 className="section-heading mb-2">{title}</h2>
@@ -52,12 +50,8 @@ const About = () => {
             </div>
           </motion.div>
 
-          {/* Stats */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+            {...m({ initial: { opacity: 0, x: 40 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.7 } })}
             className="grid grid-cols-2 gap-4"
           >
             {stats.map((stat, index) => {
@@ -65,11 +59,7 @@ const About = () => {
               return (
                 <motion.div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.5, delay: index * 0.1 }, whileHover: { y: -4, transition: { duration: 0.2 } } })}
                   className="group bg-card p-6 rounded-2xl border border-border text-center transition-all duration-300 hover:border-primary/20"
                   style={{ boxShadow: 'var(--card-shadow)' }}
                 >

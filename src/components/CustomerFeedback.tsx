@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Loader2, Play, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 interface FeedbackItem { id: string; title: string | null; description: string | null; media_type: string; media_url: string; display_order: number; }
 
@@ -9,6 +10,8 @@ const CustomerFeedback = () => {
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<FeedbackItem | null>(null);
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -25,7 +28,7 @@ const CustomerFeedback = () => {
   return (
     <section id="customer-feedback" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient)' }}>
       <div className="container mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+        <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true } })} className="text-center mb-14">
           <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Customer Feedback</h2>
           <p className="section-subheading">See what our customers have to say about our services.</p>
@@ -35,11 +38,7 @@ const CustomerFeedback = () => {
           {items.map((item, index) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.08 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: index * 0.08 }, whileHover: { y: -4, transition: { duration: 0.2 } } })}
               className="group bg-card rounded-2xl overflow-hidden border border-border cursor-pointer transition-all duration-500"
               style={{ boxShadow: 'var(--card-shadow)' }}
               onClick={() => setSelectedItem(item)}

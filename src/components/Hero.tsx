@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Droplets, Shield, Award } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 const DEFAULT_BG = "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
 
@@ -27,6 +28,9 @@ const Hero = () => {
   const title = data?.title || "Integrated Water & Environmental Solutions";
   const backgroundImage = metadata?.backgroundImage || DEFAULT_BG;
   const services = metadata?.services || defaultServices;
+  const noMotion = useNoMotion();
+
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   return (
     <section id="home" className="relative min-h-screen flex items-center pt-16 overflow-hidden">
@@ -51,9 +55,7 @@ const Hero = () => {
         <div className="max-w-4xl">
           {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            {...m({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5 } })}
             className="mb-6"
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-widest bg-white/10 text-white/90 border border-white/15 backdrop-blur-sm">
@@ -64,9 +66,7 @@ const Hero = () => {
 
           {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+            {...m({ initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, delay: 0.15 } })}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.08] mb-6 tracking-tight"
             style={{ fontFamily: "var(--font-serif)" }}
           >
@@ -75,9 +75,7 @@ const Hero = () => {
 
           {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            {...m({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.3 } })}
             className="text-lg md:text-xl text-white/70 max-w-2xl mb-8 leading-relaxed"
           >
             Comprehensive water management, environmental consulting & sustainable solutions backed by 35+ years of expertise.
@@ -85,17 +83,13 @@ const Hero = () => {
 
           {/* Services grid */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            {...m({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.4 } })}
             className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-10"
           >
             {services.map((service, index) => (
               <motion.div
                 key={service}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.5 + index * 0.06 }}
+                {...m({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3, delay: 0.5 + index * 0.06 } })}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm"
               >
                 <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'hsl(42 90% 55%)' }} />
@@ -106,9 +100,7 @@ const Hero = () => {
 
           {/* CTA + Stats row */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            {...m({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.6 } })}
             className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
           >
             <a href="#services" className="btn-primary-hero inline-flex items-center gap-2 group">
@@ -131,21 +123,23 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
+      {/* Scroll indicator — hidden on mobile/tablet */}
+      {!noMotion && (
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-1.5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
-          <div className="w-1 h-2.5 rounded-full bg-white/60" />
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-1.5"
+          >
+            <div className="w-1 h-2.5 rounded-full bg-white/60" />
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </section>
   );
 };

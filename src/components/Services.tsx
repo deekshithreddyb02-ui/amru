@@ -3,19 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ServiceCard from "./ServiceCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 interface Service {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  link: string | null;
-  is_main: boolean;
-  is_main_tablet: boolean;
-  is_main_mobile: boolean;
-  display_order: number;
-  display_order_tablet: number;
-  display_order_mobile: number;
+  id: string; title: string; description: string; image: string; link: string | null;
+  is_main: boolean; is_main_tablet: boolean; is_main_mobile: boolean;
+  display_order: number; display_order_tablet: number; display_order_mobile: number;
 }
 
 type DeviceType = "laptop" | "tablet" | "mobile";
@@ -46,6 +39,8 @@ const Services = () => {
   const [showMore, setShowMore] = useState(false);
   const [allServices, setAllServices] = useState<Service[]>([]);
   const device = useDeviceType();
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -64,10 +59,7 @@ const Services = () => {
     <section id="services" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
           className="text-center mb-14"
         >
           <div className="gold-accent mx-auto mb-6" />
@@ -80,7 +72,7 @@ const Services = () => {
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           {mainServices.map((service, index) => (
             <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.85rem)]">
-              <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={index * 0.08} />
+              <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={noMotion ? 0 : index * 0.08} />
             </div>
           ))}
         </div>
@@ -91,7 +83,7 @@ const Services = () => {
               <div className="flex flex-wrap justify-center gap-4">
                 {extraServices.map((service, index) => (
                   <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.85rem)]">
-                    <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={index * 0.04} />
+                    <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={noMotion ? 0 : index * 0.04} />
                   </div>
                 ))}
               </div>

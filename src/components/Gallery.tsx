@@ -2,11 +2,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGallery } from "@/hooks/useGallery";
 import { Loader2, X } from "lucide-react";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 const Gallery = () => {
   const { images, loading } = useGallery();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const visibleImages = images.filter(img => img.is_visible);
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   if (loading) {
     return (
@@ -23,7 +26,7 @@ const Gallery = () => {
   return (
     <section id="gallery" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-14">
+        <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="text-center mb-14">
           <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Our Gallery</h2>
           <p className="section-subheading">A glimpse of our work and projects across India.</p>
@@ -33,11 +36,7 @@ const Gallery = () => {
           {visibleImages.map((image, index) => (
             <motion.div
               key={image.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.04 }}
-              whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+              {...m({ initial: { opacity: 0, scale: 0.95 }, whileInView: { opacity: 1, scale: 1 }, viewport: { once: true }, transition: { duration: 0.4, delay: index * 0.04 }, whileHover: { scale: 1.02, transition: { duration: 0.2 } } })}
               className="relative group cursor-pointer overflow-hidden rounded-2xl aspect-square"
               style={{ boxShadow: 'var(--card-shadow)' }}
               onClick={() => setSelectedImage(image.image_url)}
