@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 const OfficeMap = lazy(() => import("@/components/OfficeMap"));
 
@@ -19,6 +20,8 @@ const OfficeLocations = () => {
   const [companyName, setCompanyName] = useState("Amruta Integrated Water Solutions Pvt. Ltd.");
   const [popupBgColor, setPopupBgColor] = useState<string | undefined>();
   const [popupTextColor, setPopupTextColor] = useState<string | undefined>();
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +51,7 @@ const OfficeLocations = () => {
   return (
     <section id="office-locations" className="relative py-20 md:py-28 overflow-hidden bg-background">
       <div className="container mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-14">
+        <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="text-center mb-14">
           <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Office Locations</h2>
           <p className="section-subheading">Find us at our offices across India.</p>
@@ -58,10 +61,7 @@ const OfficeLocations = () => {
           {officesWithCoords.map((office, i) => (
             <motion.div
               key={office.city}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.5, delay: i * 0.1 } })}
               className="bg-card rounded-2xl border border-border overflow-hidden"
               style={{ boxShadow: 'var(--card-shadow)' }}
             >

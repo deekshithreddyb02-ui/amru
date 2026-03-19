@@ -3,6 +3,7 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Quote, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import testimonialsBg from "@/assets/testimonials-bg.jpg";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 const fallbackTestimonials = [
   { text: "This is - from Vatika Society - Balewadi- PUNE - having 3 Buildings & 193 Flats. We used to spend 7 to 8 tankers in a day and Rs. 70,000/- to 80,000/- in a month and totally Rs. 8 Lakh to 9 Lakh in a Year for Tankers. Earlier We had a failure with Convention method (survey done by other third party vendor) called Copper Dowsing Rods. We approached Amrutha Ground Water Discovery, to perform Ground Water Survey, and they visited and Survey done with an American Intelligent Ground Water Discovery Machine and they have suggested 4 Bore Points in the Report and out of which they have recommended Greatest Ground Water resource point and we have drilled it and got more than 2 inch of water and we switch the Motor on for 2 to 3 hours and gives us 7 to 8 tankers (80,000 Liters) and it is sufficient for ONE DAY consumption. Now we are saving around Rs. 70,000/- to 80,000/- in a month. Yearly we are saving around Rs. 8 Lack to 9 Lack. They have made us to realize the important", name: "Rajesh Lokhande", organization: "Vatika Society" },
@@ -22,6 +23,8 @@ const Testimonials = () => {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const [testimonials, setTestimonials] = useState(fallbackTestimonials);
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
     const fetch = async () => {
@@ -51,10 +54,7 @@ const Testimonials = () => {
 
       <div className="container mx-auto px-4 relative z-10 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          {...m({ initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
         >
           <div className="flex justify-center gap-1 mb-4">
             {[...Array(5)].map((_, i) => (
@@ -70,15 +70,15 @@ const Testimonials = () => {
             <motion.div
               key={current}
               custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              drag="x"
+              variants={noMotion ? undefined : slideVariants}
+              initial={noMotion ? undefined : "enter"}
+              animate={noMotion ? undefined : "center"}
+              exit={noMotion ? undefined : "exit"}
+              transition={noMotion ? undefined : { duration: 0.4, ease: "easeInOut" }}
+              drag={noMotion ? false : "x"}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.15}
-              onDragEnd={handleDragEnd}
+              onDragEnd={noMotion ? undefined : handleDragEnd}
               className="max-w-3xl mx-auto cursor-grab active:cursor-grabbing px-4"
             >
               <Quote className="w-8 h-8 mx-auto mb-5 opacity-30" style={{ color: 'hsl(var(--secondary))' }} />
@@ -104,7 +104,7 @@ const Testimonials = () => {
         <div className="flex justify-center gap-2 mt-10">
           {testimonials.map((_, i) => (
             <button key={i} onClick={() => goTo(i)} className="group p-1" aria-label={`Go to testimonial ${i + 1}`}>
-              <span className={`block rounded-full transition-all duration-400 ${
+              <span className={`block rounded-full transition-all duration-300 ${
                 i === current ? "w-8 h-2" : "w-2 h-2 group-hover:w-4"
               }`} style={{ background: i === current ? 'hsl(var(--secondary))' : 'hsl(0 0% 100% / 0.25)' }} />
             </button>

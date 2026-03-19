@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Users, Lightbulb, Search, Shield, Clock, HeartHandshake, LucideIcon } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
 const iconMap: Record<string, LucideIcon> = { Users, Lightbulb, Search, Shield, Clock, HeartHandshake };
 
@@ -19,19 +20,17 @@ const WhyUs = () => {
   const title = data?.title || "Why Choose Us";
   const subtitle = data?.content || "Trusted by hundreds of clients across India for our expertise, reliability, and commitment to excellence.";
   const reasons = metadata?.reasons || defaultReasons;
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   return (
     <section id="why" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'hsl(var(--ocean-deep))' }}>
-      {/* Decorative gradient orbs */}
       <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ background: 'hsl(var(--teal))' }} />
       <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full opacity-10 blur-3xl" style={{ background: 'hsl(var(--secondary))' }} />
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
           className="text-center mb-14"
         >
           <div className="gold-accent mx-auto mb-6" />
@@ -45,11 +44,7 @@ const WhyUs = () => {
             return (
               <motion.div
                 key={reason.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.5, delay: index * 0.08 }, whileHover: { y: -4, transition: { duration: 0.2 } } })}
                 className="group p-6 rounded-2xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:border-white/20"
                 style={{ background: 'hsl(0 0% 100% / 0.04)' }}
               >

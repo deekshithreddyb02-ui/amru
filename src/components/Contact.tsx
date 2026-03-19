@@ -3,16 +3,9 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Loader2, Send, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNoMotion } from "@/hooks/useNoMotion";
 
-interface Office { city: string; address: string; lat?: number; lng?: number; }
 interface OfficeContact { city: string; phone?: string; whatsapp?: string; email?: string; }
-
-const defaultOffices: Office[] = [
-  { city: "Pune", address: "301, Fortuna Business Park, Shivar Chowk, Pimple Saudagar, Pimpri Chinchwad, Pune, Maharashtra - 411061" },
-  { city: "Hyderabad", address: "Head Office - Hyderabad, Telangana" },
-  { city: "Mumbai", address: "Branch Office - Mumbai, Maharashtra" },
-  { city: "Bangalore", address: "Branch Office - Bangalore, Karnataka" },
-];
 
 const defaultOfficeContacts: OfficeContact[] = [
   { city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
@@ -26,6 +19,8 @@ const inputCls = "w-full px-4 py-3 rounded-xl border border-border bg-background
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [officeContacts, setOfficeContacts] = useState<OfficeContact[]>(defaultOfficeContacts);
+  const noMotion = useNoMotion();
+  const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,15 +69,14 @@ const Contact = () => {
   return (
     <section id="contact" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-14">
+        <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="text-center mb-14">
           <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Get In Touch</h2>
           <p className="section-subheading">Ready to start your project? Contact our team for consultations, quotes, or any inquiries.</p>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Contact Info */}
-          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-5">
+          <motion.div {...m({ initial: { opacity: 0, x: -30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="space-y-5">
             <div className="bg-card p-6 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
               <h3 className="font-bold text-lg text-foreground mb-4" style={{ fontFamily: 'var(--font-serif)' }}>Contact Information</h3>
               <div className="flex items-center gap-3 mb-5 p-3 rounded-xl border border-border" style={{ background: 'hsl(var(--primary) / 0.04)' }}>
@@ -109,8 +103,7 @@ const Contact = () => {
             </div>
           </motion.div>
 
-          {/* Form */}
-          <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+          <motion.div {...m({ initial: { opacity: 0, x: 30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
             className="bg-card p-6 md:p-8 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
             <h3 className="font-bold text-lg text-foreground mb-6" style={{ fontFamily: 'var(--font-serif)' }}>Send Us a Message</h3>
             <form className="space-y-4" onSubmit={handleSubmit}>
