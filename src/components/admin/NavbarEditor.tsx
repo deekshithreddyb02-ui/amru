@@ -30,8 +30,10 @@ const NavbarEditor = () => {
   const { data, loading, updateContent } = useSiteContent("navbar");
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
   const [externalLink, setExternalLink] = useState<ExternalLink>({ name: "", url: "" });
 
