@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink, Upload } from "lucide-react";
 
 interface NavLink {
   name: string;
