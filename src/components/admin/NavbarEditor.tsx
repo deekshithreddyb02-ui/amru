@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink, Upload } from "lucide-react";
 
 interface NavLink {
   name: string;
@@ -29,8 +30,10 @@ const NavbarEditor = () => {
   const { data, loading, updateContent } = useSiteContent("navbar");
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
   const [externalLink, setExternalLink] = useState<ExternalLink>({ name: "", url: "" });
 
@@ -60,6 +63,35 @@ const NavbarEditor = () => {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+    if (!allowed.includes(file.type)) {
+      toast({ title: "Invalid file", description: "Please upload a PNG, JPG, WebP, or SVG image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Logo must be under 2 MB.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `branding/logo-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("main").upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("main").getPublicUrl(path);
+      setLogoUrl(urlData.publicUrl);
+      toast({ title: "Uploaded", description: "Logo uploaded. Don't forget to save!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: sanitizeError(err), variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -103,16 +135,34 @@ const NavbarEditor = () => {
             />
           </div>
           <div>
-            <Label htmlFor="logo-url">Logo URL (leave empty to use default)</Label>
+            <Label>Logo</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+              <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+                Upload Logo
+              </Button>
+              <span className="text-xs text-muted-foreground">or paste URL below</span>
+            </div>
             <Input
               id="logo-url"
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
               placeholder="https://example.com/logo.png"
+              className="mt-2"
             />
             {logoUrl && (
-              <div className="mt-2">
+              <div className="mt-2 flex items-center gap-3">
                 <img src={logoUrl} alt="Logo preview" className="w-12 h-12 object-contain rounded-full bg-muted" />
+                <Button type="button" variant="ghost" size="sm" onClick={() => setLogoUrl("")} className="text-destructive text-xs">
+                  <Trash2 className="w-3 h-3 mr-1" /> Remove
+                </Button>
               </div>
             )}
           </div>
