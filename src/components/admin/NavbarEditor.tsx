@@ -66,6 +66,35 @@ const NavbarEditor = () => {
     }
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+    if (!allowed.includes(file.type)) {
+      toast({ title: "Invalid file", description: "Please upload a PNG, JPG, WebP, or SVG image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Logo must be under 2 MB.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `branding/logo-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("main").upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("main").getPublicUrl(path);
+      setLogoUrl(urlData.publicUrl);
+      toast({ title: "Uploaded", description: "Logo uploaded. Don't forget to save!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: sanitizeError(err), variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const addNavLink = () => {
     setNavLinks([...navLinks, { name: "", href: "#" }]);
   };
