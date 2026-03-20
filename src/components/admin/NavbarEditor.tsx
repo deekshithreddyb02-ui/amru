@@ -135,16 +135,34 @@ const NavbarEditor = () => {
             />
           </div>
           <div>
-            <Label htmlFor="logo-url">Logo URL (leave empty to use default)</Label>
+            <Label>Logo</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+              <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+                Upload Logo
+              </Button>
+              <span className="text-xs text-muted-foreground">or paste URL below</span>
+            </div>
             <Input
               id="logo-url"
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
               placeholder="https://example.com/logo.png"
+              className="mt-2"
             />
             {logoUrl && (
-              <div className="mt-2">
+              <div className="mt-2 flex items-center gap-3">
                 <img src={logoUrl} alt="Logo preview" className="w-12 h-12 object-contain rounded-full bg-muted" />
+                <Button type="button" variant="ghost" size="sm" onClick={() => setLogoUrl("")} className="text-destructive text-xs">
+                  <Trash2 className="w-3 h-3 mr-1" /> Remove
+                </Button>
               </div>
             )}
           </div>
