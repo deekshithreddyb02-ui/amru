@@ -74,8 +74,8 @@ const NavbarEditor = () => {
       toast({ title: "Invalid file", description: "Please upload a PNG, JPG, WebP, or SVG image.", variant: "destructive" });
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Logo must be under 2 MB.", variant: "destructive" });
+    if (file.size > 50 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Logo must be under 50 MB.", variant: "destructive" });
       return;
     }
     setUploading(true);
