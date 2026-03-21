@@ -73,7 +73,7 @@ const OfficeLocations = () => {
                   href={`https://www.google.com/maps/dir/?api=1&destination=${office.lat},${office.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute bottom-3 left-3 z-[1000] flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-white"
+                  className="absolute bottom-3 left-3 z-[400] flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 text-white"
                   style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(200 60% 35%))', boxShadow: '0 4px 12px hsl(var(--primary) / 0.3)' }}
                 >
                   Get Direction <MapPin className="w-4 h-4" />
