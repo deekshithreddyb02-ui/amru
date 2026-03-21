@@ -22,6 +22,8 @@ import {
   Wrench,
   LocateFixed,
   Ruler,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 import {
   Select,
@@ -32,6 +34,15 @@ import {
 } from "@/components/ui/select";
 
 const BIZ_AREAS = ["Maharashtra", "Telangana", "Karnataka", "AndhraPradesh", "Others"];
+
+// Country code mapping
+const COUNTRY_CODES: Record<string, string> = {
+  india: "+91", "united states": "+1", "united kingdom": "+44", australia: "+61",
+  canada: "+1", germany: "+49", france: "+33", japan: "+81", china: "+86",
+  brazil: "+55", "south africa": "+27", uae: "+971", "united arab emirates": "+971",
+  singapore: "+65", malaysia: "+60", nepal: "+977", "sri lanka": "+94",
+  bangladesh: "+880", pakistan: "+92", indonesia: "+62", thailand: "+66",
+};
 const DISTANCES = [
   "0-30 KM", "50 KM", "100 KM", "150 KM", "200 KM", "250 KM",
   "300 KM", "400 KM", "500 KM", "700 KM", "800 KM", "1000 KM", "1500 KM", "2000 KM",
@@ -105,6 +116,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [mailingStreet, setMailingStreet] = useState("");
   const [mailingCity, setMailingCity] = useState("");
   const [mailingPoBox, setMailingPoBox] = useState("");
+  const [detectedCountry, setDetectedCountry] = useState("");
 
   // Location
   const [locating, setLocating] = useState(false);
@@ -126,22 +138,41 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     return `Gunta: ${converted.guntas}\nAcres: ${converted.acres}\nSq.Yrds: ${converted.sqyd}\nSq.Ft: ${converted.sqft}`;
   }, [converted]);
 
+  // Google Maps URL
+  const googleMapsUrl = useMemo(() => {
+    if (!coords) return "";
+    return `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
+  }, [coords]);
+
+  // Copy to clipboard helper
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => toast.success(`${label} copied!`)).catch(() => toast.error("Copy failed"));
+  };
+
   // Auto-fill description from fields above
   const autoDescription = useMemo(() => {
     const parts: string[] = [];
     if (lastName) parts.push(`Name: ${lastName}`);
+    if (whatsapp) parts.push(`WhatsApp: ${whatsapp}`);
     parts.push(`Service: ${serviceNeeded}`);
     parts.push(`Area Type: ${areaType}`);
     if (converted) {
-      parts.push(`Area: ${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label} (${converted.sqft} Sq.Ft)`);
+      parts.push(`Area: ${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label}`);
+      parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
     }
     parts.push(`BIZ Area: ${bizArea}`);
     parts.push(`Distance: ${distance}`);
     parts.push(`Scans: ${numScans}`);
-    if (coords) parts.push(`Location: ${coords.lat}, ${coords.lng}`);
+    if (coords) {
+      parts.push(`GPS: ${coords.lat}, ${coords.lng}`);
+      parts.push(`Maps: https://www.google.com/maps?q=${coords.lat},${coords.lng}`);
+    }
+    if (mailingStreet) parts.push(`Street: ${mailingStreet}`);
     if (mailingCity) parts.push(`City: ${mailingCity}`);
+    if (mailingPoBox) parts.push(`PIN: ${mailingPoBox}`);
+    if (detectedCountry) parts.push(`Country: ${detectedCountry}`);
     return parts.join("\n");
-  }, [lastName, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingCity]);
+  }, [lastName, whatsapp, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingPoBox, detectedCountry]);
 
   // Sync auto description
   useEffect(() => {
@@ -167,9 +198,15 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           const data = await res.json();
           if (data.address) {
             const a = data.address;
-            setMailingStreet([a.road, a.neighbourhood, a.suburb].filter(Boolean).join(", "));
+            const country = a.country || "";
+            setDetectedCountry(country);
+
+            // Build mailing street: road, neighbourhood, suburb, district, state, country
+            const streetParts = [a.road, a.neighbourhood, a.suburb, a.state_district || a.county, a.state, country].filter(Boolean);
+            setMailingStreet(streetParts.join(", "));
             setMailingCity(a.city || a.town || a.village || a.county || "");
             setMailingPoBox(a.postcode || "");
+
             // Auto-detect BIZ Area from state
             const state = (a.state || "").toLowerCase();
             if (state.includes("telangana")) setBizArea("Telangana");
@@ -177,6 +214,13 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             else if (state.includes("karnataka")) setBizArea("Karnataka");
             else if (state.includes("andhra")) setBizArea("AndhraPradesh");
             else setBizArea("Others");
+
+            // Auto-fill country code for phone
+            const countryLower = country.toLowerCase();
+            const code = COUNTRY_CODES[countryLower];
+            if (code && !whatsapp) {
+              setWhatsapp(code + " ");
+            }
           }
           toast.success("Location detected!");
         } catch {
@@ -207,7 +251,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   }, [isSubmitting, onSuccess]);
 
   const handleSubmit = () => {
-    if (!lastName.trim() || !whatsapp.trim() || !description.trim()) {
+    if (!lastName.trim() || !whatsapp.trim() || !description.trim() || !mailingStreet.trim() || !mailingCity.trim() || !mailingPoBox.trim() || !areaValue.trim()) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -281,9 +325,27 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             {locating ? "Detecting Location…" : coords ? "📍 Location Captured — Re-detect" : "📍 Get My Location"}
           </Button>
           {coords && (
-            <p className="text-[10px] text-muted-foreground mt-1 text-center font-mono">
-              {coords.lat}, {coords.lng}
-            </p>
+            <div className="mt-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30 space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] text-foreground/80 font-mono">
+                  <span className="text-muted-foreground">Lat:</span> {coords.lat} &nbsp; <span className="text-muted-foreground">Lon:</span> {coords.lng}
+                </p>
+                <button type="button" onClick={() => handleCopy(`${coords.lat}, ${coords.lng}`, "Coordinates")} className="p-1 rounded hover:bg-primary/10 transition-colors" title="Copy coordinates">
+                  <Copy className="w-3.5 h-3.5 text-primary/70" />
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline underline-offset-2 truncate flex-1 hover:text-primary/80 transition-colors">
+                  {googleMapsUrl}
+                </a>
+                <button type="button" onClick={() => handleCopy(googleMapsUrl, "Google Maps URL")} className="p-1 rounded hover:bg-primary/10 transition-colors" title="Copy Maps URL">
+                  <Copy className="w-3.5 h-3.5 text-primary/70" />
+                </button>
+                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-primary/10 transition-colors" title="Open in Maps">
+                  <ExternalLink className="w-3.5 h-3.5 text-primary/70" />
+                </a>
+              </div>
+            </div>
           )}
         </motion.div>
 
@@ -411,23 +473,23 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
         {/* Mailing Address */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Home className="h-3.5 w-3.5 text-primary" /> Mailing Street</Label>
-          <Textarea name="mailingstreet" value={mailingStreet} onChange={(e) => setMailingStreet(e.target.value)} placeholder="Street address (auto-filled from location)" rows={2} className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 text-sm resize-none" />
+          <Label className={labelCls}><Home className="h-3.5 w-3.5 text-primary" /> Mailing Street <span className="text-destructive">*</span></Label>
+          <Textarea name="mailingstreet" required value={mailingStreet} onChange={(e) => setMailingStreet(e.target.value)} placeholder="Street address (auto-filled from location)" rows={2} className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 text-sm resize-none" />
         </motion.div>
 
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className={labelCls}><Building2 className="h-3 w-3 text-primary" /> Mailing City</Label>
+            <Label className={labelCls}><Building2 className="h-3 w-3 text-primary" /> Mailing City <span className="text-destructive">*</span></Label>
             <div className="relative">
               <Building2 className={fieldIcon} />
-              <Input name="mailingcity" value={mailingCity} onChange={(e) => setMailingCity(e.target.value)} placeholder="City" className={inputCls} />
+              <Input name="mailingcity" required value={mailingCity} onChange={(e) => setMailingCity(e.target.value)} placeholder="City" className={inputCls} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className={labelCls}><MailIcon className="h-3 w-3 text-primary" /> P.O. Box</Label>
+            <Label className={labelCls}><MailIcon className="h-3 w-3 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
             <div className="relative">
               <MailIcon className={fieldIcon} />
-              <Input name="mailingpobox" value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="P.O. Box" className={inputCls} />
+              <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
             </div>
           </div>
         </motion.div>
