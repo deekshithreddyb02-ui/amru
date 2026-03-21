@@ -28,8 +28,8 @@ const About = () => {
 
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <motion.div
-            {...m({ initial: { opacity: 0, x: -40 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.7 } })}>
+          <motion.div className="text-center">
+            
             
             <div className="gold-accent mb-6" />
             <h2 className="section-heading mb-2">{title}</h2>
