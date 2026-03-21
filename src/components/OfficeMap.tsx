@@ -1,5 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useRef, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useRef, useEffect, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -29,6 +29,44 @@ interface OfficeMapProps {
   popupTextColor?: string;
 }
 
+/** Disables single-finger drag on touch; enables two-finger drag */
+const TouchGuard = ({ onShowHint }: { onShowHint: () => void }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) return;
+
+    // Disable default touch drag
+    map.dragging.disable();
+
+    const container = map.getContainer();
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length >= 2) {
+        map.dragging.enable();
+      } else {
+        map.dragging.disable();
+        onShowHint();
+      }
+    };
+
+    const handleTouchEnd = () => {
+      map.dragging.disable();
+    };
+
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [map, onShowHint]);
+
+  return null;
+};
+
 const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupTextColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string; popupTextColor?: string }) => {
   const markerRef = useRef<L.Marker>(null);
 
@@ -54,10 +92,17 @@ const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupText
 };
 
 const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor, popupTextColor }: OfficeMapProps) => {
+  const [showHint, setShowHint] = useState(false);
+
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
 
+  const handleShowHint = () => {
+    setShowHint(true);
+    setTimeout(() => setShowHint(false), 1500);
+  };
+
   return (
-    <div className="w-full rounded-lg overflow-hidden border border-border shadow-sm" style={{ height }}>
+    <div className="relative w-full rounded-lg overflow-hidden border border-border shadow-sm" style={{ height }}>
       <MapContainer
         center={[office.lat, office.lng]}
         zoom={14}
@@ -69,7 +114,15 @@ const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} popupBgColor={popupBgColor} popupTextColor={popupTextColor} />
+        <TouchGuard onShowHint={handleShowHint} />
       </MapContainer>
+      {showHint && (
+        <div className="absolute inset-0 z-[500] flex items-center justify-center bg-black/40 pointer-events-none transition-opacity">
+          <span className="text-white text-sm font-medium bg-black/60 px-4 py-2 rounded-xl">
+            Use two fingers to move the map
+          </span>
+        </div>
+      )}
     </div>
   );
 };
