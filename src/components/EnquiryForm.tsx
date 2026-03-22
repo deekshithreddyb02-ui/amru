@@ -24,15 +24,15 @@ import {
   LocateFixed,
   Ruler,
   Copy,
-  ExternalLink,
-} from "lucide-react";
+  ExternalLink } from
+"lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  SelectValue } from
+"@/components/ui/select";
 
 const BIZ_AREAS = ["Maharashtra", "Telangana", "Karnataka", "AndhraPradesh", "Others"];
 
@@ -42,25 +42,25 @@ const COUNTRY_CODES: Record<string, string> = {
   canada: "+1", germany: "+49", france: "+33", japan: "+81", china: "+86",
   brazil: "+55", "south africa": "+27", uae: "+971", "united arab emirates": "+971",
   singapore: "+65", malaysia: "+60", nepal: "+977", "sri lanka": "+94",
-  bangladesh: "+880", pakistan: "+92", indonesia: "+62", thailand: "+66",
+  bangladesh: "+880", pakistan: "+92", indonesia: "+62", thailand: "+66"
 };
 const DISTANCES = [
-  "0-30 KM", "50 KM", "100 KM", "150 KM", "200 KM", "250 KM",
-  "300 KM", "400 KM", "500 KM", "700 KM", "800 KM", "1000 KM", "1500 KM", "2000 KM",
-];
+"0-30 KM", "50 KM", "100 KM", "150 KM", "200 KM", "250 KM",
+"300 KM", "400 KM", "500 KM", "700 KM", "800 KM", "1000 KM", "1500 KM", "2000 KM"];
+
 const SERVICES_LIST = ["GWS", "RWH", "iGEOS", "GeoTech", "THRML-IMG", "GPR", "STP", "ETP", "CGWA", "NOCB", "MEP"];
 const SCANS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const AREA_TYPES = ["OPEN PLOT", "APPRT", "MANFCT PLANT", "IT BLDG", "BANGLOW", "SINGLE BLDG", "ORG LAND"];
 
 type AreaUnit = "sqft" | "sqm" | "sqyd" | "acres" | "guntas";
 
-const AREA_UNITS: { value: AreaUnit; label: string }[] = [
-  { value: "sqft", label: "Sq.Ft" },
-  { value: "sqm", label: "Sq.M" },
-  { value: "sqyd", label: "Sq.Yrds" },
-  { value: "acres", label: "Acres" },
-  { value: "guntas", label: "Guntas" },
-];
+const AREA_UNITS: {value: AreaUnit;label: string;}[] = [
+{ value: "sqft", label: "Sq.Ft" },
+{ value: "sqm", label: "Sq.M" },
+{ value: "sqyd", label: "Sq.Yrds" },
+{ value: "acres", label: "Acres" },
+{ value: "guntas", label: "Guntas" }];
+
 
 // Conversion factors to sqft
 const TO_SQFT: Record<AreaUnit, number> = {
@@ -68,7 +68,7 @@ const TO_SQFT: Record<AreaUnit, number> = {
   sqm: 10.7639,
   sqyd: 9,
   acres: 43560,
-  guntas: 1089,
+  guntas: 1089
 };
 
 function convertArea(value: number, from: AreaUnit): Record<AreaUnit, string> {
@@ -90,15 +90,15 @@ const stagger = {
   hidden: { opacity: 0, y: 10 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.035, duration: 0.25, ease: [0, 0, 0.2, 1] as const },
-  }),
+    transition: { delay: i * 0.035, duration: 0.25, ease: [0, 0, 0.2, 1] as const }
+  })
 };
 
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastName, setLastName] = useState("");
   const [expectedClose, setExpectedClose] = useState(() => {
-    const d = new Date(); d.setDate(d.getDate() + 7);
+    const d = new Date();d.setDate(d.getDate() + 7);
     return d.toISOString().split("T")[0];
   });
   const [whatsapp, setWhatsapp] = useState("");
@@ -118,7 +118,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
   // Location
   const [locating, setLocating] = useState(false);
-  const [coords, setCoords] = useState<{ lat: string; lng: string } | null>(null);
+  const [coords, setCoords] = useState<{lat: string;lng: string;} | null>(null);
 
   // Area conversion
   const [areaUnit, setAreaUnit] = useState<AreaUnit>("sqft");
@@ -155,7 +155,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     parts.push(`Service: ${serviceNeeded}`);
     parts.push(`Area Type: ${areaType}`);
     if (converted) {
-      parts.push(`Area: ${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label}`);
+      parts.push(`Area: ${areaValue} ${AREA_UNITS.find((u) => u.value === areaUnit)?.label}`);
       parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
     }
     parts.push(`BIZ Area: ${bizArea}`);
@@ -207,11 +207,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
             // Auto-detect BIZ Area from state
             const state = (a.state || "").toLowerCase();
-            if (state.includes("telangana")) setBizArea("Telangana");
-            else if (state.includes("maharashtra")) setBizArea("Maharashtra");
-            else if (state.includes("karnataka")) setBizArea("Karnataka");
-            else if (state.includes("andhra")) setBizArea("AndhraPradesh");
-            else setBizArea("Others");
+            if (state.includes("telangana")) setBizArea("Telangana");else
+            if (state.includes("maharashtra")) setBizArea("Maharashtra");else
+            if (state.includes("karnataka")) setBizArea("Karnataka");else
+            if (state.includes("andhra")) setBizArea("AndhraPradesh");else
+            setBizArea("Others");
 
             // Auto-fill country code for phone
             const countryLower = country.toLowerCase();
@@ -260,11 +260,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         description: description,
         mailingstreet: mailingStreet,
         mailingcity: mailingCity,
-        mailingpobox: mailingPoBox,
+        mailingpobox: mailingPoBox
       };
 
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
-        body: { formData },
+        body: { formData }
       });
 
       if (error) throw error;
@@ -293,9 +293,9 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   return (
     <>
       <form
-        className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin"
-        onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-      >
+        className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin mx-0 px-[11px]"
+        onSubmit={(e) => {e.preventDefault();handleSubmit();}}>
+        
 
         {/* Name */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
@@ -331,13 +331,13 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             variant="outline"
             onClick={handleGetLocation}
             disabled={locating}
-            className="w-full gap-2 h-10 text-xs font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
-          >
+            className="w-full gap-2 h-10 text-xs font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200">
+            
             {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
             {locating ? "Detecting Location…" : coords ? "📍 Location Captured — Re-detect" : "📍 Get My Location"}
           </Button>
-          {coords && (
-            <div className="mt-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30 space-y-1.5">
+          {coords &&
+          <div className="mt-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30 space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[11px] text-foreground/80 font-mono">
                   <span className="text-muted-foreground">Lat:</span> {coords.lat} &nbsp; <span className="text-muted-foreground">Lon:</span> {coords.lng}
@@ -358,7 +358,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
                 </a>
               </div>
             </div>
-          )}
+          }
         </motion.div>
 
         {/* BIZ Area & Distance */}
@@ -434,18 +434,18 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
               value={areaValue}
               onChange={(e) => setAreaValue(e.target.value)}
               placeholder="Enter area"
-              className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 flex-1"
-            />
+              className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 flex-1" />
+            
           </div>
-          {converted && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1.5 px-2 py-1.5 rounded-lg bg-muted/30 border border-border/30">
-              {AREA_UNITS.filter(u => u.value !== areaUnit).map((u) => (
-                <p key={u.value} className="text-[10px] text-muted-foreground">
+          {converted &&
+          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1.5 px-2 py-1.5 rounded-lg bg-muted/30 border border-border/30">
+              {AREA_UNITS.filter((u) => u.value !== areaUnit).map((u) =>
+            <p key={u.value} className="text-[10px] text-muted-foreground">
                   <span className="font-medium text-foreground/70">{u.label}:</span> {converted[u.value]}
                 </p>
-              ))}
+            )}
             </div>
-          )}
+          }
         </motion.div>
 
 
@@ -459,8 +459,8 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Auto-filled from above details..."
             rows={4}
-            className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 text-xs resize-none font-mono leading-relaxed"
-          />
+            className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 text-xs resize-none font-mono leading-relaxed" />
+          
           <p className="text-[10px] text-muted-foreground italic">Auto-filled from your inputs. You can edit it.</p>
         </motion.div>
 
@@ -492,14 +492,14 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <Button
             type="submit"
             className="w-full gap-2.5 h-12 font-bold text-sm relative overflow-hidden bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 rounded-xl"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (<><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</>) : (<><Send className="w-4 h-4" /> Submit Enquiry</>)}
+            disabled={isSubmitting}>
+            
+            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Send className="w-4 h-4" /> Submit Enquiry</>}
           </Button>
         </motion.div>
       </form>
-    </>
-  );
+    </>);
+
 };
 
 export default EnquiryForm;

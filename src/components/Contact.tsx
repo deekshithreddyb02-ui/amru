@@ -57,7 +57,7 @@ const Contact = () => {
                   <div className="text-xs text-muted-foreground">Mon – Sun: 9:00 AM to 6:00 PM</div>
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 text-left">
                 {officeContacts.map((contact) =>
                 <div key={contact.city} className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg flex-shrink-0 mt-0.5 items-center justify-center mx-[3px] flex flex-row" style={{ background: 'hsl(var(--primary) / 0.08)' }}>
