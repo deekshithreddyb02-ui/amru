@@ -23,11 +23,11 @@ const About = () => {
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   return (
-    <section id="about" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient)' }}>
+    <section id="about" className="relative py-20 overflow-hidden md:py-0 pb-[100px]" style={{ background: 'var(--section-gradient)' }}>
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03] blur-3xl" style={{ background: 'hsl(var(--primary))' }} />
 
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center my-0">
           <motion.div className="text-center">
             
             
