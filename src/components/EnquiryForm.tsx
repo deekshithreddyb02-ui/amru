@@ -293,7 +293,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   return (
     <>
       <form
-        className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin mx-0 px-[11px]"
+        className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin mx-0 px-[11px] py-[11px]"
         onSubmit={(e) => {e.preventDefault();handleSubmit();}}>
         
 
