@@ -46,7 +46,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           
         </div>
         <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-bold text-sm text-foreground mb-2 leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+          <h3 className="font-bold text-sm text-foreground mb-2 leading-tight text-center" style={{ fontFamily: 'var(--font-serif)' }}>
             {title}
           </h3>
           <div className="flex-1">
