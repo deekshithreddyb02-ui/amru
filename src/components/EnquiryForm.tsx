@@ -365,9 +365,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> BIZ Area <span className="text-destructive">*</span></Label>
-            <select name="cf_990" value={bizArea} onChange={(e) => setBizArea(e.target.value)} required className="hidden">
-              {BIZ_AREAS.map((b) => <option key={b} value={b}>{b}</option>)}
-            </select>
             <Select value={bizArea} onValueChange={setBizArea}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -377,9 +374,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
           <div className="space-y-1.5">
             <Label className={labelCls}><Navigation className="h-3 w-3 text-primary" /> Distance <span className="text-destructive">*</span></Label>
-            <select name="cf_998" value={distance} onChange={(e) => setDistance(e.target.value)} required className="hidden">
-              {DISTANCES.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
             <Select value={distance} onValueChange={setDistance}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95 max-h-48">
@@ -393,9 +387,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className={labelCls}><Wrench className="h-3 w-3 text-primary" /> Service <span className="text-destructive">*</span></Label>
-            <select name="cf_994" value={serviceNeeded} onChange={(e) => setServiceNeeded(e.target.value)} required className="hidden">
-              {SERVICES_LIST.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
             <Select value={serviceNeeded} onValueChange={setServiceNeeded}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -405,9 +396,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
           <div className="space-y-1.5">
             <Label className={labelCls}><ScanLine className="h-3 w-3 text-primary" /> Scans <span className="text-destructive">*</span></Label>
-            <select name="cf_1014" value={numScans} onChange={(e) => setNumScans(e.target.value)} required className="hidden">
-              {SCANS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
             <Select value={numScans} onValueChange={setNumScans}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -420,9 +408,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         {/* Area Type */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
           <Label className={labelCls}><LandPlot className="h-3.5 w-3.5 text-primary" /> Area Type <span className="text-destructive">*</span></Label>
-          <select name="cf_1002" value={areaType} onChange={(e) => setAreaType(e.target.value)} required className="hidden">
-            {AREA_TYPES.map((a) => <option key={a} value={a}>{a}</option>)}
-          </select>
           <Select value={areaType} onValueChange={setAreaType}>
             <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
             <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -461,12 +446,8 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
               ))}
             </div>
           )}
-          {/* Hidden field for CRM */}
-          <textarea name="cf_1006" value={totalAreaText} readOnly className="hidden" />
         </motion.div>
 
-        {/* Hidden: Total BIZ Cost — sending empty to CRM */}
-        <input type="hidden" name="cf_1020" value="" />
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
