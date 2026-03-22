@@ -96,9 +96,6 @@ const stagger = {
 
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-
   const [lastName, setLastName] = useState("");
   const [expectedClose, setExpectedClose] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 7);
