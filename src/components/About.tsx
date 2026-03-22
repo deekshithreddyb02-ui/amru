@@ -27,7 +27,7 @@ const About = () => {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03] blur-3xl" style={{ background: 'hsl(var(--primary))' }} />
 
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center my-0">
+        <div className="grid lg:grid-cols-2 gap-16 items-center my-0 pb-0 px-[10px] py-[50px]">
           <motion.div className="text-center">
             
             
