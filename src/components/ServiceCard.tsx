@@ -51,11 +51,17 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           </h3>
           <div className="flex-1">
             <p
-              className="text-muted-foreground text-xs leading-relaxed line-clamp-3 cursor-pointer hover:text-foreground transition-colors"
-              onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
+              className="text-muted-foreground text-xs leading-relaxed line-clamp-5"
             >
               {description}
             </p>
+            <button
+              type="button"
+              className="text-xs font-medium mt-1 text-primary hover:text-primary/80 transition-colors text-left"
+              onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
+            >
+              Read more
+            </button>
           </div>
           {link ? (
             <a
