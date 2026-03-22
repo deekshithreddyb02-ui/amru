@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -95,9 +96,6 @@ const stagger = {
 
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-
   const [lastName, setLastName] = useState("");
   const [expectedClose, setExpectedClose] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 7);
@@ -236,27 +234,53 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     );
   };
 
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-    const onLoad = () => {
-      if (isSubmitting) {
-        setIsSubmitting(false);
-        toast.success("Enquiry submitted successfully! We'll contact you soon.");
-        onSuccess();
-      }
-    };
-    iframe.addEventListener("load", onLoad);
-    return () => iframe.removeEventListener("load", onLoad);
-  }, [isSubmitting, onSuccess]);
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!lastName.trim() || !whatsapp.trim() || !description.trim() || !mailingStreet.trim() || !mailingCity.trim() || !mailingPoBox.trim() || !areaValue.trim()) {
       toast.error("Please fill in all required fields.");
       return;
     }
     setIsSubmitting(true);
-    formRef.current?.submit();
+
+    try {
+      const formData: Record<string, string> = {
+        __vtrftk: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
+        publicid: "85432a838b51f53a6bc4ec937b64ee40",
+        urlencodeenable: "1",
+        name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
+        lastname: lastName,
+        cf_1044: expectedClose,
+        cf_1022: whatsapp,
+        cf_990: bizArea,
+        cf_998: distance,
+        cf_994: serviceNeeded,
+        cf_1014: numScans,
+        cf_1002: areaType,
+        cf_1006: totalAreaText,
+        cf_1020: "",
+        description: description,
+        mailingstreet: mailingStreet,
+        mailingcity: mailingCity,
+        mailingpobox: mailingPoBox,
+      };
+
+      const { data, error } = await supabase.functions.invoke("vtiger-submit", {
+        body: { formData },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success("Enquiry submitted successfully! We'll contact you soon.");
+        onSuccess();
+      } else {
+        toast.error(data?.message || "Submission failed. Please try again after sometime.");
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      toast.error("Could not submit enquiry. Please try again after sometime.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const fieldIcon = "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none";
@@ -268,22 +292,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
   return (
     <>
-      <iframe ref={iframeRef} name="vtiger_submit_frame" className="hidden" title="submit" />
-
       <form
-        ref={formRef}
-        action="https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php"
-        method="post"
-        acceptCharset="utf-8"
-        encType="multipart/form-data"
-        target="vtiger_submit_frame"
         className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin"
         onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
       >
-        <input type="hidden" name="__vtrftk" value="sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516" />
-        <input type="hidden" name="publicid" value="85432a838b51f53a6bc4ec937b64ee40" />
-        <input type="hidden" name="urlencodeenable" value="1" />
-        <input type="hidden" name="name" value="Enquiry Form: Telangana - Amruta HydroGeo Services" />
 
         {/* Name */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
@@ -353,9 +365,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> BIZ Area <span className="text-destructive">*</span></Label>
-            <select name="cf_990" value={bizArea} onChange={(e) => setBizArea(e.target.value)} required className="hidden">
-              {BIZ_AREAS.map((b) => <option key={b} value={b}>{b}</option>)}
-            </select>
             <Select value={bizArea} onValueChange={setBizArea}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -365,9 +374,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
           <div className="space-y-1.5">
             <Label className={labelCls}><Navigation className="h-3 w-3 text-primary" /> Distance <span className="text-destructive">*</span></Label>
-            <select name="cf_998" value={distance} onChange={(e) => setDistance(e.target.value)} required className="hidden">
-              {DISTANCES.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
             <Select value={distance} onValueChange={setDistance}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95 max-h-48">
@@ -381,9 +387,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label className={labelCls}><Wrench className="h-3 w-3 text-primary" /> Service <span className="text-destructive">*</span></Label>
-            <select name="cf_994" value={serviceNeeded} onChange={(e) => setServiceNeeded(e.target.value)} required className="hidden">
-              {SERVICES_LIST.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
             <Select value={serviceNeeded} onValueChange={setServiceNeeded}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -393,9 +396,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
           <div className="space-y-1.5">
             <Label className={labelCls}><ScanLine className="h-3 w-3 text-primary" /> Scans <span className="text-destructive">*</span></Label>
-            <select name="cf_1014" value={numScans} onChange={(e) => setNumScans(e.target.value)} required className="hidden">
-              {SCANS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
             <Select value={numScans} onValueChange={setNumScans}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -408,9 +408,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         {/* Area Type */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
           <Label className={labelCls}><LandPlot className="h-3.5 w-3.5 text-primary" /> Area Type <span className="text-destructive">*</span></Label>
-          <select name="cf_1002" value={areaType} onChange={(e) => setAreaType(e.target.value)} required className="hidden">
-            {AREA_TYPES.map((a) => <option key={a} value={a}>{a}</option>)}
-          </select>
           <Select value={areaType} onValueChange={setAreaType}>
             <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
             <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -449,12 +446,8 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
               ))}
             </div>
           )}
-          {/* Hidden field for CRM */}
-          <textarea name="cf_1006" value={totalAreaText} readOnly className="hidden" />
         </motion.div>
 
-        {/* Hidden: Total BIZ Cost — sending empty to CRM */}
-        <input type="hidden" name="cf_1020" value="" />
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
