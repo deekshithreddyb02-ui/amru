@@ -6,14 +6,14 @@ import { useNoMotion } from "@/hooks/useNoMotion";
 import EnquiryForm from "@/components/EnquiryForm";
 import { toast } from "sonner";
 
-interface OfficeContact { city: string; phone?: string; whatsapp?: string; email?: string; }
+interface OfficeContact {city: string;phone?: string;whatsapp?: string;email?: string;}
 
 const defaultOfficeContacts: OfficeContact[] = [
-  { city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
-  { city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
-  { city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
-  { city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
-];
+{ city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
+{ city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+{ city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
+{ city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" }];
+
 
 const Contact = () => {
   const [officeContacts, setOfficeContacts] = useState<OfficeContact[]>(defaultOfficeContacts);
@@ -32,7 +32,7 @@ const Contact = () => {
             }
           });
         }
-      } catch { /* defaults */ }
+      } catch {/* defaults */}
     };
     fetchData();
   }, []);
@@ -53,36 +53,36 @@ const Contact = () => {
               <div className="flex items-center gap-3 mb-5 p-3 rounded-xl border border-border" style={{ background: 'hsl(var(--primary) / 0.04)' }}>
                 <Clock className="w-5 h-5 text-primary flex-shrink-0" />
                 <div>
-                  <div className="font-semibold text-sm text-foreground">Business Hours</div>
+                  <div className="font-semibold text-foreground text-base">Business Hours</div>
                   <div className="text-xs text-muted-foreground">Mon – Sun: 9:00 AM to 6:00 PM</div>
                 </div>
               </div>
               <div className="space-y-4">
-                {officeContacts.map((contact) => (
-                  <div key={contact.city} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'hsl(var(--primary) / 0.08)' }}>
+                {officeContacts.map((contact) =>
+                <div key={contact.city} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg flex-shrink-0 mt-0.5 items-center justify-center mx-[3px] flex flex-row" style={{ background: 'hsl(var(--primary) / 0.08)' }}>
                       <Phone className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <div className="font-semibold text-sm text-foreground">{contact.city}</div>
-                      {contact.phone && <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="text-xs text-muted-foreground hover:text-primary transition-colors block">{contact.phone}</a>}
-                      {contact.email && <a href={`mailto:${contact.email}`} className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"><Mail className="w-3 h-3" />{contact.email}</a>}
+                      <div className="font-semibold text-foreground text-base">{contact.city}</div>
+                      {contact.phone && <a href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`} className="text-muted-foreground hover:text-primary transition-colors block text-sm">{contact.phone}</a>}
+                      {contact.email && <a href={`mailto:${contact.email}`} className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 text-sm"><Mail className="w-3 h-3" />{contact.email}</a>}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </motion.div>
 
           <motion.div {...m({ initial: { opacity: 0, x: 30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
-            className="bg-card p-6 md:p-8 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+          className="bg-card p-6 md:p-8 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
             <h3 className="font-bold text-lg text-foreground mb-6" style={{ fontFamily: 'var(--font-serif)' }}>Send Us a Message</h3>
             <EnquiryForm serviceTitle="General Enquiry" onSuccess={() => toast.success("Message sent successfully!")} />
           </motion.div>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default Contact;
