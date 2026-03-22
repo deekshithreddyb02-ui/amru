@@ -5,8 +5,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  DialogDescription } from
+"@/components/ui/dialog";
 import EnquiryForm from "@/components/EnquiryForm";
 
 interface ServiceCardProps {
@@ -31,9 +31,9 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
         transition={{ duration: 0.4, delay }}
         className="group bg-card rounded-2xl h-full flex flex-col cursor-pointer border border-border/50 overflow-hidden transition-shadow duration-500"
         style={{ boxShadow: 'var(--card-shadow)' }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)'; }}
-      >
+        onMouseEnter={(e) => {(e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-hover)';}}
+        onMouseLeave={(e) => {(e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow)';}}>
+        
         <div className="overflow-hidden aspect-[4/3] bg-muted/20">
           <img
             src={image}
@@ -42,8 +42,8 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             height={300}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
-          />
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px" />
+          
         </div>
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-bold text-sm text-foreground mb-2 leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
@@ -51,36 +51,36 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           </h3>
           <div className="flex-1">
             <p
-              className="text-muted-foreground text-xs leading-relaxed line-clamp-5"
-            >
+              className="text-muted-foreground text-xs leading-relaxed line-clamp-5 text-center">
+              
               {description}
             </p>
             <button
               type="button"
               className="text-xs font-medium mt-1 text-primary hover:text-primary/80 transition-colors text-left"
-              onClick={(e) => { e.stopPropagation(); setDetailOpen(true); }}
-            >
+              onClick={(e) => {e.stopPropagation();setDetailOpen(true);}}>
+              
               Read more
             </button>
           </div>
-          {link ? (
-            <a
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center font-semibold text-xs mt-3 pt-2.5 border-t border-border/30 transition-colors duration-300"
-              style={{ color: 'hsl(var(--secondary))' }}
-            >
+          {link ?
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center font-semibold text-xs mt-3 pt-2.5 border-t border-border/30 transition-colors duration-300"
+            style={{ color: 'hsl(var(--secondary))' }}>
+            
               Visit App →
-            </a>
-          ) : (
-            <button
-              onClick={() => setOpen(true)}
-              className="inline-flex items-center text-primary font-semibold text-xs hover:text-primary/80 transition-colors text-left mt-3 pt-2.5 border-t border-border/30"
-            >
+            </a> :
+
+          <button
+            onClick={() => setOpen(true)}
+            className="inline-flex items-center text-primary font-semibold text-xs hover:text-primary/80 transition-colors text-left mt-3 pt-2.5 border-t border-border/30">
+            
               Enquire →
             </button>
-          )}
+          }
         </div>
       </motion.article>
 
@@ -97,11 +97,11 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl border-border/30"
-          style={{ boxShadow: '0 25px 60px -15px hsl(var(--primary) / 0.15)', background: 'linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.4))' }}>
+        style={{ boxShadow: '0 25px 60px -15px hsl(var(--primary) / 0.15)', background: 'linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.4))' }}>
           <div className="relative px-6 pt-6 pb-4 border-b border-border/30"
-            style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.04), transparent)' }}>
+          style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.04), transparent)' }}>
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none"
-              style={{ background: 'hsl(var(--primary) / 0.03)' }} />
+            style={{ background: 'hsl(var(--primary) / 0.03)' }} />
             <DialogHeader className="relative">
               <DialogTitle className="text-lg tracking-tight text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
                 Enquire About
@@ -116,8 +116,8 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
           </div>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>);
+
 };
 
 export default ServiceCard;
