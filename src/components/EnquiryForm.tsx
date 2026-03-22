@@ -237,27 +237,53 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     );
   };
 
-  useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-    const onLoad = () => {
-      if (isSubmitting) {
-        setIsSubmitting(false);
-        toast.success("Enquiry submitted successfully! We'll contact you soon.");
-        onSuccess();
-      }
-    };
-    iframe.addEventListener("load", onLoad);
-    return () => iframe.removeEventListener("load", onLoad);
-  }, [isSubmitting, onSuccess]);
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!lastName.trim() || !whatsapp.trim() || !description.trim() || !mailingStreet.trim() || !mailingCity.trim() || !mailingPoBox.trim() || !areaValue.trim()) {
       toast.error("Please fill in all required fields.");
       return;
     }
     setIsSubmitting(true);
-    formRef.current?.submit();
+
+    try {
+      const formData: Record<string, string> = {
+        __vtrftk: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
+        publicid: "85432a838b51f53a6bc4ec937b64ee40",
+        urlencodeenable: "1",
+        name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
+        lastname: lastName,
+        cf_1044: expectedClose,
+        cf_1022: whatsapp,
+        cf_990: bizArea,
+        cf_998: distance,
+        cf_994: serviceNeeded,
+        cf_1014: numScans,
+        cf_1002: areaType,
+        cf_1006: totalAreaText,
+        cf_1020: "",
+        description: description,
+        mailingstreet: mailingStreet,
+        mailingcity: mailingCity,
+        mailingpobox: mailingPoBox,
+      };
+
+      const { data, error } = await supabase.functions.invoke("vtiger-submit", {
+        body: { formData },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success("Enquiry submitted successfully! We'll contact you soon.");
+        onSuccess();
+      } else {
+        toast.error(data?.message || "Submission failed. Please try again after sometime.");
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      toast.error("Could not submit enquiry. Please try again after sometime.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const fieldIcon = "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60 pointer-events-none";
