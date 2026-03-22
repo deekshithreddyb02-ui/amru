@@ -54,13 +54,51 @@ const Contact = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error("Please enter a valid email address."); setIsSubmitting(false); return; }
 
     try {
+      // Save to database
       const { error } = await supabase.from('contact_messages').insert({ name, email, phone, service, message });
       if (error) throw error;
-      toast.success("Thank you! Your inquiry has been received.");
+
+      // Submit to Vtiger CRM
+      const today = new Date();
+      const closeDate = new Date(today);
+      closeDate.setDate(closeDate.getDate() + 7);
+      const expectedClose = closeDate.toISOString().split("T")[0];
+
+      const crmFormData: Record<string, string> = {
+        __vtrftk: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
+        publicid: "85432a838b51f53a6bc4ec937b64ee40",
+        urlencodeenable: "1",
+        name: "Contact Form: Amruta HydroGeo Services",
+        lastname: name,
+        cf_1044: expectedClose,
+        cf_1022: phone || "",
+        cf_990: "",
+        cf_998: "",
+        cf_994: service || "",
+        cf_1014: "",
+        cf_1002: "",
+        cf_1006: "",
+        cf_1020: "",
+        description: `Contact Form Enquiry\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nService: ${service || "N/A"}\nMessage: ${message || "N/A"}`,
+        mailingstreet: "",
+        mailingcity: "",
+        mailingpobox: email,
+      };
+
+      const { data: crmData, error: crmError } = await supabase.functions.invoke("vtiger-submit", {
+        body: { formData: crmFormData },
+      });
+
+      if (crmError || !crmData?.success) {
+        console.warn("CRM submission failed:", crmError || crmData?.message);
+        toast.success("Inquiry saved! CRM sync may be delayed.");
+      } else {
+        toast.success("Thank you! Your inquiry has been received.");
+      }
       form.reset();
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error("Failed to submit. Please try calling us.");
+      toast.error("Failed to submit. Please try again after sometime.");
     } finally {
       setIsSubmitting(false);
     }
