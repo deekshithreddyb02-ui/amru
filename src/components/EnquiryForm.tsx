@@ -292,22 +292,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
   return (
     <>
-      <iframe ref={iframeRef} name="vtiger_submit_frame" className="hidden" title="submit" />
-
       <form
-        ref={formRef}
-        action="https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php"
-        method="post"
-        acceptCharset="utf-8"
-        encType="multipart/form-data"
-        target="vtiger_submit_frame"
         className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin"
         onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
       >
-        <input type="hidden" name="__vtrftk" value="sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516" />
-        <input type="hidden" name="publicid" value="85432a838b51f53a6bc4ec937b64ee40" />
-        <input type="hidden" name="urlencodeenable" value="1" />
-        <input type="hidden" name="name" value="Enquiry Form: Telangana - Amruta HydroGeo Services" />
 
         {/* Name */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
