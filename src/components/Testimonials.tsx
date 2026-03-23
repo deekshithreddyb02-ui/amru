@@ -65,7 +65,7 @@ const Testimonials = () => {
           <p className="text-white/50 text-sm mb-12">Trusted by 1000+ clients across India</p>
         </motion.div>
 
-        <div className="relative min-h-[240px] md:min-h-[200px] flex items-center justify-center touch-pan-y">
+        <div className="relative h-[280px] md:h-[250px] flex items-center justify-center touch-pan-y overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={current}
@@ -79,13 +79,13 @@ const Testimonials = () => {
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.15}
               onDragEnd={noMotion ? undefined : handleDragEnd}
-              className="max-w-3xl mx-auto cursor-grab active:cursor-grabbing px-4"
+              className="absolute inset-0 flex flex-col items-center justify-center max-w-3xl mx-auto cursor-grab active:cursor-grabbing px-4"
             >
-              <Quote className="w-8 h-8 mx-auto mb-5 opacity-30" style={{ color: 'hsl(var(--secondary))' }} />
-              <p className="text-white/85 text-base md:text-lg leading-relaxed mb-6 italic line-clamp-[8]">
+              <Quote className="w-8 h-8 mx-auto mb-5 opacity-30 shrink-0" style={{ color: 'hsl(var(--secondary))' }} />
+              <p className="text-white/85 text-base md:text-lg leading-relaxed mb-6 italic line-clamp-5 text-center">
                 "{testimonials[current].text}"
               </p>
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-3 shrink-0">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
                   style={{ background: 'hsl(var(--secondary) / 0.2)', color: 'hsl(var(--secondary))' }}>
                   {testimonials[current].name.charAt(0)}
