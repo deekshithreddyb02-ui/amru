@@ -1142,6 +1142,10 @@ const Admin = () => {
                 )}
               </div>
             </TabsContent>
+
+            <TabsContent value="analytics">
+              <AnalyticsDashboard />
+            </TabsContent>
         </motion.div>
       </main>
       </Tabs>
