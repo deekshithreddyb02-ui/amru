@@ -31,6 +31,7 @@ import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
 import FeedbackEditor from "@/components/admin/FeedbackEditor";
+import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 
 interface User {
   id: string;
@@ -420,6 +421,10 @@ const Admin = () => {
               <TabsTrigger value="users" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
                 <Users className="w-4 h-4 shrink-0" />
                 <span className="truncate">Users</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
+                <BarChart3 className="w-4 h-4 shrink-0" />
+                <span className="truncate">Analytics</span>
               </TabsTrigger>
               <TabsTrigger value="modify" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
                 <Settings className="w-4 h-4 shrink-0" />
