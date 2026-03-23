@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import { useVisitTracker } from "@/hooks/useVisitTracker";
 
 // Lazy load below-the-fold components to reduce initial JS bundle
 const Services = lazy(() => import("@/components/Services"));
@@ -17,6 +18,7 @@ const Footer = lazy(() => import("@/components/Footer"));
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 
 const Index = () => {
+  useVisitTracker();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
