@@ -96,7 +96,18 @@ serve(async (req) => {
       }
     }
 
-    const vtigerUrl = "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php";
+    // Get CRM URL from settings or use default
+    let vtigerUrl = "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php";
+    try {
+      const { data: crmSettings } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "crm_settings")
+        .maybeSingle();
+      if (crmSettings?.value && (crmSettings.value as any).crm_url) {
+        vtigerUrl = (crmSettings.value as any).crm_url;
+      }
+    } catch { /* use default */ }
 
     const response = await fetch(vtigerUrl, {
       method: "POST",
