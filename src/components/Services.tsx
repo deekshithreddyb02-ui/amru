@@ -62,7 +62,7 @@ const Services = () => {
           {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
           className="text-center mb-14"
         >
-          
+          <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Our Services</h2>
           <p className="section-subheading">
             Comprehensive water management and environmental consulting solutions backed by 35 years of expertise.

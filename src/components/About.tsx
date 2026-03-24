@@ -31,7 +31,7 @@ const About = () => {
           <motion.div className="text-center">
             
             
-            
+            <div className="gold-accent mb-6 mx-auto" />
             <h2 className="section-heading mb-2">{title}</h2>
             <p className="text-sm uppercase tracking-widest font-semibold mb-8" style={{ color: 'hsl(var(--secondary))' }}>
               Pioneering Water Solutions Since 1990

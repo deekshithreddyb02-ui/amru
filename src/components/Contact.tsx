@@ -41,7 +41,7 @@ const Contact = () => {
     <section id="contact" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
         <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="text-center mb-14">
-          
+          <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Get In Touch</h2>
           <p className="section-subheading">Ready to start your project? Contact our team for consultations, quotes, or any inquiries.</p>
         </motion.div>

@@ -33,7 +33,7 @@ const WhyUs = () => {
           {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
           className="text-center mb-14">
           
-          
+          <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading text-white mb-4">{title}</h2>
           <p className="text-white/60 max-w-2xl mx-auto text-lg leading-relaxed">{subtitle}</p>
         </motion.div>

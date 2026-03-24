@@ -27,7 +27,7 @@ const Gallery = () => {
     <section id="gallery" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
         <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="text-center mb-14">
-          
+          <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Our Gallery</h2>
           <p className="section-subheading">A glimpse of our work and projects across India.</p>
         </motion.div>
