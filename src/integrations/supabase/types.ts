@@ -66,34 +66,79 @@ export type Database = {
       }
       contact_messages: {
         Row: {
+          area_type: string | null
+          area_value: string | null
+          biz_area: string | null
+          country: string | null
           created_at: string
+          crm_status: string | null
+          distance: string | null
           email: string
+          expected_close: string | null
           id: string
           is_read: boolean | null
+          latitude: string | null
+          longitude: string | null
+          mailing_city: string | null
+          mailing_pincode: string | null
+          mailing_street: string | null
           message: string
           name: string
+          num_scans: string | null
           phone: string | null
           service: string | null
+          service_needed: string | null
+          whatsapp: string | null
         }
         Insert: {
+          area_type?: string | null
+          area_value?: string | null
+          biz_area?: string | null
+          country?: string | null
           created_at?: string
+          crm_status?: string | null
+          distance?: string | null
           email: string
+          expected_close?: string | null
           id?: string
           is_read?: boolean | null
+          latitude?: string | null
+          longitude?: string | null
+          mailing_city?: string | null
+          mailing_pincode?: string | null
+          mailing_street?: string | null
           message: string
           name: string
+          num_scans?: string | null
           phone?: string | null
           service?: string | null
+          service_needed?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          area_type?: string | null
+          area_value?: string | null
+          biz_area?: string | null
+          country?: string | null
           created_at?: string
+          crm_status?: string | null
+          distance?: string | null
           email?: string
+          expected_close?: string | null
           id?: string
           is_read?: boolean | null
+          latitude?: string | null
+          longitude?: string | null
+          mailing_city?: string | null
+          mailing_pincode?: string | null
+          mailing_street?: string | null
           message?: string
           name?: string
+          num_scans?: string | null
           phone?: string | null
           service?: string | null
+          service_needed?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
