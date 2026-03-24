@@ -25,9 +25,10 @@ const getCorsHeaders = (origin: string | null) => {
 const ALLOWED_FIELDS = new Set([
   'lastname', 'firstname', 'email', 'phone', 'mobile',
   'company', 'designation', 'leadsource', 'description',
-  'cf_990', 'cf_998', 'cf_1002', 'cf_1014', 'cf_1020', 'cf_1022',
+  'cf_990', 'cf_994', 'cf_998', 'cf_1002', 'cf_1006', 'cf_1014', 'cf_1020', 'cf_1022', 'cf_1044',
   'assigned_user_id', 'salutationtype', 'closingdate',
   '__vtrftk', 'publicid', 'urlencodeenable', 'name',
+  'mailingstreet', 'mailingcity', 'mailingpobox',
 ]);
 
 // Max lengths for field values
