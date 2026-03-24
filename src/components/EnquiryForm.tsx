@@ -242,11 +242,30 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     setIsSubmitting(true);
 
     try {
+      // Fetch CRM settings from site_settings
+      let crmToken = "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516";
+      let crmPublicId = "85432a838b51f53a6bc4ec937b64ee40";
+      let crmFormName = "Enquiry Form: Telangana - Amruta HydroGeo Services";
+
+      try {
+        const { data: crmSettings } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "crm_settings")
+          .maybeSingle();
+        if (crmSettings?.value) {
+          const s = crmSettings.value as Record<string, string>;
+          if (s.token) crmToken = s.token;
+          if (s.public_id) crmPublicId = s.public_id;
+          if (s.form_name) crmFormName = s.form_name;
+        }
+      } catch { /* use defaults */ }
+
       const formData: Record<string, string> = {
-        __vtrftk: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
-        publicid: "85432a838b51f53a6bc4ec937b64ee40",
+        __vtrftk: crmToken,
+        publicid: crmPublicId,
         urlencodeenable: "1",
-        name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
+        name: crmFormName,
         lastname: lastName,
         cf_1044: expectedClose,
         cf_1022: whatsapp,
@@ -263,11 +282,56 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         mailingpobox: mailingPoBox
       };
 
+      // Save to database
+      let crmStatus = "pending";
+      const dbRecord = {
+        name: lastName,
+        email: whatsapp, // use whatsapp as primary contact
+        phone: whatsapp,
+        service: serviceNeeded,
+        message: description,
+        whatsapp,
+        biz_area: bizArea,
+        distance,
+        service_needed: serviceNeeded,
+        num_scans: numScans,
+        area_type: areaType,
+        area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
+        mailing_street: mailingStreet,
+        mailing_city: mailingCity,
+        mailing_pincode: mailingPoBox,
+        latitude: coords?.lat || null,
+        longitude: coords?.lng || null,
+        country: detectedCountry || null,
+        expected_close: expectedClose,
+        crm_status: crmStatus,
+      };
+
+      const { data: insertedLead, error: dbError } = await supabase
+        .from("contact_messages")
+        .insert(dbRecord)
+        .select("id")
+        .single();
+
+      if (dbError) {
+        console.error("DB save error:", dbError);
+      }
+
+      // Submit to CRM
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
         body: { formData }
       });
 
       if (error) throw error;
+
+      // Update CRM status in DB
+      if (insertedLead?.id) {
+        const newStatus = data?.success ? "success" : "failed";
+        await supabase
+          .from("contact_messages")
+          .update({ crm_status: newStatus })
+          .eq("id", insertedLead.id);
+      }
 
       if (data?.success) {
         toast.success("Enquiry submitted successfully! We'll contact you soon.");

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone, ExternalLink } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,6 +33,7 @@ import ContactEditor from "@/components/admin/ContactEditor";
 import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
+import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 
 interface User {
   id: string;
@@ -463,7 +464,7 @@ const Admin = () => {
                       </Button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1">
+                  <div className="grid grid-cols-3 md:grid-cols-7 gap-1">
                     {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
@@ -471,6 +472,7 @@ const Admin = () => {
                       { key: "contacts", label: "Contacts", icon: Phone },
                       { key: "footer", label: "Footer", icon: PanelBottom },
                       { key: "legal", label: "Legal Notice", icon: Scale },
+                      { key: "crm", label: "CRM", icon: ExternalLink },
                     ].map(({ key, label, icon: Icon }) => (
                       <Button
                         key={key}
@@ -500,6 +502,7 @@ const Admin = () => {
                     {modifySection === "contacts" && <ContactEditor />}
                     {modifySection === "footer" && <FooterEditor />}
                     {modifySection === "legal" && <LegalNoticeEditor />}
+                    {modifySection === "crm" && <CrmSettingsEditor />}
                   </CardContent>
                 </Card>
               </div>

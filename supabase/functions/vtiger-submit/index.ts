@@ -25,9 +25,10 @@ const getCorsHeaders = (origin: string | null) => {
 const ALLOWED_FIELDS = new Set([
   'lastname', 'firstname', 'email', 'phone', 'mobile',
   'company', 'designation', 'leadsource', 'description',
-  'cf_990', 'cf_998', 'cf_1002', 'cf_1014', 'cf_1020', 'cf_1022',
+  'cf_990', 'cf_994', 'cf_998', 'cf_1002', 'cf_1006', 'cf_1014', 'cf_1020', 'cf_1022', 'cf_1044',
   'assigned_user_id', 'salutationtype', 'closingdate',
   '__vtrftk', 'publicid', 'urlencodeenable', 'name',
+  'mailingstreet', 'mailingcity', 'mailingpobox',
 ]);
 
 // Max lengths for field values
@@ -73,13 +74,13 @@ serve(async (req) => {
       params.append(key, strValue);
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     // Rate limiting: check recent submissions via Supabase
     const email = formData.email ? String(formData.email) : null;
     if (email) {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { count } = await supabase
         .from('contact_messages')
@@ -95,7 +96,18 @@ serve(async (req) => {
       }
     }
 
-    const vtigerUrl = "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php";
+    // Get CRM URL from settings or use default
+    let vtigerUrl = "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php";
+    try {
+      const { data: crmSettings } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "crm_settings")
+        .maybeSingle();
+      if (crmSettings?.value && (crmSettings.value as any).crm_url) {
+        vtigerUrl = (crmSettings.value as any).crm_url;
+      }
+    } catch { /* use default */ }
 
     const response = await fetch(vtigerUrl, {
       method: "POST",
