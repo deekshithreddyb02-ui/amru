@@ -44,7 +44,7 @@ const Certifications = () => {
                   {cert.title}
                 </h3>
                 {cert.subtitle &&
-              <p className="text-xs font-semibold mb-2" style={{ color: 'hsl(var(--primary))' }}>{cert.subtitle}</p>
+              <p className="text-xs font-semibold mb-2 text-center" style={{ color: 'hsl(var(--primary))' }}>{cert.subtitle}</p>
               }
                 <p className="text-muted-foreground text-sm leading-relaxed text-center">{cert.description}</p>
               </div>
