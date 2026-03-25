@@ -242,30 +242,9 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // Fetch CRM settings from site_settings
-      let crmToken = "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516";
-      let crmPublicId = "85432a838b51f53a6bc4ec937b64ee40";
-      let crmFormName = "Enquiry Form: Telangana - Amruta HydroGeo Services";
-
-      try {
-        const { data: crmSettings } = await supabase
-          .from("site_settings")
-          .select("value")
-          .eq("key", "crm_settings")
-          .maybeSingle();
-        if (crmSettings?.value) {
-          const s = crmSettings.value as Record<string, string>;
-          if (s.token) crmToken = s.token;
-          if (s.public_id) crmPublicId = s.public_id;
-          if (s.form_name) crmFormName = s.form_name;
-        }
-      } catch { /* use defaults */ }
-
+      // CRM tokens are handled server-side by the edge function
       const formData: Record<string, string> = {
-        __vtrftk: crmToken,
-        publicid: crmPublicId,
         urlencodeenable: "1",
-        name: crmFormName,
         lastname: lastName,
         cf_1044: expectedClose,
         cf_1022: whatsapp,
