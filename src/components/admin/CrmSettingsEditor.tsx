@@ -20,6 +20,11 @@ interface CrmConfig {
   enabled: boolean;
 }
 
+interface LeadRouting {
+  store_in_db: boolean;
+  send_to_crm: boolean;
+}
+
 const STATE_SLOTS = [
   { label: "Maharashtra", state_key: "maharashtra" },
   { label: "Telangana", state_key: "telangana" },
