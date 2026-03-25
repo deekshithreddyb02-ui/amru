@@ -145,6 +145,24 @@ const CrmSettingsEditor = () => {
           Each CRM slot is mapped to a state. When a user submits the enquiry form, the form is routed to the CRM matching their detected state (via GPS). If the matched CRM is disabled or not configured, the submission goes to the <strong>"Others"</strong> CRM as fallback.
         </p>
 
+        <Card className="bg-muted/30 border-border/50">
+          <CardContent className="pt-4 space-y-3">
+            <p className="text-xs font-semibold text-foreground">Lead Routing Control</p>
+            <p className="text-[10px] text-muted-foreground">Choose where enquiry submissions are sent. You can enable both, one, or neither.</p>
+            <div className="flex items-center gap-3">
+              <Switch checked={routing.store_in_db} onCheckedChange={(v) => setRouting((r) => ({ ...r, store_in_db: v }))} />
+              <Label className="text-sm">Save leads in database (visible in Admin Leads)</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={routing.send_to_crm} onCheckedChange={(v) => setRouting((r) => ({ ...r, send_to_crm: v }))} />
+              <Label className="text-sm">Send leads to CRM (Vtiger web form)</Label>
+            </div>
+            {!routing.store_in_db && !routing.send_to_crm && (
+              <p className="text-[11px] text-destructive font-medium">⚠ Both options are disabled — enquiry submissions will be silently discarded.</p>
+            )}
+          </CardContent>
+        </Card>
+
         <Accordion type="multiple" className="space-y-2">
           {crms.map((crm, i) => (
             <AccordionItem key={i} value={`crm-${i}`} className="border rounded-lg px-4">
