@@ -261,56 +261,32 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         mailingpobox: mailingPoBox
       };
 
-      // Save to database
-      let crmStatus = "pending";
-      const dbRecord = {
-        name: lastName,
-        email: whatsapp, // use whatsapp as primary contact
-        phone: whatsapp,
-        service: serviceNeeded,
-        message: description,
-        whatsapp,
-        biz_area: bizArea,
-        distance,
-        service_needed: serviceNeeded,
-        num_scans: numScans,
-        area_type: areaType,
-        area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
-        mailing_street: mailingStreet,
-        mailing_city: mailingCity,
-        mailing_pincode: mailingPoBox,
-        latitude: coords?.lat || null,
-        longitude: coords?.lng || null,
-        country: detectedCountry || null,
-        expected_close: expectedClose,
-        crm_status: crmStatus,
-      };
-
-      const { data: insertedLead, error: dbError } = await supabase
-        .from("contact_messages")
-        .insert(dbRecord)
-        .select("id")
-        .single();
-
-      if (dbError) {
-        console.error("DB save error:", dbError);
-      }
-
-      // Submit to CRM — pass bizArea so the edge function routes to the correct state CRM
+      // Submit to edge function which handles both DB save and CRM routing based on admin settings
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
-        body: { formData, bizArea }
+        body: { formData, bizArea, dbRecord: {
+          name: lastName,
+          email: whatsapp,
+          phone: whatsapp,
+          service: serviceNeeded,
+          message: description,
+          whatsapp,
+          biz_area: bizArea,
+          distance,
+          service_needed: serviceNeeded,
+          num_scans: numScans,
+          area_type: areaType,
+          area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
+          mailing_street: mailingStreet,
+          mailing_city: mailingCity,
+          mailing_pincode: mailingPoBox,
+          latitude: coords?.lat || null,
+          longitude: coords?.lng || null,
+          country: detectedCountry || null,
+          expected_close: expectedClose,
+        }}
       });
 
       if (error) throw error;
-
-      // Update CRM status in DB
-      if (insertedLead?.id) {
-        const newStatus = data?.success ? "success" : "failed";
-        await supabase
-          .from("contact_messages")
-          .update({ crm_status: newStatus })
-          .eq("id", insertedLead.id);
-      }
 
       if (data?.success) {
         toast.success("Enquiry submitted successfully! We'll contact you soon.");
