@@ -33,8 +33,18 @@ const ALLOWED_FIELDS = new Set([
 const MAX_FIELD_VALUE_LENGTH = 2000;
 const MAX_FIELDS = 30;
 
+// Map BIZ Area values to state_key used in CRM settings
+const STATE_KEY_MAP: Record<string, string> = {
+  maharashtra: "maharashtra",
+  telangana: "telangana",
+  andhrapradesh: "andhrapradesh",
+  karnataka: "karnataka",
+  others: "others",
+};
+
 interface CrmConfig {
   label: string;
+  state_key: string;
   crm_url: string;
   token: string;
   public_id: string;
@@ -52,7 +62,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { formData } = body;
+    const { formData, bizArea } = body;
 
     if (!formData || typeof formData !== "object") {
       return new Response(
@@ -91,8 +101,14 @@ serve(async (req) => {
       }
     }
 
+    // Resolve state_key from bizArea
+    const rawBizArea = (bizArea || formData.cf_990 || "Others").toLowerCase().replace(/\s+/g, "");
+    const stateKey = STATE_KEY_MAP[rawBizArea] || "others";
+
     // Load CRM configs from DB
     let crmConfigs: CrmConfig[] = [];
+    let matchedCrm: CrmConfig | null = null;
+
     try {
       const { data: crmSettings } = await supabase
         .from("site_settings")
@@ -103,82 +119,84 @@ serve(async (req) => {
       if (crmSettings?.value) {
         const v = crmSettings.value as any;
         if (Array.isArray(v.crms)) {
-          crmConfigs = (v.crms as CrmConfig[]).filter(c => c.enabled && c.crm_url);
+          crmConfigs = v.crms as CrmConfig[];
+          // Find CRM matching the state
+          matchedCrm = crmConfigs.find(c => c.state_key === stateKey && c.enabled && c.crm_url) || null;
+          // Fallback to "others" if no match
+          if (!matchedCrm) {
+            matchedCrm = crmConfigs.find(c => c.state_key === "others" && c.enabled && c.crm_url) || null;
+          }
+          // Fallback to any enabled CRM
+          if (!matchedCrm) {
+            matchedCrm = crmConfigs.find(c => c.enabled && c.crm_url) || null;
+          }
         } else if (v.crm_url) {
           // Legacy single-CRM format
-          crmConfigs = [{
+          matchedCrm = {
             label: "Primary",
+            state_key: "telangana",
             crm_url: v.crm_url,
             token: v.token || "",
             public_id: v.public_id || "",
             form_name: v.form_name || "",
             enabled: true,
-          }];
+          };
         }
       }
     } catch { /* fallback below */ }
 
     // Fallback if no CRM configured
-    if (crmConfigs.length === 0) {
-      crmConfigs = [{
+    if (!matchedCrm) {
+      matchedCrm = {
         label: "Default",
+        state_key: "telangana",
         crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
         token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
         public_id: "85432a838b51f53a6bc4ec937b64ee40",
         form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
         enabled: true,
-      }];
+      };
     }
 
-    // Submit to all enabled CRMs
-    const results: { label: string; success: boolean; status: number }[] = [];
+    // Submit to the matched CRM only
+    const crm = matchedCrm;
+    let result = { label: crm.label, success: false, status: 0 };
 
-    for (const crm of crmConfigs) {
-      try {
-        // Build params with CRM-specific token/publicid/name
-        const params = new URLSearchParams();
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.has(key)) continue;
-          // Override CRM-specific fields
-          if (key === '__vtrftk') { params.append(key, crm.token); continue; }
-          if (key === 'publicid') { params.append(key, crm.public_id); continue; }
-          if (key === 'name') { params.append(key, crm.form_name); continue; }
-          const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
-          params.append(key, strValue);
-        }
-        // Ensure CRM fields are present even if not in formData
-        if (!params.has('__vtrftk')) params.append('__vtrftk', crm.token);
-        if (!params.has('publicid')) params.append('publicid', crm.public_id);
-        if (!params.has('name')) params.append('name', crm.form_name);
-
-        const response = await fetch(crm.crm_url, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
-          body: params.toString(),
-        });
-
-        const responseText = await response.text();
-        console.log(`CRM [${crm.label}] response: ${response.status}, body: ${responseText.length} chars`);
-        results.push({ label: crm.label, success: response.ok, status: response.status });
-      } catch (err) {
-        console.error(`CRM [${crm.label}] error:`, err);
-        results.push({ label: crm.label, success: false, status: 0 });
+    try {
+      const params = new URLSearchParams();
+      for (const [key, value] of entries) {
+        if (!ALLOWED_FIELDS.has(key)) continue;
+        if (key === '__vtrftk') { params.append(key, crm.token); continue; }
+        if (key === 'publicid') { params.append(key, crm.public_id); continue; }
+        if (key === 'name') { params.append(key, crm.form_name); continue; }
+        const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
+        params.append(key, strValue);
       }
-    }
+      if (!params.has('__vtrftk')) params.append('__vtrftk', crm.token);
+      if (!params.has('publicid')) params.append('publicid', crm.public_id);
+      if (!params.has('name')) params.append('name', crm.form_name);
 
-    const anySuccess = results.some(r => r.success);
-    const allSuccess = results.every(r => r.success);
+      const response = await fetch(crm.crm_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
+        body: params.toString(),
+      });
+
+      const responseText = await response.text();
+      console.log(`CRM [${crm.label}] (state: ${stateKey}) response: ${response.status}, body: ${responseText.length} chars`);
+      result = { label: crm.label, success: response.ok, status: response.status };
+    } catch (err) {
+      console.error(`CRM [${crm.label}] error:`, err);
+    }
 
     return new Response(
       JSON.stringify({
-        success: anySuccess,
-        allSuccess,
-        results,
-        message: allSuccess
-          ? "Enquiry submitted to all CRMs successfully"
-          : anySuccess
-            ? "Enquiry submitted to some CRMs. Check admin for details."
-            : "Failed to submit to any CRM. Please try again later.",
+        success: result.success,
+        crmLabel: result.label,
+        stateKey,
+        message: result.success
+          ? `Enquiry submitted to ${crm.label} CRM successfully`
+          : "Failed to submit to CRM. Please try again later.",
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Save, ExternalLink, Plus } from "lucide-react";
+import { Loader2, Save, ExternalLink } from "lucide-react";
 
 interface CrmConfig {
   label: string;
+  state_key: string;
   crm_url: string;
   token: string;
   public_id: string;
@@ -19,29 +20,23 @@ interface CrmConfig {
   enabled: boolean;
 }
 
-const EMPTY_CRM: CrmConfig = {
-  label: "",
-  crm_url: "",
-  token: "",
-  public_id: "",
-  form_name: "",
-  enabled: false,
-};
-
-const DEFAULT_CRMS: CrmConfig[] = [
-  {
-    label: "Telangana",
-    crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
-    token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
-    public_id: "85432a838b51f53a6bc4ec937b64ee40",
-    form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
-    enabled: true,
-  },
-  { ...EMPTY_CRM, label: "CRM 2" },
-  { ...EMPTY_CRM, label: "CRM 3" },
-  { ...EMPTY_CRM, label: "CRM 4" },
-  { ...EMPTY_CRM, label: "CRM 5" },
+const STATE_SLOTS = [
+  { label: "Maharashtra", state_key: "maharashtra" },
+  { label: "Telangana", state_key: "telangana" },
+  { label: "Andhra Pradesh", state_key: "andhrapradesh" },
+  { label: "Karnataka", state_key: "karnataka" },
+  { label: "Others", state_key: "others" },
 ];
+
+const DEFAULT_CRMS: CrmConfig[] = STATE_SLOTS.map((s, i) => ({
+  label: s.label,
+  state_key: s.state_key,
+  crm_url: i === 1 ? "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php" : "",
+  token: i === 1 ? "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516" : "",
+  public_id: i === 1 ? "85432a838b51f53a6bc4ec937b64ee40" : "",
+  form_name: i === 1 ? "Enquiry Form: Telangana - Amruta HydroGeo Services" : "",
+  enabled: i === 1,
+}));
 
 const CrmSettingsEditor = () => {
   const { toast } = useToast();
@@ -59,22 +54,27 @@ const CrmSettingsEditor = () => {
           .maybeSingle();
         if (!error && data?.value) {
           const v = data.value as any;
-          // Support new multi-CRM format
           if (Array.isArray(v.crms)) {
             const loaded = v.crms as CrmConfig[];
-            // Ensure always 5 slots
-            const padded = [...loaded];
-            while (padded.length < 5) padded.push({ ...EMPTY_CRM, label: `CRM ${padded.length + 1}` });
-            setCrms(padded.slice(0, 5));
+            // Merge with state slots to ensure all 5 exist with correct state_key
+            const merged = STATE_SLOTS.map((slot) => {
+              const existing = loaded.find(
+                (c) => c.state_key === slot.state_key || c.label?.toLowerCase() === slot.label.toLowerCase()
+              );
+              return existing
+                ? { ...existing, state_key: slot.state_key }
+                : { ...DEFAULT_CRMS.find((d) => d.state_key === slot.state_key)! };
+            });
+            setCrms(merged);
           } else if (v.crm_url) {
-            // Migrate old single-CRM format
+            // Migrate old single-CRM format into Telangana slot
             const migrated = [...DEFAULT_CRMS];
-            migrated[0] = {
-              label: "Primary CRM",
-              crm_url: v.crm_url || DEFAULT_CRMS[0].crm_url,
-              token: v.token || DEFAULT_CRMS[0].token,
-              public_id: v.public_id || DEFAULT_CRMS[0].public_id,
-              form_name: v.form_name || DEFAULT_CRMS[0].form_name,
+            migrated[1] = {
+              ...migrated[1],
+              crm_url: v.crm_url,
+              token: v.token || migrated[1].token,
+              public_id: v.public_id || migrated[1].public_id,
+              form_name: v.form_name || migrated[1].form_name,
               enabled: true,
             };
             setCrms(migrated);
@@ -127,11 +127,13 @@ const CrmSettingsEditor = () => {
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           <ExternalLink className="w-5 h-5 text-primary" />
-          CRM Integration Settings (5 Slots)
+          CRM Integration Settings (State-wise)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">Configure up to 5 Vtiger CRM web forms. Enquiry submissions will be sent to all <strong>enabled</strong> CRMs simultaneously.</p>
+        <p className="text-xs text-muted-foreground">
+          Each CRM slot is mapped to a state. When a user submits the enquiry form, the form is routed to the CRM matching their detected state (via GPS). If the matched CRM is disabled or not configured, the submission goes to the <strong>"Others"</strong> CRM as fallback.
+        </p>
 
         <Accordion type="multiple" className="space-y-2">
           {crms.map((crm, i) => (
@@ -139,7 +141,8 @@ const CrmSettingsEditor = () => {
               <AccordionTrigger className="py-3 hover:no-underline">
                 <div className="flex items-center gap-3 w-full">
                   <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${crm.enabled ? "bg-green-500" : "bg-muted-foreground/30"}`} />
-                  <span className="font-medium text-sm">{crm.label || `CRM ${i + 1}`}</span>
+                  <span className="font-medium text-sm">{crm.label}</span>
+                  <span className="text-[10px] text-muted-foreground ml-1">({crm.state_key})</span>
                   {crm.enabled && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-auto mr-4">Active</span>}
                 </div>
               </AccordionTrigger>
@@ -150,8 +153,9 @@ const CrmSettingsEditor = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Label / Name</Label>
+                  <Label className="text-xs font-medium">Display Label</Label>
                   <Input value={crm.label} onChange={(e) => updateCrm(i, { label: e.target.value })} placeholder="e.g. Telangana CRM" />
+                  <p className="text-[10px] text-muted-foreground">Display name only. State routing uses the fixed state key: <code>{crm.state_key}</code></p>
                 </div>
 
                 <div className="space-y-1.5">
