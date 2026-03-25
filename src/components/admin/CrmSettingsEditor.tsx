@@ -46,6 +46,7 @@ const DEFAULT_CRMS: CrmConfig[] = STATE_SLOTS.map((s, i) => ({
 const CrmSettingsEditor = () => {
   const { toast } = useToast();
   const [crms, setCrms] = useState<CrmConfig[]>(DEFAULT_CRMS);
+  const [routing, setRouting] = useState<LeadRouting>({ store_in_db: true, send_to_crm: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
