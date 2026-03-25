@@ -13,7 +13,6 @@ const getCorsHeaders = (origin: string | null) => {
   const allowOrigin = origin && ALLOWED_ORIGINS.some(o => origin.startsWith(o) || origin === o)
     ? origin
     : ALLOWED_ORIGINS[0];
-
   return {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -33,7 +32,6 @@ const ALLOWED_FIELDS = new Set([
 const MAX_FIELD_VALUE_LENGTH = 2000;
 const MAX_FIELDS = 30;
 
-// Map BIZ Area values to state_key used in CRM settings
 const STATE_KEY_MAP: Record<string, string> = {
   maharashtra: "maharashtra",
   telangana: "telangana",
@@ -52,6 +50,11 @@ interface CrmConfig {
   enabled: boolean;
 }
 
+interface LeadRouting {
+  store_in_db: boolean;
+  send_to_crm: boolean;
+}
+
 serve(async (req) => {
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
@@ -62,7 +65,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { formData, bizArea } = body;
+    const { formData, bizArea, dbRecord } = body;
 
     if (!formData || typeof formData !== "object") {
       return new Response(
@@ -83,8 +86,8 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Rate limiting
-    const email = formData.email ? String(formData.email) : null;
+    // Rate limiting by email/phone
+    const email = formData.email ? String(formData.email) : (dbRecord?.email || null);
     if (email) {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { count } = await supabase
@@ -101,13 +104,9 @@ serve(async (req) => {
       }
     }
 
-    // Resolve state_key from bizArea
-    const rawBizArea = (bizArea || formData.cf_990 || "Others").toLowerCase().replace(/\s+/g, "");
-    const stateKey = STATE_KEY_MAP[rawBizArea] || "others";
-
-    // Load CRM configs from DB
+    // Load CRM settings (includes routing config)
+    let routing: LeadRouting = { store_in_db: true, send_to_crm: true };
     let crmConfigs: CrmConfig[] = [];
-    let matchedCrm: CrmConfig | null = null;
 
     try {
       const { data: crmSettings } = await supabase
@@ -118,92 +117,140 @@ serve(async (req) => {
 
       if (crmSettings?.value) {
         const v = crmSettings.value as any;
-        if (Array.isArray(v.crms)) {
-          crmConfigs = v.crms as CrmConfig[];
-          // Find CRM matching the state
-          matchedCrm = crmConfigs.find(c => c.state_key === stateKey && c.enabled && c.crm_url) || null;
-          // Fallback to "others" if no match
-          if (!matchedCrm) {
-            matchedCrm = crmConfigs.find(c => c.state_key === "others" && c.enabled && c.crm_url) || null;
-          }
-          // Fallback to any enabled CRM
-          if (!matchedCrm) {
-            matchedCrm = crmConfigs.find(c => c.enabled && c.crm_url) || null;
-          }
-        } else if (v.crm_url) {
-          // Legacy single-CRM format
-          matchedCrm = {
-            label: "Primary",
-            state_key: "telangana",
-            crm_url: v.crm_url,
-            token: v.token || "",
-            public_id: v.public_id || "",
-            form_name: v.form_name || "",
-            enabled: true,
+        if (v.routing) {
+          routing = {
+            store_in_db: v.routing.store_in_db !== false,
+            send_to_crm: v.routing.send_to_crm !== false,
           };
         }
+        if (Array.isArray(v.crms)) {
+          crmConfigs = v.crms as CrmConfig[];
+        }
       }
-    } catch { /* fallback below */ }
+    } catch { /* defaults */ }
 
-    // Fallback if no CRM configured
-    if (!matchedCrm) {
-      matchedCrm = {
-        label: "Default",
-        state_key: "telangana",
-        crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
-        token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
-        public_id: "85432a838b51f53a6bc4ec937b64ee40",
-        form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
-        enabled: true,
-      };
+    let dbSaveSuccess = false;
+    let crmSuccess = false;
+    let crmLabel = "";
+    const rawBizArea = (bizArea || formData.cf_990 || "Others").toLowerCase().replace(/\s+/g, "");
+    const stateKey = STATE_KEY_MAP[rawBizArea] || "others";
+
+    // --- Step 1: Save to database if enabled ---
+    if (routing.store_in_db && dbRecord && typeof dbRecord === "object") {
+      try {
+        const sanitized: Record<string, any> = {};
+        const allowedDbFields = new Set([
+          'name', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'biz_area', 'distance', 'service_needed', 'num_scans',
+          'area_type', 'area_value', 'mailing_street', 'mailing_city',
+          'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
+        ]);
+        for (const [k, v] of Object.entries(dbRecord)) {
+          if (allowedDbFields.has(k)) {
+            sanitized[k] = v === undefined ? null : v;
+          }
+        }
+        sanitized.crm_status = routing.send_to_crm ? "pending" : "db_only";
+
+        const { error: dbErr } = await supabase.from("contact_messages").insert(sanitized);
+        if (dbErr) {
+          console.error("DB save error:", dbErr);
+        } else {
+          dbSaveSuccess = true;
+        }
+      } catch (err) {
+        console.error("DB save exception:", err);
+      }
     }
 
-    // Submit to the matched CRM only
-    const crm = matchedCrm;
-    let result = { label: crm.label, success: false, status: 0 };
+    // --- Step 2: Send to CRM if enabled ---
+    if (routing.send_to_crm) {
+      let matchedCrm: CrmConfig | null = null;
 
-    try {
-      const params = new URLSearchParams();
-      for (const [key, value] of entries) {
-        if (!ALLOWED_FIELDS.has(key)) continue;
-        if (key === '__vtrftk') { params.append(key, crm.token); continue; }
-        if (key === 'publicid') { params.append(key, crm.public_id); continue; }
-        if (key === 'name') { params.append(key, crm.form_name); continue; }
-        const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
-        params.append(key, strValue);
+      if (crmConfigs.length > 0) {
+        matchedCrm = crmConfigs.find(c => c.state_key === stateKey && c.enabled && c.crm_url) || null;
+        if (!matchedCrm) matchedCrm = crmConfigs.find(c => c.state_key === "others" && c.enabled && c.crm_url) || null;
+        if (!matchedCrm) matchedCrm = crmConfigs.find(c => c.enabled && c.crm_url) || null;
       }
-      if (!params.has('__vtrftk')) params.append('__vtrftk', crm.token);
-      if (!params.has('publicid')) params.append('publicid', crm.public_id);
-      if (!params.has('name')) params.append('name', crm.form_name);
 
-      const response = await fetch(crm.crm_url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
-        body: params.toString(),
-      });
+      // Fallback default
+      if (!matchedCrm) {
+        matchedCrm = {
+          label: "Default",
+          state_key: "telangana",
+          crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
+          token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
+          public_id: "85432a838b51f53a6bc4ec937b64ee40",
+          form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
+          enabled: true,
+        };
+      }
 
-      const responseText = await response.text();
-      console.log(`CRM [${crm.label}] (state: ${stateKey}) response: ${response.status}, body: ${responseText.length} chars`);
-      result = { label: crm.label, success: response.ok, status: response.status };
-    } catch (err) {
-      console.error(`CRM [${crm.label}] error:`, err);
+      crmLabel = matchedCrm.label;
+
+      try {
+        const params = new URLSearchParams();
+        for (const [key, value] of entries) {
+          if (!ALLOWED_FIELDS.has(key)) continue;
+          if (key === '__vtrftk') { params.append(key, matchedCrm.token); continue; }
+          if (key === 'publicid') { params.append(key, matchedCrm.public_id); continue; }
+          if (key === 'name') { params.append(key, matchedCrm.form_name); continue; }
+          const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
+          params.append(key, strValue);
+        }
+        if (!params.has('__vtrftk')) params.append('__vtrftk', matchedCrm.token);
+        if (!params.has('publicid')) params.append('publicid', matchedCrm.public_id);
+        if (!params.has('name')) params.append('name', matchedCrm.form_name);
+
+        const response = await fetch(matchedCrm.crm_url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
+          body: params.toString(),
+        });
+
+        const responseText = await response.text();
+        console.log(`CRM [${matchedCrm.label}] (state: ${stateKey}) response: ${response.status}, body: ${responseText.length} chars`);
+        crmSuccess = response.ok;
+      } catch (err) {
+        console.error(`CRM [${crmLabel}] error:`, err);
+      }
+
+      // Update CRM status in DB if we saved
+      if (dbSaveSuccess && dbRecord?.email) {
+        const newStatus = crmSuccess ? "success" : "failed";
+        await supabase
+          .from("contact_messages")
+          .update({ crm_status: newStatus })
+          .eq("email", dbRecord.email)
+          .order("created_at", { ascending: false })
+          .limit(1);
+      }
     }
+
+    // Determine overall success
+    const overallSuccess = (routing.store_in_db ? dbSaveSuccess : true) && (routing.send_to_crm ? crmSuccess : true);
+    // At least one action must be enabled
+    const anyAction = routing.store_in_db || routing.send_to_crm;
 
     return new Response(
       JSON.stringify({
-        success: result.success,
-        crmLabel: result.label,
+        success: anyAction && overallSuccess,
         stateKey,
-        message: result.success
-          ? `Enquiry submitted to ${crm.label} CRM successfully`
-          : "Failed to submit to CRM. Please try again later.",
+        crmLabel,
+        dbSaved: routing.store_in_db ? dbSaveSuccess : "skipped",
+        crmSent: routing.send_to_crm ? crmSuccess : "skipped",
+        message: !anyAction
+          ? "Lead routing is disabled. Please contact admin."
+          : overallSuccess
+            ? "Enquiry submitted successfully"
+            : "Submission partially failed. Please try again later.",
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Vtiger proxy error:", error);
     return new Response(
-      JSON.stringify({ success: false, message: "Failed to connect to CRM system. Please try again later." }),
+      JSON.stringify({ success: false, message: "Failed to process enquiry. Please try again later." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
