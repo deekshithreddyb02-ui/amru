@@ -60,9 +60,14 @@ const CrmSettingsEditor = () => {
           .maybeSingle();
         if (!error && data?.value) {
           const v = data.value as any;
+          if (v.routing) {
+            setRouting({
+              store_in_db: v.routing.store_in_db !== false,
+              send_to_crm: v.routing.send_to_crm !== false,
+            });
+          }
           if (Array.isArray(v.crms)) {
             const loaded = v.crms as CrmConfig[];
-            // Merge with state slots to ensure all 5 exist with correct state_key
             const merged = STATE_SLOTS.map((slot) => {
               const existing = loaded.find(
                 (c) => c.state_key === slot.state_key || c.label?.toLowerCase() === slot.label.toLowerCase()
@@ -73,7 +78,6 @@ const CrmSettingsEditor = () => {
             });
             setCrms(merged);
           } else if (v.crm_url) {
-            // Migrate old single-CRM format into Telangana slot
             const migrated = [...DEFAULT_CRMS];
             migrated[1] = {
               ...migrated[1],
@@ -99,7 +103,7 @@ const CrmSettingsEditor = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const value = { crms };
+      const value = { crms, routing };
       const { data: existing } = await (supabase as any)
         .from("site_settings")
         .select("id")
