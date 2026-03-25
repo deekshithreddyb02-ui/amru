@@ -317,9 +317,9 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         console.error("DB save error:", dbError);
       }
 
-      // Submit to CRM
+      // Submit to CRM — pass bizArea so the edge function routes to the correct state CRM
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
-        body: { formData }
+        body: { formData, bizArea }
       });
 
       if (error) throw error;
