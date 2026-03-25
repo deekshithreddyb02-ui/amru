@@ -1,0 +1,1 @@
+DROP POLICY "Authenticated users can read settings" ON public.site_settings;
