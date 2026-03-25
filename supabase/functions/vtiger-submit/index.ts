@@ -21,7 +21,6 @@ const getCorsHeaders = (origin: string | null) => {
   };
 };
 
-// Whitelist of allowed VTiger form field names
 const ALLOWED_FIELDS = new Set([
   'lastname', 'firstname', 'email', 'phone', 'mobile',
   'company', 'designation', 'leadsource', 'description',
@@ -31,9 +30,17 @@ const ALLOWED_FIELDS = new Set([
   'mailingstreet', 'mailingcity', 'mailingpobox',
 ]);
 
-// Max lengths for field values
 const MAX_FIELD_VALUE_LENGTH = 2000;
 const MAX_FIELDS = 30;
+
+interface CrmConfig {
+  label: string;
+  crm_url: string;
+  token: string;
+  public_id: string;
+  form_name: string;
+  enabled: boolean;
+}
 
 serve(async (req) => {
   const origin = req.headers.get('origin');
@@ -54,7 +61,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate field count
     const entries = Object.entries(formData);
     if (entries.length > MAX_FIELDS) {
       return new Response(
@@ -63,22 +69,11 @@ serve(async (req) => {
       );
     }
 
-    // Build URL-encoded form body with whitelisted fields only
-    const params = new URLSearchParams();
-    for (const [key, value] of entries) {
-      if (!ALLOWED_FIELDS.has(key)) {
-        console.warn(`Blocked non-whitelisted field: ${key}`);
-        continue;
-      }
-      const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
-      params.append(key, strValue);
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Rate limiting: check recent submissions via Supabase
+    // Rate limiting
     const email = formData.email ? String(formData.email) : null;
     if (email) {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -96,56 +91,102 @@ serve(async (req) => {
       }
     }
 
-    // Get CRM URL from settings or use default
-    let vtigerUrl = "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php";
+    // Load CRM configs from DB
+    let crmConfigs: CrmConfig[] = [];
     try {
       const { data: crmSettings } = await supabase
         .from("site_settings")
         .select("value")
         .eq("key", "crm_settings")
         .maybeSingle();
-      if (crmSettings?.value && (crmSettings.value as any).crm_url) {
-        vtigerUrl = (crmSettings.value as any).crm_url;
+
+      if (crmSettings?.value) {
+        const v = crmSettings.value as any;
+        if (Array.isArray(v.crms)) {
+          crmConfigs = (v.crms as CrmConfig[]).filter(c => c.enabled && c.crm_url);
+        } else if (v.crm_url) {
+          // Legacy single-CRM format
+          crmConfigs = [{
+            label: "Primary",
+            crm_url: v.crm_url,
+            token: v.token || "",
+            public_id: v.public_id || "",
+            form_name: v.form_name || "",
+            enabled: true,
+          }];
+        }
       }
-    } catch { /* use default */ }
+    } catch { /* fallback below */ }
 
-    const response = await fetch(vtigerUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-      },
-      body: params.toString(),
-    });
+    // Fallback if no CRM configured
+    if (crmConfigs.length === 0) {
+      crmConfigs = [{
+        label: "Default",
+        crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
+        token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
+        public_id: "85432a838b51f53a6bc4ec937b64ee40",
+        form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
+        enabled: true,
+      }];
+    }
 
-    const responseText = await response.text();
-    const isSuccess = response.ok;
+    // Submit to all enabled CRMs
+    const results: { label: string; success: boolean; status: number }[] = [];
 
-    console.log(`Vtiger response status: ${response.status}, body length: ${responseText.length}`);
+    for (const crm of crmConfigs) {
+      try {
+        // Build params with CRM-specific token/publicid/name
+        const params = new URLSearchParams();
+        for (const [key, value] of entries) {
+          if (!ALLOWED_FIELDS.has(key)) continue;
+          // Override CRM-specific fields
+          if (key === '__vtrftk') { params.append(key, crm.token); continue; }
+          if (key === 'publicid') { params.append(key, crm.public_id); continue; }
+          if (key === 'name') { params.append(key, crm.form_name); continue; }
+          const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
+          params.append(key, strValue);
+        }
+        // Ensure CRM fields are present even if not in formData
+        if (!params.has('__vtrftk')) params.append('__vtrftk', crm.token);
+        if (!params.has('publicid')) params.append('publicid', crm.public_id);
+        if (!params.has('name')) params.append('name', crm.form_name);
+
+        const response = await fetch(crm.crm_url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8" },
+          body: params.toString(),
+        });
+
+        const responseText = await response.text();
+        console.log(`CRM [${crm.label}] response: ${response.status}, body: ${responseText.length} chars`);
+        results.push({ label: crm.label, success: response.ok, status: response.status });
+      } catch (err) {
+        console.error(`CRM [${crm.label}] error:`, err);
+        results.push({ label: crm.label, success: false, status: 0 });
+      }
+    }
+
+    const anySuccess = results.some(r => r.success);
+    const allSuccess = results.every(r => r.success);
 
     return new Response(
       JSON.stringify({
-        success: isSuccess,
-        status: response.status,
-        message: isSuccess
-          ? "Enquiry submitted successfully to CRM"
-          : "Failed to submit enquiry. Please try again later.",
+        success: anySuccess,
+        allSuccess,
+        results,
+        message: allSuccess
+          ? "Enquiry submitted to all CRMs successfully"
+          : anySuccess
+            ? "Enquiry submitted to some CRMs. Check admin for details."
+            : "Failed to submit to any CRM. Please try again later.",
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Vtiger proxy error:", error);
     return new Response(
-      JSON.stringify({
-        success: false,
-        message: "Failed to connect to CRM system. Please try again later.",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ success: false, message: "Failed to connect to CRM system. Please try again later." }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
