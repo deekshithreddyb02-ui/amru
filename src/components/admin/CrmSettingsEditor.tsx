@@ -20,6 +20,11 @@ interface CrmConfig {
   enabled: boolean;
 }
 
+interface LeadRouting {
+  store_in_db: boolean;
+  send_to_crm: boolean;
+}
+
 const STATE_SLOTS = [
   { label: "Maharashtra", state_key: "maharashtra" },
   { label: "Telangana", state_key: "telangana" },
@@ -41,6 +46,7 @@ const DEFAULT_CRMS: CrmConfig[] = STATE_SLOTS.map((s, i) => ({
 const CrmSettingsEditor = () => {
   const { toast } = useToast();
   const [crms, setCrms] = useState<CrmConfig[]>(DEFAULT_CRMS);
+  const [routing, setRouting] = useState<LeadRouting>({ store_in_db: true, send_to_crm: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -54,9 +60,14 @@ const CrmSettingsEditor = () => {
           .maybeSingle();
         if (!error && data?.value) {
           const v = data.value as any;
+          if (v.routing) {
+            setRouting({
+              store_in_db: v.routing.store_in_db !== false,
+              send_to_crm: v.routing.send_to_crm !== false,
+            });
+          }
           if (Array.isArray(v.crms)) {
             const loaded = v.crms as CrmConfig[];
-            // Merge with state slots to ensure all 5 exist with correct state_key
             const merged = STATE_SLOTS.map((slot) => {
               const existing = loaded.find(
                 (c) => c.state_key === slot.state_key || c.label?.toLowerCase() === slot.label.toLowerCase()
@@ -67,7 +78,6 @@ const CrmSettingsEditor = () => {
             });
             setCrms(merged);
           } else if (v.crm_url) {
-            // Migrate old single-CRM format into Telangana slot
             const migrated = [...DEFAULT_CRMS];
             migrated[1] = {
               ...migrated[1],
@@ -93,7 +103,7 @@ const CrmSettingsEditor = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const value = { crms };
+      const value = { crms, routing };
       const { data: existing } = await (supabase as any)
         .from("site_settings")
         .select("id")
@@ -134,6 +144,24 @@ const CrmSettingsEditor = () => {
         <p className="text-xs text-muted-foreground">
           Each CRM slot is mapped to a state. When a user submits the enquiry form, the form is routed to the CRM matching their detected state (via GPS). If the matched CRM is disabled or not configured, the submission goes to the <strong>"Others"</strong> CRM as fallback.
         </p>
+
+        <Card className="bg-muted/30 border-border/50">
+          <CardContent className="pt-4 space-y-3">
+            <p className="text-xs font-semibold text-foreground">Lead Routing Control</p>
+            <p className="text-[10px] text-muted-foreground">Choose where enquiry submissions are sent. You can enable both, one, or neither.</p>
+            <div className="flex items-center gap-3">
+              <Switch checked={routing.store_in_db} onCheckedChange={(v) => setRouting((r) => ({ ...r, store_in_db: v }))} />
+              <Label className="text-sm">Save leads in database (visible in Admin Leads)</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={routing.send_to_crm} onCheckedChange={(v) => setRouting((r) => ({ ...r, send_to_crm: v }))} />
+              <Label className="text-sm">Send leads to CRM (Vtiger web form)</Label>
+            </div>
+            {!routing.store_in_db && !routing.send_to_crm && (
+              <p className="text-[11px] text-destructive font-medium">⚠ Both options are disabled — enquiry submissions will be silently discarded.</p>
+            )}
+          </CardContent>
+        </Card>
 
         <Accordion type="multiple" className="space-y-2">
           {crms.map((crm, i) => (
