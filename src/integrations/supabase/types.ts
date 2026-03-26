@@ -142,6 +142,42 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_ping_history: {
+        Row: {
+          crm_label: string | null
+          crm_url: string
+          error_message: string | null
+          id: string
+          pinged_at: string
+          response_time_ms: number | null
+          state_key: string
+          status: string
+          status_code: number | null
+        }
+        Insert: {
+          crm_label?: string | null
+          crm_url: string
+          error_message?: string | null
+          id?: string
+          pinged_at?: string
+          response_time_ms?: number | null
+          state_key: string
+          status?: string
+          status_code?: number | null
+        }
+        Update: {
+          crm_label?: string | null
+          crm_url?: string
+          error_message?: string | null
+          id?: string
+          pinged_at?: string
+          response_time_ms?: number | null
+          state_key?: string
+          status?: string
+          status_code?: number | null
+        }
+        Relationships: []
+      }
       customer_feedback: {
         Row: {
           created_at: string

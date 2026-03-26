@@ -34,6 +34,7 @@ import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
+import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
 
 interface User {
   id: string;
@@ -502,7 +503,12 @@ const Admin = () => {
                     {modifySection === "contacts" && <ContactEditor />}
                     {modifySection === "footer" && <FooterEditor />}
                     {modifySection === "legal" && <LegalNoticeEditor />}
-                    {modifySection === "crm" && <CrmSettingsEditor />}
+                    {modifySection === "crm" && (
+                      <div className="space-y-6">
+                        <CrmSettingsEditor />
+                        <CrmPingDashboard />
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
