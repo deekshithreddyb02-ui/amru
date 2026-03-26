@@ -5,9 +5,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription } from
-"@/components/ui/dialog";
+  DialogDescription,
+} from "@/components/ui/dialog";
 import EnquiryForm from "@/components/EnquiryForm";
+import CrmStateSelector from "@/components/CrmStateSelector";
 
 interface ServiceCardProps {
   title: string;
@@ -20,6 +21,7 @@ interface ServiceCardProps {
 const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   return (
     <>
@@ -43,44 +45,38 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px" />
-          
         </div>
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-bold text-sm text-foreground mb-2 leading-tight text-center" style={{ fontFamily: 'var(--font-serif)' }}>
             {title}
           </h3>
           <div className="flex-1">
-            <p
-              className="text-muted-foreground text-xs leading-relaxed line-clamp-5 text-center">
-              
+            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-5 text-center">
               {description}
             </p>
             <button
               type="button"
               className="text-xs font-medium mt-1 text-primary hover:text-primary/80 transition-colors text-center"
               onClick={(e) => {e.stopPropagation();setDetailOpen(true);}}>
-              
               Read more
             </button>
           </div>
-          {link ?
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center font-semibold text-xs mt-3 pt-2.5 border-t border-border/30 transition-colors duration-300"
-            style={{ color: 'hsl(var(--secondary))' }}>
-            
+          {link ? (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center font-semibold text-xs mt-3 pt-2.5 border-t border-border/30 transition-colors duration-300"
+              style={{ color: 'hsl(var(--secondary))' }}>
               Visit App →
-            </a> :
-
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center text-primary font-semibold text-xs hover:text-primary/80 transition-colors text-left mt-3 pt-2.5 border-t border-border/30">
-            
+            </a>
+          ) : (
+            <button
+              onClick={() => { setOpen(true); setShowForm(false); }}
+              className="inline-flex items-center text-primary font-semibold text-xs hover:text-primary/80 transition-colors text-left mt-3 pt-2.5 border-t border-border/30">
               Enquire →
             </button>
-          }
+          )}
         </div>
       </motion.article>
 
@@ -95,7 +91,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setShowForm(false); }}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl border-border/30"
         style={{ boxShadow: '0 25px 60px -15px hsl(var(--primary) / 0.15)', background: 'linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.4))' }}>
           <div className="relative px-6 pt-6 pb-4 border-b border-border/30"
@@ -104,20 +100,24 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             style={{ background: 'hsl(var(--primary) / 0.03)' }} />
             <DialogHeader className="relative">
               <DialogTitle className="text-lg tracking-tight text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                Enquire About
+                {showForm ? "Enquiry Form" : "Enquire About"}
               </DialogTitle>
               <DialogDescription className="font-semibold text-base" style={{ color: 'hsl(var(--primary))' }}>
                 {title}
               </DialogDescription>
             </DialogHeader>
           </div>
-          <div className="px-6 pb-6">
-            <EnquiryForm serviceTitle={title} onSuccess={() => setOpen(false)} />
+          <div className="px-6 pb-6 max-h-[65vh] overflow-y-auto">
+            {showForm ? (
+              <EnquiryForm serviceTitle={title} onSuccess={() => setOpen(false)} />
+            ) : (
+              <CrmStateSelector onFillFormHere={() => setShowForm(true)} />
+            )}
           </div>
         </DialogContent>
       </Dialog>
-    </>);
-
+    </>
+  );
 };
 
 export default ServiceCard;

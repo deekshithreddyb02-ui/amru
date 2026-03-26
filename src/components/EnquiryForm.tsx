@@ -262,10 +262,14 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       };
 
       // Submit to edge function which handles both DB save and CRM routing based on admin settings
+      // Generate a valid placeholder email from WhatsApp number for DB storage
+      const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
+      const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
+
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
         body: { formData, bizArea, dbRecord: {
           name: lastName,
-          email: whatsapp,
+          email: generatedEmail,
           phone: whatsapp,
           service: serviceNeeded,
           message: description,
