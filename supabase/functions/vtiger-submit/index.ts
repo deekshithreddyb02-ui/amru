@@ -88,12 +88,14 @@ serve(async (req) => {
 
     // Rate limiting by email/phone
     const email = formData.email ? String(formData.email) : (dbRecord?.email || null);
-    if (email) {
+    // Ensure email is valid for rate limiting (skip if it's a generated placeholder)
+    const rateLimitEmail = email && email.includes('@') && !email.endsWith('@enquiry.amrutageo.com') ? email : null;
+    if (rateLimitEmail) {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { count } = await supabase
         .from('contact_messages')
         .select('*', { count: 'exact', head: true })
-        .eq('email', email)
+        .eq('email', rateLimitEmail)
         .gte('created_at', oneHourAgo);
 
       if (count !== null && count >= 5) {
