@@ -228,7 +228,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         <div>
           <h2 className="text-2xl font-bold text-primary">Leads</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Total: <strong>{leads.length}</strong> · <strong>{unreadCount}</strong> unread
+            Total: <strong>{leads.length}</strong>
           </p>
         </div>
         <div className="flex items-center gap-2">
