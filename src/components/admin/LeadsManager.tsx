@@ -91,8 +91,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
   const filtered = useMemo(() => {
     return leads.filter((lead) => {
-      if (tab === "unread" && lead.is_read) return false;
-      if (tab === "read" && !lead.is_read) return false;
       if (dateFrom) {
         const d = new Date(lead.created_at).toISOString().split("T")[0];
         if (d < dateFrom) return false;
@@ -204,11 +202,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     a.click(); URL.revokeObjectURL(url);
   };
 
-  const unreadCount = leads.filter(l => !l.is_read).length;
   const tabs = [
     { key: "all", label: "All Leads", count: leads.length },
-    { key: "unread", label: "Unread", count: unreadCount },
-    { key: "read", label: "Read", count: leads.length - unreadCount },
   ];
 
   const getMapsUrl = (lat: string | null, lng: string | null) => {
@@ -336,7 +331,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[60px]">Status</TableHead>
+                      
                       <TableHead>Name</TableHead>
                       <TableHead>WhatsApp</TableHead>
                       <TableHead>Service</TableHead>
@@ -356,12 +351,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       const isExpanded = expandedId === lead.id;
                       return (
                         <>
-                          <TableRow key={lead.id} className={`cursor-pointer ${!lead.is_read ? "bg-primary/5" : ""}`} onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
-                            <TableCell>
-                              <Badge variant={lead.is_read ? "secondary" : "default"} className="text-[10px]">
-                                {lead.is_read ? "Read" : "New"}
-                              </Badge>
-                            </TableCell>
+                          <TableRow key={lead.id} className="cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
                             <TableCell className="font-medium whitespace-nowrap">{lead.name}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm">{lead.whatsapp || lead.phone || "-"}</TableCell>
                             <TableCell className="text-sm">{lead.service_needed || lead.service || "-"}</TableCell>
@@ -387,9 +377,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleRead(lead.id, lead.is_read)}>
-                                  {lead.is_read ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                </Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteSingle(lead.id)}>
                                   <Trash2 className="w-3.5 h-3.5 text-destructive" />
                                 </Button>
