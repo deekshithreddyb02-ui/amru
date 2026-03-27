@@ -8,7 +8,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import EnquiryForm from "@/components/EnquiryForm";
-import CrmStateSelector from "@/components/CrmStateSelector";
 
 interface ServiceCardProps {
   title: string;
@@ -21,7 +20,6 @@ interface ServiceCardProps {
 const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [showForm, setShowForm] = useState(false);
 
   return (
     <>
@@ -72,7 +70,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             </a>
           ) : (
             <button
-              onClick={() => { setOpen(true); setShowForm(false); }}
+              onClick={() => setOpen(true)}
               className="inline-flex items-center text-primary font-semibold text-xs hover:text-primary/80 transition-colors text-left mt-3 pt-2.5 border-t border-border/30">
               Enquire →
             </button>
@@ -91,7 +89,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
         </DialogContent>
       </Dialog>
 
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setShowForm(false); }}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl border-border/30"
         style={{ boxShadow: '0 25px 60px -15px hsl(var(--primary) / 0.15)', background: 'linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.4))' }}>
           <div className="relative px-6 pt-6 pb-4 border-b border-border/30"
@@ -100,7 +98,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             style={{ background: 'hsl(var(--primary) / 0.03)' }} />
             <DialogHeader className="relative">
               <DialogTitle className="text-lg tracking-tight text-foreground" style={{ fontFamily: 'var(--font-serif)' }}>
-                {showForm ? "Enquiry Form" : "Enquire About"}
+                Enquiry Form
               </DialogTitle>
               <DialogDescription className="font-semibold text-base" style={{ color: 'hsl(var(--primary))' }}>
                 {title}
@@ -108,11 +106,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             </DialogHeader>
           </div>
           <div className="px-6 pb-6 max-h-[65vh] overflow-y-auto">
-            {showForm ? (
-              <EnquiryForm serviceTitle={title} onSuccess={() => setOpen(false)} />
-            ) : (
-              <CrmStateSelector onFillFormHere={() => setShowForm(true)} />
-            )}
+            <EnquiryForm serviceTitle={title} onSuccess={() => setOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
