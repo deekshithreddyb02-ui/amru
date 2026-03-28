@@ -444,19 +444,19 @@ const Admin = () => {
             <TabsContent value="modify">
               <div className="space-y-6">
                 {/* Two-row grid tabs like reference */}
-                <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="flex flex-wrap gap-1">
+                <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl space-y-1">
+                  <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-1">
                     {[
-                      { key: "page-layout", label: "Page Layout", icon: LayoutList },
+                      { key: "page-layout", label: "Layout", icon: LayoutList },
                       { key: "hero", label: "Hero", icon: Sparkles },
-                      { key: "about", label: "About Us", icon: Info },
+                      { key: "about", label: "About", icon: Info },
                       { key: "whyus", label: "Why Us", icon: HelpCircle },
-                      { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
+                      { key: "testimonials", label: "Reviews", icon: MessageSquareQuote },
                       { key: "services", label: "Services", icon: Wrench },
                       { key: "feedback", label: "Feedback", icon: BarChart3 },
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
-                      { key: "offices", label: "Office Maps", icon: MapPin },
+                      { key: "offices", label: "Offices", icon: MapPin },
                       { key: "contacts", label: "Contacts", icon: Phone },
                       { key: "footer", label: "Footer", icon: PanelBottom },
                       { key: "legal", label: "Legal", icon: Scale },
@@ -467,7 +467,7 @@ const Admin = () => {
                         variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1 md:gap-1.5 text-xs md:text-sm px-2 md:px-3 py-2 ${modifySection === key ? "shadow-md" : ""}`}
+                        className={`rounded-lg gap-1 justify-center text-[11px] md:text-xs lg:text-sm px-1 md:px-2 py-2 h-auto min-w-0 ${modifySection === key ? "shadow-md" : ""}`}
                       >
                         <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate">{label}</span>
