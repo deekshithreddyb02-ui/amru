@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone, ExternalLink } from "lucide-react";
+import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, LayoutList, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone, ExternalLink } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -35,6 +35,7 @@ import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
+import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 
 interface User {
   id: string;
@@ -444,8 +445,9 @@ const Admin = () => {
               <div className="space-y-6">
                 {/* Two-row grid tabs like reference */}
                 <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mb-1">
+                  <div className="grid grid-cols-3 md:grid-cols-7 gap-1 mb-1">
                     {[
+                      { key: "page-layout", label: "Page Layout", icon: LayoutList },
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About Us", icon: Info },
                       { key: "whyus", label: "Why Us", icon: HelpCircle },
@@ -491,6 +493,7 @@ const Admin = () => {
 
                 <Card>
                   <CardContent className="pt-6">
+                    {modifySection === "page-layout" && <SectionOrderEditor />}
                     {modifySection === "hero" && <HeroEditor />}
                     {modifySection === "about" && <AboutEditor />}
                     {modifySection === "whyus" && <WhyUsEditor />}
