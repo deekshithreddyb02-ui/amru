@@ -445,7 +445,7 @@ const Admin = () => {
               <div className="space-y-6">
                 {/* Two-row grid tabs like reference */}
                 <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl">
-                  <div className="grid grid-cols-3 md:grid-cols-7 gap-1 mb-1">
+                  <div className="flex flex-wrap gap-1">
                     {[
                       { key: "page-layout", label: "Page Layout", icon: LayoutList },
                       { key: "hero", label: "Hero", icon: Sparkles },
@@ -454,27 +454,12 @@ const Admin = () => {
                       { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
                       { key: "services", label: "Services", icon: Wrench },
                       { key: "feedback", label: "Feedback", icon: BarChart3 },
-                    ].map(({ key, label, icon: Icon }) => (
-                      <Button
-                        key={key}
-                        variant={modifySection === key ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-3 md:grid-cols-7 gap-1">
-                    {[
                       { key: "gallery", label: "Gallery", icon: Image },
                       { key: "navbar", label: "Navbar", icon: Navigation },
                       { key: "offices", label: "Office Maps", icon: MapPin },
                       { key: "contacts", label: "Contacts", icon: Phone },
                       { key: "footer", label: "Footer", icon: PanelBottom },
-                      { key: "legal", label: "Legal Notice", icon: Scale },
+                      { key: "legal", label: "Legal", icon: Scale },
                       { key: "crm", label: "CRM", icon: ExternalLink },
                     ].map(({ key, label, icon: Icon }) => (
                       <Button
@@ -482,9 +467,9 @@ const Admin = () => {
                         variant={modifySection === key ? "default" : "ghost"}
                         size="sm"
                         onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1 md:gap-1.5 justify-center text-xs md:text-sm px-1 md:px-3 ${modifySection === key ? "shadow-md" : ""}`}
+                        className={`rounded-lg gap-1 md:gap-1.5 text-xs md:text-sm px-2 md:px-3 py-2 ${modifySection === key ? "shadow-md" : ""}`}
                       >
-                        <Icon className="w-4 h-4 shrink-0" />
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate">{label}</span>
                       </Button>
                     ))}
