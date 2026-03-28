@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -18,8 +19,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Search, RefreshCw, Trash2, Eye, EyeOff, Download,
-  MapPin, Loader2, ChevronLeft, ChevronRight, AlertTriangle, ExternalLink,
+  Search, RefreshCw, Trash2, Download,
+  MapPin, Loader2, ChevronLeft, ChevronRight, AlertTriangle, ExternalLink, Send,
 } from "lucide-react";
 
 interface Lead {
@@ -59,6 +60,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [sendingCrm, setSendingCrm] = useState(false);
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -70,6 +72,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [deleteRangeFrom, setDeleteRangeFrom] = useState("");
   const [deleteRangeTo, setDeleteRangeTo] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -80,6 +83,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         .order("created_at", { ascending: false });
       if (error) throw error;
       setLeads((data as Lead[]) || []);
+      setSelectedIds(new Set());
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
@@ -113,14 +117,24 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
   useEffect(() => { setPage(1); }, [search, dateFrom, dateTo, tab, perPage]);
 
-  const toggleRead = async (id: string, isRead: boolean) => {
-    try {
-      const { error } = await supabase.from("contact_messages").update({ is_read: !isRead }).eq("id", id);
-      if (error) throw error;
-      setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, is_read: !isRead } : l)));
-    } catch (error: any) {
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+  // Selection helpers
+  const allPageSelected = paginated.length > 0 && paginated.every((l) => selectedIds.has(l.id));
+  const somePageSelected = paginated.some((l) => selectedIds.has(l.id));
+
+  const toggleSelectAll = () => {
+    const next = new Set(selectedIds);
+    if (allPageSelected) {
+      paginated.forEach((l) => next.delete(l.id));
+    } else {
+      paginated.forEach((l) => next.add(l.id));
     }
+    setSelectedIds(next);
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedIds(next);
   };
 
   const deleteSingle = async (id: string) => {
@@ -129,10 +143,112 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       const { error } = await supabase.from("contact_messages").delete().eq("id", id);
       if (error) throw error;
       setLeads((prev) => prev.filter((l) => l.id !== id));
+      setSelectedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
       toast({ title: "Deleted", description: "Lead removed successfully" });
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
+  };
+
+  const deleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    setDeleting(true);
+    try {
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase.from("contact_messages").delete().in("id", ids);
+      if (error) throw error;
+      toast({ title: "Success", description: `Deleted ${ids.length} leads` });
+      await fetchLeads();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally { setDeleting(false); }
+  };
+
+  const sendSelectedToCrm = async () => {
+    if (selectedIds.size === 0) return;
+    setSendingCrm(true);
+    const selectedLeads = leads.filter((l) => selectedIds.has(l.id));
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const lead of selectedLeads) {
+      try {
+        const formData: Record<string, string> = {
+          lastname: lead.name || "",
+          email: lead.email || "",
+          phone: lead.whatsapp || lead.phone || "",
+          mobile: lead.whatsapp || lead.phone || "",
+          description: lead.message || "",
+          cf_990: lead.biz_area || "Others",
+          cf_994: lead.distance || "",
+          cf_998: lead.service_needed || lead.service || "",
+          cf_1002: lead.num_scans || "",
+          cf_1006: lead.area_type || "",
+          cf_1014: lead.area_value || "",
+          mailingstreet: lead.mailing_street || "",
+          mailingcity: lead.mailing_city || "",
+          mailingpobox: lead.mailing_pincode || "",
+          closingdate: lead.expected_close || "",
+          __vtrftk: "",
+          publicid: "",
+          urlencodeenable: "1",
+          name: "",
+        };
+
+        const dbRecord = {
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          whatsapp: lead.whatsapp,
+          message: lead.message,
+          service: lead.service,
+          service_needed: lead.service_needed,
+          biz_area: lead.biz_area,
+          distance: lead.distance,
+          num_scans: lead.num_scans,
+          area_type: lead.area_type,
+          area_value: lead.area_value,
+          mailing_street: lead.mailing_street,
+          mailing_city: lead.mailing_city,
+          mailing_pincode: lead.mailing_pincode,
+          latitude: lead.latitude,
+          longitude: lead.longitude,
+          country: lead.country,
+          expected_close: lead.expected_close,
+        };
+
+        const { data, error } = await supabase.functions.invoke("vtiger-submit", {
+          body: {
+            formData,
+            bizArea: lead.biz_area || "Others",
+            dbRecord: null, // Don't re-save to DB, just send to CRM
+          },
+        });
+
+        if (error) throw error;
+
+        // Update CRM status in local state and DB
+        const newStatus = data?.crmSent === true ? "success" : "failed";
+        await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
+
+        if (data?.crmSent === true) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch {
+        failCount++;
+      }
+    }
+
+    setSendingCrm(false);
+    setSelectedIds(new Set());
+    await fetchLeads();
+    toast({
+      title: "CRM Sync Complete",
+      description: `Sent: ${successCount}, Failed: ${failCount}`,
+      variant: failCount > 0 ? "destructive" : "default",
+    });
   };
 
   const deleteLastN = async () => {
@@ -190,10 +306,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   };
 
   const exportCSV = () => {
-    const headers = ["Name","WhatsApp","Service","BIZ Area","Distance","Scans","Area Type","Area Value","Mailing Street","City","PIN","Latitude","Longitude","Country","Expected Close","CRM Status","Description","Date","Status"];
+    const headers = ["Name","WhatsApp","Service","BIZ Area","Distance","Scans","Area Type","Area Value","Mailing Street","City","PIN","Latitude","Longitude","Country","Expected Close","CRM Status","Description","Date"];
     const header = headers.join(",") + "\n";
     const rows = filtered.map((m) =>
-      [m.name, m.whatsapp||"", m.service_needed||m.service||"", m.biz_area||"", m.distance||"", m.num_scans||"", m.area_type||"", m.area_value||"", `"${(m.mailing_street||"").replace(/"/g,'""')}"`, m.mailing_city||"", m.mailing_pincode||"", m.latitude||"", m.longitude||"", m.country||"", m.expected_close||"", m.crm_status||"", `"${(m.message||"").replace(/"/g,'""')}"`, new Date(m.created_at).toLocaleDateString(), m.is_read?"Read":"New"].join(",")
+      [m.name, m.whatsapp||"", m.service_needed||m.service||"", m.biz_area||"", m.distance||"", m.num_scans||"", m.area_type||"", m.area_value||"", `"${(m.mailing_street||"").replace(/"/g,'""')}"`, m.mailing_city||"", m.mailing_pincode||"", m.latitude||"", m.longitude||"", m.country||"", m.expected_close||"", m.crm_status||"", `"${(m.message||"").replace(/"/g,'""')}"`, new Date(m.created_at).toLocaleDateString()].join(",")
     ).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -201,10 +317,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     a.download = `leads-${new Date().toISOString().split("T")[0]}.csv`;
     a.click(); URL.revokeObjectURL(url);
   };
-
-  const tabs = [
-    { key: "all", label: "All Leads", count: leads.length },
-  ];
 
   const getMapsUrl = (lat: string | null, lng: string | null) => {
     if (!lat || !lng) return null;
@@ -229,6 +341,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           <h2 className="text-2xl font-bold text-primary">Leads</h2>
           <p className="text-sm text-muted-foreground mt-1">
             Total: <strong>{leads.length}</strong>
+            {selectedIds.size > 0 && <span className="ml-2 text-primary font-semibold">• {selectedIds.size} selected</span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -240,6 +353,62 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           </Button>
         </div>
       </div>
+
+      {/* Selection Actions Bar */}
+      {selectedIds.size > 0 && (
+        <Card>
+          <CardContent className="py-3 flex flex-wrap items-center gap-3">
+            <span className="text-sm font-medium text-foreground">{selectedIds.size} lead{selectedIds.size > 1 ? "s" : ""} selected</span>
+            <div className="flex gap-2 ml-auto">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="default" size="sm" disabled={sendingCrm} className="gap-1.5">
+                    {sendingCrm ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    Send to CRM
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Send to CRM</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will send {selectedIds.size} selected lead{selectedIds.size > 1 ? "s" : ""} to the configured CRM. Leads will be routed based on their BIZ Area / state.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={sendSelectedToCrm}>Send {selectedIds.size} to CRM</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" disabled={deleting} className="gap-1.5">
+                    {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    Delete Selected
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Selected Leads</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to permanently delete {selectedIds.size} selected lead{selectedIds.size > 1 ? "s" : ""}? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={deleteSelected} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete {selectedIds.size}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+                Clear
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -253,17 +422,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[150px]" />
           {(dateFrom || dateTo) && <Button variant="ghost" size="sm" onClick={() => { setDateFrom(""); setDateTo(""); }}>Clear</Button>}
         </div>
-      </div>
-
-      {/* Sub-tabs */}
-      <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
-        {tabs.map((t) => (
-          <Button key={t.key} variant={tab === t.key ? "default" : "ghost"} size="sm" onClick={() => setTab(t.key)}
-            className={`rounded-lg text-xs gap-1.5 ${tab === t.key ? "shadow-md" : ""}`}>
-            {t.label}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab === t.key ? "bg-primary-foreground/20" : "bg-muted"}`}>{t.count}</span>
-          </Button>
-        ))}
       </div>
 
       {/* Bulk Actions */}
@@ -331,7 +489,14 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      
+                      <TableHead className="w-[40px]">
+                        <Checkbox
+                          checked={allPageSelected}
+                          onCheckedChange={toggleSelectAll}
+                          aria-label="Select all on page"
+                          className={somePageSelected && !allPageSelected ? "opacity-60" : ""}
+                        />
+                      </TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>WhatsApp</TableHead>
                       <TableHead>Service</TableHead>
@@ -349,9 +514,17 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                     {paginated.map((lead) => {
                       const mapsUrl = getMapsUrl(lead.latitude, lead.longitude);
                       const isExpanded = expandedId === lead.id;
+                      const isSelected = selectedIds.has(lead.id);
                       return (
                         <>
-                          <TableRow key={lead.id} className="cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
+                          <TableRow key={lead.id} className={`cursor-pointer ${isSelected ? "bg-primary/5" : ""}`} onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => toggleSelect(lead.id)}
+                                aria-label={`Select ${lead.name}`}
+                              />
+                            </TableCell>
                             <TableCell className="font-medium whitespace-nowrap">{lead.name}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm">{lead.whatsapp || lead.phone || "-"}</TableCell>
                             <TableCell className="text-sm">{lead.service_needed || lead.service || "-"}</TableCell>
@@ -385,7 +558,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${lead.id}-detail`}>
-                              <TableCell colSpan={12} className="bg-muted/30 p-4">
+                              <TableCell colSpan={13} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                   <div><span className="text-muted-foreground text-xs">Scans:</span> <span className="font-medium">{lead.num_scans || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Expected Close:</span> <span className="font-medium">{lead.expected_close || "-"}</span></div>
