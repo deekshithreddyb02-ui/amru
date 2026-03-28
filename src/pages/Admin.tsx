@@ -35,6 +35,7 @@ import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
+import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 
 interface User {
   id: string;
