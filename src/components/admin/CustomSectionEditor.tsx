@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Loader2, Save, Trash2, Edit, Type, Image, Video, MousePointerClick } from "lucide-react";
+import { Plus, Loader2, Save, Trash2, Edit, Type, Image, Video, MousePointerClick, Search } from "lucide-react";
 
 interface CustomSectionRow {
   id: string;
