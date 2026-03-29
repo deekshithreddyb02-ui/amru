@@ -36,6 +36,7 @@ import LeadsManager from "@/components/admin/LeadsManager";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
+import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 
 interface User {
   id: string;
@@ -478,7 +479,12 @@ const Admin = () => {
 
                 <Card>
                   <CardContent className="pt-6">
-                    {modifySection === "page-layout" && <SectionOrderEditor />}
+                    {modifySection === "page-layout" && (
+                      <div className="space-y-8">
+                        <SectionOrderEditor />
+                        <CustomSectionEditor />
+                      </div>
+                    )}
                     {modifySection === "hero" && <HeroEditor />}
                     {modifySection === "about" && <AboutEditor />}
                     {modifySection === "whyus" && <WhyUsEditor />}
