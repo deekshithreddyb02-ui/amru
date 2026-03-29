@@ -238,7 +238,7 @@ const CustomSectionEditor = () => {
           </p>
         </div>
 
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <Dialog open={createDialogOpen} onOpenChange={(open) => { setCreateDialogOpen(open); if (open) setTypeSearch(""); }}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1.5">
               <Plus className="w-4 h-4" />
