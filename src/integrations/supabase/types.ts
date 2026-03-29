@@ -178,6 +178,54 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_sections: {
+        Row: {
+          background_color: string | null
+          button_link: string | null
+          button_text: string | null
+          content: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          section_key: string
+          section_type: string
+          text_color: string | null
+          title: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          button_link?: string | null
+          button_text?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          section_key: string
+          section_type?: string
+          text_color?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          button_link?: string | null
+          button_text?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          section_key?: string
+          section_type?: string
+          text_color?: string | null
+          title?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       customer_feedback: {
         Row: {
           created_at: string
