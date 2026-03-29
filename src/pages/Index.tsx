@@ -1,6 +1,7 @@
 import { lazy, Suspense, ComponentType } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import CustomSection from "@/components/CustomSection";
 import { useVisitTracker } from "@/hooks/useVisitTracker";
 import { useSectionOrder } from "@/hooks/useSectionOrder";
 
@@ -30,10 +31,17 @@ const Index = () => {
       <Hero />
       <Suspense fallback={null}>
         {sections
-          .filter((s) => s.visible && sectionComponents[s.key])
+          .filter((s) => s.visible)
           .map((s) => {
-            const Component = sectionComponents[s.key];
-            return <Component key={s.key} />;
+            if (sectionComponents[s.key]) {
+              const Component = sectionComponents[s.key];
+              return <Component key={s.key} />;
+            }
+            // Custom section (key starts with custom_)
+            if (s.key.startsWith("custom_")) {
+              return <CustomSection key={s.key} sectionKey={s.key} />;
+            }
+            return null;
           })}
         <Footer />
         <ChatBot />
