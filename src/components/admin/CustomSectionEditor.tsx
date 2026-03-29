@@ -41,6 +41,18 @@ const SECTION_TYPES = [
   { value: "banner", label: "Image Banner", icon: Image, description: "Full-width image with optional overlay" },
   { value: "video", label: "Video Embed", icon: Video, description: "Embed a YouTube or other video" },
   { value: "cta", label: "Call to Action", icon: MousePointerClick, description: "Highlighted block with button" },
+  { value: "hero_banner", label: "Hero Banner", icon: Image, description: "Large hero-style banner with text" },
+  { value: "features", label: "Features Grid", icon: Type, description: "Grid of feature cards with icons" },
+  { value: "stats", label: "Statistics / Counters", icon: Type, description: "Animated number counters" },
+  { value: "faq", label: "FAQ / Accordion", icon: Type, description: "Expandable questions and answers" },
+  { value: "team", label: "Team / People", icon: Type, description: "Team member profiles with photos" },
+  { value: "pricing", label: "Pricing Table", icon: Type, description: "Compare pricing plans side by side" },
+  { value: "timeline", label: "Timeline / History", icon: Type, description: "Chronological milestones or steps" },
+  { value: "logos", label: "Logo / Client Wall", icon: Image, description: "Display partner or client logos" },
+  { value: "map", label: "Map Embed", icon: Type, description: "Embed a Google Maps location" },
+  { value: "download", label: "Download / Resource", icon: Type, description: "Downloadable file or resource link" },
+  { value: "newsletter", label: "Newsletter Signup", icon: Type, description: "Email subscription call-to-action" },
+  { value: "divider", label: "Divider / Spacer", icon: Type, description: "Visual separator between sections" },
 ];
 
 const CustomSectionEditor = () => {
@@ -53,6 +65,7 @@ const CustomSectionEditor = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newType, setNewType] = useState("text");
+  const [typeSearch, setTypeSearch] = useState("");
 
   useEffect(() => {
     fetchSections();
