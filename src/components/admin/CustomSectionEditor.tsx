@@ -260,25 +260,49 @@ const CustomSectionEditor = () => {
               </div>
               <div>
                 <Label>Section Type</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {SECTION_TYPES.map((t) => {
+                <div className="relative mt-2 mb-2">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={typeSearch}
+                    onChange={(e) => setTypeSearch(e.target.value)}
+                    placeholder="Search section types…"
+                    className="pl-9"
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-1 border border-border rounded-xl p-2">
+                  {SECTION_TYPES.filter(
+                    (t) =>
+                      t.label.toLowerCase().includes(typeSearch.toLowerCase()) ||
+                      t.description.toLowerCase().includes(typeSearch.toLowerCase())
+                  ).map((t) => {
                     const Icon = t.icon;
                     return (
                       <button
                         key={t.value}
                         onClick={() => setNewType(t.value)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border text-center transition-all ${
+                        className={`flex items-center gap-3 w-full p-2.5 rounded-lg text-left transition-all ${
                           newType === t.value
-                            ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                            : "border-border hover:border-primary/30"
+                            ? "bg-primary/10 border border-primary/30 ring-1 ring-primary/20"
+                            : "hover:bg-muted/50 border border-transparent"
                         }`}
                       >
-                        <Icon className="w-5 h-5 text-primary" />
-                        <span className="text-xs font-medium">{t.label}</span>
-                        <span className="text-[10px] text-muted-foreground">{t.description}</span>
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{t.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{t.description}</p>
+                        </div>
                       </button>
                     );
                   })}
+                  {SECTION_TYPES.filter(
+                    (t) =>
+                      t.label.toLowerCase().includes(typeSearch.toLowerCase()) ||
+                      t.description.toLowerCase().includes(typeSearch.toLowerCase())
+                  ).length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-4">No matching section types</p>
+                  )}
                 </div>
               </div>
               <Button onClick={handleCreate} disabled={saving} className="w-full gap-1.5">
