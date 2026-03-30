@@ -556,14 +556,23 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                               />
                             </TableCell>
                             <TableCell className="font-medium whitespace-nowrap py-1.5">{lead.name}</TableCell>
-                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || lead.phone || "-"}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.phone || "-"}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.service_needed || lead.service || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.biz_area || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.distance || "-"}</TableCell>
-                            <TableCell className="text-sm py-1.5">
-                              <div>{lead.area_type || "-"}</div>
-                              {lead.area_value && <div className="text-[10px] text-muted-foreground">{lead.area_value}</div>}
+                            <TableCell className="text-sm py-1.5">{lead.area_type || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5" onClick={(e) => e.stopPropagation()}>
+                              {lead.area_value ? (
+                                <AreaConvert value={lead.area_value} type={lead.area_type} />
+                              ) : "-"}
                             </TableCell>
+                            <TableCell className="text-sm py-1.5">
+                              <div className="max-w-[160px] truncate" title={[lead.mailing_street, lead.mailing_city, lead.mailing_pincode].filter(Boolean).join(", ")}>
+                                {[lead.mailing_street, lead.mailing_city, lead.mailing_pincode].filter(Boolean).join(", ") || "-"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.country || "-"}</TableCell>
                             <TableCell className="py-1.5">
                               {mapsUrl ? (
                                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="flex items-center gap-1 text-primary hover:underline text-xs">
@@ -572,7 +581,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </a>
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.mailing_city || "-"}</TableCell>
                             <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm py-1.5">
                               {new Date(lead.created_at).toLocaleDateString()}
