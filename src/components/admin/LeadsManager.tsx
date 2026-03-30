@@ -53,6 +53,45 @@ interface LeadsManagerProps {
   onRefresh?: () => void;
 }
 
+const AREA_UNITS = ["Sq.ft", "Sq.m", "Sq.y", "Acres", "Guntas"] as const;
+const AREA_FACTORS: Record<string, number> = {
+  "Sq.ft": 1,
+  "Sq.m": 0.092903,
+  "Sq.y": 0.111111,
+  "Acres": 0.0000229568,
+  "Guntas": 0.000920833,
+};
+
+const AreaConvert = ({ value, type }: { value: string; type: string | null }) => {
+  const [open, setOpen] = useState(false);
+  const numVal = parseFloat(value);
+  if (isNaN(numVal)) return <span>{value}</span>;
+
+  const fromUnit = type && AREA_FACTORS[type] ? type : "Sq.ft";
+  const baseSqft = numVal / AREA_FACTORS[fromUnit];
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="text-primary underline underline-offset-2 text-sm cursor-pointer hover:text-primary/80"
+      >
+        {value} {type || ""}
+      </button>
+      {open && (
+        <div className="absolute z-50 top-6 left-0 bg-popover border border-border rounded-md shadow-lg p-2 min-w-[150px]">
+          {AREA_UNITS.map((unit) => (
+            <div key={unit} className={`text-xs py-0.5 flex justify-between gap-3 ${unit === fromUnit ? "font-bold text-primary" : "text-foreground"}`}>
+              <span>{unit}:</span>
+              <span>{(baseSqft * AREA_FACTORS[unit]).toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
