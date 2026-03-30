@@ -61,6 +61,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [sendingCrm, setSendingCrm] = useState(false);
+  const [sendingSingleCrmId, setSendingSingleCrmId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
