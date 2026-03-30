@@ -486,10 +486,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[1200px]">
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[40px]">
+                    <TableRow className="h-9">
+                      <TableHead className="w-[40px] py-1.5">
                         <Checkbox
                           checked={allPageSelected}
                           onCheckedChange={toggleSelectAll}
@@ -497,17 +497,17 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           className={somePageSelected && !allPageSelected ? "opacity-60" : ""}
                         />
                       </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>WhatsApp</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>BIZ Area</TableHead>
-                      <TableHead>Distance</TableHead>
-                      <TableHead>Area</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>City</TableHead>
-                      <TableHead>CRM</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
+                      <TableHead className="py-1.5 min-w-[140px]">Name</TableHead>
+                      <TableHead className="py-1.5 min-w-[130px]">WhatsApp</TableHead>
+                      <TableHead className="py-1.5 min-w-[150px]">Service</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">BIZ Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[90px]">Distance</TableHead>
+                      <TableHead className="py-1.5 min-w-[110px]">Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Location</TableHead>
+                      <TableHead className="py-1.5 min-w-[100px]">City</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
+                      <TableHead className="py-1.5 min-w-[100px]">Date</TableHead>
+                      <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
