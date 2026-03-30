@@ -517,24 +517,24 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       const isSelected = selectedIds.has(lead.id);
                       return (
                         <>
-                          <TableRow key={lead.id} className={`cursor-pointer ${isSelected ? "bg-primary/5" : ""}`} onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
-                            <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableRow key={lead.id} className={`cursor-pointer h-9 ${isSelected ? "bg-primary/5" : ""}`} onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
+                            <TableCell className="py-1.5" onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => toggleSelect(lead.id)}
                                 aria-label={`Select ${lead.name}`}
                               />
                             </TableCell>
-                            <TableCell className="font-medium whitespace-nowrap">{lead.name}</TableCell>
-                            <TableCell className="whitespace-nowrap text-sm">{lead.whatsapp || lead.phone || "-"}</TableCell>
-                            <TableCell className="text-sm">{lead.service_needed || lead.service || "-"}</TableCell>
-                            <TableCell className="text-sm">{lead.biz_area || "-"}</TableCell>
-                            <TableCell className="text-sm">{lead.distance || "-"}</TableCell>
-                            <TableCell className="text-sm">
+                            <TableCell className="font-medium whitespace-nowrap py-1.5">{lead.name}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || lead.phone || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">{lead.service_needed || lead.service || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">{lead.biz_area || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">{lead.distance || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">
                               <div>{lead.area_type || "-"}</div>
                               {lead.area_value && <div className="text-[10px] text-muted-foreground">{lead.area_value}</div>}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-1.5">
                               {mapsUrl ? (
                                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="flex items-center gap-1 text-primary hover:underline text-xs">
                                   <MapPin className="w-3 h-3" /> Map
@@ -542,16 +542,19 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </a>
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="text-sm whitespace-nowrap">{lead.mailing_city || "-"}</TableCell>
-                            <TableCell>{crmBadge(lead.crm_status)}</TableCell>
-                            <TableCell className="whitespace-nowrap text-sm">
+                            <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.mailing_city || "-"}</TableCell>
+                            <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">
                               {new Date(lead.created_at).toLocaleDateString()}
                               <div className="text-[10px] text-muted-foreground">{new Date(lead.created_at).toLocaleTimeString()}</div>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteSingle(lead.id)}>
-                                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" onClick={() => { setSelectedIds(new Set([lead.id])); }}>
+                                  <Send className="w-3 h-3 text-primary" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Delete" onClick={() => deleteSingle(lead.id)}>
+                                  <Trash2 className="w-3 h-3 text-destructive" />
                                 </Button>
                               </div>
                             </TableCell>
