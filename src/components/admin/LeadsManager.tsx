@@ -53,6 +53,45 @@ interface LeadsManagerProps {
   onRefresh?: () => void;
 }
 
+const AREA_UNITS = ["Sq.ft", "Sq.m", "Sq.y", "Acres", "Guntas"] as const;
+const AREA_FACTORS: Record<string, number> = {
+  "Sq.ft": 1,
+  "Sq.m": 0.092903,
+  "Sq.y": 0.111111,
+  "Acres": 0.0000229568,
+  "Guntas": 0.000920833,
+};
+
+const AreaConvert = ({ value, type }: { value: string; type: string | null }) => {
+  const [open, setOpen] = useState(false);
+  const numVal = parseFloat(value);
+  if (isNaN(numVal)) return <span>{value}</span>;
+
+  const fromUnit = type && AREA_FACTORS[type] ? type : "Sq.ft";
+  const baseSqft = numVal / AREA_FACTORS[fromUnit];
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="text-primary underline underline-offset-2 text-sm cursor-pointer hover:text-primary/80"
+      >
+        {value} {type || ""}
+      </button>
+      {open && (
+        <div className="absolute z-50 top-6 left-0 bg-popover border border-border rounded-md shadow-lg p-2 min-w-[150px]">
+          {AREA_UNITS.map((unit) => (
+            <div key={unit} className={`text-xs py-0.5 flex justify-between gap-3 ${unit === fromUnit ? "font-bold text-primary" : "text-foreground"}`}>
+              <span>{unit}:</span>
+              <span>{(baseSqft * AREA_FACTORS[unit]).toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
@@ -513,7 +552,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <Table className="min-w-[1200px]">
+                <Table className="min-w-[1600px]">
                   <TableHeader>
                     <TableRow className="h-9">
                       <TableHead className="w-[40px] py-1.5">
@@ -524,14 +563,17 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           className={somePageSelected && !allPageSelected ? "opacity-60" : ""}
                         />
                       </TableHead>
-                      <TableHead className="py-1.5 min-w-[140px]">Name</TableHead>
-                      <TableHead className="py-1.5 min-w-[130px]">WhatsApp</TableHead>
-                      <TableHead className="py-1.5 min-w-[150px]">Service</TableHead>
-                      <TableHead className="py-1.5 min-w-[120px]">BIZ Area</TableHead>
-                      <TableHead className="py-1.5 min-w-[90px]">Distance</TableHead>
-                      <TableHead className="py-1.5 min-w-[110px]">Area</TableHead>
-                      <TableHead className="py-1.5 min-w-[80px]">Location</TableHead>
-                      <TableHead className="py-1.5 min-w-[100px]">City</TableHead>
+                      <TableHead className="py-1.5 min-w-[130px]">Name</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">Mobile</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">WhatsApp</TableHead>
+                      <TableHead className="py-1.5 min-w-[140px]">Service</TableHead>
+                      <TableHead className="py-1.5 min-w-[110px]">BIZ Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Distance</TableHead>
+                      <TableHead className="py-1.5 min-w-[90px]">Area Type</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[160px]">Location</TableHead>
+                      <TableHead className="py-1.5 min-w-[90px]">Country</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Map</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
                       <TableHead className="py-1.5 min-w-[100px]">Date</TableHead>
                       <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
@@ -553,14 +595,23 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                               />
                             </TableCell>
                             <TableCell className="font-medium whitespace-nowrap py-1.5">{lead.name}</TableCell>
-                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || lead.phone || "-"}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.phone || "-"}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.service_needed || lead.service || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.biz_area || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.distance || "-"}</TableCell>
-                            <TableCell className="text-sm py-1.5">
-                              <div>{lead.area_type || "-"}</div>
-                              {lead.area_value && <div className="text-[10px] text-muted-foreground">{lead.area_value}</div>}
+                            <TableCell className="text-sm py-1.5">{lead.area_type || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5" onClick={(e) => e.stopPropagation()}>
+                              {lead.area_value ? (
+                                <AreaConvert value={lead.area_value} type={lead.area_type} />
+                              ) : "-"}
                             </TableCell>
+                            <TableCell className="text-sm py-1.5">
+                              <div className="max-w-[160px] truncate" title={[lead.mailing_street, lead.mailing_city, lead.mailing_pincode].filter(Boolean).join(", ")}>
+                                {[lead.mailing_street, lead.mailing_city, lead.mailing_pincode].filter(Boolean).join(", ") || "-"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.country || "-"}</TableCell>
                             <TableCell className="py-1.5">
                               {mapsUrl ? (
                                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="flex items-center gap-1 text-primary hover:underline text-xs">
@@ -569,7 +620,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </a>
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.mailing_city || "-"}</TableCell>
                             <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm py-1.5">
                               {new Date(lead.created_at).toLocaleDateString()}
@@ -588,7 +638,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${lead.id}-detail`}>
-                              <TableCell colSpan={13} className="bg-muted/30 p-4">
+                              <TableCell colSpan={15} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                   <div><span className="text-muted-foreground text-xs">Scans:</span> <span className="font-medium">{lead.num_scans || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Expected Close:</span> <span className="font-medium">{lead.expected_close || "-"}</span></div>
