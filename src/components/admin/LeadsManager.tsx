@@ -513,7 +513,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <Table className="min-w-[1200px]">
+                <Table className="min-w-[1600px]">
                   <TableHeader>
                     <TableRow className="h-9">
                       <TableHead className="w-[40px] py-1.5">
