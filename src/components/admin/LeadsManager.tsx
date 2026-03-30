@@ -61,6 +61,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [sendingCrm, setSendingCrm] = useState(false);
+  const [sendingSingleCrmId, setSendingSingleCrmId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -162,6 +163,32 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally { setDeleting(false); }
+  };
+
+  const sendSingleToCrm = async (lead: Lead) => {
+    setSendingSingleCrmId(lead.id);
+    try {
+      const formData: Record<string, string> = {
+        lastname: lead.name || "", email: lead.email || "",
+        phone: lead.whatsapp || lead.phone || "", mobile: lead.whatsapp || lead.phone || "",
+        description: lead.message || "", cf_990: lead.biz_area || "Others",
+        cf_994: lead.distance || "", cf_998: lead.service_needed || lead.service || "",
+        cf_1002: lead.num_scans || "", cf_1006: lead.area_type || "",
+        cf_1014: lead.area_value || "", mailingstreet: lead.mailing_street || "",
+        mailingcity: lead.mailing_city || "", mailingpobox: lead.mailing_pincode || "",
+        closingdate: lead.expected_close || "", __vtrftk: "", publicid: "", urlencodeenable: "1", name: "",
+      };
+      const { data, error } = await supabase.functions.invoke("vtiger-submit", {
+        body: { formData, bizArea: lead.biz_area || "Others", dbRecord: null },
+      });
+      if (error) throw error;
+      const newStatus = data?.crmSent === true ? "success" : "failed";
+      await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
+      await fetchLeads();
+      toast({ title: newStatus === "success" ? "Sent to CRM" : "CRM Failed", variant: newStatus === "success" ? "default" : "destructive" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally { setSendingSingleCrmId(null); }
   };
 
   const sendSelectedToCrm = async () => {
@@ -486,10 +513,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[1200px]">
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[40px]">
+                    <TableRow className="h-9">
+                      <TableHead className="w-[40px] py-1.5">
                         <Checkbox
                           checked={allPageSelected}
                           onCheckedChange={toggleSelectAll}
@@ -497,17 +524,17 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           className={somePageSelected && !allPageSelected ? "opacity-60" : ""}
                         />
                       </TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>WhatsApp</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>BIZ Area</TableHead>
-                      <TableHead>Distance</TableHead>
-                      <TableHead>Area</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>City</TableHead>
-                      <TableHead>CRM</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="w-[100px]">Actions</TableHead>
+                      <TableHead className="py-1.5 min-w-[140px]">Name</TableHead>
+                      <TableHead className="py-1.5 min-w-[130px]">WhatsApp</TableHead>
+                      <TableHead className="py-1.5 min-w-[150px]">Service</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">BIZ Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[90px]">Distance</TableHead>
+                      <TableHead className="py-1.5 min-w-[110px]">Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Location</TableHead>
+                      <TableHead className="py-1.5 min-w-[100px]">City</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
+                      <TableHead className="py-1.5 min-w-[100px]">Date</TableHead>
+                      <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -517,24 +544,24 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       const isSelected = selectedIds.has(lead.id);
                       return (
                         <>
-                          <TableRow key={lead.id} className={`cursor-pointer ${isSelected ? "bg-primary/5" : ""}`} onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
-                            <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableRow key={lead.id} className={`cursor-pointer h-9 ${isSelected ? "bg-primary/5" : ""}`} onClick={() => setExpandedId(isExpanded ? null : lead.id)}>
+                            <TableCell className="py-1.5" onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => toggleSelect(lead.id)}
                                 aria-label={`Select ${lead.name}`}
                               />
                             </TableCell>
-                            <TableCell className="font-medium whitespace-nowrap">{lead.name}</TableCell>
-                            <TableCell className="whitespace-nowrap text-sm">{lead.whatsapp || lead.phone || "-"}</TableCell>
-                            <TableCell className="text-sm">{lead.service_needed || lead.service || "-"}</TableCell>
-                            <TableCell className="text-sm">{lead.biz_area || "-"}</TableCell>
-                            <TableCell className="text-sm">{lead.distance || "-"}</TableCell>
-                            <TableCell className="text-sm">
+                            <TableCell className="font-medium whitespace-nowrap py-1.5">{lead.name}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || lead.phone || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">{lead.service_needed || lead.service || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">{lead.biz_area || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">{lead.distance || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">
                               <div>{lead.area_type || "-"}</div>
                               {lead.area_value && <div className="text-[10px] text-muted-foreground">{lead.area_value}</div>}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-1.5">
                               {mapsUrl ? (
                                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="flex items-center gap-1 text-primary hover:underline text-xs">
                                   <MapPin className="w-3 h-3" /> Map
@@ -542,16 +569,19 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </a>
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="text-sm whitespace-nowrap">{lead.mailing_city || "-"}</TableCell>
-                            <TableCell>{crmBadge(lead.crm_status)}</TableCell>
-                            <TableCell className="whitespace-nowrap text-sm">
+                            <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.mailing_city || "-"}</TableCell>
+                            <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
+                            <TableCell className="whitespace-nowrap text-sm py-1.5">
                               {new Date(lead.created_at).toLocaleDateString()}
                               <div className="text-[10px] text-muted-foreground">{new Date(lead.created_at).toLocaleTimeString()}</div>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteSingle(lead.id)}>
-                                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
+                                  {sendingSingleCrmId === lead.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3 text-primary" />}
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Delete" onClick={() => deleteSingle(lead.id)}>
+                                  <Trash2 className="w-3 h-3 text-destructive" />
                                 </Button>
                               </div>
                             </TableCell>
