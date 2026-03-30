@@ -165,6 +165,32 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     } finally { setDeleting(false); }
   };
 
+  const sendSingleToCrm = async (lead: Lead) => {
+    setSendingSingleCrmId(lead.id);
+    try {
+      const formData: Record<string, string> = {
+        lastname: lead.name || "", email: lead.email || "",
+        phone: lead.whatsapp || lead.phone || "", mobile: lead.whatsapp || lead.phone || "",
+        description: lead.message || "", cf_990: lead.biz_area || "Others",
+        cf_994: lead.distance || "", cf_998: lead.service_needed || lead.service || "",
+        cf_1002: lead.num_scans || "", cf_1006: lead.area_type || "",
+        cf_1014: lead.area_value || "", mailingstreet: lead.mailing_street || "",
+        mailingcity: lead.mailing_city || "", mailingpobox: lead.mailing_pincode || "",
+        closingdate: lead.expected_close || "", __vtrftk: "", publicid: "", urlencodeenable: "1", name: "",
+      };
+      const { data, error } = await supabase.functions.invoke("vtiger-submit", {
+        body: { formData, bizArea: lead.biz_area || "Others", dbRecord: null },
+      });
+      if (error) throw error;
+      const newStatus = data?.crmSent === true ? "success" : "failed";
+      await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
+      await fetchLeads();
+      toast({ title: newStatus === "success" ? "Sent to CRM" : "CRM Failed", variant: newStatus === "success" ? "default" : "destructive" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally { setSendingSingleCrmId(null); }
+  };
+
   const sendSelectedToCrm = async () => {
     if (selectedIds.size === 0) return;
     setSendingCrm(true);
