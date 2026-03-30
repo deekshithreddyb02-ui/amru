@@ -524,14 +524,17 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           className={somePageSelected && !allPageSelected ? "opacity-60" : ""}
                         />
                       </TableHead>
-                      <TableHead className="py-1.5 min-w-[140px]">Name</TableHead>
-                      <TableHead className="py-1.5 min-w-[130px]">WhatsApp</TableHead>
-                      <TableHead className="py-1.5 min-w-[150px]">Service</TableHead>
-                      <TableHead className="py-1.5 min-w-[120px]">BIZ Area</TableHead>
-                      <TableHead className="py-1.5 min-w-[90px]">Distance</TableHead>
-                      <TableHead className="py-1.5 min-w-[110px]">Area</TableHead>
-                      <TableHead className="py-1.5 min-w-[80px]">Location</TableHead>
-                      <TableHead className="py-1.5 min-w-[100px]">City</TableHead>
+                      <TableHead className="py-1.5 min-w-[130px]">Name</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">Mobile</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">WhatsApp</TableHead>
+                      <TableHead className="py-1.5 min-w-[140px]">Service</TableHead>
+                      <TableHead className="py-1.5 min-w-[110px]">BIZ Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Distance</TableHead>
+                      <TableHead className="py-1.5 min-w-[90px]">Area Type</TableHead>
+                      <TableHead className="py-1.5 min-w-[120px]">Area</TableHead>
+                      <TableHead className="py-1.5 min-w-[160px]">Location</TableHead>
+                      <TableHead className="py-1.5 min-w-[90px]">Country</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Map</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
                       <TableHead className="py-1.5 min-w-[100px]">Date</TableHead>
                       <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
