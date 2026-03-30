@@ -577,8 +577,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                             </TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" onClick={() => { setSelectedIds(new Set([lead.id])); }}>
-                                  <Send className="w-3 h-3 text-primary" />
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
+                                  {sendingSingleCrmId === lead.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3 text-primary" />}
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Delete" onClick={() => deleteSingle(lead.id)}>
                                   <Trash2 className="w-3 h-3 text-destructive" />
