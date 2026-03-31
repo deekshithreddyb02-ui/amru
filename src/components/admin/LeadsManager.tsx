@@ -106,7 +106,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState<string>("All");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(50);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
