@@ -76,7 +76,7 @@ const Contact = () => {
           </motion.div>
 
           <motion.div {...m({ initial: { opacity: 0, x: 30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
-          className="bg-card p-6 md:p-8 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+          className="bg-card p-6 md:p-8 rounded-2xl border border-border h-full" style={{ boxShadow: 'var(--card-shadow)' }}>
             <h3 className="font-bold text-lg text-foreground mb-6 text-center" style={{ fontFamily: 'var(--font-serif)' }}>Send Us a Message</h3>
             <EnquiryForm serviceTitle="General Enquiry" onSuccess={() => toast.success("Message sent successfully!")} />
           </motion.div>
