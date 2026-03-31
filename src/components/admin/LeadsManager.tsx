@@ -137,6 +137,16 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
   const filtered = useMemo(() => {
     return leads.filter((lead) => {
+      // BIZ Area tab filter
+      if (tab !== "All") {
+        const area = (lead.biz_area || "").trim();
+        if (tab === "Others") {
+          const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
+          if (knownAreas.includes(area)) return false;
+        } else {
+          if (area !== tab) return false;
+        }
+      }
       if (dateFrom) {
         const d = new Date(lead.created_at).toISOString().split("T")[0];
         if (d < dateFrom) return false;
@@ -153,6 +163,22 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       return true;
     });
   }, [leads, tab, dateFrom, dateTo, search]);
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: leads.length };
+    const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
+    knownAreas.forEach((a) => { counts[a] = 0; });
+    counts["Others"] = 0;
+    leads.forEach((lead) => {
+      const area = (lead.biz_area || "").trim();
+      if (knownAreas.includes(area)) {
+        counts[area] = (counts[area] || 0) + 1;
+      } else {
+        counts["Others"] += 1;
+      }
+    });
+    return counts;
+  }, [leads]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
