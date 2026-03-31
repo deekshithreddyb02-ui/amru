@@ -76,7 +76,7 @@ const AreaConvert = ({ value, type }: { value: string; type: string | null }) =>
         onClick={() => setOpen(!open)}
         className="text-primary underline underline-offset-2 text-sm cursor-pointer hover:text-primary/80"
       >
-        {value} {type || ""}
+        {value}
       </button>
       {open && (
         <div className="absolute z-50 top-6 left-0 bg-popover border border-border rounded-md shadow-lg p-2 min-w-[150px]">
@@ -390,9 +390,9 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   };
 
   const crmBadge = (status: string | null) => {
-    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px]">CRM ✓</Badge>;
-    if (status === "failed") return <Badge variant="destructive" className="text-[10px]">CRM ✗</Badge>;
-    return <Badge variant="outline" className="text-[10px]">Pending</Badge>;
+    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px] whitespace-nowrap">CRM ✓</Badge>;
+    if (status === "failed") return <Badge variant="destructive" className="text-[10px] whitespace-nowrap">CRM ✗</Badge>;
+    return <Badge variant="outline" className="text-[10px] whitespace-nowrap">Pending</Badge>;
   };
 
   if (loading) {
@@ -602,13 +602,13 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                             <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.phone || "-"}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.service_needed || lead.service || "-"}</TableCell>
-                            <TableCell className="text-sm py-1.5">{lead.area_type && lead.area_type !== "Open Plot" ? lead.area_type : lead.area_type === "Open Plot" ? "-" : "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5 whitespace-nowrap">{lead.area_type && lead.area_type !== "Open Plot" ? lead.area_type : "-"}</TableCell>
                             <TableCell className="text-sm py-1.5" onClick={(e) => e.stopPropagation()}>
                               {lead.area_value ? (
                                 <AreaConvert value={lead.area_value} type={lead.area_type} />
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="text-sm py-1.5">{lead.distance || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5 whitespace-nowrap">{lead.distance || "-"}</TableCell>
                             <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.country || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.biz_area || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">
