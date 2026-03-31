@@ -92,6 +92,8 @@ const AreaConvert = ({ value, type }: { value: string; type: string | null }) =>
   );
 };
 
+const BIZ_AREA_TABS = ["All", "Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Others"] as const;
+
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
