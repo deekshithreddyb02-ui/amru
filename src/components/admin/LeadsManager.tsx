@@ -76,7 +76,7 @@ const AreaConvert = ({ value, type }: { value: string; type: string | null }) =>
         onClick={() => setOpen(!open)}
         className="text-primary underline underline-offset-2 text-sm cursor-pointer hover:text-primary/80"
       >
-        {value} {type || ""}
+        {value}
       </button>
       {open && (
         <div className="absolute z-50 top-6 left-0 bg-popover border border-border rounded-md shadow-lg p-2 min-w-[150px]">
