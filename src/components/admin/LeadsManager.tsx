@@ -92,6 +92,7 @@ const AreaConvert = ({ value, type }: { value: string; type: string | null }) =>
   );
 };
 
+const COUNTRY_TABS = ["All", "India", "Other Countries"] as const;
 const BIZ_AREA_TABS = ["All", "Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Others"] as const;
 
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
@@ -106,6 +107,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [countryTab, setCountryTab] = useState<string>("All");
   const [tab, setTab] = useState<string>("All");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(50);
@@ -135,10 +137,27 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
   useEffect(() => { fetchLeads(); }, []);
 
+  const isIndiaLead = (lead: Lead) => {
+    const country = (lead.country || "").trim().toLowerCase();
+    // If country is empty, check biz_area — known Indian states mean India
+    const knownIndianAreas = ["maharashtra", "telangana", "andhra pradesh", "karnataka"];
+    const area = (lead.biz_area || "").trim().toLowerCase();
+    if (!country || country === "india") return true;
+    if (knownIndianAreas.includes(area)) return true;
+    return false;
+  };
+
   const filtered = useMemo(() => {
     return leads.filter((lead) => {
-      // BIZ Area tab filter
-      if (tab !== "All") {
+      // Country tab filter
+      if (countryTab === "India") {
+        if (!isIndiaLead(lead)) return false;
+      } else if (countryTab === "Other Countries") {
+        if (isIndiaLead(lead)) return false;
+      }
+
+      // BIZ Area sub-tab filter (only applies when viewing India)
+      if (countryTab !== "Other Countries" && tab !== "All") {
         const area = (lead.biz_area || "").trim();
         if (tab === "Others") {
           const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
@@ -147,6 +166,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           if (area !== tab) return false;
         }
       }
+
       if (dateFrom) {
         const d = new Date(lead.created_at).toISOString().split("T")[0];
         if (d < dateFrom) return false;
@@ -162,14 +182,25 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       }
       return true;
     });
-  }, [leads, tab, dateFrom, dateTo, search]);
+  }, [leads, countryTab, tab, dateFrom, dateTo, search]);
+
+  const countryCounts = useMemo(() => {
+    let india = 0;
+    let other = 0;
+    leads.forEach((lead) => {
+      if (isIndiaLead(lead)) india++;
+      else other++;
+    });
+    return { All: leads.length, India: india, "Other Countries": other };
+  }, [leads]);
 
   const tabCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: leads.length };
+    const indiaLeads = leads.filter(isIndiaLead);
+    const counts: Record<string, number> = { All: indiaLeads.length };
     const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
     knownAreas.forEach((a) => { counts[a] = 0; });
     counts["Others"] = 0;
-    leads.forEach((lead) => {
+    indiaLeads.forEach((lead) => {
       const area = (lead.biz_area || "").trim();
       if (knownAreas.includes(area)) {
         counts[area] = (counts[area] || 0) + 1;
@@ -183,7 +214,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
-  useEffect(() => { setPage(1); }, [search, dateFrom, dateTo, tab, perPage]);
+  useEffect(() => { setPage(1); }, [search, dateFrom, dateTo, countryTab, tab, perPage]);
 
   // Selection helpers
   const allPageSelected = paginated.length > 0 && paginated.every((l) => selectedIds.has(l.id));
@@ -504,20 +535,40 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         </Card>
       )}
 
-      {/* BIZ Area Tabs */}
-      <div className="flex flex-wrap gap-2">
-        {BIZ_AREA_TABS.map((t) => (
-          <Button
-            key={t}
-            variant={tab === t ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTab(t)}
-            className="gap-1.5"
-          >
-            {t}
-            <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
-          </Button>
-        ))}
+      {/* Country Folder Tabs */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {COUNTRY_TABS.map((t) => (
+            <Button
+              key={t}
+              variant={countryTab === t ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setCountryTab(t); setTab("All"); }}
+              className="gap-1.5"
+            >
+              {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
+            </Button>
+          ))}
+        </div>
+
+        {/* BIZ Area Sub-Tabs (only visible for All or India) */}
+        {countryTab !== "Other Countries" && (
+          <div className="flex flex-wrap gap-2 pl-6 border-l-2 border-primary/20">
+            {BIZ_AREA_TABS.map((t) => (
+              <Button
+                key={t}
+                variant={tab === t ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setTab(t)}
+                className="gap-1.5 h-7 text-xs"
+              >
+                {t}
+                <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Search & Filters */}
