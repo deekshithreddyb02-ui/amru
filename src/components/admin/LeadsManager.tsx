@@ -137,10 +137,27 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
   useEffect(() => { fetchLeads(); }, []);
 
+  const isIndiaLead = (lead: Lead) => {
+    const country = (lead.country || "").trim().toLowerCase();
+    // If country is empty, check biz_area — known Indian states mean India
+    const knownIndianAreas = ["maharashtra", "telangana", "andhra pradesh", "karnataka"];
+    const area = (lead.biz_area || "").trim().toLowerCase();
+    if (!country || country === "india") return true;
+    if (knownIndianAreas.includes(area)) return true;
+    return false;
+  };
+
   const filtered = useMemo(() => {
     return leads.filter((lead) => {
-      // BIZ Area tab filter
-      if (tab !== "All") {
+      // Country tab filter
+      if (countryTab === "India") {
+        if (!isIndiaLead(lead)) return false;
+      } else if (countryTab === "Other Countries") {
+        if (isIndiaLead(lead)) return false;
+      }
+
+      // BIZ Area sub-tab filter (only applies when viewing India)
+      if (countryTab !== "Other Countries" && tab !== "All") {
         const area = (lead.biz_area || "").trim();
         if (tab === "Others") {
           const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
@@ -149,6 +166,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           if (area !== tab) return false;
         }
       }
+
       if (dateFrom) {
         const d = new Date(lead.created_at).toISOString().split("T")[0];
         if (d < dateFrom) return false;
@@ -164,14 +182,25 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       }
       return true;
     });
-  }, [leads, tab, dateFrom, dateTo, search]);
+  }, [leads, countryTab, tab, dateFrom, dateTo, search]);
+
+  const countryCounts = useMemo(() => {
+    let india = 0;
+    let other = 0;
+    leads.forEach((lead) => {
+      if (isIndiaLead(lead)) india++;
+      else other++;
+    });
+    return { All: leads.length, India: india, "Other Countries": other };
+  }, [leads]);
 
   const tabCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: leads.length };
+    const indiaLeads = leads.filter(isIndiaLead);
+    const counts: Record<string, number> = { All: indiaLeads.length };
     const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
     knownAreas.forEach((a) => { counts[a] = 0; });
     counts["Others"] = 0;
-    leads.forEach((lead) => {
+    indiaLeads.forEach((lead) => {
       const area = (lead.biz_area || "").trim();
       if (knownAreas.includes(area)) {
         counts[area] = (counts[area] || 0) + 1;
