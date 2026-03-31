@@ -12,7 +12,8 @@ const defaultOfficeContacts: OfficeContact[] = [
 { city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
 { city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
 { city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
-{ city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" }];
+{ city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+{ city: "Other", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "geo@amrutawater.com" }];
 
 
 const Contact = () => {
