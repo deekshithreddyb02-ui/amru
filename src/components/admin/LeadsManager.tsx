@@ -504,6 +504,22 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         </Card>
       )}
 
+      {/* BIZ Area Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {BIZ_AREA_TABS.map((t) => (
+          <Button
+            key={t}
+            variant={tab === t ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTab(t)}
+            className="gap-1.5"
+          >
+            {t}
+            <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+          </Button>
+        ))}
+      </div>
+
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[250px]">
