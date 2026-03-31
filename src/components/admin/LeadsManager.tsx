@@ -608,7 +608,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 <AreaConvert value={lead.area_value} type={lead.area_type} />
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="text-sm py-1.5">{lead.distance || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5 whitespace-nowrap">{lead.distance || "-"}</TableCell>
                             <TableCell className="text-sm whitespace-nowrap py-1.5">{lead.country || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">{lead.biz_area || "-"}</TableCell>
                             <TableCell className="text-sm py-1.5">
