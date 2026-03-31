@@ -92,6 +92,8 @@ const AreaConvert = ({ value, type }: { value: string; type: string | null }) =>
   );
 };
 
+const BIZ_AREA_TABS = ["All", "Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Others"] as const;
+
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
@@ -104,7 +106,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState<string>("All");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(50);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -135,6 +137,16 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
   const filtered = useMemo(() => {
     return leads.filter((lead) => {
+      // BIZ Area tab filter
+      if (tab !== "All") {
+        const area = (lead.biz_area || "").trim();
+        if (tab === "Others") {
+          const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
+          if (knownAreas.includes(area)) return false;
+        } else {
+          if (area !== tab) return false;
+        }
+      }
       if (dateFrom) {
         const d = new Date(lead.created_at).toISOString().split("T")[0];
         if (d < dateFrom) return false;
@@ -151,6 +163,22 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       return true;
     });
   }, [leads, tab, dateFrom, dateTo, search]);
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: leads.length };
+    const knownAreas = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka"];
+    knownAreas.forEach((a) => { counts[a] = 0; });
+    counts["Others"] = 0;
+    leads.forEach((lead) => {
+      const area = (lead.biz_area || "").trim();
+      if (knownAreas.includes(area)) {
+        counts[area] = (counts[area] || 0) + 1;
+      } else {
+        counts["Others"] += 1;
+      }
+    });
+    return counts;
+  }, [leads]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
@@ -475,6 +503,22 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           </CardContent>
         </Card>
       )}
+
+      {/* BIZ Area Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {BIZ_AREA_TABS.map((t) => (
+          <Button
+            key={t}
+            variant={tab === t ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTab(t)}
+            className="gap-1.5"
+          >
+            {t}
+            <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+          </Button>
+        ))}
+      </div>
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
