@@ -214,7 +214,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const paginated = filtered.slice((page - 1) * perPage, page * perPage);
 
-  useEffect(() => { setPage(1); }, [search, dateFrom, dateTo, tab, perPage]);
+  useEffect(() => { setPage(1); }, [search, dateFrom, dateTo, countryTab, tab, perPage]);
 
   // Selection helpers
   const allPageSelected = paginated.length > 0 && paginated.every((l) => selectedIds.has(l.id));
