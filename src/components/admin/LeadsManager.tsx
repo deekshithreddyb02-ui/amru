@@ -601,7 +601,11 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                             <TableCell className="font-medium whitespace-nowrap py-1.5">{lead.name}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.phone || "-"}</TableCell>
                             <TableCell className="whitespace-nowrap text-sm py-1.5">{lead.whatsapp || "-"}</TableCell>
-                            <TableCell className="text-sm py-1.5">{lead.service_needed || lead.service || "-"}</TableCell>
+                            <TableCell className="text-sm py-1.5">
+                              <div className="max-w-[140px] truncate" title={lead.service_needed || lead.service || "-"}>
+                                {lead.service_needed || lead.service || "-"}
+                              </div>
+                            </TableCell>
                             <TableCell className="text-sm py-1.5 whitespace-nowrap">{lead.area_type && lead.area_type !== "Open Plot" ? lead.area_type : "-"}</TableCell>
                             <TableCell className="text-sm py-1.5" onClick={(e) => e.stopPropagation()}>
                               {lead.area_value ? (
