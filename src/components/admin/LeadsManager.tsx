@@ -390,9 +390,9 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   };
 
   const crmBadge = (status: string | null) => {
-    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px]">CRM ✓</Badge>;
-    if (status === "failed") return <Badge variant="destructive" className="text-[10px]">CRM ✗</Badge>;
-    return <Badge variant="outline" className="text-[10px]">Pending</Badge>;
+    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px] whitespace-nowrap">CRM ✓</Badge>;
+    if (status === "failed") return <Badge variant="destructive" className="text-[10px] whitespace-nowrap">CRM ✗</Badge>;
+    return <Badge variant="outline" className="text-[10px] whitespace-nowrap">Pending</Badge>;
   };
 
   if (loading) {
