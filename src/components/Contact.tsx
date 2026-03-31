@@ -12,7 +12,8 @@ const defaultOfficeContacts: OfficeContact[] = [
 { city: "Pune", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
 { city: "Hyderabad", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
 { city: "Mumbai", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "rain@amrutawater.com" },
-{ city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" }];
+{ city: "Bangalore", phone: "+91-741-0030-417", whatsapp: "917410030417", email: "rain@amrutawater.com" },
+{ city: "Other", phone: "+91-741-0030-418", whatsapp: "917410030418", email: "geo@amrutawater.com" }];
 
 
 const Contact = () => {
@@ -47,8 +48,8 @@ const Contact = () => {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          <motion.div {...m({ initial: { opacity: 0, x: -30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="space-y-5">
-            <div className="bg-card p-6 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+          <motion.div {...m({ initial: { opacity: 0, x: -30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="h-full">
+            <div className="bg-card p-6 rounded-2xl border border-border h-full" style={{ boxShadow: 'var(--card-shadow)' }}>
               <h3 className="font-bold text-lg text-foreground mb-4 text-center" style={{ fontFamily: 'var(--font-serif)' }}>Contact Information</h3>
               <div className="flex items-center gap-3 mb-5 p-3 rounded-xl border border-border" style={{ background: 'hsl(var(--primary) / 0.04)' }}>
                 <Clock className="w-5 h-5 text-primary flex-shrink-0" />
@@ -75,7 +76,7 @@ const Contact = () => {
           </motion.div>
 
           <motion.div {...m({ initial: { opacity: 0, x: 30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
-          className="bg-card p-6 md:p-8 rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+          className="bg-card p-6 md:p-8 rounded-2xl border border-border h-full" style={{ boxShadow: 'var(--card-shadow)' }}>
             <h3 className="font-bold text-lg text-foreground mb-6 text-center" style={{ fontFamily: 'var(--font-serif)' }}>Send Us a Message</h3>
             <EnquiryForm serviceTitle="General Enquiry" onSuccess={() => toast.success("Message sent successfully!")} />
           </motion.div>
