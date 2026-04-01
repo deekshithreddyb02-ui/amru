@@ -535,39 +535,44 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         </Card>
       )}
 
-      {/* Country Folder Tabs — vertical left sidebar style */}
-      <div className="flex flex-col gap-1.5 w-fit">
-        {COUNTRY_TABS.map((t) => (
-          <Button
-            key={t}
-            variant={countryTab === t ? "default" : "outline"}
-            size="sm"
-            onClick={() => { setCountryTab(t); setTab("All"); }}
-            className="gap-1.5 justify-start"
-          >
-            {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
-            <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
-          </Button>
-        ))}
+      {/* Sidebar + Main Content Layout */}
+      <div className="flex gap-4">
+        {/* Country Folder Tabs — vertical left sidebar */}
+        <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0">
+          {COUNTRY_TABS.map((t) => (
+            <Button
+              key={t}
+              variant={countryTab === t ? "default" : "outline"}
+              size="sm"
+              onClick={() => { setCountryTab(t); setTab("All"); }}
+              className="gap-1.5 justify-start"
+            >
+              {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
+              <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
+            </Button>
+          ))}
 
-        {/* BIZ Area Sub-Tabs (only visible for All or India) */}
-        {countryTab !== "Other Countries" && (
-          <div className="flex flex-col gap-1 pl-6 border-l-2 border-primary/20 mt-1">
-            {BIZ_AREA_TABS.map((t) => (
-              <Button
-                key={t}
-                variant={tab === t ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setTab(t)}
-                className="gap-1.5 justify-start h-7 text-xs"
-              >
-                {t}
-                <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
-              </Button>
-            ))}
-          </div>
-        )}
-      </div>
+          {/* BIZ Area Sub-Tabs (only visible for All or India) */}
+          {countryTab !== "Other Countries" && (
+            <div className="flex flex-col gap-1 pl-6 border-l-2 border-primary/20 mt-1">
+              {BIZ_AREA_TABS.map((t) => (
+                <Button
+                  key={t}
+                  variant={tab === t ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setTab(t)}
+                  className="gap-1.5 justify-start h-7 text-xs"
+                >
+                  {t}
+                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0 space-y-4">
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -785,6 +790,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           )}
         </CardContent>
       </Card>
+        </div>{/* end Main Content */}
+      </div>{/* end Sidebar + Main Layout */}
     </div>
   );
 };
