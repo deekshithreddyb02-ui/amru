@@ -537,7 +537,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
       {/* Sidebar + Main Content Layout */}
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Country Folder Tabs — vertical sidebar on desktop, horizontal scroll on mobile */}
+        {/* Country Folder Tabs */}
         <div className="flex lg:flex-col gap-1.5 lg:w-[200px] lg:min-w-[200px] lg:shrink-0 overflow-x-auto pb-1 lg:pb-0">
           {COUNTRY_TABS.map((t) => (
             <Button
@@ -551,37 +551,17 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
               <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
             </Button>
           ))}
-        </div>
 
-        {/* BIZ Area Sub-Tabs (only visible for All or India) */}
-        {countryTab !== "Other Countries" && (
-          <div className="flex lg:hidden gap-1 overflow-x-auto pb-1 -mt-2">
-            {BIZ_AREA_TABS.map((t) => (
-              <Button
-                key={t}
-                variant={tab === t ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setTab(t)}
-                className="gap-1 justify-start h-7 text-xs whitespace-nowrap"
-              >
-                {t}
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
-              </Button>
-            ))}
-          </div>
-        )}
-
-        {/* Desktop-only BIZ Area Sub-Tabs inside sidebar — re-insert for lg */}
-        <div className="hidden lg:flex lg:flex-col gap-1.5 lg:w-[200px] lg:min-w-[200px] lg:shrink-0 lg:-mt-4">
+          {/* BIZ Area Sub-Tabs */}
           {countryTab !== "Other Countries" && (
-            <div className="flex flex-col gap-1 pl-6 border-l-2 border-primary/20 mt-1">
+            <div className="flex lg:flex-col gap-1 lg:pl-6 lg:border-l-2 border-primary/20 lg:mt-1">
               {BIZ_AREA_TABS.map((t) => (
                 <Button
                   key={t}
                   variant={tab === t ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setTab(t)}
-                  className="gap-1.5 justify-start h-7 text-xs"
+                  className="gap-1.5 justify-start h-7 text-xs whitespace-nowrap"
                 >
                   {t}
                   <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
