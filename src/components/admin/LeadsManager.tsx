@@ -790,6 +790,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           )}
         </CardContent>
       </Card>
+        </div>{/* end Main Content */}
+      </div>{/* end Sidebar + Main Layout */}
     </div>
   );
 };
