@@ -535,36 +535,34 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         </Card>
       )}
 
-      {/* Country Folder Tabs */}
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          {COUNTRY_TABS.map((t) => (
-            <Button
-              key={t}
-              variant={countryTab === t ? "default" : "outline"}
-              size="sm"
-              onClick={() => { setCountryTab(t); setTab("All"); }}
-              className="gap-1.5"
-            >
-              {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
-            </Button>
-          ))}
-        </div>
+      {/* Country Folder Tabs — vertical left sidebar style */}
+      <div className="flex flex-col gap-1.5 w-fit">
+        {COUNTRY_TABS.map((t) => (
+          <Button
+            key={t}
+            variant={countryTab === t ? "default" : "outline"}
+            size="sm"
+            onClick={() => { setCountryTab(t); setTab("All"); }}
+            className="gap-1.5 justify-start"
+          >
+            {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
+            <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
+          </Button>
+        ))}
 
         {/* BIZ Area Sub-Tabs (only visible for All or India) */}
         {countryTab !== "Other Countries" && (
-          <div className="flex flex-wrap gap-2 pl-6 border-l-2 border-primary/20">
+          <div className="flex flex-col gap-1 pl-6 border-l-2 border-primary/20 mt-1">
             {BIZ_AREA_TABS.map((t) => (
               <Button
                 key={t}
                 variant={tab === t ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setTab(t)}
-                className="gap-1.5 h-7 text-xs"
+                className="gap-1.5 justify-start h-7 text-xs"
               >
                 {t}
-                <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+                <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
               </Button>
             ))}
           </div>
