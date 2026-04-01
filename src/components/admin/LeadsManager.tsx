@@ -569,7 +569,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         )}
       </div>
 
-      {/* Desktop: sidebar + main content layout */}
+      {/* Desktop/Tablet: sidebar + main content layout */}
       <div className="hidden md:flex flex-row gap-4">
         {/* Vertical sidebar */}
         <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0">
@@ -603,20 +603,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           )}
         </div>
 
-        {/* Main Content — desktop */}
+        {/* Main Content for desktop */}
         <div className="flex-1 min-w-0 space-y-4">
-
-        {/* Main Content — mobile (rendered below) */}
-      </div>
-      <div className="space-y-4 md:hidden">
-      </div>
-
-      {/* Shared Main Content */}
-      <div className="hidden md:block flex-1 min-w-0">
-      </div>
-
-      {/* Main content (works for both) */}
-      <div className="space-y-4">
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
