@@ -537,75 +537,55 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         </Card>
       )}
 
-      {/* Mobile: old horizontal tab pattern */}
-      <div className="md:hidden space-y-2">
-        <div className="flex flex-wrap gap-1.5">
-          {COUNTRY_TABS.map((t) => (
-            <Button
-              key={t}
-              variant={countryTab === t ? "default" : "outline"}
-              size="sm"
-              onClick={() => { setCountryTab(t); setTab("All"); }}
-              className="gap-1.5 text-xs"
-            >
-              {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other"}
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
-            </Button>
-          ))}
-        </div>
-        {countryTab !== "Other Countries" && (
-          <div className="flex flex-wrap gap-1">
-            {BIZ_AREA_TABS.map((t) => (
-              <Button
-                key={t}
-                variant={tab === t ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setTab(t)}
-                className="h-7 text-xs gap-1"
-              >
-                {t}
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+      {/* Mobile: horizontal tabs */}
+      {isMobile && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            {COUNTRY_TABS.map((t) => (
+              <Button key={t} variant={countryTab === t ? "default" : "outline"} size="sm" onClick={() => { setCountryTab(t); setTab("All"); }} className="gap-1.5 text-xs">
+                {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other"}
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
               </Button>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Desktop/Tablet: sidebar + main content layout */}
-      <div className="hidden md:flex flex-row gap-4">
-        {/* Vertical sidebar */}
-        <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0">
-          {COUNTRY_TABS.map((t) => (
-            <Button
-              key={t}
-              variant={countryTab === t ? "default" : "outline"}
-              size="sm"
-              onClick={() => { setCountryTab(t); setTab("All"); }}
-              className="gap-1.5 justify-start"
-            >
-              {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
-              <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
-            </Button>
-          ))}
           {countryTab !== "Other Countries" && (
-            <div className="flex flex-col gap-1 pl-6 border-l-2 border-primary/20 mt-1">
+            <div className="flex flex-wrap gap-1">
               {BIZ_AREA_TABS.map((t) => (
-                <Button
-                  key={t}
-                  variant={tab === t ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setTab(t)}
-                  className="gap-1.5 justify-start h-7 text-xs"
-                >
+                <Button key={t} variant={tab === t ? "default" : "ghost"} size="sm" onClick={() => setTab(t)} className="h-7 text-xs gap-1">
                   {t}
-                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
                 </Button>
               ))}
             </div>
           )}
         </div>
+      )}
 
-        {/* Main Content for desktop */}
+      {/* Desktop/Tablet: sidebar layout wrapper */}
+      <div className={isMobile ? "space-y-4" : "flex flex-row gap-4"}>
+        {/* Desktop sidebar */}
+        {!isMobile && (
+          <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0">
+            {COUNTRY_TABS.map((t) => (
+              <Button key={t} variant={countryTab === t ? "default" : "outline"} size="sm" onClick={() => { setCountryTab(t); setTab("All"); }} className="gap-1.5 justify-start">
+                {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
+                <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{countryCounts[t] ?? 0}</Badge>
+              </Button>
+            ))}
+            {countryTab !== "Other Countries" && (
+              <div className="flex flex-col gap-1 pl-6 border-l-2 border-primary/20 mt-1">
+                {BIZ_AREA_TABS.map((t) => (
+                  <Button key={t} variant={tab === t ? "default" : "ghost"} size="sm" onClick={() => setTab(t)} className="gap-1.5 justify-start h-7 text-xs">
+                    {t}
+                    <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">{tabCounts[t] ?? 0}</Badge>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Main Content */}
         <div className="flex-1 min-w-0 space-y-4">
 
       {/* Search & Filters */}
