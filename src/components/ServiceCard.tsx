@@ -54,7 +54,7 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
             </p>
             <button
               type="button"
-              className="text-xs font-medium mt-1 text-primary hover:text-primary/80 transition-colors text-center"
+              className="text-xs font-medium mt-1 text-primary hover:text-primary/80 transition-colors w-full text-center"
               onClick={(e) => {e.stopPropagation();setDetailOpen(true);}}>
               Read more
             </button>
