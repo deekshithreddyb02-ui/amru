@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink, Upload } from "lucide-react";
+import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, Save, ExternalLink, Upload } from "lucide-react";
 
 interface NavLink {
   name: string;
@@ -109,6 +109,14 @@ const NavbarEditor = () => {
     setNavLinks(updated);
   };
 
+  const moveNavLink = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= navLinks.length) return;
+    const updated = [...navLinks];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setNavLinks(updated);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -181,7 +189,15 @@ const NavbarEditor = () => {
         <CardContent className="space-y-3">
           {navLinks.map((link, index) => (
             <div key={index} className="flex items-center gap-2">
-              <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <span className="text-xs font-medium text-muted-foreground w-5 text-center shrink-0">{index + 1}</span>
+              <div className="flex flex-col shrink-0">
+                <Button variant="ghost" size="icon" className="h-5 w-5" disabled={index === 0} onClick={() => moveNavLink(index, "up")}>
+                  <ArrowUp className="w-3 h-3" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-5 w-5" disabled={index === navLinks.length - 1} onClick={() => moveNavLink(index, "down")}>
+                  <ArrowDown className="w-3 h-3" />
+                </Button>
+              </div>
               <Input
                 value={link.name}
                 onChange={(e) => updateNavLink(index, "name", e.target.value)}
@@ -194,12 +210,7 @@ const NavbarEditor = () => {
                 placeholder="#section or /page"
                 className="flex-1"
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeNavLink(index)}
-                className="flex-shrink-0"
-              >
+              <Button variant="ghost" size="icon" onClick={() => removeNavLink(index)} className="flex-shrink-0">
                 <Trash2 className="w-4 h-4 text-destructive" />
               </Button>
             </div>
