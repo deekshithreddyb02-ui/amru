@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Menu, X, LogIn, LogOut, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useSiteContent } from "@/hooks/useSiteContent";
+import { useSectionOrder } from "@/hooks/useSectionOrder";
 import defaultLogo from "@/assets/logo-small.webp";
 
 interface NavLink { name: string; href: string; }
@@ -15,27 +16,49 @@ interface NavbarMetadata {
   external_link: { name: string; url: string };
 }
 
+const SECTION_NAV_MAP: Record<string, NavLink> = {
+  about: { name: "About Us", href: "#about" },
+  whyus: { name: "Why Us", href: "#why" },
+  services: { name: "Services", href: "#services" },
+  testimonials: { name: "Testimonials", href: "#testimonials" },
+  gallery: { name: "Gallery", href: "#gallery" },
+  offices: { name: "Office Maps", href: "#offices" },
+  contact: { name: "Contact", href: "#contact" },
+  certifications: { name: "Certifications", href: "#certifications" },
+  feedback: { name: "Feedback", href: "#feedback" },
+  legal: { name: "Legal Notice", href: "#legal" },
+};
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const { isAdmin } = useAdmin();
   const { data: navbarContent } = useSiteContent("navbar");
+  const { sections } = useSectionOrder();
 
   const meta = navbarContent?.metadata as unknown as NavbarMetadata | undefined;
   const companyName = meta?.company_name || "Amruta Integrated Water Solutions Pvt. Ltd.";
   const logoSrc = meta?.logo_url || defaultLogo;
-  const navLinks = meta?.nav_links || [
-    { name: "Home", href: "#home" },
-    { name: "About Us", href: "#about" },
-    { name: "Why Us", href: "#why" },
-    { name: "Testimonials", href: "#testimonials" },
-    { name: "Services", href: "#services" },
-    { name: "Gallery", href: "#gallery" },
-    { name: "Office Maps", href: "#offices" },
-    { name: "Contact", href: "#contact" },
-  ];
   const externalLink = meta?.external_link || { name: "RWH SW HFL PMS", url: "https://rain.amrutageo.com/" };
+
+  const savedLinks = meta?.nav_links;
+  const savedLinkMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    savedLinks?.forEach(l => { map[l.href] = l.name; });
+    return map;
+  }, [savedLinks]);
+
+  const navLinks = useMemo(() => {
+    const links: NavLink[] = [{ name: "Home", href: "#home" }];
+    sections.filter(s => s.visible).forEach(s => {
+      const base = SECTION_NAV_MAP[s.key];
+      if (base) {
+        links.push({ name: savedLinkMap[base.href] || base.name, href: base.href });
+      }
+    });
+    return links;
+  }, [sections, savedLinkMap]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
