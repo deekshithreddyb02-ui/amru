@@ -81,8 +81,8 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl" style={{ fontFamily: 'var(--font-serif)' }}>{title}</DialogTitle>
-            <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
+            <DialogTitle className="text-xl text-center" style={{ fontFamily: 'var(--font-serif)' }}>{title}</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap text-center">
               {description}
             </DialogDescription>
           </DialogHeader>
