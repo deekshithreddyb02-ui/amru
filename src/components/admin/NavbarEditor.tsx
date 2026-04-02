@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, Trash2, GripVertical, Save, ExternalLink, Upload } from "lucide-react";
+import { Loader2, Plus, Trash2, ArrowUp, ArrowDown, Save, ExternalLink, Upload } from "lucide-react";
 
 interface NavLink {
   name: string;
