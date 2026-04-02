@@ -109,6 +109,14 @@ const NavbarEditor = () => {
     setNavLinks(updated);
   };
 
+  const moveNavLink = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= navLinks.length) return;
+    const updated = [...navLinks];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setNavLinks(updated);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
