@@ -23,59 +23,57 @@ const About = () => {
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   return (
-    <section id="about" className="relative overflow-hidden">
-      {/* Stats Bar */}
-      <motion.div
-        {...m({ initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })}
-        className="relative py-6 md:py-8"
-        style={{ background: 'hsl(var(--primary) / 0.85)', backdropFilter: 'blur(8px)' }}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center gap-8 md:gap-16 flex-wrap">
-            {stats.map((stat, index) => {
-              const IconComponent = iconMap[stat.icon] || Award;
-              return (
-                <motion.div
-                  key={stat.label}
-                  {...m({ initial: { opacity: 0, y: 12 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.4, delay: index * 0.1 } })}
-                  className="flex items-center gap-3 text-primary-foreground"
-                >
-                  <IconComponent className="w-5 h-5 md:w-6 md:h-6 opacity-80" />
-                  <div>
-                    <div className="text-xl md:text-2xl font-bold leading-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-                      {stat.value}
-                    </div>
-                    <div className="text-xs md:text-sm opacity-80 font-medium">{stat.label}</div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </motion.div>
+    <section id="about" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient)' }}>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03] blur-3xl" style={{ background: 'hsl(var(--primary))' }} />
 
-      {/* About Content */}
-      <div className="py-20 md:py-28" style={{ background: 'var(--section-gradient)' }}>
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03] blur-3xl" style={{ background: 'hsl(var(--primary))' }} />
-        <div className="container mx-auto px-4">
-          <motion.div {...m({ initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="max-w-3xl mx-auto text-center">
+      <div className="container mx-auto px-4">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div className="text-center">
+            
+            
             <div className="gold-accent mb-6 mx-auto" />
             <h2 className="section-heading mb-2">{title}</h2>
             <p className="text-sm uppercase tracking-widest font-semibold mb-8" style={{ color: 'hsl(var(--secondary))' }}>
               Pioneering Water Solutions Since 1990
             </p>
-            <div className="space-y-4">
+            <div className="space-y-4 text-center">
               {paragraphs.map((paragraph, index) => {
                 const parts = paragraph.split(/\*\*(.*?)\*\*/g);
                 return (
                   <p key={index} className="text-muted-foreground leading-relaxed">
                     {parts.map((part, i) =>
-                      i % 2 === 1 ? <strong key={i} className="text-foreground font-semibold">{part}</strong> : <span key={i}>{part}</span>
+                    i % 2 === 1 ? <strong key={i} className="text-foreground font-semibold">{part}</strong> : <span key={i}>{part}</span>
                     )}
-                  </p>
-                );
+                  </p>);
+
               })}
             </div>
+          </motion.div>
+
+          <motion.div
+            {...m({ initial: { opacity: 0, x: 40 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.7 } })}
+            className="grid grid-cols-2 gap-4">
+            
+            {stats.map((stat, index) => {
+              const IconComponent = iconMap[stat.icon] || Award;
+              return (
+                <motion.div
+                  key={stat.label}
+                  {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.5, delay: index * 0.1 }, whileHover: { y: -4, transition: { duration: 0.2 } } })}
+                  className="group bg-card p-6 rounded-2xl border border-border text-center transition-all duration-300 hover:border-primary/20"
+                  style={{ boxShadow: 'var(--card-shadow)' }}>
+                  
+                  <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center transition-colors duration-300"
+                  style={{ background: 'hsl(var(--primary) / 0.08)' }}>
+                    <IconComponent className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-foreground mb-1" style={{ fontFamily: 'var(--font-serif)' }}>
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+                </motion.div>);
+
+            })}
           </motion.div>
         </div>
       </div>
