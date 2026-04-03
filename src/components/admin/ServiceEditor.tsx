@@ -136,11 +136,12 @@ const ServiceEditor = () => {
     const { error } = await supabase.from("services").insert({
       title: newService.title,
       description: newService.description,
+      detailed_description: newService.detailed_description || null,
       image: newService.image,
       link: newService.link || null,
       is_main: newService.is_main,
       display_order: maxOrder + 1,
-    });
+    } as any);
 
     setSaving(false);
     if (error) {
