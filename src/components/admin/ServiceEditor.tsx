@@ -200,8 +200,13 @@ const ServiceEditor = () => {
               <Input value={newService.title} onChange={(e) => setNewService({ ...newService, title: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>Description *</Label>
-              <Textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="mt-1" />
+              <Label>Description (Card) *</Label>
+              <Textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="mt-1" placeholder="Short description shown on card" />
+            </div>
+            <div>
+              <Label>Detailed Description (Popup)</Label>
+              <Textarea value={newService.detailed_description} onChange={(e) => setNewService({ ...newService, detailed_description: e.target.value })} className="mt-1 min-h-[120px]" placeholder="Rich content for Read more popup. Supports **bold**, *italic*, - lists, etc." />
+              <p className="text-xs text-muted-foreground mt-1">Supports Markdown formatting. Leave empty to use card description in popup.</p>
             </div>
             <div>
               <Label>Image *</Label>
