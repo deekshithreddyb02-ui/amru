@@ -72,7 +72,7 @@ const Services = () => {
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           {mainServices.map((service, index) => (
             <div key={service.id} className="w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.75rem)] lg:w-[calc(20%-0.85rem)]">
-              <ServiceCard title={service.title} description={service.description} image={service.image} link={service.link || undefined} delay={noMotion ? 0 : index * 0.08} />
+              <ServiceCard title={service.title} description={service.description} detailedDescription={service.detailed_description} image={service.image} link={service.link || undefined} delay={noMotion ? 0 : index * 0.08} />
             </div>
           ))}
         </div>
