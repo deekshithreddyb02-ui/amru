@@ -16,6 +16,7 @@ interface Service {
   id: string;
   title: string;
   description: string;
+  detailed_description: string | null;
   image: string;
   link: string | null;
   is_main: boolean;
