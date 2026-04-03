@@ -148,7 +148,7 @@ const ServiceEditor = () => {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Service added" });
-      setNewService({ title: "", description: "", image: "", link: "", is_main: false });
+      setNewService({ title: "", description: "", detailed_description: "", image: "", link: "", is_main: false });
       setAdding(false);
       fetchServices();
     }
