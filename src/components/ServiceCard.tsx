@@ -81,12 +81,18 @@ const ServiceCard = ({ title, description, detailedDescription, image, link, del
       </motion.article>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="sm:max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl text-center" style={{ fontFamily: 'var(--font-serif)' }}>{title}</DialogTitle>
-            <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap text-center">
-              {description}
-            </DialogDescription>
+            {detailedDescription ? (
+              <div className="text-muted-foreground text-sm leading-relaxed text-center prose prose-sm max-w-none [&_p]:text-muted-foreground [&_li]:text-muted-foreground [&_strong]:text-foreground [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
+                <ReactMarkdown>{detailedDescription}</ReactMarkdown>
+              </div>
+            ) : (
+              <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap text-center">
+                {description}
+              </DialogDescription>
+            )}
           </DialogHeader>
         </DialogContent>
       </Dialog>
