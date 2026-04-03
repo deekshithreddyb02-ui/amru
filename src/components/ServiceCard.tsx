@@ -19,7 +19,7 @@ interface ServiceCardProps {
   delay?: number;
 }
 
-const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
+const ServiceCard = ({ title, description, detailedDescription, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
 
