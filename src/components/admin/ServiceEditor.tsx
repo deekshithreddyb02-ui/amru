@@ -34,6 +34,7 @@ const ServiceEditor = () => {
   const [newService, setNewService] = useState({
     title: "",
     description: "",
+    detailed_description: "",
     image: "",
     link: "",
     is_main: false,
