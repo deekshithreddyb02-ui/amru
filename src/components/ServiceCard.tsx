@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import EnquiryForm from "@/components/EnquiryForm";
 interface ServiceCardProps {
   title: string;
   description: string;
+  detailedDescription?: string | null;
   image: string;
   link?: string;
   delay?: number;
