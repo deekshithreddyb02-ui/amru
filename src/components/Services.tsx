@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNoMotion } from "@/hooks/useNoMotion";
 
 interface Service {
-  id: string; title: string; description: string; image: string; link: string | null;
+  id: string; title: string; description: string; detailed_description: string | null; image: string; link: string | null;
   is_main: boolean; is_main_tablet: boolean; is_main_mobile: boolean;
   display_order: number; display_order_tablet: number; display_order_mobile: number;
 }
