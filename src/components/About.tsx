@@ -8,7 +8,7 @@ const iconMap: Record<string, LucideIcon> = { Award, Building2, Users, MapPin };
 const defaultStats = [
 { icon: "Award", value: "35+", label: "Years Experience" },
 { icon: "Building2", value: "4", label: "Office Locations" },
-{ icon: "Users", value: "1000+", label: "Projects Completed" },
+{ icon: "Users", value: "13,000+", label: "Projects Completed" },
 { icon: "MapPin", value: "Pan India", label: "Service Coverage" }];
 
 
