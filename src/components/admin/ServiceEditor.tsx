@@ -106,11 +106,12 @@ const ServiceEditor = () => {
       .update({
         title: editData.title,
         description: editData.description,
+        detailed_description: editData.detailed_description || null,
         image: editData.image,
         link: editData.link || null,
         is_main: editData.is_main,
         display_order: editData.display_order,
-      })
+      } as any)
       .eq("id", id);
 
     setSaving(false);
