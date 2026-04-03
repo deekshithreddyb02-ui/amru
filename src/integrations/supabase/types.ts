@@ -486,6 +486,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string
+          detailed_description: string | null
           display_order: number
           display_order_mobile: number
           display_order_tablet: number
@@ -501,6 +502,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
+          detailed_description?: string | null
           display_order?: number
           display_order_mobile?: number
           display_order_tablet?: number
@@ -516,6 +518,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
+          detailed_description?: string | null
           display_order?: number
           display_order_mobile?: number
           display_order_tablet?: number

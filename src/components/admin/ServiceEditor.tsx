@@ -16,6 +16,7 @@ interface Service {
   id: string;
   title: string;
   description: string;
+  detailed_description: string | null;
   image: string;
   link: string | null;
   is_main: boolean;
@@ -33,6 +34,7 @@ const ServiceEditor = () => {
   const [newService, setNewService] = useState({
     title: "",
     description: "",
+    detailed_description: "",
     image: "",
     link: "",
     is_main: false,
@@ -104,11 +106,12 @@ const ServiceEditor = () => {
       .update({
         title: editData.title,
         description: editData.description,
+        detailed_description: editData.detailed_description || null,
         image: editData.image,
         link: editData.link || null,
         is_main: editData.is_main,
         display_order: editData.display_order,
-      })
+      } as any)
       .eq("id", id);
 
     setSaving(false);
@@ -133,18 +136,19 @@ const ServiceEditor = () => {
     const { error } = await supabase.from("services").insert({
       title: newService.title,
       description: newService.description,
+      detailed_description: newService.detailed_description || null,
       image: newService.image,
       link: newService.link || null,
       is_main: newService.is_main,
       display_order: maxOrder + 1,
-    });
+    } as any);
 
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Service added" });
-      setNewService({ title: "", description: "", image: "", link: "", is_main: false });
+      setNewService({ title: "", description: "", detailed_description: "", image: "", link: "", is_main: false });
       setAdding(false);
       fetchServices();
     }
@@ -196,8 +200,13 @@ const ServiceEditor = () => {
               <Input value={newService.title} onChange={(e) => setNewService({ ...newService, title: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <Label>Description *</Label>
-              <Textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="mt-1" />
+              <Label>Description (Card) *</Label>
+              <Textarea value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} className="mt-1" placeholder="Short description shown on card" />
+            </div>
+            <div>
+              <Label>Detailed Description (Popup)</Label>
+              <Textarea value={newService.detailed_description} onChange={(e) => setNewService({ ...newService, detailed_description: e.target.value })} className="mt-1 min-h-[120px]" placeholder="Rich content for Read more popup. Supports **bold**, *italic*, - lists, etc." />
+              <p className="text-xs text-muted-foreground mt-1">Supports Markdown formatting. Leave empty to use card description in popup.</p>
             </div>
             <div>
               <Label>Image *</Label>
@@ -249,8 +258,13 @@ const ServiceEditor = () => {
                     <Input value={editData.title || ""} onChange={(e) => setEditData({ ...editData, title: e.target.value })} className="mt-1" />
                   </div>
                   <div>
-                    <Label>Description</Label>
-                    <Textarea value={editData.description || ""} onChange={(e) => setEditData({ ...editData, description: e.target.value })} className="mt-1" />
+                    <Label>Description (Card)</Label>
+                    <Textarea value={editData.description || ""} onChange={(e) => setEditData({ ...editData, description: e.target.value })} className="mt-1" placeholder="Short description shown on card" />
+                  </div>
+                  <div>
+                    <Label>Detailed Description (Popup)</Label>
+                    <Textarea value={editData.detailed_description || ""} onChange={(e) => setEditData({ ...editData, detailed_description: e.target.value })} className="mt-1 min-h-[120px]" placeholder="Rich content for Read more popup. Supports **bold**, *italic*, - lists, etc." />
+                    <p className="text-xs text-muted-foreground mt-1">Supports Markdown formatting. Leave empty to use card description in popup.</p>
                   </div>
                   <div>
                     <Label>Image</Label>

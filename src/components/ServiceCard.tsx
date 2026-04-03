@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +13,13 @@ import EnquiryForm from "@/components/EnquiryForm";
 interface ServiceCardProps {
   title: string;
   description: string;
+  detailedDescription?: string | null;
   image: string;
   link?: string;
   delay?: number;
 }
 
-const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCardProps) => {
+const ServiceCard = ({ title, description, detailedDescription, image, link, delay = 0 }: ServiceCardProps) => {
   const [open, setOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -79,12 +81,18 @@ const ServiceCard = ({ title, description, image, link, delay = 0 }: ServiceCard
       </motion.article>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="sm:max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl text-center" style={{ fontFamily: 'var(--font-serif)' }}>{title}</DialogTitle>
-            <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap text-center">
-              {description}
-            </DialogDescription>
+            {detailedDescription ? (
+              <div className="text-muted-foreground text-sm leading-relaxed text-center prose prose-sm max-w-none [&_p]:text-muted-foreground [&_li]:text-muted-foreground [&_strong]:text-foreground [&_h1]:text-foreground [&_h2]:text-foreground [&_h3]:text-foreground">
+                <ReactMarkdown>{detailedDescription}</ReactMarkdown>
+              </div>
+            ) : (
+              <DialogDescription className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap text-center">
+                {description}
+              </DialogDescription>
+            )}
           </DialogHeader>
         </DialogContent>
       </Dialog>
