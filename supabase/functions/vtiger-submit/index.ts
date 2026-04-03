@@ -198,8 +198,26 @@ serve(async (req) => {
         });
 
         const responseText = await response.text();
-        console.log(`CRM [${matchedCrm.label}] (state: ${stateKey}) response: ${response.status}, body: ${responseText.length} chars`);
-        crmSuccess = response.ok;
+        console.log(`CRM [${matchedCrm.label}] (state: ${stateKey}) response: ${response.status}, body: ${responseText.substring(0, 500)}`);
+
+        // Vtiger capture.php returns HTTP 200 even on failure, so check body
+        if (response.ok) {
+          try {
+            const responseJson = JSON.parse(responseText);
+            // Vtiger returns {"success":false,"error":{"message":"..."}} on failure
+            if (responseJson.success === false) {
+              console.error(`CRM [${matchedCrm.label}] rejected: ${responseJson.error?.message || 'Unknown error'}`);
+              crmSuccess = false;
+            } else {
+              crmSuccess = true;
+            }
+          } catch {
+            // Non-JSON response (e.g. HTML redirect on success) — treat as success
+            crmSuccess = true;
+          }
+        } else {
+          crmSuccess = false;
+        }
       } catch (err) {
         console.error(`CRM [${crmLabel}] error:`, err);
       }
