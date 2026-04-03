@@ -18,7 +18,7 @@ const defaultServices = [
 
 const stats = [
   { icon: Award, value: "35+", label: "Years" },
-  { icon: Shield, value: "1000+", label: "Projects" },
+  { icon: Shield, value: "13,000+", label: "Projects" },
   { icon: Droplets, value: "Pan India", label: "Coverage" },
 ];
 
