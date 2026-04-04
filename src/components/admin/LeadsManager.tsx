@@ -436,10 +436,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   };
 
   const exportCSV = () => {
-    const headers = ["Name","WhatsApp","Service","BIZ Area","Distance","Scans","Area Type","Area Value","Mailing Street","City","PIN","Latitude","Longitude","Country","Expected Close","CRM Status","Description","Date"];
+    const headers = ["Name","WhatsApp","Service","BIZ Area","Distance","Scans","Area Type","Area Value","Mailing Street","City","PIN","Latitude","Longitude","Country","Expected Close","CRM Status","Sent To CRM","Description","Date"];
     const header = headers.join(",") + "\n";
     const rows = filtered.map((m) =>
-      [m.name, m.whatsapp||"", m.service_needed||m.service||"", m.biz_area||"", m.distance||"", m.num_scans||"", m.area_type||"", m.area_value||"", `"${(m.mailing_street||"").replace(/"/g,'""')}"`, m.mailing_city||"", m.mailing_pincode||"", m.latitude||"", m.longitude||"", m.country||"", m.expected_close||"", m.crm_status||"", `"${(m.message||"").replace(/"/g,'""')}"`, new Date(m.created_at).toLocaleDateString()].join(",")
+      [m.name, m.whatsapp||"", m.service_needed||m.service||"", m.biz_area||"", m.distance||"", m.num_scans||"", m.area_type||"", m.area_value||"", `"${(m.mailing_street||"").replace(/"/g,'""')}"`, m.mailing_city||"", m.mailing_pincode||"", m.latitude||"", m.longitude||"", m.country||"", m.expected_close||"", m.crm_status||"", m.crm_label||"", `"${(m.message||"").replace(/"/g,'""')}"`, new Date(m.created_at).toLocaleDateString()].join(",")
     ).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
