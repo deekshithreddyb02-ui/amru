@@ -223,12 +223,12 @@ serve(async (req) => {
         console.error(`CRM [${crmLabel}] error:`, err);
       }
 
-      // Update CRM status in DB if we saved
+      // Update CRM status and label in DB if we saved
       if (dbSaveSuccess && dbRecord?.email) {
         const newStatus = crmSuccess ? "success" : "failed";
         await supabase
           .from("contact_messages")
-          .update({ crm_status: newStatus })
+          .update({ crm_status: newStatus, crm_label: crmLabel || null })
           .eq("email", dbRecord.email)
           .order("created_at", { ascending: false })
           .limit(1);
