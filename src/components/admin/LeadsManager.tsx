@@ -757,7 +757,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </a>
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
+                            <TableCell className="py-1.5">{crmBadge(lead.crm_status, lead.crm_label)}</TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
