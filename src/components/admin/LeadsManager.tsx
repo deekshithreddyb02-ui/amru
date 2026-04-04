@@ -358,7 +358,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
         // Update CRM status in local state and DB
         const newStatus = data?.crmSent === true ? "success" : "failed";
-        await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
+        const crmLbl = data?.crmLabel || null;
+        await supabase.from("contact_messages").update({ crm_status: newStatus, crm_label: crmLbl } as any).eq("id", lead.id);
 
         if (data?.crmSent === true) {
           successCount++;
