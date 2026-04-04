@@ -498,6 +498,25 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         </div>
       </div>
 
+      {/* CRM Stats Summary */}
+      {Object.keys(crmStats).length > 0 && (
+        <Card>
+          <CardContent className="py-3">
+            <p className="text-xs font-semibold text-foreground mb-2">CRM Delivery Summary</p>
+            <div className="flex flex-wrap gap-3">
+              {Object.entries(crmStats).map(([label, s]) => (
+                <div key={label} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-1.5">
+                  <span className="text-xs font-medium">{label}</span>
+                  <Badge variant="secondary" className="text-[10px]">{s.total} total</Badge>
+                  <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px]">{s.success} ✓</Badge>
+                  {s.failed > 0 && <Badge variant="destructive" className="text-[10px]">{s.failed} ✗</Badge>}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Selection Actions Bar */}
       {selectedIds.size > 0 && (
         <Card>
