@@ -453,11 +453,25 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     return `https://www.google.com/maps?q=${lat},${lng}`;
   };
 
-  const crmBadge = (status: string | null) => {
-    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px] whitespace-nowrap">CRM ✓</Badge>;
-    if (status === "failed") return <Badge variant="destructive" className="text-[10px] whitespace-nowrap">CRM ✗</Badge>;
+  const crmBadge = (status: string | null, label: string | null) => {
+    const labelText = label ? ` (${label})` : "";
+    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px] whitespace-nowrap">✓{labelText}</Badge>;
+    if (status === "failed") return <Badge variant="destructive" className="text-[10px] whitespace-nowrap">✗{labelText}</Badge>;
+    if (status === "db_only") return <Badge variant="outline" className="text-[10px] whitespace-nowrap">DB Only</Badge>;
     return <Badge variant="outline" className="text-[10px] whitespace-nowrap">Pending</Badge>;
   };
+
+  const crmStats = useMemo(() => {
+    const stats: Record<string, { total: number; success: number; failed: number }> = {};
+    leads.forEach((l) => {
+      if (!l.crm_label) return;
+      if (!stats[l.crm_label]) stats[l.crm_label] = { total: 0, success: 0, failed: 0 };
+      stats[l.crm_label].total++;
+      if (l.crm_status === "success") stats[l.crm_label].success++;
+      if (l.crm_status === "failed") stats[l.crm_label].failed++;
+    });
+    return stats;
+  }, [leads]);
 
   if (loading) {
     return <div className="flex items-center justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
