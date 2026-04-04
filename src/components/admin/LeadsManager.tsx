@@ -284,7 +284,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       });
       if (error) throw error;
       const newStatus = data?.crmSent === true ? "success" : "failed";
-      await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
+      const crmLabel = data?.crmLabel || null;
+      await supabase.from("contact_messages").update({ crm_status: newStatus, crm_label: crmLabel } as any).eq("id", lead.id);
       await fetchLeads();
       toast({ title: newStatus === "success" ? "Sent to CRM" : "CRM Failed", variant: newStatus === "success" ? "default" : "destructive" });
     } catch (error: any) {
