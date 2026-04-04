@@ -48,6 +48,7 @@ interface Lead {
   country: string | null;
   expected_close: string | null;
   crm_status: string | null;
+  crm_label: string | null;
 }
 
 interface LeadsManagerProps {
