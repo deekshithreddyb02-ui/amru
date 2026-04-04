@@ -140,6 +140,7 @@ serve(async (req) => {
           }
         }
         sanitized.crm_status = routing.send_to_crm ? "pending" : "db_only";
+        sanitized.crm_label = null; // Will be updated after CRM match
 
         const { error: dbErr } = await supabase.from("contact_messages").insert(sanitized);
         if (dbErr) {
