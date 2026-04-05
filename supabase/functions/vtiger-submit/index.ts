@@ -166,12 +166,12 @@ serve(async (req) => {
       // Fallback default
       if (!matchedCrm) {
         matchedCrm = {
-          label: "Default",
+          label: "Default (TS-CRM)",
           state_key: "telangana",
-          crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
-          token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
-          public_id: "85432a838b51f53a6bc4ec937b64ee40",
-          form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
+          crm_url: "https://appscomsolutions.com/HYD-VTCRM/modules/Webforms/capture.php",
+          token: "sid:ee3fcd87c4f067554d85b0375cb53e41f7bdd8dc,1775110829",
+          public_id: "25127a10562daa4d6686c790ca52b0dd",
+          form_name: "TS-CRM",
           enabled: true,
         };
       }
