@@ -140,7 +140,6 @@ serve(async (req) => {
           }
         }
         sanitized.crm_status = routing.send_to_crm ? "pending" : "db_only";
-        sanitized.crm_label = null; // Will be updated after CRM match
 
         const { error: dbErr } = await supabase.from("contact_messages").insert(sanitized);
         if (dbErr) {
@@ -166,12 +165,12 @@ serve(async (req) => {
       // Fallback default
       if (!matchedCrm) {
         matchedCrm = {
-          label: "Default (TS-CRM)",
+          label: "Default",
           state_key: "telangana",
-          crm_url: "https://appscomsolutions.com/HYD-VTCRM/modules/Webforms/capture.php",
-          token: "sid:ee3fcd87c4f067554d85b0375cb53e41f7bdd8dc,1775110829",
-          public_id: "25127a10562daa4d6686c790ca52b0dd",
-          form_name: "TS-CRM",
+          crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
+          token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
+          public_id: "85432a838b51f53a6bc4ec937b64ee40",
+          form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
           enabled: true,
         };
       }
@@ -223,12 +222,12 @@ serve(async (req) => {
         console.error(`CRM [${crmLabel}] error:`, err);
       }
 
-      // Update CRM status and label in DB if we saved
+      // Update CRM status in DB if we saved
       if (dbSaveSuccess && dbRecord?.email) {
         const newStatus = crmSuccess ? "success" : "failed";
         await supabase
           .from("contact_messages")
-          .update({ crm_status: newStatus, crm_label: crmLabel || null })
+          .update({ crm_status: newStatus })
           .eq("email", dbRecord.email)
           .order("created_at", { ascending: false })
           .limit(1);

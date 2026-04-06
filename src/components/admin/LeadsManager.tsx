@@ -48,7 +48,6 @@ interface Lead {
   country: string | null;
   expected_close: string | null;
   crm_status: string | null;
-  crm_label: string | null;
 }
 
 interface LeadsManagerProps {
@@ -284,8 +283,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       });
       if (error) throw error;
       const newStatus = data?.crmSent === true ? "success" : "failed";
-      const crmLabel = data?.crmLabel || null;
-      await supabase.from("contact_messages").update({ crm_status: newStatus, crm_label: crmLabel } as any).eq("id", lead.id);
+      await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
       await fetchLeads();
       toast({ title: newStatus === "success" ? "Sent to CRM" : "CRM Failed", variant: newStatus === "success" ? "default" : "destructive" });
     } catch (error: any) {
@@ -358,8 +356,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
 
         // Update CRM status in local state and DB
         const newStatus = data?.crmSent === true ? "success" : "failed";
-        const crmLbl = data?.crmLabel || null;
-        await supabase.from("contact_messages").update({ crm_status: newStatus, crm_label: crmLbl } as any).eq("id", lead.id);
+        await supabase.from("contact_messages").update({ crm_status: newStatus }).eq("id", lead.id);
 
         if (data?.crmSent === true) {
           successCount++;
@@ -436,10 +433,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   };
 
   const exportCSV = () => {
-    const headers = ["Name","WhatsApp","Service","BIZ Area","Distance","Scans","Area Type","Area Value","Mailing Street","City","PIN","Latitude","Longitude","Country","Expected Close","CRM Status","Sent To CRM","Description","Date"];
+    const headers = ["Name","WhatsApp","Service","BIZ Area","Distance","Scans","Area Type","Area Value","Mailing Street","City","PIN","Latitude","Longitude","Country","Expected Close","CRM Status","Description","Date"];
     const header = headers.join(",") + "\n";
     const rows = filtered.map((m) =>
-      [m.name, m.whatsapp||"", m.service_needed||m.service||"", m.biz_area||"", m.distance||"", m.num_scans||"", m.area_type||"", m.area_value||"", `"${(m.mailing_street||"").replace(/"/g,'""')}"`, m.mailing_city||"", m.mailing_pincode||"", m.latitude||"", m.longitude||"", m.country||"", m.expected_close||"", m.crm_status||"", m.crm_label||"", `"${(m.message||"").replace(/"/g,'""')}"`, new Date(m.created_at).toLocaleDateString()].join(",")
+      [m.name, m.whatsapp||"", m.service_needed||m.service||"", m.biz_area||"", m.distance||"", m.num_scans||"", m.area_type||"", m.area_value||"", `"${(m.mailing_street||"").replace(/"/g,'""')}"`, m.mailing_city||"", m.mailing_pincode||"", m.latitude||"", m.longitude||"", m.country||"", m.expected_close||"", m.crm_status||"", `"${(m.message||"").replace(/"/g,'""')}"`, new Date(m.created_at).toLocaleDateString()].join(",")
     ).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -453,25 +450,11 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     return `https://www.google.com/maps?q=${lat},${lng}`;
   };
 
-  const crmBadge = (status: string | null, label: string | null) => {
-    const labelText = label ? ` (${label})` : "";
-    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px] whitespace-nowrap">✓{labelText}</Badge>;
-    if (status === "failed") return <Badge variant="destructive" className="text-[10px] whitespace-nowrap">✗{labelText}</Badge>;
-    if (status === "db_only") return <Badge variant="outline" className="text-[10px] whitespace-nowrap">DB Only</Badge>;
+  const crmBadge = (status: string | null) => {
+    if (status === "success") return <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px] whitespace-nowrap">CRM ✓</Badge>;
+    if (status === "failed") return <Badge variant="destructive" className="text-[10px] whitespace-nowrap">CRM ✗</Badge>;
     return <Badge variant="outline" className="text-[10px] whitespace-nowrap">Pending</Badge>;
   };
-
-  const crmStats = useMemo(() => {
-    const stats: Record<string, { total: number; success: number; failed: number }> = {};
-    leads.forEach((l) => {
-      if (!l.crm_label) return;
-      if (!stats[l.crm_label]) stats[l.crm_label] = { total: 0, success: 0, failed: 0 };
-      stats[l.crm_label].total++;
-      if (l.crm_status === "success") stats[l.crm_label].success++;
-      if (l.crm_status === "failed") stats[l.crm_label].failed++;
-    });
-    return stats;
-  }, [leads]);
 
   if (loading) {
     return <div className="flex items-center justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
@@ -497,25 +480,6 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
           </Button>
         </div>
       </div>
-
-      {/* CRM Stats Summary */}
-      {Object.keys(crmStats).length > 0 && (
-        <Card>
-          <CardContent className="py-3">
-            <p className="text-xs font-semibold text-foreground mb-2">CRM Delivery Summary</p>
-            <div className="flex flex-wrap gap-3">
-              {Object.entries(crmStats).map(([label, s]) => (
-                <div key={label} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-1.5">
-                  <span className="text-xs font-medium">{label}</span>
-                  <Badge variant="secondary" className="text-[10px]">{s.total} total</Badge>
-                  <Badge className="bg-green-500/10 text-green-700 border-green-300 text-[10px]">{s.success} ✓</Badge>
-                  {s.failed > 0 && <Badge variant="destructive" className="text-[10px]">{s.failed} ✗</Badge>}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Selection Actions Bar */}
       {selectedIds.size > 0 && (
@@ -776,7 +740,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </a>
                               ) : "-"}
                             </TableCell>
-                            <TableCell className="py-1.5">{crmBadge(lead.crm_status, lead.crm_label)}</TableCell>
+                            <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
