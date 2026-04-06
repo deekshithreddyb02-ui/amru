@@ -98,6 +98,28 @@ const CrmSettingsEditor = () => {
     load();
   }, []);
 
+  // Fetch lead counts per CRM label
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("contact_messages")
+          .select("crm_label, crm_status");
+        if (error || !data) return;
+        const counts: Record<string, { total: number; success: number; failed: number }> = {};
+        for (const row of data) {
+          const label = row.crm_label || "Unknown";
+          if (!counts[label]) counts[label] = { total: 0, success: 0, failed: 0 };
+          counts[label].total++;
+          if (row.crm_status === "success") counts[label].success++;
+          else if (row.crm_status === "failed") counts[label].failed++;
+        }
+        setLeadCounts(counts);
+      } catch { /* ignore */ }
+    };
+    fetchCounts();
+  }, []);
+
   const updateCrm = (index: number, patch: Partial<CrmConfig>) => {
     setCrms((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
   };
