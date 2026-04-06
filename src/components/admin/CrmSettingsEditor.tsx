@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Save, ExternalLink, Hash } from "lucide-react";
+import { Loader2, Save, ExternalLink, Hash, ShieldCheck, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 
 interface CrmConfig {
   label: string;
@@ -51,6 +51,8 @@ const CrmSettingsEditor = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [leadCounts, setLeadCounts] = useState<Record<string, { total: number; success: number; failed: number }>>({});
+  const [recaptchaKey, setRecaptchaKey] = useState("");
+  const [savingRecaptcha, setSavingRecaptcha] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -91,6 +93,17 @@ const CrmSettingsEditor = () => {
             };
             setCrms(migrated);
           }
+        }
+
+        // Load reCAPTCHA key
+        const { data: recaptchaData } = await (supabase as any)
+          .from("site_settings")
+          .select("value")
+          .eq("key", "recaptcha_site_key")
+          .maybeSingle();
+        if (recaptchaData?.value) {
+          if (typeof recaptchaData.value === "string") setRecaptchaKey(recaptchaData.value);
+          else if (recaptchaData.value.key) setRecaptchaKey(recaptchaData.value.key);
         }
       } catch { /* defaults */ }
       setLoading(false);
@@ -154,93 +167,201 @@ const CrmSettingsEditor = () => {
     }
   };
 
+  const handleSaveRecaptcha = async () => {
+    setSavingRecaptcha(true);
+    try {
+      const { data: existing } = await (supabase as any)
+        .from("site_settings")
+        .select("id")
+        .eq("key", "recaptcha_site_key")
+        .maybeSingle();
+
+      const value = recaptchaKey.trim() || "";
+      if (existing) {
+        const { error } = await (supabase as any)
+          .from("site_settings")
+          .update({ value, updated_at: new Date().toISOString() })
+          .eq("key", "recaptcha_site_key");
+        if (error) throw error;
+      } else {
+        const { error } = await (supabase as any)
+          .from("site_settings")
+          .insert({ key: "recaptcha_site_key", value });
+        if (error) throw error;
+      }
+      toast({ title: "Success", description: "reCAPTCHA key saved" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSavingRecaptcha(false);
+    }
+  };
+
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <ExternalLink className="w-5 h-5 text-primary" />
-          CRM Integration Settings (State-wise)
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
-          Each CRM slot is mapped to a state. When a user submits the enquiry form, the form is routed to the CRM matching their detected state (via GPS). If the matched CRM is disabled or not configured, the submission goes to the <strong>"Others"</strong> CRM as fallback.
-        </p>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ExternalLink className="w-5 h-5 text-primary" />
+            CRM Integration Settings (State-wise)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Each CRM slot is mapped to a state. When a user submits the enquiry form, the form is routed to the CRM matching their detected state (via GPS). If the matched CRM is disabled or not configured, the submission goes to the <strong>"Others"</strong> CRM as fallback.
+          </p>
 
-        <Card className="bg-muted/30 border-border/50">
-          <CardContent className="pt-4 space-y-3">
-            <p className="text-xs font-semibold text-foreground">Lead Routing Control</p>
-            <p className="text-[10px] text-muted-foreground">Choose where enquiry submissions are sent. You can enable both, one, or neither.</p>
-            <div className="flex items-center gap-3">
-              <Switch checked={routing.store_in_db} onCheckedChange={(v) => setRouting((r) => ({ ...r, store_in_db: v }))} />
-              <Label className="text-sm">Save leads in database (visible in Admin Leads)</Label>
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={routing.send_to_crm} onCheckedChange={(v) => setRouting((r) => ({ ...r, send_to_crm: v }))} />
-              <Label className="text-sm">Send leads to CRM (Vtiger web form)</Label>
-            </div>
-            {!routing.store_in_db && !routing.send_to_crm && (
-              <p className="text-[11px] text-destructive font-medium">⚠ Both options are disabled — enquiry submissions will be silently discarded.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Accordion type="multiple" className="space-y-2">
-          {crms.map((crm, i) => (
-            <AccordionItem key={i} value={`crm-${i}`} className="border rounded-lg px-4">
-              <AccordionTrigger className="py-3 hover:no-underline">
-                <div className="flex items-center gap-3 w-full">
-                  <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${crm.enabled ? "bg-green-500" : "bg-muted-foreground/30"}`} />
-                  <span className="font-medium text-sm">{crm.label}</span>
-                  <span className="text-[10px] text-muted-foreground ml-1">({crm.state_key})</span>
-                  {crm.enabled && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-auto mr-4">Active</span>}
+          {/* Lead Counter Summary */}
+          {Object.keys(leadCounts).length > 0 && (
+            <Card className="bg-muted/30 border-border/50">
+              <CardContent className="pt-4 space-y-2">
+                <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-primary" /> CRM Lead Delivery Counter
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {Object.entries(leadCounts).map(([label, counts]) => (
+                    <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/60 border border-border/30">
+                      <Hash className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{label}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                            Total: {counts.total}
+                          </Badge>
+                          <span className="flex items-center gap-0.5 text-[10px] text-green-600">
+                            <CheckCircle className="w-3 h-3" /> {counts.success}
+                          </span>
+                          <span className="flex items-center gap-0.5 text-[10px] text-destructive">
+                            <XCircle className="w-3 h-3" /> {counts.failed}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-3 pb-4">
-                <div className="flex items-center gap-3">
-                  <Switch checked={crm.enabled} onCheckedChange={(v) => updateCrm(i, { enabled: v })} />
-                  <Label className="text-sm">Enable this CRM</Label>
-                </div>
+              </CardContent>
+            </Card>
+          )}
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Display Label</Label>
-                  <Input value={crm.label} onChange={(e) => updateCrm(i, { label: e.target.value })} placeholder="e.g. Telangana CRM" />
-                  <p className="text-[10px] text-muted-foreground">Display name only. State routing uses the fixed state key: <code>{crm.state_key}</code></p>
-                </div>
+          <Card className="bg-muted/30 border-border/50">
+            <CardContent className="pt-4 space-y-3">
+              <p className="text-xs font-semibold text-foreground">Lead Routing Control</p>
+              <p className="text-[10px] text-muted-foreground">Choose where enquiry submissions are sent. You can enable both, one, or neither.</p>
+              <div className="flex items-center gap-3">
+                <Switch checked={routing.store_in_db} onCheckedChange={(v) => setRouting((r) => ({ ...r, store_in_db: v }))} />
+                <Label className="text-sm">Save leads in database (visible in Admin Leads)</Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch checked={routing.send_to_crm} onCheckedChange={(v) => setRouting((r) => ({ ...r, send_to_crm: v }))} />
+                <Label className="text-sm">Send leads to CRM (Vtiger web form)</Label>
+              </div>
+              {!routing.store_in_db && !routing.send_to_crm && (
+                <p className="text-[11px] text-destructive font-medium">⚠ Both options are disabled — enquiry submissions will be silently discarded.</p>
+              )}
+            </CardContent>
+          </Card>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">CRM Web Form URL</Label>
-                  <Input value={crm.crm_url} onChange={(e) => updateCrm(i, { crm_url: e.target.value })} placeholder="https://..." />
-                  <p className="text-[10px] text-muted-foreground">The Vtiger capture.php endpoint</p>
-                </div>
+          <Accordion type="multiple" className="space-y-2">
+            {crms.map((crm, i) => {
+              const crmLeadData = leadCounts[crm.label];
+              return (
+                <AccordionItem key={i} value={`crm-${i}`} className="border rounded-lg px-4">
+                  <AccordionTrigger className="py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 w-full">
+                      <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${crm.enabled ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                      <span className="font-medium text-sm">{crm.label}</span>
+                      <span className="text-[10px] text-muted-foreground ml-1">({crm.state_key})</span>
+                      {crmLeadData && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1 gap-1">
+                          <Hash className="w-2.5 h-2.5" /> {crmLeadData.total}
+                        </Badge>
+                      )}
+                      {crm.enabled && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-auto mr-4">Active</span>}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 pb-4">
+                    {crmLeadData && (
+                      <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20 border border-border/30">
+                        <span className="text-xs text-muted-foreground">Leads:</span>
+                        <Badge variant="secondary" className="text-[10px]">Total: {crmLeadData.total}</Badge>
+                        <span className="flex items-center gap-0.5 text-[10px] text-green-600"><CheckCircle className="w-3 h-3" /> {crmLeadData.success}</span>
+                        <span className="flex items-center gap-0.5 text-[10px] text-destructive"><XCircle className="w-3 h-3" /> {crmLeadData.failed}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <Switch checked={crm.enabled} onCheckedChange={(v) => updateCrm(i, { enabled: v })} />
+                      <Label className="text-sm">Enable this CRM</Label>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Display Label</Label>
+                      <Input value={crm.label} onChange={(e) => updateCrm(i, { label: e.target.value })} placeholder="e.g. Telangana CRM" />
+                      <p className="text-[10px] text-muted-foreground">Display name only. State routing uses the fixed state key: <code>{crm.state_key}</code></p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">CRM Web Form URL</Label>
+                      <Input value={crm.crm_url} onChange={(e) => updateCrm(i, { crm_url: e.target.value })} placeholder="https://..." />
+                      <p className="text-[10px] text-muted-foreground">The Vtiger capture.php endpoint</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Web Form Token (__vtrftk)</Label>
+                      <Input value={crm.token} onChange={(e) => updateCrm(i, { token: e.target.value })} placeholder="sid:..." />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Public ID</Label>
+                      <Input value={crm.public_id} onChange={(e) => updateCrm(i, { public_id: e.target.value })} placeholder="85432a..." />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Form Name</Label>
+                      <Input value={crm.form_name} onChange={(e) => updateCrm(i, { form_name: e.target.value })} placeholder="Enquiry Form: ..." />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Web Form Token (__vtrftk)</Label>
-                  <Input value={crm.token} onChange={(e) => updateCrm(i, { token: e.target.value })} placeholder="sid:..." />
-                </div>
+          <Button onClick={handleSave} disabled={saving} className="gap-2 w-full">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save All CRM Settings
+          </Button>
+        </CardContent>
+      </Card>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Public ID</Label>
-                  <Input value={crm.public_id} onChange={(e) => updateCrm(i, { public_id: e.target.value })} placeholder="85432a..." />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Form Name</Label>
-                  <Input value={crm.form_name} onChange={(e) => updateCrm(i, { form_name: e.target.value })} placeholder="Enquiry Form: ..." />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-
-        <Button onClick={handleSave} disabled={saving} className="gap-2 w-full">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Save All CRM Settings
-        </Button>
-      </CardContent>
-    </Card>
+      {/* reCAPTCHA Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-primary" />
+            reCAPTCHA Security Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Add your Google reCAPTCHA v2 site key to enable CAPTCHA verification on the enquiry form. Leave empty to disable reCAPTCHA.
+          </p>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">reCAPTCHA Site Key</Label>
+            <Input
+              value={recaptchaKey}
+              onChange={(e) => setRecaptchaKey(e.target.value)}
+              placeholder="6LcXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Get your site key from{" "}
+              <a href="https://www.google.com/recaptcha/admin" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                Google reCAPTCHA Admin Console
+              </a>
+            </p>
+          </div>
+          <Button onClick={handleSaveRecaptcha} disabled={savingRecaptcha} variant="outline" className="gap-2 w-full">
+            {savingRecaptcha ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save reCAPTCHA Key
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
