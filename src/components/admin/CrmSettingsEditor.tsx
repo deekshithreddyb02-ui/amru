@@ -50,6 +50,7 @@ const CrmSettingsEditor = () => {
   const [routing, setRouting] = useState<LeadRouting>({ store_in_db: true, send_to_crm: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [leadCounts, setLeadCounts] = useState<Record<string, { total: number; success: number; failed: number }>>({});
 
   useEffect(() => {
     const load = async () => {
