@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Save, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Save, ExternalLink, Hash } from "lucide-react";
 
 interface CrmConfig {
   label: string;
