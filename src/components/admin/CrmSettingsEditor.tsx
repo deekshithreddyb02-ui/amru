@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Save, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Save, ExternalLink, Hash } from "lucide-react";
 
 interface CrmConfig {
   label: string;
@@ -49,6 +50,7 @@ const CrmSettingsEditor = () => {
   const [routing, setRouting] = useState<LeadRouting>({ store_in_db: true, send_to_crm: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [leadCounts, setLeadCounts] = useState<Record<string, { total: number; success: number; failed: number }>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -94,6 +96,28 @@ const CrmSettingsEditor = () => {
       setLoading(false);
     };
     load();
+  }, []);
+
+  // Fetch lead counts per CRM label
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("contact_messages")
+          .select("crm_label, crm_status");
+        if (error || !data) return;
+        const counts: Record<string, { total: number; success: number; failed: number }> = {};
+        for (const row of data) {
+          const label = row.crm_label || "Unknown";
+          if (!counts[label]) counts[label] = { total: 0, success: 0, failed: 0 };
+          counts[label].total++;
+          if (row.crm_status === "success") counts[label].success++;
+          else if (row.crm_status === "failed") counts[label].failed++;
+        }
+        setLeadCounts(counts);
+      } catch { /* ignore */ }
+    };
+    fetchCounts();
   }, []);
 
   const updateCrm = (index: number, patch: Partial<CrmConfig>) => {
