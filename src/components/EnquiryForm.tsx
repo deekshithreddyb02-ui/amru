@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,6 +94,40 @@ const stagger = {
   })
 };
 
+// Load reCAPTCHA script once
+let recaptchaScriptLoaded = false;
+function loadRecaptchaScript(siteKey: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (recaptchaScriptLoaded && (window as any).grecaptcha) {
+      resolve();
+      return;
+    }
+    const existing = document.querySelector('script[src*="recaptcha"]');
+    if (existing) {
+      // Wait for it to load
+      const check = setInterval(() => {
+        if ((window as any).grecaptcha?.render) {
+          clearInterval(check);
+          recaptchaScriptLoaded = true;
+          resolve();
+        }
+      }, 100);
+      setTimeout(() => { clearInterval(check); reject(new Error("reCAPTCHA load timeout")); }, 10000);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit`;
+    script.async = true;
+    script.defer = true;
+    (window as any).onRecaptchaLoad = () => {
+      recaptchaScriptLoaded = true;
+      resolve();
+    };
+    script.onerror = () => reject(new Error("Failed to load reCAPTCHA"));
+    document.head.appendChild(script);
+  });
+}
+
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastName, setLastName] = useState("");
@@ -123,6 +157,54 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   // Area conversion
   const [areaUnit, setAreaUnit] = useState<AreaUnit>("sqft");
   const [areaValue, setAreaValue] = useState("");
+
+  // reCAPTCHA
+  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const recaptchaRef = useRef<HTMLDivElement>(null);
+  const recaptchaWidgetId = useRef<number | null>(null);
+
+  // Fetch reCAPTCHA site key from CRM settings
+  useEffect(() => {
+    const fetchCrmConfig = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("crm-urls");
+        if (!error && data?.recaptcha_site_key) {
+          setRecaptchaSiteKey(data.recaptcha_site_key);
+        }
+      } catch { /* no reCAPTCHA */ }
+    };
+    fetchCrmConfig();
+  }, []);
+
+  // Initialize reCAPTCHA widget when site key is available
+  useEffect(() => {
+    if (!recaptchaSiteKey || !recaptchaRef.current) return;
+    
+    let mounted = true;
+    loadRecaptchaScript(recaptchaSiteKey).then(() => {
+      if (!mounted || !recaptchaRef.current) return;
+      const grecaptcha = (window as any).grecaptcha;
+      if (!grecaptcha?.render) return;
+      
+      // Clear any previous widget
+      if (recaptchaRef.current) recaptchaRef.current.innerHTML = '';
+      
+      try {
+        recaptchaWidgetId.current = grecaptcha.render(recaptchaRef.current, {
+          sitekey: recaptchaSiteKey,
+          callback: (token: string) => setRecaptchaToken(token),
+          'expired-callback': () => setRecaptchaToken(""),
+          theme: 'light',
+          size: 'normal',
+        });
+      } catch (e) {
+        console.error("reCAPTCHA render error:", e);
+      }
+    }).catch(console.error);
+    
+    return () => { mounted = false; };
+  }, [recaptchaSiteKey]);
 
   const converted = useMemo(() => {
     const num = parseFloat(areaValue);
@@ -199,7 +281,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             const country = a.country || "";
             setDetectedCountry(country);
 
-            // Build mailing street: road, neighbourhood, suburb, district, state, country
             const streetParts = [a.road, a.neighbourhood, a.suburb, a.state_district || a.county, a.state, country].filter(Boolean);
             setMailingStreet(streetParts.join(", "));
             setMailingCity(a.city || a.town || a.village || a.county || "");
@@ -213,7 +294,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             if (state.includes("andhra")) setBizArea("AndhraPradesh");else
             setBizArea("Others");
 
-            // Auto-fill country code for phone
             const countryLower = country.toLowerCase();
             const code = COUNTRY_CODES[countryLower];
             if (code && !whatsapp) {
@@ -239,30 +319,40 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       toast.error("Please fill in all required fields.");
       return;
     }
+
+    // Validate reCAPTCHA if enabled
+    if (recaptchaSiteKey && !recaptchaToken) {
+      toast.error("Please complete the reCAPTCHA verification.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // CRM tokens are handled server-side by the edge function
+      // Use logical field names — the edge function maps them to per-CRM field IDs
       const formData: Record<string, string> = {
         urlencodeenable: "1",
         lastname: lastName,
-        cf_1044: expectedClose,
-        cf_1022: whatsapp,
-        cf_990: bizArea,
-        cf_998: distance,
-        cf_994: serviceNeeded,
-        cf_1014: numScans,
-        cf_1002: areaType,
-        cf_1006: totalAreaText,
-        cf_1020: "",
+        expected_close: expectedClose,
+        whatsapp: whatsapp,
+        biz_area: bizArea,
+        distance: distance,
+        service_needed: serviceNeeded,
+        num_scans: numScans,
+        area_type: areaType,
+        total_area: totalAreaText,
+        biz_cost: "",
         description: description,
-        mailingstreet: mailingStreet,
-        mailingcity: mailingCity,
-        mailingpobox: mailingPoBox
+        mailing_street: mailingStreet,
+        mailing_city: mailingCity,
+        mailing_pincode: mailingPoBox,
       };
 
-      // Submit to edge function which handles both DB save and CRM routing based on admin settings
-      // Generate a valid placeholder email from WhatsApp number for DB storage
+      // Include reCAPTCHA token if available
+      if (recaptchaToken) {
+        formData['g-recaptcha-response'] = recaptchaToken;
+      }
+
       const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
       const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
 
@@ -303,6 +393,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       toast.error("Could not submit enquiry. Please try again after sometime.");
     } finally {
       setIsSubmitting(false);
+      // Reset reCAPTCHA
+      if (recaptchaWidgetId.current !== null && (window as any).grecaptcha) {
+        try { (window as any).grecaptcha.reset(recaptchaWidgetId.current); } catch {}
+      }
+      setRecaptchaToken("");
     }
   };
 
@@ -334,7 +429,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <Label className={labelCls}><Calendar className="h-3.5 w-3.5 text-primary" /> Expected Close Date <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Calendar className={fieldIcon} />
-            <Input name="cf_1044" type="date" required value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
+            <Input name="expected_close" type="date" required value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
           </div>
         </motion.div>
 
@@ -343,7 +438,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <Label className={labelCls}><Phone className="h-3.5 w-3.5 text-primary" /> WhatsApp Number <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Phone className={fieldIcon} />
-            <Input name="cf_1022" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
+            <Input name="whatsapp" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
           </div>
         </motion.div>
 
@@ -510,12 +605,19 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
         </motion.div>
 
+        {/* reCAPTCHA */}
+        {recaptchaSiteKey && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="flex justify-center py-2">
+            <div ref={recaptchaRef} />
+          </motion.div>
+        )}
+
         {/* Submit */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="pt-1">
           <Button
             type="submit"
             className="w-full gap-2.5 h-12 font-bold text-sm relative overflow-hidden bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 rounded-xl"
-            disabled={isSubmitting}>
+            disabled={isSubmitting || (!!recaptchaSiteKey && !recaptchaToken)}>
             
             {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Send className="w-4 h-4" /> Submit Enquiry</>}
           </Button>
