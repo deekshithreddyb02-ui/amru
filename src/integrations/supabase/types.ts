@@ -71,6 +71,7 @@ export type Database = {
           biz_area: string | null
           country: string | null
           created_at: string
+          crm_label: string | null
           crm_status: string | null
           distance: string | null
           email: string
@@ -96,6 +97,7 @@ export type Database = {
           biz_area?: string | null
           country?: string | null
           created_at?: string
+          crm_label?: string | null
           crm_status?: string | null
           distance?: string | null
           email: string
@@ -121,6 +123,7 @@ export type Database = {
           biz_area?: string | null
           country?: string | null
           created_at?: string
+          crm_label?: string | null
           crm_status?: string | null
           distance?: string | null
           email?: string
