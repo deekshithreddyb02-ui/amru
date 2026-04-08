@@ -37,6 +37,7 @@ import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
+import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
 
 interface User {
   id: string;
@@ -449,6 +450,7 @@ const Admin = () => {
                   <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-1">
                     {[
                       { key: "page-layout", label: "Layout", icon: LayoutList },
+                      { key: "site-stats", label: "Stats", icon: BarChart3 },
                       { key: "hero", label: "Hero", icon: Sparkles },
                       { key: "about", label: "About", icon: Info },
                       { key: "whyus", label: "Why Us", icon: HelpCircle },
@@ -485,6 +487,7 @@ const Admin = () => {
                         <CustomSectionEditor />
                       </div>
                     )}
+                    {modifySection === "site-stats" && <SiteStatsEditor />}
                     {modifySection === "hero" && <HeroEditor />}
                     {modifySection === "about" && <AboutEditor />}
                     {modifySection === "whyus" && <WhyUsEditor />}
