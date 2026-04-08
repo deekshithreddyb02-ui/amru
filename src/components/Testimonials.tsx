@@ -64,7 +64,7 @@ const Testimonials = () => {
             ))}
           </div>
           <h2 className="section-heading text-white mb-2">What Our Clients Say</h2>
-          <p className="text-white/50 text-sm mb-12">Trusted by 1000+ clients across India</p>
+          <p className="text-white/50 text-sm mb-12">Trusted by {projectsCompleted} clients across India</p>
         </motion.div>
 
         <div className="relative h-[280px] md:h-[250px] flex items-center justify-center touch-pan-y overflow-hidden">
