@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import ServiceCard from "./ServiceCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useNoMotion } from "@/hooks/useNoMotion";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 interface Service {
   id: string; title: string; description: string; detailed_description: string | null; image: string; link: string | null;
@@ -40,6 +41,7 @@ const Services = () => {
   const [allServices, setAllServices] = useState<Service[]>([]);
   const device = useDeviceType();
   const noMotion = useNoMotion();
+  const { yearsExperience } = useAboutStats();
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
@@ -65,7 +67,7 @@ const Services = () => {
           <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Our Services</h2>
           <p className="section-subheading">
-            Comprehensive water management and environmental consulting solutions backed by 35 years of expertise.
+            Comprehensive water management and environmental consulting solutions backed by {yearsExperience} years of expertise.
           </p>
         </motion.div>
 
