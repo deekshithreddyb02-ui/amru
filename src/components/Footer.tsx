@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { MapPin, Globe, Mail, Phone, Droplets } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-optimized.webp";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 interface QuickLink { label: string; url: string; emoji: string; }
 interface FooterData {
@@ -36,6 +37,7 @@ const defaultFooter: FooterData = {
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const { yearsExperience } = useAboutStats();
   const [footer, setFooter] = useState<FooterData>(defaultFooter);
 
   useEffect(() => {
@@ -60,7 +62,7 @@ const Footer = () => {
                 Amruta Integrated Water Solutions Pvt. Ltd.
               </span>
             </div>
-            <p className="text-white/60 text-sm mb-3 leading-relaxed">{footer.description}</p>
+            <p className="text-white/60 text-sm mb-3 leading-relaxed">{footer.description.replace(/\d+\+?\s*years/, `${yearsExperience} years`)}</p>
             <p className="text-white/40 text-sm italic mb-5">{footer.tagline_quote}</p>
             <div className="space-y-3 text-sm">
               <div>
