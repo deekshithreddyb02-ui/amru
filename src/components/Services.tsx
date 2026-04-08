@@ -67,7 +67,7 @@ const Services = () => {
           <div className="gold-accent mx-auto mb-6" />
           <h2 className="section-heading mb-4">Our Services</h2>
           <p className="section-subheading">
-            Comprehensive water management and environmental consulting solutions backed by 35 years of expertise.
+            Comprehensive water management and environmental consulting solutions backed by {yearsExperience} years of expertise.
           </p>
         </motion.div>
 
