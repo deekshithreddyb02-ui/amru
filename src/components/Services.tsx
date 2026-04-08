@@ -41,6 +41,7 @@ const Services = () => {
   const [allServices, setAllServices] = useState<Service[]>([]);
   const device = useDeviceType();
   const noMotion = useNoMotion();
+  const { yearsExperience } = useAboutStats();
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {

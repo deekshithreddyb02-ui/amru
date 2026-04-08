@@ -25,6 +25,7 @@ const Testimonials = () => {
   const [direction, setDirection] = useState(1);
   const [testimonials, setTestimonials] = useState(fallbackTestimonials);
   const noMotion = useNoMotion();
+  const { projectsCompleted } = useAboutStats();
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
