@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import ServiceCard from "./ServiceCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useNoMotion } from "@/hooks/useNoMotion";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 interface Service {
   id: string; title: string; description: string; detailed_description: string | null; image: string; link: string | null;
