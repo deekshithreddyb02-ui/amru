@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutList, BarChart3, Sparkles, Info, HelpCircle, MessageSquareQuote,
   Wrench, Image, Navigation, MapPin, PanelBottom, Scale, Phone,
-  ExternalLink, ChevronRight, Settings, Globe, Layers, Shield,
+  ExternalLink, ChevronRight, Settings, Globe, Layers, Shield, Palette,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +24,7 @@ import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
+import BrandingEditor from "@/components/admin/BrandingEditor";
 
 interface SettingsItem {
   key: string;
@@ -43,6 +44,7 @@ const settingsGroups: SettingsGroup[] = [
     title: "Page Structure",
     icon: Layers,
     items: [
+      { key: "branding", label: "Branding & Assets", icon: Palette, description: "Logos, favicon & brand identity" },
       { key: "page-layout", label: "Page Layout", icon: LayoutList, description: "Section ordering & custom sections" },
       { key: "site-stats", label: "Site Statistics", icon: BarChart3, description: "Centralized metrics across all pages" },
       { key: "navbar", label: "Navigation Bar", icon: Navigation, description: "Menu items, logo & nav styling" },
@@ -83,7 +85,7 @@ const settingsGroups: SettingsGroup[] = [
 const allItems = settingsGroups.flatMap(g => g.items);
 
 const SettingsModule = () => {
-  const [activeKey, setActiveKey] = useState("page-layout");
+  const [activeKey, setActiveKey] = useState("branding");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const activeItem = allItems.find(i => i.key === activeKey);
@@ -182,6 +184,7 @@ const SettingsModule = () => {
 
         {/* Content body */}
         <div className="p-6">
+          {activeKey === "branding" && <BrandingEditor />}
           {activeKey === "page-layout" && (
             <div className="space-y-8">
               <SectionOrderEditor />
