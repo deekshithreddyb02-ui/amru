@@ -38,6 +38,7 @@ import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
+import SettingsModule from "@/components/admin/SettingsModule";
 
 interface User {
   id: string;
