@@ -55,7 +55,6 @@ const Admin = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [userSearch, setUserSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
-  const [modifySection, setModifySection] = useState("hero");
   const [userTab, setUserTab] = useState("active");
   const [messageTab, setMessageTab] = useState("all");
   const [messageSearch, setMessageSearch] = useState("");
