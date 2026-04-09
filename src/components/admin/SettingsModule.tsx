@@ -85,7 +85,7 @@ const settingsGroups: SettingsGroup[] = [
 const allItems = settingsGroups.flatMap(g => g.items);
 
 const SettingsModule = () => {
-  const [activeKey, setActiveKey] = useState("page-layout");
+  const [activeKey, setActiveKey] = useState("branding");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const activeItem = allItems.find(i => i.key === activeKey);
