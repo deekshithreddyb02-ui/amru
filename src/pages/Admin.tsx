@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, LayoutList, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone, ExternalLink } from "lucide-react";
+import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Home, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,25 +19,9 @@ import {
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
-import ServiceEditor from "@/components/admin/ServiceEditor";
-import GalleryEditor from "@/components/admin/GalleryEditor";
-import NavbarEditor from "@/components/admin/NavbarEditor";
-import OfficeEditor from "@/components/admin/OfficeEditor";
-import FooterEditor from "@/components/admin/FooterEditor";
-import HeroEditor from "@/components/admin/HeroEditor";
-import AboutEditor from "@/components/admin/AboutEditor";
-import WhyUsEditor from "@/components/admin/WhyUsEditor";
-import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
-import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
-import ContactEditor from "@/components/admin/ContactEditor";
-import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
-import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
-import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
-import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
-import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
-import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
+import SettingsModule from "@/components/admin/SettingsModule";
 
 interface User {
   id: string;
@@ -71,7 +55,6 @@ const Admin = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [userSearch, setUserSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
-  const [modifySection, setModifySection] = useState("hero");
   const [userTab, setUserTab] = useState("active");
   const [messageTab, setMessageTab] = useState("all");
   const [messageSearch, setMessageSearch] = useState("");
@@ -444,71 +427,7 @@ const Admin = () => {
             </TabsContent>
 
             <TabsContent value="modify">
-              <div className="space-y-6">
-                {/* Two-row grid tabs like reference */}
-                <div className="p-2 bg-primary/5 border border-primary/10 rounded-xl space-y-1">
-                  <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-1">
-                    {[
-                      { key: "page-layout", label: "Layout", icon: LayoutList },
-                      { key: "site-stats", label: "Stats", icon: BarChart3 },
-                      { key: "hero", label: "Hero", icon: Sparkles },
-                      { key: "about", label: "About", icon: Info },
-                      { key: "whyus", label: "Why Us", icon: HelpCircle },
-                      { key: "testimonials", label: "Reviews", icon: MessageSquareQuote },
-                      { key: "services", label: "Services", icon: Wrench },
-                      { key: "feedback", label: "Feedback", icon: BarChart3 },
-                      { key: "gallery", label: "Gallery", icon: Image },
-                      { key: "navbar", label: "Navbar", icon: Navigation },
-                      { key: "offices", label: "Offices", icon: MapPin },
-                      { key: "contacts", label: "Contacts", icon: Phone },
-                      { key: "footer", label: "Footer", icon: PanelBottom },
-                      { key: "legal", label: "Legal", icon: Scale },
-                      { key: "crm", label: "CRM", icon: ExternalLink },
-                    ].map(({ key, label, icon: Icon }) => (
-                      <Button
-                        key={key}
-                        variant={modifySection === key ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setModifySection(key)}
-                        className={`rounded-lg gap-1 justify-center text-[11px] md:text-xs lg:text-sm px-1 md:px-2 py-2 h-auto min-w-0 ${modifySection === key ? "shadow-md" : ""}`}
-                      >
-                        <Icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <Card>
-                  <CardContent className="pt-6">
-                    {modifySection === "page-layout" && (
-                      <div className="space-y-8">
-                        <SectionOrderEditor />
-                        <CustomSectionEditor />
-                      </div>
-                    )}
-                    {modifySection === "site-stats" && <SiteStatsEditor />}
-                    {modifySection === "hero" && <HeroEditor />}
-                    {modifySection === "about" && <AboutEditor />}
-                    {modifySection === "whyus" && <WhyUsEditor />}
-                    {modifySection === "testimonials" && <TestimonialsEditor />}
-                    {modifySection === "services" && <ServiceEditor />}
-                    {modifySection === "gallery" && <GalleryEditor />}
-                    {modifySection === "feedback" && <FeedbackEditor />}
-                    {modifySection === "navbar" && <NavbarEditor />}
-                    {modifySection === "offices" && <OfficeEditor />}
-                    {modifySection === "contacts" && <ContactEditor />}
-                    {modifySection === "footer" && <FooterEditor />}
-                    {modifySection === "legal" && <LegalNoticeEditor />}
-                    {modifySection === "crm" && (
-                      <div className="space-y-6">
-                        <CrmSettingsEditor />
-                        <CrmPingDashboard />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              <SettingsModule />
             </TabsContent>
 
             <TabsContent value="users">
