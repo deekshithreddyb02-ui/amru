@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutList, BarChart3, Sparkles, Info, HelpCircle, MessageSquareQuote,
   Wrench, Image, Navigation, MapPin, PanelBottom, Scale, Phone,
-  ExternalLink, ChevronRight, Settings, Globe, Layers, Shield,
+  ExternalLink, ChevronRight, Settings, Globe, Layers, Shield, Palette,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +24,7 @@ import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
+import BrandingEditor from "@/components/admin/BrandingEditor";
 
 interface SettingsItem {
   key: string;

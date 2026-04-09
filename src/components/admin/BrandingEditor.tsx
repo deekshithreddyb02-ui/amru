@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import {
   Loader2, Save, Upload, Trash2, Info, Image as ImageIcon,
-  Monitor, Smartphone, Moon, Sun, Globe, RotateCcw, CheckCircle2,
+  Monitor, Smartphone, Moon, Sun, Globe, CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
 import defaultLogo from "@/assets/logo-small.webp";
