@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, FileText, LogOut, Trash2, Eye, EyeOff, Home, LayoutDashboard, LayoutList, Wrench, Image, Navigation, MapPin, PanelBottom, Search, Sparkles, Info, HelpCircle, MessageSquareQuote, Scale, Filter, Download, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, Calendar, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, Phone, ExternalLink } from "lucide-react";
+import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Home, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,25 +19,8 @@ import {
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
-import ServiceEditor from "@/components/admin/ServiceEditor";
-import GalleryEditor from "@/components/admin/GalleryEditor";
-import NavbarEditor from "@/components/admin/NavbarEditor";
-import OfficeEditor from "@/components/admin/OfficeEditor";
-import FooterEditor from "@/components/admin/FooterEditor";
-import HeroEditor from "@/components/admin/HeroEditor";
-import AboutEditor from "@/components/admin/AboutEditor";
-import WhyUsEditor from "@/components/admin/WhyUsEditor";
-import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
-import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
-import ContactEditor from "@/components/admin/ContactEditor";
-import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
-import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
-import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
-import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
-import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
-import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
 import SettingsModule from "@/components/admin/SettingsModule";
 
 interface User {
