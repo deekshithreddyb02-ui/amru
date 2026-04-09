@@ -184,6 +184,7 @@ const SettingsModule = () => {
 
         {/* Content body */}
         <div className="p-6">
+          {activeKey === "branding" && <BrandingEditor />}
           {activeKey === "page-layout" && (
             <div className="space-y-8">
               <SectionOrderEditor />
