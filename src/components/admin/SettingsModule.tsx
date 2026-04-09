@@ -44,6 +44,7 @@ const settingsGroups: SettingsGroup[] = [
     title: "Page Structure",
     icon: Layers,
     items: [
+      { key: "branding", label: "Branding & Assets", icon: Palette, description: "Logos, favicon & brand identity" },
       { key: "page-layout", label: "Page Layout", icon: LayoutList, description: "Section ordering & custom sections" },
       { key: "site-stats", label: "Site Statistics", icon: BarChart3, description: "Centralized metrics across all pages" },
       { key: "navbar", label: "Navigation Bar", icon: Navigation, description: "Menu items, logo & nav styling" },
