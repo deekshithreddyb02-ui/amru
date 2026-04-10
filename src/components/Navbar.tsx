@@ -136,11 +136,6 @@ const Navbar = () => {
                 {externalLink.name}
               </a>
             )}
-            {isAdmin && (
-              <a href="/admin" className={`${pillCls} text-white border border-white/10`} style={{ background: 'hsl(var(--secondary) / 0.2)' }}>
-                <Shield className="w-3.5 h-3.5" /> Admin
-              </a>
-            )}
             {user ? (
               <button onClick={handleLogout} className={`${pillCls} bg-white/10 text-white hover:bg-white/20 border border-white/10`}>
                 <LogOut className="w-3.5 h-3.5" /> Logout
@@ -179,13 +174,6 @@ const Navbar = () => {
                 <a href={externalLink.url} target="_blank" rel="noopener noreferrer"
                   className="bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-medium text-center border border-white/10">
                   {externalLink.name}
-                </a>
-              )}
-              {isAdmin && (
-                <a href="/admin" onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white border border-white/10"
-                  style={{ background: 'hsl(var(--secondary) / 0.2)' }}>
-                  <Shield className="w-4 h-4" /> Admin
                 </a>
               )}
               {user ? (
