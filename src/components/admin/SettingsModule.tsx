@@ -91,11 +91,11 @@ const SettingsModule = () => {
   const activeItem = allItems.find(i => i.key === activeKey);
 
   return (
-    <div className="flex gap-0 min-h-[600px] border border-border rounded-xl overflow-hidden bg-card">
+    <div className="flex h-[calc(100vh-10rem)] border border-border rounded-xl overflow-hidden bg-card">
       {/* Sidebar */}
       <aside
         className={cn(
-          "border-r border-border bg-muted/30 shrink-0 transition-all duration-300 overflow-y-auto",
+          "border-r border-border bg-muted/30 shrink-0 transition-all duration-300 flex flex-col",
           sidebarCollapsed ? "w-14" : "w-64"
         )}
       >
@@ -120,7 +120,7 @@ const SettingsModule = () => {
         </div>
 
         {/* Groups */}
-        <nav className="py-2">
+        <nav className="py-2 flex-1 overflow-y-auto">
           {settingsGroups.map((group) => (
             <div key={group.title} className="mb-1">
               {!sidebarCollapsed && (
@@ -168,7 +168,7 @@ const SettingsModule = () => {
       </aside>
 
       {/* Content area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto min-h-0">
         {/* Content header */}
         <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4">
           <div className="flex items-center gap-3">
