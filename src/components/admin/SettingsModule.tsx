@@ -25,6 +25,7 @@ import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
 import BrandingEditor from "@/components/admin/BrandingEditor";
+import LoginSecurityEditor from "@/components/admin/LoginSecurityEditor";
 
 interface SettingsItem {
   key: string;
