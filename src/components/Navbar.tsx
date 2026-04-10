@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Menu, X, LogIn, LogOut, Shield } from "lucide-react";
+import { Menu, X, LogIn, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { useAdmin } from "@/hooks/useAdmin";
+
 import { useSiteContent } from "@/hooks/useSiteContent";
 import defaultLogo from "@/assets/logo-small.webp";
 
@@ -23,7 +23,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const { isAdmin } = useAdmin();
+  
   const { data: navbarContent } = useSiteContent("navbar");
   const navigate = useNavigate();
   const clickTimestamps = useRef<number[]>([]);
