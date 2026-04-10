@@ -25,6 +25,7 @@ import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
 import BrandingEditor from "@/components/admin/BrandingEditor";
+import LoginSecurityEditor from "@/components/admin/LoginSecurityEditor";
 
 interface SettingsItem {
   key: string;
@@ -77,6 +78,7 @@ const settingsGroups: SettingsGroup[] = [
     icon: Shield,
     items: [
       { key: "crm", label: "CRM Settings", icon: ExternalLink, description: "CRM routing, ping & status" },
+      { key: "login-security", label: "Login Security", icon: Shield, description: "Login attempt limits & lockout" },
       { key: "legal", label: "Legal Notice", icon: Scale, description: "Terms, privacy & disclaimers" },
     ],
   },
@@ -210,6 +212,7 @@ const SettingsModule = () => {
               <CrmPingDashboard />
             </div>
           )}
+          {activeKey === "login-security" && <LoginSecurityEditor />}
         </div>
       </main>
     </div>

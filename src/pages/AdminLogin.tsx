@@ -34,9 +34,32 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
+      // Check if login is allowed (attempt limit)
+      const checkRes = await supabase.functions.invoke("check-login", {
+        body: { email: email.trim().toLowerCase() },
+      });
+
+      if (checkRes.error) throw checkRes.error;
+
+      if (!checkRes.data?.allowed) {
+        toast({
+          title: "Account Temporarily Blocked",
+          description: `Too many failed attempts. Please try again later. (${checkRes.data?.max_attempts} max attempts per hour)`,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) throw error;
+      if (error) {
+        // Record failed attempt
+        await supabase.functions.invoke("record-login-attempt", {
+          body: { email: email.trim().toLowerCase(), success: false },
+        });
+        throw error;
+      }
 
       // Check if user is admin
       const { data: roleData, error: roleError } = await supabase
@@ -55,6 +78,11 @@ const AdminLogin = () => {
         });
         return;
       }
+
+      // Clear failed attempts on successful admin login
+      await supabase.functions.invoke("record-login-attempt", {
+        body: { email: email.trim().toLowerCase(), success: true },
+      });
 
       toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
       navigate("/admin");
