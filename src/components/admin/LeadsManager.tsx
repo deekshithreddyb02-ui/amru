@@ -461,7 +461,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-[calc(100vh-10rem)]">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -562,10 +562,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       )}
 
       {/* Desktop/Tablet: sidebar layout wrapper */}
-      <div className={isMobile ? "space-y-4" : "flex flex-row gap-4"}>
+      <div className={isMobile ? "flex-1 overflow-y-auto space-y-4" : "flex flex-row gap-4 flex-1 min-h-0"}>
         {/* Desktop sidebar */}
         {!isMobile && (
-          <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0">
+          <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0 overflow-y-auto">
             {COUNTRY_TABS.map((t) => (
               <Button key={t} variant={countryTab === t ? "default" : "outline"} size="sm" onClick={() => { setCountryTab(t); setTab("All"); }} className="gap-1.5 justify-start">
                 {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
@@ -586,7 +586,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="flex-1 min-w-0 overflow-y-auto space-y-4">
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
