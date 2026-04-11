@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Home, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import defaultLogo from "@/assets/logo-small.webp";
 
 interface BrandingMeta {
