@@ -384,17 +384,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Tabs defaultValue="leads">
-        <header className="bg-primary text-primary-foreground shadow-lg">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
-                <Home className="w-4 h-4 mr-2" />
-                Home
-              </Button>
-              <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
 
       <main className="container mx-auto px-4 py-8">
         <motion.div
