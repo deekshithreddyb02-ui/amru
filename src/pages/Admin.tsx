@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Home, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
+import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
 import {
   Select,
   SelectContent,
