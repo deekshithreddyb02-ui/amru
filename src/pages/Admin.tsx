@@ -22,6 +22,7 @@ import { motion } from "framer-motion";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
 import SettingsModule from "@/components/admin/SettingsModule";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 interface User {
   id: string;
