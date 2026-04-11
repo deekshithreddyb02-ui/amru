@@ -65,10 +65,6 @@ const AdminHeader = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
-            <Home className="w-4 h-4 mr-1.5" />
-            <span className="hidden sm:inline">Home</span>
-          </Button>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10">
             <LogOut className="w-4 h-4 mr-1.5" />
             <span className="hidden sm:inline">Logout</span>
