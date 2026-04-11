@@ -87,7 +87,7 @@ const Hero = () => {
             {...m({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.3 } })}
             className="text-lg md:text-xl text-white/70 max-w-2xl mb-8 leading-relaxed"
           >
-            Comprehensive water management, environmental consulting & sustainable solutions backed by 35+ years of expertise.
+            Comprehensive water management, environmental consulting & sustainable solutions backed by {yearsExperience} years of expertise.
           </motion.p>
 
           {/* Services grid */}
