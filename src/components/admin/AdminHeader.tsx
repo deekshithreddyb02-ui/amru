@@ -44,7 +44,7 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="bg-primary text-primary-foreground shadow-lg">
+    <header className="bg-primary text-primary-foreground shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
