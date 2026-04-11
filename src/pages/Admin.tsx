@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Home, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
+import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -22,6 +22,7 @@ import { motion } from "framer-motion";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
 import SettingsModule from "@/components/admin/SettingsModule";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 interface User {
   id: string;
@@ -383,17 +384,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Tabs defaultValue="leads">
-        <header className="bg-primary text-primary-foreground shadow-lg">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="secondary" size="sm" onClick={() => navigate("/")}>
-                <Home className="w-4 h-4 mr-2" />
-                Home
-              </Button>
-              <h1 className="text-xl font-serif font-semibold">Admin Dashboard</h1>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
 
       <main className="container mx-auto px-4 py-8">
         <motion.div
