@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound } from "lucide-react";
+import { Loader2, Users, Mail, Trash2, Eye, EyeOff, Search, Settings, RefreshCw, UserCheck, UserX, BarChart3, ShieldCheck, Trash, CheckCircle2, XCircle, MailCheck, UserCog, KeyRound, ClipboardList } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,7 @@ import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import LeadsManager from "@/components/admin/LeadsManager";
 import SettingsModule from "@/components/admin/SettingsModule";
 import AdminHeader from "@/components/admin/AdminHeader";
+import EmployeeManager from "@/components/admin/EmployeeManager";
 
 interface User {
   id: string;
@@ -406,6 +407,10 @@ const Admin = () => {
                 <BarChart3 className="w-4 h-4 shrink-0" />
                 <span className="truncate">Analytics</span>
               </TabsTrigger>
+              <TabsTrigger value="employees" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
+                <ClipboardList className="w-4 h-4 shrink-0" />
+                <span className="truncate">Employees</span>
+              </TabsTrigger>
               <TabsTrigger value="modify" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
                 <Settings className="w-4 h-4 shrink-0" />
                 <span className="truncate">Settings</span>
@@ -419,6 +424,10 @@ const Admin = () => {
 
             <TabsContent value="modify">
               <SettingsModule />
+            </TabsContent>
+
+            <TabsContent value="employees">
+              <EmployeeManager />
             </TabsContent>
 
             <TabsContent value="users">
