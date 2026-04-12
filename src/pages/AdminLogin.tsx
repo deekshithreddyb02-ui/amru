@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, Loader2 } from "lucide-react";
-import { useAdmin } from "@/hooks/useAdmin";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -16,13 +16,19 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAdmin, loading: adminLoading } = useAdmin();
+  const { role, loading: roleLoading, mustChangePassword, isAdmin, isEmployee } = useUserRole();
 
   useEffect(() => {
-    if (!adminLoading && isAdmin) {
-      navigate("/admin");
+    if (!roleLoading) {
+      if (mustChangePassword) {
+        navigate("/change-password");
+      } else if (isAdmin) {
+        navigate("/admin");
+      } else if (isEmployee) {
+        navigate("/employee");
+      }
     }
-  }, [isAdmin, adminLoading, navigate]);
+  }, [role, roleLoading, mustChangePassword, navigate, isAdmin, isEmployee]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,31 +67,48 @@ const AdminLogin = () => {
         throw error;
       }
 
-      // Check if user is admin
+      // Check user role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', data.user.id)
-        .eq('role', 'admin')
         .maybeSingle();
 
-      if (roleError || !roleData) {
+      if (roleError || !roleData || (roleData.role !== 'admin' && roleData.role !== 'employee')) {
         await supabase.auth.signOut();
         toast({ 
           title: "Access Denied", 
-          description: "You don't have admin privileges", 
+          description: "You don't have admin or employee privileges", 
           variant: "destructive" 
         });
         return;
       }
 
-      // Clear failed attempts on successful admin login
+      // Clear failed attempts on successful login
       await supabase.functions.invoke("record-login-attempt", {
         body: { email: email.trim().toLowerCase(), success: true },
       });
 
-      toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
-      navigate("/admin");
+      // Check if must change password
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('must_change_password')
+        .eq('user_id', data.user.id)
+        .maybeSingle();
+
+      if (profile?.must_change_password) {
+        toast({ title: "Password Change Required", description: "Please set a new password." });
+        navigate("/change-password");
+        return;
+      }
+
+      if (roleData.role === 'admin') {
+        toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
+        navigate("/admin");
+      } else {
+        toast({ title: "Welcome!", description: "Redirecting to employee dashboard..." });
+        navigate("/employee");
+      }
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
@@ -93,7 +116,7 @@ const AdminLogin = () => {
     }
   };
 
-  if (adminLoading) {
+  if (roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -150,7 +173,7 @@ const AdminLogin = () => {
                     Signing in...
                   </>
                 ) : (
-                  "Sign In as Admin"
+                  "Sign In"
                 )}
               </Button>
             </form>

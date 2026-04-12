@@ -298,6 +298,48 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_tasks: {
+        Row: {
+          assigned_by: string
+          assigned_to: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          priority: Database["public"]["Enums"]["task_priority"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          assigned_to: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          assigned_to?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           caption: string | null
@@ -409,6 +451,7 @@ export type Database = {
           full_name: string
           id: string
           is_approved: boolean
+          must_change_password: boolean
           phone: string | null
           updated_at: string
           user_id: string
@@ -418,6 +461,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_approved?: boolean
+          must_change_password?: boolean
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -427,6 +471,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_approved?: boolean
+          must_change_password?: boolean
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -728,7 +773,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "employee"
       booking_status:
         | "pending"
         | "confirmed"
@@ -742,6 +787,8 @@ export type Database = {
         | "report_generated"
         | "work_started"
         | "completed"
+      task_priority: "low" | "medium" | "high" | "urgent"
+      task_status: "pending" | "in_progress" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -869,7 +916,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "employee"],
       booking_status: [
         "pending",
         "confirmed",
@@ -885,6 +932,8 @@ export const Constants = {
         "work_started",
         "completed",
       ],
+      task_priority: ["low", "medium", "high", "urgent"],
+      task_status: ["pending", "in_progress", "completed", "cancelled"],
     },
   },
 } as const
