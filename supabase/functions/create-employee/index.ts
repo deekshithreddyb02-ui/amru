@@ -45,10 +45,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, phone, temp_password } = await req.json();
+    const { email, full_name, phone, temp_password, username } = await req.json();
 
-    if (!email || !temp_password || !full_name) {
-      return new Response(JSON.stringify({ error: "Email, full name, and temporary password are required" }), {
+    if (!email || !temp_password || !full_name || !username) {
+      return new Response(JSON.stringify({ error: "Email, full name, username, and temporary password are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -56,6 +56,15 @@ Deno.serve(async (req) => {
 
     if (temp_password.length < 8) {
       return new Response(JSON.stringify({ error: "Password must be at least 8 characters" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check username uniqueness
+    const { data: existingUser } = await adminClient.from("profiles").select("id").eq("username", username.trim().toLowerCase()).maybeSingle();
+    if (existingUser) {
+      return new Response(JSON.stringify({ error: "Username already taken" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -84,10 +93,10 @@ Deno.serve(async (req) => {
       .update({ role: "employee" })
       .eq("user_id", newUser.user.id);
 
-    // Set must_change_password flag
+    // Set must_change_password flag and username
     await adminClient
       .from("profiles")
-      .update({ must_change_password: true })
+      .update({ must_change_password: true, username: username.trim().toLowerCase() })
       .eq("user_id", newUser.user.id);
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), {
