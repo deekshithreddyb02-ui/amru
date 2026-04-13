@@ -45,6 +45,7 @@ const EmployeeManager = () => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [newTempPassword, setNewTempPassword] = useState("");
+  const [newUsername, setNewUsername] = useState("");
 
   // Create task form
   const [showTaskDialog, setShowTaskDialog] = useState(false);
@@ -109,25 +110,26 @@ const EmployeeManager = () => {
   };
 
   const createEmployee = async () => {
-    if (!newEmail || !newName || !newTempPassword) {
-      toast({ title: "Error", description: "Fill in all required fields", variant: "destructive" });
+    if (!newEmail || !newName || !newTempPassword || !newUsername) {
+      toast({ title: "Error", description: "Fill in all required fields (including username)", variant: "destructive" });
       return;
     }
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-employee", {
-        body: { email: newEmail, full_name: newName, phone: newPhone, temp_password: newTempPassword },
+        body: { email: newEmail, full_name: newName, phone: newPhone, temp_password: newTempPassword, username: newUsername },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Employee Created", description: `${newName} can now log in with the temporary password.` });
+      toast({ title: "Employee Created", description: `${newName} can now log in with username "${newUsername}".` });
       setShowCreateDialog(false);
       setNewEmail("");
       setNewName("");
       setNewPhone("");
       setNewTempPassword("");
+      setNewUsername("");
       fetchData();
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
@@ -252,10 +254,11 @@ const EmployeeManager = () => {
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Full Name *" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                <Input placeholder="Username *" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
                 <Input type="email" placeholder="Email *" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
                 <Input placeholder="Phone (optional)" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
                 <Input type="password" placeholder="Temporary Password * (min 8 chars)" value={newTempPassword} onChange={(e) => setNewTempPassword(e.target.value)} />
-                <p className="text-xs text-muted-foreground">Employee will be forced to change this password on first login.</p>
+                <p className="text-xs text-muted-foreground">Employee will log in with their username and must change password on first login.</p>
                 <Button onClick={createEmployee} disabled={creating} className="w-full">
                   {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
                   Create Account
