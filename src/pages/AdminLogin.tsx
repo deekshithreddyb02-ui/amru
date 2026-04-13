@@ -114,7 +114,7 @@ const AdminLogin = () => {
         return;
       }
 
-      if (roleData.role === 'admin') {
+      if (isAdminRole) {
         toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
         navigate("/admin");
       } else {
