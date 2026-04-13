@@ -77,14 +77,17 @@ const AdminLogin = () => {
         throw error;
       }
 
-      // Check user role
-      const { data: roleData, error: roleError } = await supabase
+      // Check user role - fetch all roles since user may have multiple
+      const { data: rolesData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', data.user.id)
-        .maybeSingle();
+        .eq('user_id', data.user.id);
 
-      if (roleError || !roleData || (roleData.role !== 'admin' && roleData.role !== 'employee')) {
+      const roles = (rolesData || []).map(r => r.role);
+      const isAdminRole = roles.includes('admin');
+      const isEmployeeRole = roles.includes('employee');
+
+      if (roleError || (!isAdminRole && !isEmployeeRole)) {
         await supabase.auth.signOut();
         toast({ 
           title: "Access Denied", 
