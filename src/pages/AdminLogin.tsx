@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Loader2 } from "lucide-react";
+import { Shield, User, Lock, Loader2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -33,16 +33,27 @@ const AdminLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email.trim() || !password) {
+    if (!username.trim() || !password) {
       toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
       return;
     }
 
     setLoading(true);
     try {
+      // Look up email by username
+      const { data: email, error: lookupError } = await supabase.rpc("get_email_by_username", {
+        _username: username.trim().toLowerCase(),
+      });
+
+      if (lookupError || !email) {
+        toast({ title: "Error", description: "Invalid username or password", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       // Check if login is allowed (attempt limit)
       const checkRes = await supabase.functions.invoke("check-login", {
-        body: { email: email.trim().toLowerCase() },
+        body: { email },
       });
 
       if (checkRes.error) throw checkRes.error;
@@ -60,9 +71,8 @@ const AdminLogin = () => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        // Record failed attempt
         await supabase.functions.invoke("record-login-attempt", {
-          body: { email: email.trim().toLowerCase(), success: false },
+          body: { email, success: false },
         });
         throw error;
       }
@@ -84,9 +94,8 @@ const AdminLogin = () => {
         return;
       }
 
-      // Clear failed attempts on successful login
       await supabase.functions.invoke("record-login-attempt", {
-        body: { email: email.trim().toLowerCase(), success: true },
+        body: { email, success: true },
       });
 
       // Check if must change password
@@ -140,17 +149,17 @@ const AdminLogin = () => {
               </div>
             </div>
             <CardTitle className="text-2xl font-serif text-primary">Admin Login</CardTitle>
-            <CardDescription>Enter your admin credentials to access the dashboard</CardDescription>
+            <CardDescription>Enter your username and password to access the dashboard</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  type="email"
-                  placeholder="Admin email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="pl-10"
                   disabled={loading}
                 />
