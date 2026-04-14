@@ -114,11 +114,50 @@ const EmployeeManager = () => {
 
       if (taskError) throw taskError;
       setTasks((taskData || []) as Task[]);
+
+      // Fetch region assignments
+      const { data: regionData } = await supabase
+        .from("lead_region_assignments")
+        .select("*");
+      setRegionAssignments((regionData || []) as RegionAssignment[]);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const saveRegionAssignment = async (biz_area: string, employeeId: string | null) => {
+    setSavingRegion(true);
+    try {
+      if (!employeeId) {
+        // Remove assignment
+        await supabase.from("lead_region_assignments").delete().eq("biz_area", biz_area);
+        setRegionAssignments(prev => prev.filter(r => r.biz_area !== biz_area));
+      } else {
+        // Upsert assignment
+        const { data, error } = await supabase
+          .from("lead_region_assignments")
+          .upsert({ biz_area, employee_id: employeeId } as any, { onConflict: "biz_area" })
+          .select()
+          .single();
+        if (error) throw error;
+        setRegionAssignments(prev => {
+          const filtered = prev.filter(r => r.biz_area !== biz_area);
+          return [...filtered, data as RegionAssignment];
+        });
+      }
+      toast({ title: "Region Assignment Updated" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSavingRegion(false);
+    }
+  };
+
+  const getRegionEmployee = (biz_area: string) => {
+    const assignment = regionAssignments.find(r => r.biz_area === biz_area);
+    return assignment?.employee_id || "";
   };
 
   const createEmployee = async () => {
