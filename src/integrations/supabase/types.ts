@@ -70,6 +70,7 @@ export type Database = {
           area_value: string | null
           assigned_to: string | null
           biz_area: string | null
+          biz_cost: string | null
           country: string | null
           created_at: string
           crm_label: string | null
@@ -77,17 +78,21 @@ export type Database = {
           distance: string | null
           email: string
           expected_close: string | null
+          firstname: string | null
           id: string
           is_read: boolean | null
           latitude: string | null
           longitude: string | null
           mailing_city: string | null
           mailing_pincode: string | null
+          mailing_state: string | null
           mailing_street: string | null
           message: string
+          mobile_phone: string | null
           name: string
           num_scans: string | null
           phone: string | null
+          primary_phone: string | null
           service: string | null
           service_needed: string | null
           whatsapp: string | null
@@ -97,6 +102,7 @@ export type Database = {
           area_value?: string | null
           assigned_to?: string | null
           biz_area?: string | null
+          biz_cost?: string | null
           country?: string | null
           created_at?: string
           crm_label?: string | null
@@ -104,17 +110,21 @@ export type Database = {
           distance?: string | null
           email: string
           expected_close?: string | null
+          firstname?: string | null
           id?: string
           is_read?: boolean | null
           latitude?: string | null
           longitude?: string | null
           mailing_city?: string | null
           mailing_pincode?: string | null
+          mailing_state?: string | null
           mailing_street?: string | null
           message: string
+          mobile_phone?: string | null
           name: string
           num_scans?: string | null
           phone?: string | null
+          primary_phone?: string | null
           service?: string | null
           service_needed?: string | null
           whatsapp?: string | null
@@ -124,6 +134,7 @@ export type Database = {
           area_value?: string | null
           assigned_to?: string | null
           biz_area?: string | null
+          biz_cost?: string | null
           country?: string | null
           created_at?: string
           crm_label?: string | null
@@ -131,17 +142,21 @@ export type Database = {
           distance?: string | null
           email?: string
           expected_close?: string | null
+          firstname?: string | null
           id?: string
           is_read?: boolean | null
           latitude?: string | null
           longitude?: string | null
           mailing_city?: string | null
           mailing_pincode?: string | null
+          mailing_state?: string | null
           mailing_street?: string | null
           message?: string
+          mobile_phone?: string | null
           name?: string
           num_scans?: string | null
           phone?: string | null
+          primary_phone?: string | null
           service?: string | null
           service_needed?: string | null
           whatsapp?: string | null
