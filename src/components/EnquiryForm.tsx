@@ -94,36 +94,41 @@ const stagger = {
   })
 };
 
-// Load reCAPTCHA script once
-let recaptchaScriptLoaded = false;
-function loadRecaptchaScript(siteKey: string): Promise<void> {
+// Load Cloudflare Turnstile script once
+let turnstileScriptLoaded = false;
+function loadTurnstileScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (recaptchaScriptLoaded && (window as any).grecaptcha) {
+    if (turnstileScriptLoaded && (window as any).turnstile) {
       resolve();
       return;
     }
-    const existing = document.querySelector('script[src*="recaptcha"]');
+    const existing = document.querySelector('script[src*="turnstile"]');
     if (existing) {
-      // Wait for it to load
       const check = setInterval(() => {
-        if ((window as any).grecaptcha?.render) {
+        if ((window as any).turnstile?.render) {
           clearInterval(check);
-          recaptchaScriptLoaded = true;
+          turnstileScriptLoaded = true;
           resolve();
         }
       }, 100);
-      setTimeout(() => { clearInterval(check); reject(new Error("reCAPTCHA load timeout")); }, 10000);
+      setTimeout(() => { clearInterval(check); reject(new Error("Turnstile load timeout")); }, 10000);
       return;
     }
     const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit`;
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
     script.async = true;
     script.defer = true;
-    (window as any).onRecaptchaLoad = () => {
-      recaptchaScriptLoaded = true;
-      resolve();
+    script.onload = () => {
+      const check = setInterval(() => {
+        if ((window as any).turnstile?.render) {
+          clearInterval(check);
+          turnstileScriptLoaded = true;
+          resolve();
+        }
+      }, 50);
+      setTimeout(() => { clearInterval(check); reject(new Error("Turnstile init timeout")); }, 5000);
     };
-    script.onerror = () => reject(new Error("Failed to load reCAPTCHA"));
+    script.onerror = () => reject(new Error("Failed to load Turnstile"));
     document.head.appendChild(script);
   });
 }
@@ -158,53 +163,64 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [areaUnit, setAreaUnit] = useState<AreaUnit>("sqft");
   const [areaValue, setAreaValue] = useState("");
 
-  // reCAPTCHA
-  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState("");
-  const [recaptchaToken, setRecaptchaToken] = useState("");
-  const recaptchaRef = useRef<HTMLDivElement>(null);
-  const recaptchaWidgetId = useRef<number | null>(null);
+  // Cloudflare Turnstile
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
 
-  // Fetch reCAPTCHA site key from CRM settings
+  // Fetch Turnstile site key from CRM settings
   useEffect(() => {
     const fetchCrmConfig = async () => {
       try {
         const { data, error } = await supabase.functions.invoke("crm-urls");
-        if (!error && data?.recaptcha_site_key) {
-          setRecaptchaSiteKey(data.recaptcha_site_key);
+        if (!error) {
+          // Support both turnstile and legacy recaptcha key
+          const key = data?.turnstile_site_key || data?.recaptcha_site_key;
+          if (key) setTurnstileSiteKey(key);
         }
-      } catch { /* no reCAPTCHA */ }
+      } catch { /* no CAPTCHA */ }
     };
     fetchCrmConfig();
   }, []);
 
-  // Initialize reCAPTCHA widget when site key is available
+  // Initialize Turnstile widget when site key is available
   useEffect(() => {
-    if (!recaptchaSiteKey || !recaptchaRef.current) return;
+    if (!turnstileSiteKey || !turnstileRef.current) return;
     
     let mounted = true;
-    loadRecaptchaScript(recaptchaSiteKey).then(() => {
-      if (!mounted || !recaptchaRef.current) return;
-      const grecaptcha = (window as any).grecaptcha;
-      if (!grecaptcha?.render) return;
+    loadTurnstileScript().then(() => {
+      if (!mounted || !turnstileRef.current) return;
+      const turnstile = (window as any).turnstile;
+      if (!turnstile?.render) return;
       
-      // Clear any previous widget
-      if (recaptchaRef.current) recaptchaRef.current.innerHTML = '';
+      // Remove previous widget
+      if (turnstileWidgetId.current) {
+        try { turnstile.remove(turnstileWidgetId.current); } catch {}
+      }
+      turnstileRef.current.innerHTML = '';
       
       try {
-        recaptchaWidgetId.current = grecaptcha.render(recaptchaRef.current, {
-          sitekey: recaptchaSiteKey,
-          callback: (token: string) => setRecaptchaToken(token),
-          'expired-callback': () => setRecaptchaToken(""),
+        turnstileWidgetId.current = turnstile.render(turnstileRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token: string) => setCaptchaToken(token),
+          'expired-callback': () => setCaptchaToken(""),
+          'error-callback': () => setCaptchaToken(""),
           theme: 'light',
           size: 'normal',
         });
       } catch (e) {
-        console.error("reCAPTCHA render error:", e);
+        console.error("Turnstile render error:", e);
       }
     }).catch(console.error);
     
-    return () => { mounted = false; };
-  }, [recaptchaSiteKey]);
+    return () => {
+      mounted = false;
+      if (turnstileWidgetId.current) {
+        try { (window as any).turnstile?.remove(turnstileWidgetId.current); } catch {}
+      }
+    };
+  }, [turnstileSiteKey]);
 
   const converted = useMemo(() => {
     const num = parseFloat(areaValue);
@@ -320,9 +336,9 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       return;
     }
 
-    // Validate reCAPTCHA if enabled
-    if (recaptchaSiteKey && !recaptchaToken) {
-      toast.error("Please complete the reCAPTCHA verification.");
+    // Validate CAPTCHA if enabled
+    if (turnstileSiteKey && !captchaToken) {
+      toast.error("Please complete the verification.");
       return;
     }
 
@@ -348,9 +364,9 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         mailing_pincode: mailingPoBox,
       };
 
-      // Include reCAPTCHA token if available
-      if (recaptchaToken) {
-        formData['g-recaptcha-response'] = recaptchaToken;
+      // Include Turnstile token if available
+      if (captchaToken) {
+        formData['cf-turnstile-response'] = captchaToken;
       }
 
       const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
@@ -393,11 +409,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       toast.error("Could not submit enquiry. Please try again after sometime.");
     } finally {
       setIsSubmitting(false);
-      // Reset reCAPTCHA
-      if (recaptchaWidgetId.current !== null && (window as any).grecaptcha) {
-        try { (window as any).grecaptcha.reset(recaptchaWidgetId.current); } catch {}
+      // Reset Turnstile
+      if (turnstileWidgetId.current && (window as any).turnstile) {
+        try { (window as any).turnstile.reset(turnstileWidgetId.current); } catch {}
       }
-      setRecaptchaToken("");
+      setCaptchaToken("");
     }
   };
 
@@ -605,10 +621,15 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
         </motion.div>
 
-        {/* reCAPTCHA */}
-        {recaptchaSiteKey && (
-          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="flex justify-center py-2">
-            <div ref={recaptchaRef} />
+        {/* Cloudflare Turnstile CAPTCHA */}
+        {turnstileSiteKey && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-2">
+            <div className="flex justify-center py-2">
+              <div ref={turnstileRef} />
+            </div>
+            {!captchaToken && (
+              <p className="text-[11px] text-destructive text-center font-medium">Please complete verification</p>
+            )}
           </motion.div>
         )}
 
@@ -617,7 +638,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <Button
             type="submit"
             className="w-full gap-2.5 h-12 font-bold text-sm relative overflow-hidden bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 rounded-xl"
-            disabled={isSubmitting || (!!recaptchaSiteKey && !recaptchaToken)}>
+            disabled={isSubmitting || (!!turnstileSiteKey && !captchaToken)}>
             
             {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Send className="w-4 h-4" /> Submit Enquiry</>}
           </Button>
