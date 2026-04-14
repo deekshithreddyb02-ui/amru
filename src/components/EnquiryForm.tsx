@@ -142,8 +142,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     return d.toISOString().split("T")[0];
   });
   const [whatsapp, setWhatsapp] = useState("");
-  const [primaryPhone, setPrimaryPhone] = useState("");
-  const [mobilePhone, setMobilePhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [bizArea, setBizArea] = useState("Telangana");
   const [distance, setDistance] = useState("0-30 KM");
   const [serviceNeeded, setServiceNeeded] = useState(() => {
@@ -152,7 +151,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   });
   const [numScans, setNumScans] = useState("1");
   const [areaType, setAreaType] = useState("OPEN PLOT");
-  const [bizCost, setBizCost] = useState("");
+  
   const [description, setDescription] = useState("");
   const [mailingStreet, setMailingStreet] = useState("");
   const [mailingCity, setMailingCity] = useState("");
