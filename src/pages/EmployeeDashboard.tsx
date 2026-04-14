@@ -104,6 +104,18 @@ const EmployeeDashboard = () => {
     }
   };
 
+  const fetchAssignedLeads = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("contact_messages")
+        .select("id, name, email, phone, service, message, created_at, biz_area, country, mailing_city, crm_status, whatsapp")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setAssignedLeads((data || []) as AssignedLead[]);
+    } catch (error: any) {
+      console.error("Error fetching leads:", error);
+    }
+
   const updateTaskStatus = async (taskId: string, newStatus: string) => {
     try {
       const { error } = await supabase
