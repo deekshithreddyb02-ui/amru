@@ -65,6 +65,8 @@ const EmployeeDashboard = () => {
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
   const [taskNotes, setTaskNotes] = useState<Record<string, string>>({});
   const [savingNotes, setSavingNotes] = useState<string | null>(null);
+  const [assignedLeads, setAssignedLeads] = useState<AssignedLead[]>([]);
+  const [activeTab, setActiveTab] = useState<"tasks" | "leads">("tasks");
 
   useEffect(() => {
     if (!roleLoading) {
