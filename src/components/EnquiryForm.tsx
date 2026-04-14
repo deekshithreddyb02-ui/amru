@@ -452,12 +452,21 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         onSubmit={(e) => {e.preventDefault();handleSubmit();}}>
         
 
-        {/* Name */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><User className="h-3.5 w-3.5 text-primary" /> Name <span className="text-destructive">*</span></Label>
-          <div className="relative">
-            <User className={fieldIcon} />
-            <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Your full name" className={inputCls} />
+        {/* First Name & Last Name */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> First Name</Label>
+            <div className="relative">
+              <User className={fieldIcon} />
+              <Input name="firstname" maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className={inputCls} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> Last Name <span className="text-destructive">*</span></Label>
+            <div className="relative">
+              <User className={fieldIcon} />
+              <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" className={inputCls} />
+            </div>
           </div>
         </motion.div>
 
@@ -476,6 +485,24 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <div className="relative">
             <Phone className={fieldIcon} />
             <Input name="whatsapp" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
+          </div>
+        </motion.div>
+
+        {/* Primary Phone & Mobile Phone */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Primary Phone</Label>
+            <div className="relative">
+              <Phone className={fieldIcon} />
+              <Input name="primary_phone" maxLength={15} value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary phone" className={inputCls} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Mobile Phone</Label>
+            <div className="relative">
+              <Phone className={fieldIcon} />
+              <Input name="mobile_phone" maxLength={15} value={mobilePhone} onChange={(e) => setMobilePhone(e.target.value)} placeholder="Mobile phone" className={inputCls} />
+            </div>
           </div>
         </motion.div>
 
