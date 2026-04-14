@@ -253,14 +253,17 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   // Auto-fill description from fields above
   const autoDescription = useMemo(() => {
     const parts: string[] = [];
-    if (lastName) parts.push(`Name: ${lastName}`);
+    if (firstName || lastName) parts.push(`Name: ${firstName} ${lastName}`.trim());
     if (whatsapp) parts.push(`WhatsApp: ${whatsapp}`);
+    if (primaryPhone) parts.push(`Primary Phone: ${primaryPhone}`);
+    if (mobilePhone) parts.push(`Mobile: ${mobilePhone}`);
     parts.push(`Service: ${serviceNeeded}`);
     parts.push(`Area Type: ${areaType}`);
     if (converted) {
       parts.push(`Area: ${areaValue} ${AREA_UNITS.find((u) => u.value === areaUnit)?.label}`);
       parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
     }
+    if (bizCost) parts.push(`BIZ Cost: ${bizCost}`);
     parts.push(`BIZ Area: ${bizArea}`);
     parts.push(`Distance: ${distance}`);
     parts.push(`Scans: ${numScans}`);
@@ -270,10 +273,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     }
     if (mailingStreet) parts.push(`Street: ${mailingStreet}`);
     if (mailingCity) parts.push(`City: ${mailingCity}`);
+    if (mailingState) parts.push(`State: ${mailingState}`);
     if (mailingPoBox) parts.push(`PIN: ${mailingPoBox}`);
     if (detectedCountry) parts.push(`Country: ${detectedCountry}`);
     return parts.join("\n");
-  }, [lastName, whatsapp, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingPoBox, detectedCountry]);
+  }, [firstName, lastName, whatsapp, primaryPhone, mobilePhone, serviceNeeded, areaType, areaValue, areaUnit, converted, bizCost, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry]);
 
   // Sync auto description
   useEffect(() => {
