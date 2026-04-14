@@ -791,6 +791,22 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                               ) : "-"}
                             </TableCell>
                             <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              <Select
+                                value={lead.assigned_to || "__none__"}
+                                onValueChange={(v) => assignLeadToEmployee(lead.id, v === "__none__" ? null : v)}
+                              >
+                                <SelectTrigger className="h-7 text-xs w-[120px]">
+                                  <SelectValue placeholder="Unassigned" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__none__">Unassigned</SelectItem>
+                                  {employees.map(emp => (
+                                    <SelectItem key={emp.user_id} value={emp.user_id}>{emp.full_name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
