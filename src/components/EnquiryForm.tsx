@@ -249,31 +249,31 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     navigator.clipboard.writeText(text).then(() => toast.success(`${label} copied!`)).catch(() => toast.error("Copy failed"));
   };
 
-  // Auto-fill description from fields above
+  // Auto-fill description as a single readable sentence for CRM
   const autoDescription = useMemo(() => {
-    const parts: string[] = [];
-    if (firstName || lastName) parts.push(`Name: ${firstName} ${lastName}`.trim());
-    if (whatsapp) parts.push(`WhatsApp: ${whatsapp}`);
-    if (phoneNumber) parts.push(`Phone: ${phoneNumber}`);
-    parts.push(`Service: ${serviceNeeded}`);
-    parts.push(`Area Type: ${areaType}`);
-    if (converted) {
-      parts.push(`Area: ${areaValue} ${AREA_UNITS.find((u) => u.value === areaUnit)?.label}`);
-      parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
-    }
-    parts.push(`BIZ Area: ${bizArea}`);
-    parts.push(`Distance: ${distance}`);
-    parts.push(`Scans: ${numScans}`);
-    if (coords) {
-      parts.push(`GPS: ${coords.lat}, ${coords.lng}`);
-      parts.push(`Maps: https://www.google.com/maps?q=${coords.lat},${coords.lng}`);
-    }
-    if (mailingStreet) parts.push(`Street: ${mailingStreet}`);
-    if (mailingCity) parts.push(`City: ${mailingCity}`);
-    if (mailingState) parts.push(`State: ${mailingState}`);
-    if (mailingPoBox) parts.push(`PIN: ${mailingPoBox}`);
-    if (detectedCountry) parts.push(`Country: ${detectedCountry}`);
-    return parts.join("\n");
+    const name = `${firstName} ${lastName}`.trim();
+    const areaLabel = AREA_UNITS.find((u) => u.value === areaUnit)?.label || areaUnit;
+    const areaInfo = converted
+      ? `${areaValue} ${areaLabel} (Sq.Ft: ${converted.sqft}, Acres: ${converted.acres}, Guntas: ${converted.guntas}, Sq.Yrds: ${converted.sqyd})`
+      : "";
+    const location = [mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry].filter(Boolean).join(", ");
+    const gps = coords ? `GPS: ${coords.lat}, ${coords.lng} | Maps: https://www.google.com/maps?q=${coords.lat},${coords.lng}` : "";
+
+    const sentence = [
+      name ? `Customer ${name}` : "",
+      whatsapp ? `WhatsApp ${whatsapp}` : "",
+      phoneNumber ? `Phone ${phoneNumber}` : "",
+      `requires ${serviceNeeded} service`,
+      `in ${bizArea} region`,
+      areaType ? `for ${areaType} property` : "",
+      areaInfo ? `with total area ${areaInfo}` : "",
+      distance ? `at distance ${distance}` : "",
+      numScans ? `needing ${numScans} scan(s)` : "",
+      location ? `located at ${location}` : "",
+      gps,
+    ].filter(Boolean).join(", ") + ".";
+
+    return sentence;
   }, [firstName, lastName, whatsapp, phoneNumber, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry]);
 
   // Sync auto description
@@ -353,10 +353,14 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
     try {
       // Use logical field names — the edge function maps them to per-CRM field IDs
+      const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
+      const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
+
       const formData: Record<string, string> = {
         urlencodeenable: "1",
         firstname: firstName,
         lastname: lastName,
+        email: generatedEmail,
         expected_close: expectedClose,
         whatsapp: whatsapp,
         primary_phone: phoneNumber || whatsapp,
@@ -379,8 +383,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         formData['cf-turnstile-response'] = captchaToken;
       }
 
-      const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
-      const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
 
       const fullName = `${firstName} ${lastName}`.trim() || lastName;
 
