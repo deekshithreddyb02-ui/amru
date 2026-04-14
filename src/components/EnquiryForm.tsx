@@ -630,6 +630,14 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           }
         </motion.div>
 
+        {/* Total BIZ Cost */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+          <Label className={labelCls}><Wrench className="h-3.5 w-3.5 text-primary" /> Total BIZ Cost</Label>
+          <div className="relative">
+            <Wrench className={fieldIcon} />
+            <Input name="biz_cost" value={bizCost} onChange={(e) => setBizCost(e.target.value)} placeholder="Estimated cost" className={inputCls} />
+          </div>
+        </motion.div>
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
@@ -661,11 +669,19 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className={labelCls}><MailIcon className="h-3 w-3 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> State</Label>
             <div className="relative">
-              <MailIcon className={fieldIcon} />
-              <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
+              <MapPin className={fieldIcon} />
+              <Input name="mailingstate" value={mailingState} onChange={(e) => setMailingState(e.target.value)} placeholder="State" className={inputCls} />
             </div>
+          </div>
+        </motion.div>
+
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+          <Label className={labelCls}><MailIcon className="h-3.5 w-3.5 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+          <div className="relative">
+            <MailIcon className={fieldIcon} />
+            <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
           </div>
         </motion.div>
 
