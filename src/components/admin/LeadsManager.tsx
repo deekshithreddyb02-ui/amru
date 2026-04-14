@@ -27,6 +27,7 @@ import {
 interface Lead {
   id: string;
   name: string;
+  firstname: string | null;
   email: string;
   phone: string | null;
   service: string | null;
@@ -34,14 +35,18 @@ interface Lead {
   is_read: boolean;
   created_at: string;
   whatsapp: string | null;
+  primary_phone: string | null;
+  mobile_phone: string | null;
   biz_area: string | null;
   distance: string | null;
   service_needed: string | null;
   num_scans: string | null;
   area_type: string | null;
   area_value: string | null;
+  biz_cost: string | null;
   mailing_street: string | null;
   mailing_city: string | null;
+  mailing_state: string | null;
   mailing_pincode: string | null;
   latitude: string | null;
   longitude: string | null;
@@ -822,19 +827,23 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                             <TableRow key={`${lead.id}-detail`}>
                               <TableCell colSpan={16} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                  <div><span className="text-muted-foreground text-xs">Name:</span> <span className="font-medium">{lead.name || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">First Name:</span> <span className="font-medium">{lead.firstname || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Last Name:</span> <span className="font-medium">{lead.name || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Email:</span> <span className="font-medium">{lead.email || "-"}</span></div>
-                                  <div><span className="text-muted-foreground text-xs">Phone:</span> <span className="font-medium">{lead.phone || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">WhatsApp:</span> <span className="font-medium">{lead.whatsapp || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Primary Phone:</span> <span className="font-medium">{lead.primary_phone || lead.phone || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Mobile Phone:</span> <span className="font-medium">{lead.mobile_phone || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Service:</span> <span className="font-medium">{lead.service_needed || lead.service || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">BIZ Area:</span> <span className="font-medium">{lead.biz_area || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Distance:</span> <span className="font-medium">{lead.distance || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Scans:</span> <span className="font-medium">{lead.num_scans || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Area Type:</span> <span className="font-medium">{lead.area_type || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Area Value:</span> <span className="font-medium">{lead.area_value || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">BIZ Cost:</span> <span className="font-medium">{lead.biz_cost || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Expected Close:</span> <span className="font-medium">{lead.expected_close || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Country:</span> <span className="font-medium">{lead.country || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">City:</span> <span className="font-medium">{lead.mailing_city || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">State:</span> <span className="font-medium">{lead.mailing_state || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">PIN Code:</span> <span className="font-medium">{lead.mailing_pincode || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">CRM Status:</span> <span className="font-medium">{lead.crm_status || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">CRM Label:</span> <span className="font-medium">{lead.crm_label || "-"}</span></div>

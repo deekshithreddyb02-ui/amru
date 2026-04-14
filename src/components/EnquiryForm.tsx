@@ -135,12 +135,15 @@ function loadTurnstileScript(): Promise<void> {
 
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [expectedClose, setExpectedClose] = useState(() => {
     const d = new Date();d.setDate(d.getDate() + 7);
     return d.toISOString().split("T")[0];
   });
   const [whatsapp, setWhatsapp] = useState("");
+  const [primaryPhone, setPrimaryPhone] = useState("");
+  const [mobilePhone, setMobilePhone] = useState("");
   const [bizArea, setBizArea] = useState("Telangana");
   const [distance, setDistance] = useState("0-30 KM");
   const [serviceNeeded, setServiceNeeded] = useState(() => {
@@ -149,9 +152,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   });
   const [numScans, setNumScans] = useState("1");
   const [areaType, setAreaType] = useState("OPEN PLOT");
+  const [bizCost, setBizCost] = useState("");
   const [description, setDescription] = useState("");
   const [mailingStreet, setMailingStreet] = useState("");
   const [mailingCity, setMailingCity] = useState("");
+  const [mailingState, setMailingState] = useState("");
   const [mailingPoBox, setMailingPoBox] = useState("");
   const [detectedCountry, setDetectedCountry] = useState("");
 
@@ -248,14 +253,17 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   // Auto-fill description from fields above
   const autoDescription = useMemo(() => {
     const parts: string[] = [];
-    if (lastName) parts.push(`Name: ${lastName}`);
+    if (firstName || lastName) parts.push(`Name: ${firstName} ${lastName}`.trim());
     if (whatsapp) parts.push(`WhatsApp: ${whatsapp}`);
+    if (primaryPhone) parts.push(`Primary Phone: ${primaryPhone}`);
+    if (mobilePhone) parts.push(`Mobile: ${mobilePhone}`);
     parts.push(`Service: ${serviceNeeded}`);
     parts.push(`Area Type: ${areaType}`);
     if (converted) {
       parts.push(`Area: ${areaValue} ${AREA_UNITS.find((u) => u.value === areaUnit)?.label}`);
       parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
     }
+    if (bizCost) parts.push(`BIZ Cost: ${bizCost}`);
     parts.push(`BIZ Area: ${bizArea}`);
     parts.push(`Distance: ${distance}`);
     parts.push(`Scans: ${numScans}`);
@@ -265,10 +273,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     }
     if (mailingStreet) parts.push(`Street: ${mailingStreet}`);
     if (mailingCity) parts.push(`City: ${mailingCity}`);
+    if (mailingState) parts.push(`State: ${mailingState}`);
     if (mailingPoBox) parts.push(`PIN: ${mailingPoBox}`);
     if (detectedCountry) parts.push(`Country: ${detectedCountry}`);
     return parts.join("\n");
-  }, [lastName, whatsapp, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingPoBox, detectedCountry]);
+  }, [firstName, lastName, whatsapp, primaryPhone, mobilePhone, serviceNeeded, areaType, areaValue, areaUnit, converted, bizCost, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry]);
 
   // Sync auto description
   useEffect(() => {
@@ -300,6 +309,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             const streetParts = [a.road, a.neighbourhood, a.suburb, a.state_district || a.county, a.state, country].filter(Boolean);
             setMailingStreet(streetParts.join(", "));
             setMailingCity(a.city || a.town || a.village || a.county || "");
+            setMailingState(a.state || "");
             setMailingPoBox(a.postcode || "");
 
             // Auto-detect BIZ Area from state
@@ -348,19 +358,23 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       // Use logical field names — the edge function maps them to per-CRM field IDs
       const formData: Record<string, string> = {
         urlencodeenable: "1",
+        firstname: firstName,
         lastname: lastName,
         expected_close: expectedClose,
         whatsapp: whatsapp,
+        primary_phone: primaryPhone || whatsapp,
+        mobile_phone: mobilePhone || whatsapp,
         biz_area: bizArea,
         distance: distance,
         service_needed: serviceNeeded,
         num_scans: numScans,
         area_type: areaType,
         total_area: totalAreaText,
-        biz_cost: "",
+        biz_cost: bizCost,
         description: description,
         mailing_street: mailingStreet,
         mailing_city: mailingCity,
+        mailing_state: mailingState,
         mailing_pincode: mailingPoBox,
       };
 
@@ -372,22 +386,29 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
       const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
 
+      const fullName = `${firstName} ${lastName}`.trim() || lastName;
+
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
         body: { formData, bizArea, dbRecord: {
-          name: lastName,
+          name: fullName,
+          firstname: firstName,
           email: generatedEmail,
-          phone: whatsapp,
+          phone: primaryPhone || whatsapp,
           service: serviceNeeded,
           message: description,
           whatsapp,
+          primary_phone: primaryPhone,
+          mobile_phone: mobilePhone,
           biz_area: bizArea,
           distance,
           service_needed: serviceNeeded,
           num_scans: numScans,
           area_type: areaType,
           area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
+          biz_cost: bizCost,
           mailing_street: mailingStreet,
           mailing_city: mailingCity,
+          mailing_state: mailingState,
           mailing_pincode: mailingPoBox,
           latitude: coords?.lat || null,
           longitude: coords?.lng || null,
@@ -431,12 +452,21 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         onSubmit={(e) => {e.preventDefault();handleSubmit();}}>
         
 
-        {/* Name */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><User className="h-3.5 w-3.5 text-primary" /> Name <span className="text-destructive">*</span></Label>
-          <div className="relative">
-            <User className={fieldIcon} />
-            <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Your full name" className={inputCls} />
+        {/* First Name & Last Name */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> First Name</Label>
+            <div className="relative">
+              <User className={fieldIcon} />
+              <Input name="firstname" maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className={inputCls} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> Last Name <span className="text-destructive">*</span></Label>
+            <div className="relative">
+              <User className={fieldIcon} />
+              <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" className={inputCls} />
+            </div>
           </div>
         </motion.div>
 
@@ -455,6 +485,24 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <div className="relative">
             <Phone className={fieldIcon} />
             <Input name="whatsapp" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
+          </div>
+        </motion.div>
+
+        {/* Primary Phone & Mobile Phone */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Primary Phone</Label>
+            <div className="relative">
+              <Phone className={fieldIcon} />
+              <Input name="primary_phone" maxLength={15} value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary phone" className={inputCls} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Mobile Phone</Label>
+            <div className="relative">
+              <Phone className={fieldIcon} />
+              <Input name="mobile_phone" maxLength={15} value={mobilePhone} onChange={(e) => setMobilePhone(e.target.value)} placeholder="Mobile phone" className={inputCls} />
+            </div>
           </div>
         </motion.div>
 
@@ -582,6 +630,14 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           }
         </motion.div>
 
+        {/* Total BIZ Cost */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+          <Label className={labelCls}><Wrench className="h-3.5 w-3.5 text-primary" /> Total BIZ Cost</Label>
+          <div className="relative">
+            <Wrench className={fieldIcon} />
+            <Input name="biz_cost" value={bizCost} onChange={(e) => setBizCost(e.target.value)} placeholder="Estimated cost" className={inputCls} />
+          </div>
+        </motion.div>
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
@@ -613,11 +669,19 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className={labelCls}><MailIcon className="h-3 w-3 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> State</Label>
             <div className="relative">
-              <MailIcon className={fieldIcon} />
-              <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
+              <MapPin className={fieldIcon} />
+              <Input name="mailingstate" value={mailingState} onChange={(e) => setMailingState(e.target.value)} placeholder="State" className={inputCls} />
             </div>
+          </div>
+        </motion.div>
+
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+          <Label className={labelCls}><MailIcon className="h-3.5 w-3.5 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+          <div className="relative">
+            <MailIcon className={fieldIcon} />
+            <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
           </div>
         </motion.div>
 

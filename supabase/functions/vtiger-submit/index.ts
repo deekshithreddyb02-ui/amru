@@ -20,9 +20,12 @@ const STATE_KEY_MAP: Record<string, string> = {
 
 // Default field mappings (Telangana original)
 const DEFAULT_FIELD_MAPPINGS: Record<string, string> = {
+  firstname: "firstname",
   lastname: "lastname",
   expected_close: "cf_1044",
   whatsapp: "cf_1022",
+  primary_phone: "phone",
+  mobile_phone: "mobile",
   biz_area: "cf_990",
   distance: "cf_998",
   service_needed: "cf_994",
@@ -33,6 +36,7 @@ const DEFAULT_FIELD_MAPPINGS: Record<string, string> = {
   description: "description",
   mailing_street: "mailingstreet",
   mailing_city: "mailingcity",
+  mailing_state: "mailingstate",
   mailing_pincode: "mailingpobox",
 };
 
@@ -137,10 +141,11 @@ serve(async (req) => {
       try {
         const sanitized: Record<string, any> = {};
         const allowedDbFields = new Set([
-          'name', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'name', 'firstname', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'primary_phone', 'mobile_phone',
           'biz_area', 'distance', 'service_needed', 'num_scans',
-          'area_type', 'area_value', 'mailing_street', 'mailing_city',
-          'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
+          'area_type', 'area_value', 'biz_cost', 'mailing_street', 'mailing_city',
+          'mailing_state', 'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
         ]);
         for (const [k, v] of Object.entries(dbRecord)) {
           if (allowedDbFields.has(k)) {
