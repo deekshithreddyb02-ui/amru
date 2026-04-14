@@ -212,110 +212,199 @@ const EmployeeDashboard = () => {
             ))}
           </div>
 
-          {/* Filter */}
-          <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl mb-6">
-            {[
-              { key: "all", label: "All" },
-              { key: "pending", label: "Pending" },
-              { key: "in_progress", label: "In Progress" },
-              { key: "completed", label: "Completed" },
-            ].map(({ key, label }) => (
-              <Button
-                key={key}
-                variant={filter === key ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setFilter(key)}
-                className={`flex-1 py-2.5 rounded-lg transition-all ${filter === key ? "shadow-md" : "text-muted-foreground"}`}
-              >
-                {label} ({taskCounts[key as keyof typeof taskCounts] ?? 0})
-              </Button>
-            ))}
+          {/* Main Tabs */}
+          <div className="flex gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl mb-6">
+            <Button
+              variant={activeTab === "tasks" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("tasks")}
+              className={`flex-1 py-2.5 rounded-lg transition-all ${activeTab === "tasks" ? "shadow-md" : "text-muted-foreground"}`}
+            >
+              <ClipboardList className="w-4 h-4 mr-1.5" /> Tasks ({tasks.length})
+            </Button>
+            <Button
+              variant={activeTab === "leads" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("leads")}
+              className={`flex-1 py-2.5 rounded-lg transition-all ${activeTab === "leads" ? "shadow-md" : "text-muted-foreground"}`}
+            >
+              <MapPin className="w-4 h-4 mr-1.5" /> Assigned Leads ({assignedLeads.length})
+            </Button>
           </div>
 
-          {/* Tasks */}
-          {filteredTasks.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <p>No tasks found</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {filteredTasks.map((task) => (
-                <Card key={task.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {statusIcons[task.status]}
-                          <h3 className="font-semibold truncate">{task.title}</h3>
-                        </div>
-                        {task.description && (
-                          <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge className={priorityColors[task.priority] || ""}>
-                            {task.priority}
-                          </Badge>
-                          {task.due_date && (
-                            <span className="text-xs text-muted-foreground">
-                              Due: {new Date(task.due_date).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Select value={task.status} onValueChange={(v) => updateTaskStatus(task.id, v)}>
-                          <SelectTrigger className="w-[140px] h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setExpandedTask(expandedTask === task.id ? null : task.id);
-                            if (!taskNotes[task.id] && task.notes) {
-                              setTaskNotes(prev => ({ ...prev, [task.id]: task.notes || "" }));
-                            }
-                          }}
-                        >
-                          <ChevronDown className={`w-4 h-4 transition-transform ${expandedTask === task.id ? "rotate-180" : ""}`} />
-                        </Button>
-                      </div>
-                    </div>
+          {activeTab === "tasks" && (
+            <>
+              {/* Filter */}
+              <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl mb-6">
+                {[
+                  { key: "all", label: "All" },
+                  { key: "pending", label: "Pending" },
+                  { key: "in_progress", label: "In Progress" },
+                  { key: "completed", label: "Completed" },
+                ].map(({ key, label }) => (
+                  <Button
+                    key={key}
+                    variant={filter === key ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilter(key)}
+                    className={`flex-1 py-2.5 rounded-lg transition-all ${filter === key ? "shadow-md" : "text-muted-foreground"}`}
+                  >
+                    {label} ({taskCounts[key as keyof typeof taskCounts] ?? 0})
+                  </Button>
+                ))}
+              </div>
 
-                    {expandedTask === task.id && (
-                      <div className="mt-4 pt-4 border-t space-y-3">
-                        <div>
-                          <label className="text-sm font-medium mb-1 block">Notes</label>
-                          <Textarea
-                            value={taskNotes[task.id] ?? task.notes ?? ""}
-                            onChange={(e) => setTaskNotes(prev => ({ ...prev, [task.id]: e.target.value }))}
-                            placeholder="Add notes about this task..."
-                            rows={3}
-                          />
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => saveTaskNotes(task.id)}
-                          disabled={savingNotes === task.id}
-                        >
-                          {savingNotes === task.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                          Save Notes
-                        </Button>
-                      </div>
-                    )}
+              {/* Tasks */}
+              {filteredTasks.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                    <p>No tasks found</p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredTasks.map((task) => (
+                    <Card key={task.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              {statusIcons[task.status]}
+                              <h3 className="font-semibold truncate">{task.title}</h3>
+                            </div>
+                            {task.description && (
+                              <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+                            )}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge className={priorityColors[task.priority] || ""}>
+                                {task.priority}
+                              </Badge>
+                              {task.due_date && (
+                                <span className="text-xs text-muted-foreground">
+                                  Due: {new Date(task.due_date).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Select value={task.status} onValueChange={(v) => updateTaskStatus(task.id, v)}>
+                              <SelectTrigger className="w-[140px] h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="completed">Completed</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setExpandedTask(expandedTask === task.id ? null : task.id);
+                                if (!taskNotes[task.id] && task.notes) {
+                                  setTaskNotes(prev => ({ ...prev, [task.id]: task.notes || "" }));
+                                }
+                              }}
+                            >
+                              <ChevronDown className={`w-4 h-4 transition-transform ${expandedTask === task.id ? "rotate-180" : ""}`} />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {expandedTask === task.id && (
+                          <div className="mt-4 pt-4 border-t space-y-3">
+                            <div>
+                              <label className="text-sm font-medium mb-1 block">Notes</label>
+                              <Textarea
+                                value={taskNotes[task.id] ?? task.notes ?? ""}
+                                onChange={(e) => setTaskNotes(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                placeholder="Add notes about this task..."
+                                rows={3}
+                              />
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => saveTaskNotes(task.id)}
+                              disabled={savingNotes === task.id}
+                            >
+                              {savingNotes === task.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                              Save Notes
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "leads" && (
+            <>
+              {assignedLeads.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    <MapPin className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                    <p>No leads assigned to you yet</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {assignedLeads.map((lead) => (
+                    <Card key={lead.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm">{lead.name}</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">{lead.email}</p>
+                          </div>
+                          <Badge variant="secondary" className="text-xs shrink-0">
+                            {lead.biz_area || lead.country || "Unknown"}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                          <div>
+                            <span className="text-muted-foreground">Phone: </span>
+                            <span className="font-medium">{lead.phone || "-"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">WhatsApp: </span>
+                            <span className="font-medium">{lead.whatsapp || "-"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Service: </span>
+                            <span className="font-medium">{lead.service || "-"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">City: </span>
+                            <span className="font-medium">{lead.mailing_city || "-"}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">CRM: </span>
+                            <Badge variant={lead.crm_status === "success" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
+                              {lead.crm_status || "pending"}
+                            </Badge>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Date: </span>
+                            <span className="font-medium">{new Date(lead.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        {lead.message && (
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-xs text-muted-foreground">Message:</p>
+                            <p className="text-xs mt-1 whitespace-pre-wrap">{lead.message}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </motion.div>
       </main>
