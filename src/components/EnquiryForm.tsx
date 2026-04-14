@@ -358,19 +358,23 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       // Use logical field names — the edge function maps them to per-CRM field IDs
       const formData: Record<string, string> = {
         urlencodeenable: "1",
+        firstname: firstName,
         lastname: lastName,
         expected_close: expectedClose,
         whatsapp: whatsapp,
+        primary_phone: primaryPhone || whatsapp,
+        mobile_phone: mobilePhone || whatsapp,
         biz_area: bizArea,
         distance: distance,
         service_needed: serviceNeeded,
         num_scans: numScans,
         area_type: areaType,
         total_area: totalAreaText,
-        biz_cost: "",
+        biz_cost: bizCost,
         description: description,
         mailing_street: mailingStreet,
         mailing_city: mailingCity,
+        mailing_state: mailingState,
         mailing_pincode: mailingPoBox,
       };
 
@@ -382,22 +386,29 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
       const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
 
+      const fullName = `${firstName} ${lastName}`.trim() || lastName;
+
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
         body: { formData, bizArea, dbRecord: {
-          name: lastName,
+          name: fullName,
+          firstname: firstName,
           email: generatedEmail,
-          phone: whatsapp,
+          phone: primaryPhone || whatsapp,
           service: serviceNeeded,
           message: description,
           whatsapp,
+          primary_phone: primaryPhone,
+          mobile_phone: mobilePhone,
           biz_area: bizArea,
           distance,
           service_needed: serviceNeeded,
           num_scans: numScans,
           area_type: areaType,
           area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
+          biz_cost: bizCost,
           mailing_street: mailingStreet,
           mailing_city: mailingCity,
+          mailing_state: mailingState,
           mailing_pincode: mailingPoBox,
           latitude: coords?.lat || null,
           longitude: coords?.lng || null,
