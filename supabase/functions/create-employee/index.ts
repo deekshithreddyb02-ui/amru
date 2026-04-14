@@ -61,6 +61,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
     // Check username uniqueness
     const { data: existingUser } = await adminClient.from("profiles").select("id").eq("username", username.trim().toLowerCase()).maybeSingle();
     if (existingUser) {
@@ -69,8 +71,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Create the user with auto-confirm
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
