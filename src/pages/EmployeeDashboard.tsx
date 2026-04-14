@@ -3,15 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
-import { Loader2, LogOut, ClipboardList, Clock, CheckCircle2, AlertCircle, ChevronDown, Users, MapPin } from "lucide-react";
+import { Loader2, LogOut, ClipboardList, Clock, CheckCircle2, AlertCircle, ChevronDown, MapPin } from "lucide-react";
 import defaultLogo from "@/assets/logo-small.webp";
 
 interface Task {
