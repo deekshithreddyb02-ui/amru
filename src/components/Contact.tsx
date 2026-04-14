@@ -39,7 +39,7 @@ const Contact = () => {
   }, []);
 
   return (
-    <section id="contact" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'var(--section-gradient-alt)' }}>
+    <section id="contact" className="relative py-20 md:py-28" style={{ background: 'var(--section-gradient-alt)' }}>
       <div className="container mx-auto px-4">
         <motion.div {...m({ initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="text-center mb-14">
           <div className="gold-accent mx-auto mb-6" />
