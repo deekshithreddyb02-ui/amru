@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar } from "lucide-react";
+import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree } from "lucide-react";
 
 interface Employee {
   user_id: string;
@@ -31,12 +31,20 @@ interface Task {
   created_at: string;
 }
 
+interface RegionAssignment {
+  id: string;
+  employee_id: string;
+  biz_area: string;
+}
+
+const KNOWN_REGIONS = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Others"];
+
 const EmployeeManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"employees" | "tasks">("employees");
+  const [tab, setTab] = useState<"employees" | "tasks" | "regions">("employees");
 
   // Create employee form
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -55,6 +63,10 @@ const EmployeeManager = () => {
   const [taskAssignee, setTaskAssignee] = useState("");
   const [taskPriority, setTaskPriority] = useState("medium");
   const [taskDueDate, setTaskDueDate] = useState("");
+
+  // Region assignments
+  const [regionAssignments, setRegionAssignments] = useState<RegionAssignment[]>([]);
+  const [savingRegion, setSavingRegion] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -102,11 +114,50 @@ const EmployeeManager = () => {
 
       if (taskError) throw taskError;
       setTasks((taskData || []) as Task[]);
+
+      // Fetch region assignments
+      const { data: regionData } = await supabase
+        .from("lead_region_assignments")
+        .select("*");
+      setRegionAssignments((regionData || []) as RegionAssignment[]);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const saveRegionAssignment = async (biz_area: string, employeeId: string | null) => {
+    setSavingRegion(true);
+    try {
+      if (!employeeId) {
+        // Remove assignment
+        await supabase.from("lead_region_assignments").delete().eq("biz_area", biz_area);
+        setRegionAssignments(prev => prev.filter(r => r.biz_area !== biz_area));
+      } else {
+        // Upsert assignment
+        const { data, error } = await supabase
+          .from("lead_region_assignments")
+          .upsert({ biz_area, employee_id: employeeId } as any, { onConflict: "biz_area" })
+          .select()
+          .single();
+        if (error) throw error;
+        setRegionAssignments(prev => {
+          const filtered = prev.filter(r => r.biz_area !== biz_area);
+          return [...filtered, data as RegionAssignment];
+        });
+      }
+      toast({ title: "Region Assignment Updated" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSavingRegion(false);
+    }
+  };
+
+  const getRegionEmployee = (biz_area: string) => {
+    const assignment = regionAssignments.find(r => r.biz_area === biz_area);
+    return assignment?.employee_id || "";
   };
 
   const createEmployee = async () => {
@@ -225,6 +276,7 @@ const EmployeeManager = () => {
         {[
           { key: "employees" as const, label: "Employees", count: employees.length },
           { key: "tasks" as const, label: "Tasks", count: tasks.length },
+          { key: "regions" as const, label: "Lead Regions", count: regionAssignments.length },
         ].map(({ key, label, count }) => (
           <Button
             key={key}
@@ -398,6 +450,65 @@ const EmployeeManager = () => {
               )}
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Lead Regions Tab */}
+      {tab === "regions" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <FolderTree className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold">Auto-Route Leads by Region</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Assign each region to an employee. New leads from that region will be automatically assigned to the mapped employee.
+          </p>
+          {employees.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Create employees first before setting up region assignments.
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Region (BIZ Area)</TableHead>
+                      <TableHead>Assigned Employee</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {KNOWN_REGIONS.map((region) => (
+                      <TableRow key={region}>
+                        <TableCell className="font-medium">{region}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={getRegionEmployee(region) || "__none__"}
+                            onValueChange={(v) => saveRegionAssignment(region, v === "__none__" ? null : v)}
+                            disabled={savingRegion}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Unassigned" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">Unassigned</SelectItem>
+                              {employees.map((emp) => (
+                                <SelectItem key={emp.user_id} value={emp.user_id}>
+                                  {emp.full_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>

@@ -48,6 +48,8 @@ interface Lead {
   country: string | null;
   expected_close: string | null;
   crm_status: string | null;
+  crm_label: string | null;
+  assigned_to: string | null;
 }
 
 interface LeadsManagerProps {
@@ -98,6 +100,11 @@ const BIZ_AREA_TABS = ["All", "Maharashtra", "Telangana", "Andhra Pradesh", "Kar
 
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
+interface Employee {
+  user_id: string;
+  full_name: string;
+}
+
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -119,6 +126,48 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [deleteRangeTo, setDeleteRangeTo] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [assigningId, setAssigningId] = useState<string | null>(null);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "employee");
+      if (roles && roles.length > 0) {
+        const ids = roles.map(r => r.user_id);
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", ids);
+        setEmployees((profiles || []).map(p => ({ user_id: p.user_id, full_name: p.full_name || "Unknown" })));
+      }
+    } catch (e) { /* ignore */ }
+  };
+
+  const assignLeadToEmployee = async (leadId: string, employeeId: string | null) => {
+    setAssigningId(leadId);
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ assigned_to: employeeId } as any)
+        .eq("id", leadId);
+      if (error) throw error;
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, assigned_to: employeeId } : l));
+      toast({ title: "Lead Assigned", description: employeeId ? "Lead assigned to employee" : "Assignment removed" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setAssigningId(null);
+    }
+  };
+
+  const getEmployeeName = (userId: string | null) => {
+    if (!userId) return null;
+    const emp = employees.find(e => e.user_id === userId);
+    return emp?.full_name || userId.slice(0, 8);
+  };
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -137,7 +186,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     }
   };
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { fetchLeads(); fetchEmployees(); }, []);
 
   const isIndiaLead = (lead: Lead) => {
     const country = (lead.country || "").trim().toLowerCase();
@@ -688,6 +737,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       <TableHead className="py-1.5 min-w-[160px]">Location</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">Map</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
+                      <TableHead className="py-1.5 min-w-[130px]">Assigned To</TableHead>
                       <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -741,6 +791,22 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                               ) : "-"}
                             </TableCell>
                             <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              <Select
+                                value={lead.assigned_to || "__none__"}
+                                onValueChange={(v) => assignLeadToEmployee(lead.id, v === "__none__" ? null : v)}
+                              >
+                                <SelectTrigger className="h-7 text-xs w-[120px]">
+                                  <SelectValue placeholder="Unassigned" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__none__">Unassigned</SelectItem>
+                                  {employees.map(emp => (
+                                    <SelectItem key={emp.user_id} value={emp.user_id}>{emp.full_name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
@@ -754,7 +820,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${lead.id}-detail`}>
-                              <TableCell colSpan={15} className="bg-muted/30 p-4">
+                              <TableCell colSpan={16} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                   <div><span className="text-muted-foreground text-xs">Scans:</span> <span className="font-medium">{lead.num_scans || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Expected Close:</span> <span className="font-medium">{lead.expected_close || "-"}</span></div>
