@@ -135,12 +135,15 @@ function loadTurnstileScript(): Promise<void> {
 
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [expectedClose, setExpectedClose] = useState(() => {
     const d = new Date();d.setDate(d.getDate() + 7);
     return d.toISOString().split("T")[0];
   });
   const [whatsapp, setWhatsapp] = useState("");
+  const [primaryPhone, setPrimaryPhone] = useState("");
+  const [mobilePhone, setMobilePhone] = useState("");
   const [bizArea, setBizArea] = useState("Telangana");
   const [distance, setDistance] = useState("0-30 KM");
   const [serviceNeeded, setServiceNeeded] = useState(() => {
@@ -149,9 +152,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   });
   const [numScans, setNumScans] = useState("1");
   const [areaType, setAreaType] = useState("OPEN PLOT");
+  const [bizCost, setBizCost] = useState("");
   const [description, setDescription] = useState("");
   const [mailingStreet, setMailingStreet] = useState("");
   const [mailingCity, setMailingCity] = useState("");
+  const [mailingState, setMailingState] = useState("");
   const [mailingPoBox, setMailingPoBox] = useState("");
   const [detectedCountry, setDetectedCountry] = useState("");
 

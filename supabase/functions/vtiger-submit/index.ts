@@ -20,9 +20,12 @@ const STATE_KEY_MAP: Record<string, string> = {
 
 // Default field mappings (Telangana original)
 const DEFAULT_FIELD_MAPPINGS: Record<string, string> = {
+  firstname: "firstname",
   lastname: "lastname",
   expected_close: "cf_1044",
   whatsapp: "cf_1022",
+  primary_phone: "phone",
+  mobile_phone: "mobile",
   biz_area: "cf_990",
   distance: "cf_998",
   service_needed: "cf_994",
@@ -33,6 +36,7 @@ const DEFAULT_FIELD_MAPPINGS: Record<string, string> = {
   description: "description",
   mailing_street: "mailingstreet",
   mailing_city: "mailingcity",
+  mailing_state: "mailingstate",
   mailing_pincode: "mailingpobox",
 };
 
