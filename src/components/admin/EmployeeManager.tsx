@@ -511,6 +511,7 @@ const EmployeeManager = () => {
           )}
         </div>
       )}
+    </div>
   );
 };
 
