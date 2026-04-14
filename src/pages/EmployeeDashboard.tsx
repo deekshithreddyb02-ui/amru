@@ -83,6 +83,7 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     if (role === "employee" || role === "admin") {
       fetchTasks();
+      fetchAssignedLeads();
     }
   }, [role]);
 
