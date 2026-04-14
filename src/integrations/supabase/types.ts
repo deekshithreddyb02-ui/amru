@@ -68,6 +68,7 @@ export type Database = {
         Row: {
           area_type: string | null
           area_value: string | null
+          assigned_to: string | null
           biz_area: string | null
           country: string | null
           created_at: string
@@ -94,6 +95,7 @@ export type Database = {
         Insert: {
           area_type?: string | null
           area_value?: string | null
+          assigned_to?: string | null
           biz_area?: string | null
           country?: string | null
           created_at?: string
@@ -120,6 +122,7 @@ export type Database = {
         Update: {
           area_type?: string | null
           area_value?: string | null
+          assigned_to?: string | null
           biz_area?: string | null
           country?: string | null
           created_at?: string
@@ -367,6 +370,27 @@ export type Database = {
           image_url?: string
           is_visible?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      lead_region_assignments: {
+        Row: {
+          biz_area: string
+          created_at: string
+          employee_id: string
+          id: string
+        }
+        Insert: {
+          biz_area: string
+          created_at?: string
+          employee_id: string
+          id?: string
+        }
+        Update: {
+          biz_area?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
         }
         Relationships: []
       }
