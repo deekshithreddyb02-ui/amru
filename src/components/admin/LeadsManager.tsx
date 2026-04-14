@@ -822,19 +822,37 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                             <TableRow key={`${lead.id}-detail`}>
                               <TableCell colSpan={16} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                  <div><span className="text-muted-foreground text-xs">Name:</span> <span className="font-medium">{lead.name || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Email:</span> <span className="font-medium">{lead.email || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Phone:</span> <span className="font-medium">{lead.phone || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">WhatsApp:</span> <span className="font-medium">{lead.whatsapp || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Service:</span> <span className="font-medium">{lead.service_needed || lead.service || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">BIZ Area:</span> <span className="font-medium">{lead.biz_area || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Distance:</span> <span className="font-medium">{lead.distance || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Scans:</span> <span className="font-medium">{lead.num_scans || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Area Type:</span> <span className="font-medium">{lead.area_type || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Area Value:</span> <span className="font-medium">{lead.area_value || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Expected Close:</span> <span className="font-medium">{lead.expected_close || "-"}</span></div>
-                                  <div><span className="text-muted-foreground text-xs">PIN Code:</span> <span className="font-medium">{lead.mailing_pincode || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Country:</span> <span className="font-medium">{lead.country || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">City:</span> <span className="font-medium">{lead.mailing_city || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">PIN Code:</span> <span className="font-medium">{lead.mailing_pincode || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">CRM Status:</span> <span className="font-medium">{lead.crm_status || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">CRM Label:</span> <span className="font-medium">{lead.crm_label || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Assigned To:</span> <span className="font-medium">{getEmployeeName(lead.assigned_to) || "Unassigned"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Created:</span> <span className="font-medium">{new Date(lead.created_at).toLocaleString()}</span></div>
                                   {lead.latitude && lead.longitude && (
-                                    <div className="col-span-2"><span className="text-muted-foreground text-xs">GPS:</span> <span className="font-mono text-xs">{lead.latitude}, {lead.longitude}</span></div>
+                                    <div className="col-span-2"><span className="text-muted-foreground text-xs">GPS:</span> <span className="font-mono text-xs">{lead.latitude}, {lead.longitude}</span>
+                                      {getMapsUrl(lead.latitude, lead.longitude) && (
+                                        <a href={getMapsUrl(lead.latitude, lead.longitude)!} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary hover:underline text-xs inline-flex items-center gap-0.5"><MapPin className="w-3 h-3" />View Map<ExternalLink className="w-3 h-3" /></a>
+                                      )}
+                                    </div>
                                   )}
                                   <div className="col-span-2 md:col-span-4">
-                                    <span className="text-muted-foreground text-xs">Street:</span>
+                                    <span className="text-muted-foreground text-xs">Street Address:</span>
                                     <p className="text-xs mt-0.5">{lead.mailing_street || "-"}</p>
                                   </div>
                                   <div className="col-span-2 md:col-span-4">
-                                    <span className="text-muted-foreground text-xs">Description:</span>
+                                    <span className="text-muted-foreground text-xs">Description / Message:</span>
                                     <pre className="text-xs mt-0.5 whitespace-pre-wrap font-sans bg-background/50 p-2 rounded border border-border/30">{lead.message}</pre>
                                   </div>
                                 </div>
