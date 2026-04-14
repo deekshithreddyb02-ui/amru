@@ -486,17 +486,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         {/* Primary Phone & Mobile Phone */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Primary Phone</Label>
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Phone Number</Label>
             <div className="relative">
               <Phone className={fieldIcon} />
-              <Input name="primary_phone" maxLength={15} value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary phone" className={inputCls} />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Mobile Phone</Label>
-            <div className="relative">
-              <Phone className={fieldIcon} />
-              <Input name="mobile_phone" maxLength={15} value={mobilePhone} onChange={(e) => setMobilePhone(e.target.value)} placeholder="Mobile phone" className={inputCls} />
+              <Input name="phone_number" maxLength={15} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className={inputCls} />
             </div>
           </div>
         </motion.div>
