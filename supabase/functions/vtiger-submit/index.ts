@@ -141,10 +141,11 @@ serve(async (req) => {
       try {
         const sanitized: Record<string, any> = {};
         const allowedDbFields = new Set([
-          'name', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'name', 'firstname', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'primary_phone', 'mobile_phone',
           'biz_area', 'distance', 'service_needed', 'num_scans',
-          'area_type', 'area_value', 'mailing_street', 'mailing_city',
-          'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
+          'area_type', 'area_value', 'biz_cost', 'mailing_street', 'mailing_city',
+          'mailing_state', 'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
         ]);
         for (const [k, v] of Object.entries(dbRecord)) {
           if (allowedDbFields.has(k)) {
