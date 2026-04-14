@@ -452,7 +452,65 @@ const EmployeeManager = () => {
           </Card>
         </div>
       )}
-    </div>
+
+      {/* Lead Regions Tab */}
+      {tab === "regions" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <FolderTree className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold">Auto-Route Leads by Region</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Assign each region to an employee. New leads from that region will be automatically assigned to the mapped employee.
+          </p>
+          {employees.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                Create employees first before setting up region assignments.
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Region (BIZ Area)</TableHead>
+                      <TableHead>Assigned Employee</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {KNOWN_REGIONS.map((region) => (
+                      <TableRow key={region}>
+                        <TableCell className="font-medium">{region}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={getRegionEmployee(region) || "__none__"}
+                            onValueChange={(v) => saveRegionAssignment(region, v === "__none__" ? null : v)}
+                            disabled={savingRegion}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Unassigned" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">Unassigned</SelectItem>
+                              {employees.map((emp) => (
+                                <SelectItem key={emp.user_id} value={emp.user_id}>
+                                  {emp.full_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
   );
 };
 
