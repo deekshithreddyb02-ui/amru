@@ -47,7 +47,7 @@ const Contact = () => {
           <p className="section-subheading">Ready to start your project? Contact our team for consultations, quotes, or any inquiries.</p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
           <motion.div {...m({ initial: { opacity: 0, x: -30 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { duration: 0.6 } })} className="h-full">
             <div className="bg-card p-6 rounded-2xl border border-border h-full" style={{ boxShadow: 'var(--card-shadow)' }}>
               <h3 className="font-bold text-lg text-foreground mb-4 text-center" style={{ fontFamily: 'var(--font-serif)' }}>Contact Information</h3>
