@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -618,14 +618,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           }
         </motion.div>
 
-        {/* Total BIZ Cost */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Wrench className="h-3.5 w-3.5 text-primary" /> Total BIZ Cost</Label>
-          <div className="relative">
-            <Wrench className={fieldIcon} />
-            <Input name="biz_cost" value={bizCost} onChange={(e) => setBizCost(e.target.value)} placeholder="Estimated cost" className={inputCls} />
-          </div>
-        </motion.div>
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
