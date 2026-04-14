@@ -27,6 +27,7 @@ import {
 interface Lead {
   id: string;
   name: string;
+  firstname: string | null;
   email: string;
   phone: string | null;
   service: string | null;
@@ -34,14 +35,18 @@ interface Lead {
   is_read: boolean;
   created_at: string;
   whatsapp: string | null;
+  primary_phone: string | null;
+  mobile_phone: string | null;
   biz_area: string | null;
   distance: string | null;
   service_needed: string | null;
   num_scans: string | null;
   area_type: string | null;
   area_value: string | null;
+  biz_cost: string | null;
   mailing_street: string | null;
   mailing_city: string | null;
+  mailing_state: string | null;
   mailing_pincode: string | null;
   latitude: string | null;
   longitude: string | null;
