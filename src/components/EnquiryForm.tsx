@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,8 +142,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     return d.toISOString().split("T")[0];
   });
   const [whatsapp, setWhatsapp] = useState("");
-  const [primaryPhone, setPrimaryPhone] = useState("");
-  const [mobilePhone, setMobilePhone] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [bizArea, setBizArea] = useState("Telangana");
   const [distance, setDistance] = useState("0-30 KM");
   const [serviceNeeded, setServiceNeeded] = useState(() => {
@@ -152,7 +151,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   });
   const [numScans, setNumScans] = useState("1");
   const [areaType, setAreaType] = useState("OPEN PLOT");
-  const [bizCost, setBizCost] = useState("");
+  
   const [description, setDescription] = useState("");
   const [mailingStreet, setMailingStreet] = useState("");
   const [mailingCity, setMailingCity] = useState("");
@@ -255,15 +254,13 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     const parts: string[] = [];
     if (firstName || lastName) parts.push(`Name: ${firstName} ${lastName}`.trim());
     if (whatsapp) parts.push(`WhatsApp: ${whatsapp}`);
-    if (primaryPhone) parts.push(`Primary Phone: ${primaryPhone}`);
-    if (mobilePhone) parts.push(`Mobile: ${mobilePhone}`);
+    if (phoneNumber) parts.push(`Phone: ${phoneNumber}`);
     parts.push(`Service: ${serviceNeeded}`);
     parts.push(`Area Type: ${areaType}`);
     if (converted) {
       parts.push(`Area: ${areaValue} ${AREA_UNITS.find((u) => u.value === areaUnit)?.label}`);
       parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
     }
-    if (bizCost) parts.push(`BIZ Cost: ${bizCost}`);
     parts.push(`BIZ Area: ${bizArea}`);
     parts.push(`Distance: ${distance}`);
     parts.push(`Scans: ${numScans}`);
@@ -277,7 +274,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     if (mailingPoBox) parts.push(`PIN: ${mailingPoBox}`);
     if (detectedCountry) parts.push(`Country: ${detectedCountry}`);
     return parts.join("\n");
-  }, [firstName, lastName, whatsapp, primaryPhone, mobilePhone, serviceNeeded, areaType, areaValue, areaUnit, converted, bizCost, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry]);
+  }, [firstName, lastName, whatsapp, phoneNumber, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry]);
 
   // Sync auto description
   useEffect(() => {
@@ -362,15 +359,14 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         lastname: lastName,
         expected_close: expectedClose,
         whatsapp: whatsapp,
-        primary_phone: primaryPhone || whatsapp,
-        mobile_phone: mobilePhone || whatsapp,
+        primary_phone: phoneNumber || whatsapp,
+        mobile_phone: phoneNumber || whatsapp,
         biz_area: bizArea,
         distance: distance,
         service_needed: serviceNeeded,
         num_scans: numScans,
         area_type: areaType,
         total_area: totalAreaText,
-        biz_cost: bizCost,
         description: description,
         mailing_street: mailingStreet,
         mailing_city: mailingCity,
@@ -393,19 +389,18 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           name: fullName,
           firstname: firstName,
           email: generatedEmail,
-          phone: primaryPhone || whatsapp,
+          phone: phoneNumber || whatsapp,
           service: serviceNeeded,
           message: description,
           whatsapp,
-          primary_phone: primaryPhone,
-          mobile_phone: mobilePhone,
+          primary_phone: phoneNumber || whatsapp,
+          mobile_phone: phoneNumber || whatsapp,
           biz_area: bizArea,
           distance,
           service_needed: serviceNeeded,
           num_scans: numScans,
           area_type: areaType,
           area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
-          biz_cost: bizCost,
           mailing_street: mailingStreet,
           mailing_city: mailingCity,
           mailing_state: mailingState,
@@ -491,17 +486,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         {/* Primary Phone & Mobile Phone */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Primary Phone</Label>
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Phone Number</Label>
             <div className="relative">
               <Phone className={fieldIcon} />
-              <Input name="primary_phone" maxLength={15} value={primaryPhone} onChange={(e) => setPrimaryPhone(e.target.value)} placeholder="Primary phone" className={inputCls} />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Mobile Phone</Label>
-            <div className="relative">
-              <Phone className={fieldIcon} />
-              <Input name="mobile_phone" maxLength={15} value={mobilePhone} onChange={(e) => setMobilePhone(e.target.value)} placeholder="Mobile phone" className={inputCls} />
+              <Input name="phone_number" maxLength={15} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className={inputCls} />
             </div>
           </div>
         </motion.div>
@@ -630,14 +618,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           }
         </motion.div>
 
-        {/* Total BIZ Cost */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Wrench className="h-3.5 w-3.5 text-primary" /> Total BIZ Cost</Label>
-          <div className="relative">
-            <Wrench className={fieldIcon} />
-            <Input name="biz_cost" value={bizCost} onChange={(e) => setBizCost(e.target.value)} placeholder="Estimated cost" className={inputCls} />
-          </div>
-        </motion.div>
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">

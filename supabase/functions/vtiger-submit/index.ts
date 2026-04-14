@@ -22,6 +22,7 @@ const STATE_KEY_MAP: Record<string, string> = {
 const DEFAULT_FIELD_MAPPINGS: Record<string, string> = {
   firstname: "firstname",
   lastname: "lastname",
+  email: "email",
   expected_close: "cf_1044",
   whatsapp: "cf_1022",
   primary_phone: "phone",
