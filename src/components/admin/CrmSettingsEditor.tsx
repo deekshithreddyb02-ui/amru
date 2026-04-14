@@ -100,7 +100,8 @@ const CrmSettingsEditor = () => {
   const { toast } = useToast();
   const [crms, setCrms] = useState<CrmConfig[]>(DEFAULT_CRMS);
   const [routing, setRouting] = useState<LeadRouting>({ store_in_db: true, send_to_crm: true });
-  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState("");
+  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState(""); // legacy
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -121,6 +122,7 @@ const CrmSettingsEditor = () => {
             });
           }
           if (v.recaptcha_site_key) setRecaptchaSiteKey(v.recaptcha_site_key);
+          if (v.turnstile_site_key) setTurnstileSiteKey(v.turnstile_site_key);
           if (Array.isArray(v.crms)) {
             const loaded = v.crms as CrmConfig[];
             const merged = STATE_SLOTS.map((slot) => {
@@ -171,7 +173,7 @@ const CrmSettingsEditor = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const value = { crms, routing, recaptcha_site_key: recaptchaSiteKey };
+      const value = { crms, routing, recaptcha_site_key: recaptchaSiteKey, turnstile_site_key: turnstileSiteKey };
       const { data: existing } = await (supabase as any)
         .from("site_settings")
         .select("id")
@@ -231,11 +233,30 @@ const CrmSettingsEditor = () => {
           </CardContent>
         </Card>
 
-        {/* reCAPTCHA Settings */}
+        {/* Cloudflare Turnstile CAPTCHA Settings */}
         <Card className="bg-muted/30 border-border/50">
           <CardContent className="pt-4 space-y-3">
-            <p className="text-xs font-semibold text-foreground">Google reCAPTCHA v2 Settings</p>
-            <p className="text-[10px] text-muted-foreground">Enter the reCAPTCHA v2 site key to display the "I am not a robot" checkbox on enquiry forms. Leave empty to disable reCAPTCHA.</p>
+            <p className="text-xs font-semibold text-foreground">🛡️ Cloudflare Turnstile (Recommended — Free)</p>
+            <p className="text-[10px] text-muted-foreground">
+              Enter the Turnstile Site Key from your{" "}
+              <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank" rel="noopener noreferrer" className="text-primary underline">Cloudflare dashboard</a>.
+              This shows a privacy-friendly, invisible or managed CAPTCHA on the enquiry form. Leave empty to disable.
+            </p>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Turnstile Site Key</Label>
+              <Input value={turnstileSiteKey} onChange={(e) => setTurnstileSiteKey(e.target.value)} placeholder="0x4AAAAAAA..." />
+            </div>
+            {turnstileSiteKey && recaptchaSiteKey && (
+              <p className="text-[10px] text-amber-600 font-medium">⚠ Both Turnstile and reCAPTCHA keys are set. Turnstile will be used (preferred).</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Legacy reCAPTCHA Settings */}
+        <Card className="bg-muted/30 border-border/50">
+          <CardContent className="pt-4 space-y-3">
+            <p className="text-xs font-semibold text-foreground/60">Google reCAPTCHA v2 (Legacy)</p>
+            <p className="text-[10px] text-muted-foreground">Legacy reCAPTCHA support. Turnstile above is recommended instead.</p>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">reCAPTCHA Site Key</Label>
               <Input value={recaptchaSiteKey} onChange={(e) => setRecaptchaSiteKey(e.target.value)} placeholder="6LcXXXX..." />
