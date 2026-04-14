@@ -48,6 +48,8 @@ interface Lead {
   country: string | null;
   expected_close: string | null;
   crm_status: string | null;
+  crm_label: string | null;
+  assigned_to: string | null;
 }
 
 interface LeadsManagerProps {
@@ -98,6 +100,11 @@ const BIZ_AREA_TABS = ["All", "Maharashtra", "Telangana", "Andhra Pradesh", "Kar
 
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
+interface Employee {
+  user_id: string;
+  full_name: string;
+}
+
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -119,6 +126,48 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [deleteRangeTo, setDeleteRangeTo] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [assigningId, setAssigningId] = useState<string | null>(null);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "employee");
+      if (roles && roles.length > 0) {
+        const ids = roles.map(r => r.user_id);
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", ids);
+        setEmployees((profiles || []).map(p => ({ user_id: p.user_id, full_name: p.full_name || "Unknown" })));
+      }
+    } catch (e) { /* ignore */ }
+  };
+
+  const assignLeadToEmployee = async (leadId: string, employeeId: string | null) => {
+    setAssigningId(leadId);
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ assigned_to: employeeId } as any)
+        .eq("id", leadId);
+      if (error) throw error;
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, assigned_to: employeeId } : l));
+      toast({ title: "Lead Assigned", description: employeeId ? "Lead assigned to employee" : "Assignment removed" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setAssigningId(null);
+    }
+  };
+
+  const getEmployeeName = (userId: string | null) => {
+    if (!userId) return null;
+    const emp = employees.find(e => e.user_id === userId);
+    return emp?.full_name || userId.slice(0, 8);
+  };
 
   const fetchLeads = async () => {
     setLoading(true);
