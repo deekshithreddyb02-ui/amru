@@ -309,6 +309,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             const streetParts = [a.road, a.neighbourhood, a.suburb, a.state_district || a.county, a.state, country].filter(Boolean);
             setMailingStreet(streetParts.join(", "));
             setMailingCity(a.city || a.town || a.village || a.county || "");
+            setMailingState(a.state || "");
             setMailingPoBox(a.postcode || "");
 
             // Auto-detect BIZ Area from state
