@@ -383,8 +383,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         formData['cf-turnstile-response'] = captchaToken;
       }
 
-      const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
-      const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
 
       const fullName = `${firstName} ${lastName}`.trim() || lastName;
 
