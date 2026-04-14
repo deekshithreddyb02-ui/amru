@@ -115,6 +115,7 @@ const EmployeeDashboard = () => {
     } catch (error: any) {
       console.error("Error fetching leads:", error);
     }
+  };
 
   const updateTaskStatus = async (taskId: string, newStatus: string) => {
     try {
