@@ -186,7 +186,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     }
   };
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { fetchLeads(); fetchEmployees(); }, []);
 
   const isIndiaLead = (lead: Lead) => {
     const country = (lead.country || "").trim().toLowerCase();
