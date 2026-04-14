@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
-import { Loader2, LogOut, ClipboardList, Clock, CheckCircle2, AlertCircle, ChevronDown } from "lucide-react";
+import { Loader2, LogOut, ClipboardList, Clock, CheckCircle2, AlertCircle, ChevronDown, Users, MapPin } from "lucide-react";
 import defaultLogo from "@/assets/logo-small.webp";
 
 interface Task {
@@ -23,6 +24,21 @@ interface Task {
   notes: string | null;
   created_at: string;
   assigned_by_name?: string;
+}
+
+interface AssignedLead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  service: string | null;
+  message: string;
+  created_at: string;
+  biz_area: string | null;
+  country: string | null;
+  mailing_city: string | null;
+  crm_status: string | null;
+  whatsapp: string | null;
 }
 
 const priorityColors: Record<string, string> = {
