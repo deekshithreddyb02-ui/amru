@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar } from "lucide-react";
+import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree } from "lucide-react";
 
 interface Employee {
   user_id: string;
@@ -31,12 +31,20 @@ interface Task {
   created_at: string;
 }
 
+interface RegionAssignment {
+  id: string;
+  employee_id: string;
+  biz_area: string;
+}
+
+const KNOWN_REGIONS = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Others"];
+
 const EmployeeManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"employees" | "tasks">("employees");
+  const [tab, setTab] = useState<"employees" | "tasks" | "regions">("employees");
 
   // Create employee form
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -55,6 +63,10 @@ const EmployeeManager = () => {
   const [taskAssignee, setTaskAssignee] = useState("");
   const [taskPriority, setTaskPriority] = useState("medium");
   const [taskDueDate, setTaskDueDate] = useState("");
+
+  // Region assignments
+  const [regionAssignments, setRegionAssignments] = useState<RegionAssignment[]>([]);
+  const [savingRegion, setSavingRegion] = useState(false);
 
   useEffect(() => {
     fetchData();
