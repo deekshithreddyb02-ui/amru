@@ -276,6 +276,7 @@ const EmployeeManager = () => {
         {[
           { key: "employees" as const, label: "Employees", count: employees.length },
           { key: "tasks" as const, label: "Tasks", count: tasks.length },
+          { key: "regions" as const, label: "Lead Regions", count: regionAssignments.length },
         ].map(({ key, label, count }) => (
           <Button
             key={key}
