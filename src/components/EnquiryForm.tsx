@@ -235,8 +235,8 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
   // Build total area string for CRM
   const totalAreaText = useMemo(() => {
-    if (!converted) return "Gunta: \nAcres: \nSq.Yrds: \nSq.Ft:";
-    return `Gunta: ${converted.guntas}\nAcres: ${converted.acres}\nSq.Yrds: ${converted.sqyd}\nSq.Ft: ${converted.sqft}`;
+    if (!converted) return "";
+    return `Gunta: ${converted.guntas} | Acres: ${converted.acres} | Sq.Yrds: ${converted.sqyd} | Sq.Ft: ${converted.sqft}`;
   }, [converted]);
 
   // Google Maps URL
