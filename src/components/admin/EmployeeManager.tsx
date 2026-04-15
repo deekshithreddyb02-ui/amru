@@ -263,9 +263,9 @@ const EmployeeManager = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ClipboardList className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold text-primary">Employee & Task Management</h2>
+            <h2 className="text-2xl font-bold text-primary">Admin & Task Management</h2>
           </div>
-          <p className="text-sm text-muted-foreground">Create employee accounts and assign tasks</p>
+          <p className="text-sm text-muted-foreground">Create admin accounts and assign tasks</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
           <RefreshCw className="w-4 h-4" />
@@ -276,7 +276,7 @@ const EmployeeManager = () => {
       {/* Tabs */}
       <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
         {[
-          { key: "employees" as const, label: "Employees", count: employees.length },
+          { key: "employees" as const, label: "Admins", count: employees.length },
           { key: "tasks" as const, label: "Tasks", count: tasks.length },
           { key: "regions" as const, label: "Lead Regions", count: regionAssignments.length },
         ].map(({ key, label, count }) => (
@@ -299,7 +299,7 @@ const EmployeeManager = () => {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <UserPlus className="w-4 h-4" />
-                Create Employee
+                Create Admin
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -335,7 +335,7 @@ const EmployeeManager = () => {
           <Card>
             <CardContent className="pt-6">
               {employees.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No employees yet. Create one above.</p>
+                <p className="text-muted-foreground text-center py-8">No admins yet. Create one above.</p>
               ) : (
                 <Table>
                   <TableHeader>
@@ -379,14 +379,14 @@ const EmployeeManager = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Assign Task to Employee</DialogTitle>
+                <DialogTitle>Assign Task to Admin</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Task Title *" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} />
                 <Textarea placeholder="Description (optional)" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} rows={3} />
                 <Select value={taskAssignee} onValueChange={setTaskAssignee}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Assign to employee *" />
+                    <SelectValue placeholder="Assign to admin *" />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map((emp) => (
