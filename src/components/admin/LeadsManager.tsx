@@ -138,15 +138,19 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     try {
       const { data: roles } = await supabase
         .from("user_roles")
-        .select("user_id")
-        .eq("role", "employee");
+        .select("user_id, role")
+        .in("role", ["employee", "admin"]);
       if (roles && roles.length > 0) {
         const ids = roles.map(r => r.user_id);
         const { data: profiles } = await supabase
           .from("profiles")
           .select("user_id, full_name")
           .in("user_id", ids);
-        setEmployees((profiles || []).map(p => ({ user_id: p.user_id, full_name: p.full_name || "Unknown" })));
+        const roleMap = new Map(roles.map(r => [r.user_id, r.role]));
+        setEmployees((profiles || []).map(p => ({
+          user_id: p.user_id,
+          full_name: `${p.full_name || "Unknown"}${roleMap.get(p.user_id) === "admin" ? " (Admin)" : ""}`,
+        })));
       }
     } catch (e) { /* ignore */ }
   };

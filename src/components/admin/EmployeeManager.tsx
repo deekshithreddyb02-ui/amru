@@ -54,6 +54,7 @@ const EmployeeManager = () => {
   const [newPhone, setNewPhone] = useState("");
   const [newTempPassword, setNewTempPassword] = useState("");
   const [newUsername, setNewUsername] = useState("");
+  const [newRole, setNewRole] = useState<"employee" | "admin">("employee");
 
   // Create task form
   const [showTaskDialog, setShowTaskDialog] = useState(false);
