@@ -68,6 +68,7 @@ const EmployeeManager = () => {
   // Region assignments
   const [regionAssignments, setRegionAssignments] = useState<RegionAssignment[]>([]);
   const [savingRegion, setSavingRegion] = useState(false);
+  const [regionLeadCounts, setRegionLeadCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchData();
