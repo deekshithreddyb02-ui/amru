@@ -379,14 +379,14 @@ const EmployeeManager = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Assign Task to Employee</DialogTitle>
+                <DialogTitle>Assign Task to Admin</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Task Title *" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} />
                 <Textarea placeholder="Description (optional)" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} rows={3} />
                 <Select value={taskAssignee} onValueChange={setTaskAssignee}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Assign to employee *" />
+                    <SelectValue placeholder="Assign to admin *" />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map((emp) => (
