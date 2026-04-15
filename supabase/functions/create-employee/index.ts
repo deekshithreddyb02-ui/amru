@@ -45,7 +45,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, phone, temp_password, username } = await req.json();
+    const { email, full_name, phone, temp_password, username, role } = await req.json();
+    const targetRole = role === "admin" ? "admin" : "employee";
 
     if (!email || !temp_password || !full_name || !username) {
       return new Response(JSON.stringify({ error: "Email, full name, username, and temporary password are required" }), {
@@ -87,10 +88,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update user_roles to 'employee' (trigger already created 'user' role)
+    // Update user_roles to target role (trigger already created 'user' role)
     await adminClient
       .from("user_roles")
-      .update({ role: "employee" })
+      .update({ role: targetRole })
       .eq("user_id", newUser.user.id);
 
     // Set must_change_password flag and username

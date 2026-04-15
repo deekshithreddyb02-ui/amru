@@ -54,6 +54,7 @@ const EmployeeManager = () => {
   const [newPhone, setNewPhone] = useState("");
   const [newTempPassword, setNewTempPassword] = useState("");
   const [newUsername, setNewUsername] = useState("");
+  const [newRole, setNewRole] = useState<"employee" | "admin">("employee");
 
   // Create task form
   const [showTaskDialog, setShowTaskDialog] = useState(false);
@@ -168,7 +169,7 @@ const EmployeeManager = () => {
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-employee", {
-        body: { email: newEmail, full_name: newName, phone: newPhone, temp_password: newTempPassword, username: newUsername },
+        body: { email: newEmail, full_name: newName, phone: newPhone, temp_password: newTempPassword, username: newUsername, role: newRole },
       });
 
       if (error) throw error;
@@ -181,6 +182,7 @@ const EmployeeManager = () => {
       setNewPhone("");
       setNewTempPassword("");
       setNewUsername("");
+      setNewRole("employee");
       fetchData();
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
@@ -302,7 +304,7 @@ const EmployeeManager = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Employee Account</DialogTitle>
+                <DialogTitle>Create Account</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Full Name *" value={newName} onChange={(e) => setNewName(e.target.value)} />
@@ -310,7 +312,18 @@ const EmployeeManager = () => {
                 <Input type="email" placeholder="Email *" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
                 <Input placeholder="Phone (optional)" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
                 <Input type="password" placeholder="Temporary Password * (min 8 chars)" value={newTempPassword} onChange={(e) => setNewTempPassword(e.target.value)} />
-                <p className="text-xs text-muted-foreground">Employee will log in with their username and must change password on first login.</p>
+                <Select value={newRole} onValueChange={(v) => setNewRole(v as "employee" | "admin")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="admin">Super Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {newRole === "admin" ? "This user will have full admin access." : "Employee will log in with their username and must change password on first login."}
+                </p>
                 <Button onClick={createEmployee} disabled={creating} className="w-full">
                   {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
                   Create Account
