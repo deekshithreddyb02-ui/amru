@@ -122,6 +122,21 @@ const EmployeeManager = () => {
         .from("lead_region_assignments")
         .select("*");
       setRegionAssignments((regionData || []) as RegionAssignment[]);
+
+      // Fetch lead counts by biz_area
+      const { data: leads } = await supabase
+        .from("contact_messages")
+        .select("biz_area");
+      const counts: Record<string, number> = {};
+      let total = 0;
+      (leads || []).forEach((l: any) => {
+        const area = l.biz_area || "Others";
+        const matched = KNOWN_REGIONS.find(r => r.toLowerCase() === area.toLowerCase()) || "Others";
+        counts[matched] = (counts[matched] || 0) + 1;
+        total++;
+      });
+      counts["__total__"] = total;
+      setRegionLeadCounts(counts);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
