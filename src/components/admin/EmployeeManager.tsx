@@ -487,57 +487,95 @@ const EmployeeManager = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
             <FolderTree className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Auto-Route Leads by Region</h3>
+            <h3 className="text-lg font-semibold">Lead Regions</h3>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Assign each region to an employee. New leads from that region will be automatically assigned to the mapped employee.
-          </p>
-          {employees.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Create employees first before setting up region assignments.
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="pt-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Region (BIZ Area)</TableHead>
-                      <TableHead>Assigned Employee</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {KNOWN_REGIONS.map((region) => (
-                      <TableRow key={region}>
-                        <TableCell className="font-medium">{region}</TableCell>
-                        <TableCell>
-                          <Select
-                            value={getRegionEmployee(region) || "__none__"}
-                            onValueChange={(v) => saveRegionAssignment(region, v === "__none__" ? null : v)}
-                            disabled={savingRegion}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Unassigned" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="__none__">Unassigned</SelectItem>
-                              {employees.map((emp) => (
-                                <SelectItem key={emp.user_id} value={emp.user_id}>
-                                  {emp.full_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
+
+          {/* Lead counts summary */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold text-base">Leads by Region</h4>
+                <Badge variant="secondary" className="text-sm">Total: {regionLeadCounts["__total__"] || 0}</Badge>
+              </div>
+              <div className="space-y-2">
+                {KNOWN_REGIONS.map((region) => {
+                  const count = regionLeadCounts[region] || 0;
+                  const total = regionLeadCounts["__total__"] || 1;
+                  const pct = Math.round((count / total) * 100) || 0;
+                  return (
+                    <div key={region} className="flex items-center gap-3">
+                      <span className="w-36 text-sm font-medium truncate">{region}</span>
+                      <div className="flex-1 h-7 bg-muted rounded-lg overflow-hidden relative">
+                        <div
+                          className="h-full bg-primary/80 rounded-lg transition-all"
+                          style={{ width: `${Math.max(pct, 2)}%` }}
+                        />
+                      </div>
+                      <Badge variant="outline" className="min-w-[40px] justify-center">{count}</Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Region assignment table */}
+          <div>
+            <h4 className="font-semibold text-base mb-2">Auto-Route Leads by Region</h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              Assign each region to an admin. New leads from that region will be automatically assigned.
+            </p>
+            {employees.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Create admins first before setting up region assignments.
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Region (BIZ Area)</TableHead>
+                        <TableHead>Leads</TableHead>
+                        <TableHead>Assigned Admin</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )}
+                    </TableHeader>
+                    <TableBody>
+                      {KNOWN_REGIONS.map((region) => (
+                        <TableRow key={region}>
+                          <TableCell className="font-medium">{region}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{regionLeadCounts[region] || 0}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={getRegionEmployee(region) || "__none__"}
+                              onValueChange={(v) => saveRegionAssignment(region, v === "__none__" ? null : v)}
+                              disabled={savingRegion}
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Unassigned" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__none__">Unassigned</SelectItem>
+                                {employees.map((emp) => (
+                                  <SelectItem key={emp.user_id} value={emp.user_id}>
+                                    {emp.full_name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )}
     </div>
