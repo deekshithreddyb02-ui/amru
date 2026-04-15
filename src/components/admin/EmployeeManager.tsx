@@ -169,7 +169,7 @@ const EmployeeManager = () => {
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-employee", {
-        body: { email: newEmail, full_name: newName, phone: newPhone, temp_password: newTempPassword, username: newUsername },
+        body: { email: newEmail, full_name: newName, phone: newPhone, temp_password: newTempPassword, username: newUsername, role: newRole },
       });
 
       if (error) throw error;
@@ -182,6 +182,7 @@ const EmployeeManager = () => {
       setNewPhone("");
       setNewTempPassword("");
       setNewUsername("");
+      setNewRole("employee");
       fetchData();
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
