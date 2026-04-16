@@ -762,6 +762,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       <TableHead className="py-1.5 min-w-[80px]">Map</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
                       <TableHead className="py-1.5 min-w-[130px]">Assigned To</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Completed</TableHead>
                       <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
