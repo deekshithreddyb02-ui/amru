@@ -79,18 +79,23 @@ const EmployeeManager = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch employees (users with 'employee' role)
+      // Fetch users with 'employee' or 'admin' role
       const { data: roles } = await supabase
         .from("user_roles")
-        .select("user_id")
-        .eq("role", "employee");
+        .select("user_id, role")
+        .in("role", ["employee", "admin"]);
+
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (roles && roles.length > 0) {
-        const employeeIds = roles.map(r => r.user_id);
+        const allIds = roles.map(r => r.user_id);
+        const roleMap = new Map<string, string>();
+        roles.forEach(r => roleMap.set(r.user_id, r.role));
+
         const { data: profiles } = await supabase
           .from("profiles")
           .select("user_id, full_name, phone")
-          .in("user_id", employeeIds);
+          .in("user_id", allIds);
 
         const { data: usersData } = await supabase.rpc("get_users_with_emails");
 
@@ -104,6 +109,7 @@ const EmployeeManager = () => {
           email: emailMap.get(p.user_id) || "",
           full_name: p.full_name || "",
           phone: p.phone || "",
+          role: roleMap.get(p.user_id) || "employee",
         }));
         setEmployees(emps);
       } else {
