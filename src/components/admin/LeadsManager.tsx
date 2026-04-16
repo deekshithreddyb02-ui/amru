@@ -33,6 +33,7 @@ interface Lead {
   service: string | null;
   message: string;
   is_read: boolean;
+  is_completed: boolean;
   created_at: string;
   whatsapp: string | null;
   primary_phone: string | null;
@@ -133,6 +134,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [assigningId, setAssigningId] = useState<string | null>(null);
+  const [togglingCompleted, setTogglingCompleted] = useState<string | null>(null);
 
   const fetchEmployees = async () => {
     try {
@@ -169,6 +171,19 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setAssigningId(null);
+    }
+  };
+
+  const toggleCompleted = async (leadId: string, currentValue: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ is_completed: !currentValue } as any)
+        .eq("id", leadId);
+      if (error) throw error;
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, is_completed: !currentValue } : l));
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 
@@ -747,6 +762,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       <TableHead className="py-1.5 min-w-[80px]">Map</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
                       <TableHead className="py-1.5 min-w-[130px]">Assigned To</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Completed</TableHead>
                       <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -816,6 +832,13 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </SelectContent>
                               </Select>
                             </TableCell>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              <Checkbox
+                                checked={lead.is_completed}
+                                onCheckedChange={() => toggleCompleted(lead.id, lead.is_completed)}
+                                aria-label={`Mark ${lead.name} as completed`}
+                              />
+                            </TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
@@ -829,7 +852,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${lead.id}-detail`}>
-                              <TableCell colSpan={16} className="bg-muted/30 p-4">
+                              <TableCell colSpan={17} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                   <div><span className="text-muted-foreground text-xs">First Name:</span> <span className="font-medium">{lead.firstname || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Last Name:</span> <span className="font-medium">{lead.name || "-"}</span></div>

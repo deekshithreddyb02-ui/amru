@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree, KeyRound } from "lucide-react";
+import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree, KeyRound, Pencil } from "lucide-react";
 
 interface Employee {
   user_id: string;
@@ -38,7 +38,17 @@ interface RegionAssignment {
   biz_area: string;
 }
 
-const KNOWN_REGIONS = ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Others"];
+const ALL_INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Delhi", "Jammu and Kashmir", "Ladakh", "Chandigarh", "Puducherry",
+  "Andaman and Nicobar Islands", "Dadra and Nagar Haveli", "Daman and Diu", "Lakshadweep",
+  "Others"
+];
 
 const EmployeeManager = () => {
   const { toast } = useToast();
@@ -56,6 +66,13 @@ const EmployeeManager = () => {
   const [newTempPassword, setNewTempPassword] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [newRole, setNewRole] = useState<"employee" | "admin">("employee");
+
+  // Edit employee
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Create task form
   const [showTaskDialog, setShowTaskDialog] = useState(false);
@@ -78,13 +95,10 @@ const EmployeeManager = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch users with 'employee' or 'admin' role
       const { data: roles } = await supabase
         .from("user_roles")
         .select("user_id, role")
         .in("role", ["employee", "admin"]);
-
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (roles && roles.length > 0) {
         const allIds = roles.map(r => r.user_id);
@@ -115,16 +129,13 @@ const EmployeeManager = () => {
         setEmployees([]);
       }
 
-      // Fetch all tasks
       const { data: taskData, error: taskError } = await supabase
         .from("employee_tasks")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (taskError) throw taskError;
       setTasks((taskData || []) as Task[]);
 
-      // Fetch region assignments
       const { data: regionData } = await supabase
         .from("lead_region_assignments")
         .select("*");
@@ -133,16 +144,27 @@ const EmployeeManager = () => {
       // Fetch lead counts by biz_area
       const { data: leads } = await supabase
         .from("contact_messages")
-        .select("biz_area");
+        .select("biz_area, country");
       const counts: Record<string, number> = {};
       let total = 0;
+      let indiaCount = 0;
+      let otherCountryCount = 0;
       (leads || []).forEach((l: any) => {
         const area = l.biz_area || "Others";
-        const matched = KNOWN_REGIONS.find(r => r.toLowerCase() === area.toLowerCase()) || "Others";
+        const country = (l.country || "").trim().toLowerCase();
+        const knownIndianAreas = ALL_INDIAN_STATES.map(s => s.toLowerCase());
+        const isIndia = !country || country === "india" || knownIndianAreas.includes(area.toLowerCase());
+        
+        if (isIndia) indiaCount++;
+        else otherCountryCount++;
+
+        const matched = ALL_INDIAN_STATES.find(r => r.toLowerCase() === area.toLowerCase()) || "Others";
         counts[matched] = (counts[matched] || 0) + 1;
         total++;
       });
       counts["__total__"] = total;
+      counts["__india__"] = indiaCount;
+      counts["__other_countries__"] = otherCountryCount;
       setRegionLeadCounts(counts);
     } catch (error: any) {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
@@ -155,11 +177,9 @@ const EmployeeManager = () => {
     setSavingRegion(true);
     try {
       if (!employeeId) {
-        // Remove assignment
         await supabase.from("lead_region_assignments").delete().eq("biz_area", biz_area);
         setRegionAssignments(prev => prev.filter(r => r.biz_area !== biz_area));
       } else {
-        // Upsert assignment
         const { data, error } = await supabase
           .from("lead_region_assignments")
           .upsert({ biz_area, employee_id: employeeId } as any, { onConflict: "biz_area" })
@@ -198,7 +218,7 @@ const EmployeeManager = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Admin Created", description: `${newName} can now log in with username "${newUsername}".` });
+      toast({ title: "Account Created", description: `${newName} can now log in with username "${newUsername}".` });
       setShowCreateDialog(false);
       setNewEmail("");
       setNewName("");
@@ -211,6 +231,36 @@ const EmployeeManager = () => {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setCreating(false);
+    }
+  };
+
+  const openEditDialog = (emp: Employee) => {
+    setEditingEmployee(emp);
+    setEditName(emp.full_name);
+    setEditPhone(emp.phone);
+    setShowEditDialog(true);
+  };
+
+  const saveEditEmployee = async () => {
+    if (!editingEmployee || !editName.trim()) {
+      toast({ title: "Error", description: "Name is required", variant: "destructive" });
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: editName.trim(), phone: editPhone.trim() })
+        .eq("user_id", editingEmployee.user_id);
+      if (error) throw error;
+      toast({ title: "Updated", description: `${editName} details saved.` });
+      setShowEditDialog(false);
+      setEditingEmployee(null);
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -306,6 +356,10 @@ const EmployeeManager = () => {
     );
   }
 
+  // Get states that have leads (for region display)
+  const statesWithLeads = ALL_INDIAN_STATES.filter(s => (regionLeadCounts[s] || 0) > 0 || regionAssignments.some(r => r.biz_area === s));
+  const allRegionsToShow = [...new Set([...statesWithLeads, ...ALL_INDIAN_STATES.filter(s => regionAssignments.some(r => r.biz_area === s))])];
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
@@ -314,7 +368,7 @@ const EmployeeManager = () => {
             <ClipboardList className="w-6 h-6 text-primary" />
             <h2 className="text-2xl font-bold text-primary">Admin & Task Management</h2>
           </div>
-          <p className="text-sm text-muted-foreground">Create admin accounts and assign tasks</p>
+          <p className="text-sm text-muted-foreground">Create admin accounts, assign tasks, and manage lead regions</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
           <RefreshCw className="w-4 h-4" />
@@ -354,7 +408,7 @@ const EmployeeManager = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create Account</DialogTitle>
-                <DialogDescription>Create a new admin or employee account</DialogDescription>
+                <DialogDescription>Create a new admin account</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Full Name *" value={newName} onChange={(e) => setNewName(e.target.value)} />
@@ -362,7 +416,7 @@ const EmployeeManager = () => {
                   <Input placeholder="Username *" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
                   {newUsername.trim() && (
                     <p className="text-xs mt-1 text-amber-600">
-                      ⚠️ Make sure this username is unique. Existing: superadmin, kinnu
+                      ⚠️ Make sure this username is unique.
                     </p>
                   )}
                 </div>
@@ -374,16 +428,44 @@ const EmployeeManager = () => {
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="employee">Admin</SelectItem>
                     <SelectItem value="admin">Super Admin</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  {newRole === "admin" ? "This user will have full admin access." : "Employee will log in with their username and must change password on first login."}
+                  {newRole === "admin" ? "This user will have full super admin access." : "Admin will log in with their username and must change password on first login."}
                 </p>
                 <Button onClick={createEmployee} disabled={creating} className="w-full">
                   {creating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
                   Create Account
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Edit Dialog */}
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Admin Details</DialogTitle>
+                <DialogDescription>Update name and phone for {editingEmployee?.full_name}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Email (read-only)</label>
+                  <Input value={editingEmployee?.email || ""} disabled className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Full Name *</label>
+                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Phone</label>
+                  <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="mt-1" />
+                </div>
+                <Button onClick={saveEditEmployee} disabled={savingEdit} className="w-full">
+                  {savingEdit ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Pencil className="w-4 h-4 mr-2" />}
+                  Save Changes
                 </Button>
               </div>
             </DialogContent>
@@ -413,7 +495,7 @@ const EmployeeManager = () => {
                         <TableCell>{emp.phone || "-"}</TableCell>
                         <TableCell>
                           <Badge variant={emp.role === "admin" ? "default" : "secondary"}>
-                            {emp.role === "admin" ? "Super Admin" : "Employee"}
+                            {emp.role === "admin" ? "Super Admin" : "Admin"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -423,6 +505,9 @@ const EmployeeManager = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" title="Edit Details" onClick={() => openEditDialog(emp)}>
+                              <Pencil className="w-4 h-4 text-primary" />
+                            </Button>
                             <Button variant="ghost" size="sm" title="Reset Password" onClick={() => resetPassword(emp.email, emp.full_name)}>
                               <KeyRound className="w-4 h-4 text-primary" />
                             </Button>
@@ -549,21 +634,42 @@ const EmployeeManager = () => {
             <h3 className="text-lg font-semibold">Lead Regions</h3>
           </div>
 
-          {/* Lead counts summary */}
+          {/* Summary counts */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Card>
+              <CardContent className="py-4 text-center">
+                <p className="text-2xl font-bold text-primary">{regionLeadCounts["__total__"] || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">All Leads</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4 text-center">
+                <p className="text-2xl font-bold text-green-600">{regionLeadCounts["__india__"] || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">🇮🇳 India</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4 text-center">
+                <p className="text-2xl font-bold text-blue-600">{regionLeadCounts["__other_countries__"] || 0}</p>
+                <p className="text-xs text-muted-foreground mt-1">🌍 Other Countries</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Lead counts by state */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-semibold text-base">Leads by Region</h4>
-                <Badge variant="secondary" className="text-sm">Total: {regionLeadCounts["__total__"] || 0}</Badge>
+                <h4 className="font-semibold text-base">Leads by State / Region</h4>
               </div>
-              <div className="space-y-2">
-                {KNOWN_REGIONS.map((region) => {
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {ALL_INDIAN_STATES.filter(s => (regionLeadCounts[s] || 0) > 0).map((region) => {
                   const count = regionLeadCounts[region] || 0;
                   const total = regionLeadCounts["__total__"] || 1;
                   const pct = Math.round((count / total) * 100) || 0;
                   return (
                     <div key={region} className="flex items-center gap-3">
-                      <span className="w-36 text-sm font-medium truncate">{region}</span>
+                      <span className="w-44 text-sm font-medium truncate">{region}</span>
                       <div className="flex-1 h-7 bg-muted rounded-lg overflow-hidden relative">
                         <div
                           className="h-full bg-primary/80 rounded-lg transition-all"
@@ -574,6 +680,9 @@ const EmployeeManager = () => {
                     </div>
                   );
                 })}
+                {ALL_INDIAN_STATES.filter(s => (regionLeadCounts[s] || 0) > 0).length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No leads by region yet.</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -593,44 +702,46 @@ const EmployeeManager = () => {
             ) : (
               <Card>
                 <CardContent className="pt-6">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Region (BIZ Area)</TableHead>
-                        <TableHead>Leads</TableHead>
-                        <TableHead>Assigned Admin</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {KNOWN_REGIONS.map((region) => (
-                        <TableRow key={region}>
-                          <TableCell className="font-medium">{region}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{regionLeadCounts[region] || 0}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Select
-                              value={getRegionEmployee(region) || "__none__"}
-                              onValueChange={(v) => saveRegionAssignment(region, v === "__none__" ? null : v)}
-                              disabled={savingRegion}
-                            >
-                              <SelectTrigger className="w-[200px]">
-                                <SelectValue placeholder="Unassigned" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="__none__">Unassigned</SelectItem>
-                                {employees.map((emp) => (
-                                  <SelectItem key={emp.user_id} value={emp.user_id}>
-                                    {emp.full_name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
+                  <div className="max-h-[500px] overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Region / State</TableHead>
+                          <TableHead>Leads</TableHead>
+                          <TableHead>Assigned Admin</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {ALL_INDIAN_STATES.map((region) => (
+                          <TableRow key={region}>
+                            <TableCell className="font-medium">{region}</TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">{regionLeadCounts[region] || 0}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={getRegionEmployee(region) || "__none__"}
+                                onValueChange={(v) => saveRegionAssignment(region, v === "__none__" ? null : v)}
+                                disabled={savingRegion}
+                              >
+                                <SelectTrigger className="w-[200px]">
+                                  <SelectValue placeholder="Unassigned" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__none__">Unassigned</SelectItem>
+                                  {employees.map((emp) => (
+                                    <SelectItem key={emp.user_id} value={emp.user_id}>
+                                      {emp.full_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             )}

@@ -1,0 +1,1 @@
+ALTER TABLE public.contact_messages ADD COLUMN is_completed boolean NOT NULL DEFAULT false;
