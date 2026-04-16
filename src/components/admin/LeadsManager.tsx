@@ -832,6 +832,13 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                                 </SelectContent>
                               </Select>
                             </TableCell>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              <Checkbox
+                                checked={lead.is_completed}
+                                onCheckedChange={() => toggleCompleted(lead.id, lead.is_completed)}
+                                aria-label={`Mark ${lead.name} as completed`}
+                              />
+                            </TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
