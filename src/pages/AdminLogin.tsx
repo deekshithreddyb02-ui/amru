@@ -40,28 +40,21 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      // Look up email by username
-      const { data: email, error: lookupError } = await supabase.rpc("get_email_by_username", {
-        _username: username.trim().toLowerCase(),
-      });
-
-      if (lookupError || !email) {
-        toast({ title: "Error", description: "Invalid username or password", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-
-      // Check if login is allowed (attempt limit)
+      // Check login allowed AND resolve username→email server-side
       const checkRes = await supabase.functions.invoke("check-login", {
-        body: { email },
+        body: { username: username.trim().toLowerCase() },
       });
 
       if (checkRes.error) throw checkRes.error;
 
-      if (!checkRes.data?.allowed) {
+      const email = checkRes.data?.email;
+
+      if (!email || !checkRes.data?.allowed) {
         toast({
-          title: "Account Temporarily Blocked",
-          description: `Too many failed attempts. Please try again later. (${checkRes.data?.max_attempts} max attempts per hour)`,
+          title: !email ? "Error" : "Account Temporarily Blocked",
+          description: !email
+            ? "Invalid username or password"
+            : `Too many failed attempts. Please try again later. (${checkRes.data?.max_attempts} max attempts per hour)`,
           variant: "destructive",
         });
         setLoading(false);
@@ -77,7 +70,7 @@ const AdminLogin = () => {
         throw error;
       }
 
-      // Check user role - fetch all roles since user may have multiple
+      // Check user role
       const { data: rolesData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -202,4 +195,3 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
-

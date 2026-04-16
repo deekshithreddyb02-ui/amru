@@ -12,19 +12,61 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { email } = await req.json();
-
-    if (!email || typeof email !== "string") {
-      return new Response(
-        JSON.stringify({ error: "Email is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const body = await req.json();
+    const { username, email: directEmail } = body;
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    let email = directEmail;
+
+    // If username provided, resolve to email server-side
+    if (username && !email) {
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id")
+        .eq("username", username.toLowerCase().trim())
+        .limit(1)
+        .maybeSingle();
+
+      if (!profiles?.user_id) {
+        // Return generic "not allowed" to avoid username enumeration
+        return new Response(
+          JSON.stringify({
+            allowed: false,
+            attempts_remaining: 0,
+            max_attempts: 3,
+            email: null,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Lookup email from auth.users via admin client
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(profiles.user_id);
+      if (!userData?.user?.email) {
+        return new Response(
+          JSON.stringify({
+            allowed: false,
+            attempts_remaining: 0,
+            max_attempts: 3,
+            email: null,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      email = userData.user.email;
+    }
+
+    if (!email || typeof email !== "string") {
+      return new Response(
+        JSON.stringify({ error: "Username or email is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Get max attempts setting
     const { data: setting } = await supabaseAdmin
@@ -55,6 +97,8 @@ Deno.serve(async (req) => {
         allowed: !isBlocked,
         attempts_remaining: Math.max(0, maxAttempts - attemptCount),
         max_attempts: maxAttempts,
+        // Return email server-side so client can use it for signIn without calling RPC
+        email: email,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
