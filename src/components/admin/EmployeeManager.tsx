@@ -354,6 +354,7 @@ const EmployeeManager = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create Account</DialogTitle>
+                <DialogDescription>Create a new admin or employee account</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Full Name *" value={newName} onChange={(e) => setNewName(e.target.value)} />
