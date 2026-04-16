@@ -3,20 +3,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree } from "lucide-react";
+import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree, KeyRound } from "lucide-react";
 
 interface Employee {
   user_id: string;
   email: string;
   full_name: string;
   phone: string;
+  role: string;
 }
 
 interface Task {
@@ -77,18 +78,23 @@ const EmployeeManager = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch employees (users with 'employee' role)
+      // Fetch users with 'employee' or 'admin' role
       const { data: roles } = await supabase
         .from("user_roles")
-        .select("user_id")
-        .eq("role", "employee");
+        .select("user_id, role")
+        .in("role", ["employee", "admin"]);
+
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (roles && roles.length > 0) {
-        const employeeIds = roles.map(r => r.user_id);
+        const allIds = roles.map(r => r.user_id);
+        const roleMap = new Map<string, string>();
+        roles.forEach(r => roleMap.set(r.user_id, r.role));
+
         const { data: profiles } = await supabase
           .from("profiles")
           .select("user_id, full_name, phone")
-          .in("user_id", employeeIds);
+          .in("user_id", allIds);
 
         const { data: usersData } = await supabase.rpc("get_users_with_emails");
 
@@ -102,6 +108,7 @@ const EmployeeManager = () => {
           email: emailMap.get(p.user_id) || "",
           full_name: p.full_name || "",
           phone: p.phone || "",
+          role: roleMap.get(p.user_id) || "employee",
         }));
         setEmployees(emps);
       } else {
@@ -191,7 +198,7 @@ const EmployeeManager = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Employee Created", description: `${newName} can now log in with username "${newUsername}".` });
+      toast({ title: "Admin Created", description: `${newName} can now log in with username "${newUsername}".` });
       setShowCreateDialog(false);
       setNewEmail("");
       setNewName("");
@@ -204,6 +211,32 @@ const EmployeeManager = () => {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setCreating(false);
+    }
+  };
+
+  const deleteAdmin = async (userId: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const { data, error } = await supabase.rpc("admin_delete_user", { _target_user_id: userId });
+      if (error) throw error;
+      toast({ title: "Deleted", description: `${name} has been removed.` });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const resetPassword = async (email: string, name: string) => {
+    if (!confirm(`Send a password reset email to ${name} (${email})?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+        body: { email },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Password Reset Sent", description: `Reset email sent to ${email}.` });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 
@@ -321,6 +354,7 @@ const EmployeeManager = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create Account</DialogTitle>
+                <DialogDescription>Create a new admin or employee account</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Full Name *" value={newName} onChange={(e) => setNewName(e.target.value)} />
@@ -359,7 +393,9 @@ const EmployeeManager = () => {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
+                      <TableHead>Role</TableHead>
                       <TableHead>Tasks</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -369,9 +405,24 @@ const EmployeeManager = () => {
                         <TableCell>{emp.email}</TableCell>
                         <TableCell>{emp.phone || "-"}</TableCell>
                         <TableCell>
+                          <Badge variant={emp.role === "admin" ? "default" : "secondary"}>
+                            {emp.role === "admin" ? "Super Admin" : "Employee"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="secondary">
                             {tasks.filter(t => t.assigned_to === emp.user_id).length} tasks
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" title="Reset Password" onClick={() => resetPassword(emp.email, emp.full_name)}>
+                              <KeyRound className="w-4 h-4 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="sm" title="Delete" onClick={() => deleteAdmin(emp.user_id, emp.full_name)}>
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -396,6 +447,7 @@ const EmployeeManager = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Task to Admin</DialogTitle>
+                <DialogDescription>Create and assign a task to an admin</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Task Title *" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} />
