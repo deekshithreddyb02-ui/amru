@@ -134,6 +134,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [assigningId, setAssigningId] = useState<string | null>(null);
+  const [togglingCompleted, setTogglingCompleted] = useState<string | null>(null);
 
   const fetchEmployees = async () => {
     try {
