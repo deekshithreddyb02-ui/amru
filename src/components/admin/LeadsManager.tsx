@@ -852,7 +852,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${lead.id}-detail`}>
-                              <TableCell colSpan={16} className="bg-muted/30 p-4">
+                              <TableCell colSpan={17} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                   <div><span className="text-muted-foreground text-xs">First Name:</span> <span className="font-medium">{lead.firstname || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Last Name:</span> <span className="font-medium">{lead.name || "-"}</span></div>
