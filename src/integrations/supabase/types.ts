@@ -80,6 +80,7 @@ export type Database = {
           expected_close: string | null
           firstname: string | null
           id: string
+          is_completed: boolean
           is_read: boolean | null
           latitude: string | null
           longitude: string | null
@@ -112,6 +113,7 @@ export type Database = {
           expected_close?: string | null
           firstname?: string | null
           id?: string
+          is_completed?: boolean
           is_read?: boolean | null
           latitude?: string | null
           longitude?: string | null
@@ -144,6 +146,7 @@ export type Database = {
           expected_close?: string | null
           firstname?: string | null
           id?: string
+          is_completed?: boolean
           is_read?: boolean | null
           latitude?: string | null
           longitude?: string | null
