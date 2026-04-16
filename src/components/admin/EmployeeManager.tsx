@@ -447,6 +447,7 @@ const EmployeeManager = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Task to Admin</DialogTitle>
+                <DialogDescription>Create and assign a task to an admin</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Task Title *" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} />
