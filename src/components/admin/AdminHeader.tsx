@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import defaultLogo from "@/assets/logo-small.webp";
 
 interface BrandingMeta {
@@ -16,6 +16,8 @@ const AdminHeader = () => {
   const navigate = useNavigate();
   const [logo, setLogo] = useState(defaultLogo);
   const [companyName, setCompanyName] = useState(DEFAULT_COMPANY_NAME);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     const fetchBranding = async () => {
@@ -35,7 +37,28 @@ const AdminHeader = () => {
         // fallback to defaults
       }
     };
+
+    const fetchUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUserEmail(session.user.email || "");
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name, username")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          if (profile) {
+            setUserName(profile.full_name || profile.username || "");
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
     fetchBranding();
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
@@ -64,7 +87,18 @@ const AdminHeader = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5">
+            <User className="w-4 h-4 text-primary-foreground/70" />
+            <div className="flex flex-col">
+              <span className="text-xs font-medium leading-tight truncate max-w-[180px]">
+                {userName || "Admin"}
+              </span>
+              <span className="text-[10px] text-primary-foreground/60 leading-tight truncate max-w-[180px]">
+                {userEmail}
+              </span>
+            </div>
+          </div>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10">
             <LogOut className="w-4 h-4 mr-1.5" />
             <span className="hidden sm:inline">Logout</span>
