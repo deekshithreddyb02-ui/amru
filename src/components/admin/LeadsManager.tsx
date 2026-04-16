@@ -33,6 +33,7 @@ interface Lead {
   service: string | null;
   message: string;
   is_read: boolean;
+  is_completed: boolean;
   created_at: string;
   whatsapp: string | null;
   primary_phone: string | null;
