@@ -174,6 +174,19 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     }
   };
 
+  const toggleCompleted = async (leadId: string, currentValue: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ is_completed: !currentValue } as any)
+        .eq("id", leadId);
+      if (error) throw error;
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, is_completed: !currentValue } : l));
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
   const getEmployeeName = (userId: string | null) => {
     if (!userId) return null;
     const emp = employees.find(e => e.user_id === userId);
