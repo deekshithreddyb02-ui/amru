@@ -393,7 +393,9 @@ const EmployeeManager = () => {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
+                      <TableHead>Role</TableHead>
                       <TableHead>Tasks</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -403,9 +405,24 @@ const EmployeeManager = () => {
                         <TableCell>{emp.email}</TableCell>
                         <TableCell>{emp.phone || "-"}</TableCell>
                         <TableCell>
+                          <Badge variant={emp.role === "admin" ? "default" : "secondary"}>
+                            {emp.role === "admin" ? "Super Admin" : "Employee"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           <Badge variant="secondary">
                             {tasks.filter(t => t.assigned_to === emp.user_id).length} tasks
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" title="Reset Password" onClick={() => resetPassword(emp.email, emp.full_name)}>
+                              <KeyRound className="w-4 h-4 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="sm" title="Delete" onClick={() => deleteAdmin(emp.user_id, emp.full_name)}>
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
