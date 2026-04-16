@@ -7,11 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree, KeyRound } from "lucide-react";
-import { DialogDescription } from "@/components/ui/dialog";
 
 interface Employee {
   user_id: string;
