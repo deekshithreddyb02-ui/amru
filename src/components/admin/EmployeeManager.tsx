@@ -199,7 +199,7 @@ const EmployeeManager = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Employee Created", description: `${newName} can now log in with username "${newUsername}".` });
+      toast({ title: "Admin Created", description: `${newName} can now log in with username "${newUsername}".` });
       setShowCreateDialog(false);
       setNewEmail("");
       setNewName("");
@@ -212,6 +212,32 @@ const EmployeeManager = () => {
       toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally {
       setCreating(false);
+    }
+  };
+
+  const deleteAdmin = async (userId: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const { data, error } = await supabase.rpc("admin_delete_user", { _target_user_id: userId });
+      if (error) throw error;
+      toast({ title: "Deleted", description: `${name} has been removed.` });
+      fetchData();
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const resetPassword = async (email: string, name: string) => {
+    if (!confirm(`Send a password reset email to ${name} (${email})?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-reset-password", {
+        body: { email },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Password Reset Sent", description: `Reset email sent to ${email}.` });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     }
   };
 
