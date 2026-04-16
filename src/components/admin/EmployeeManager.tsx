@@ -358,7 +358,14 @@ const EmployeeManager = () => {
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input placeholder="Full Name *" value={newName} onChange={(e) => setNewName(e.target.value)} />
-                <Input placeholder="Username *" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
+                <div>
+                  <Input placeholder="Username *" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} />
+                  {newUsername.trim() && (
+                    <p className="text-xs mt-1 text-amber-600">
+                      ⚠️ Make sure this username is unique. Existing: superadmin, kinnu
+                    </p>
+                  )}
+                </div>
                 <Input type="email" placeholder="Email *" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
                 <Input placeholder="Phone (optional)" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
                 <Input type="password" placeholder="Temporary Password * (min 8 chars)" value={newTempPassword} onChange={(e) => setNewTempPassword(e.target.value)} />
