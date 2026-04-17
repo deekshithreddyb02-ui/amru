@@ -284,63 +284,7 @@ const EmployeeManager = () => {
     }
   };
 
-  const createTask = async () => {
-    if (!taskTitle || !taskAssignee) {
-      toast({ title: "Error", description: "Title and assignee are required", variant: "destructive" });
-      return;
-    }
-    setCreatingTask(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase.from("employee_tasks").insert({
-        title: taskTitle,
-        description: taskDesc || null,
-        assigned_to: taskAssignee,
-        assigned_by: user!.id,
-        priority: taskPriority as any,
-        due_date: taskDueDate || null,
-      } as any);
 
-      if (error) throw error;
-
-      toast({ title: "Task Created" });
-      setShowTaskDialog(false);
-      setTaskTitle("");
-      setTaskDesc("");
-      setTaskAssignee("");
-      setTaskPriority("medium");
-      setTaskDueDate("");
-      fetchData();
-    } catch (error: any) {
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
-    } finally {
-      setCreatingTask(false);
-    }
-  };
-
-  const deleteTask = async (taskId: string) => {
-    if (!confirm("Delete this task?")) return;
-    try {
-      const { error } = await supabase.from("employee_tasks").delete().eq("id", taskId);
-      if (error) throw error;
-      setTasks(tasks.filter(t => t.id !== taskId));
-      toast({ title: "Task Deleted" });
-    } catch (error: any) {
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
-    }
-  };
-
-  const getEmployeeName = (userId: string) => {
-    const emp = employees.find(e => e.user_id === userId);
-    return emp?.full_name || userId.slice(0, 8);
-  };
-
-  const priorityColors: Record<string, string> = {
-    low: "bg-muted text-muted-foreground",
-    medium: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-    urgent: "bg-destructive/10 text-destructive",
-  };
 
   if (loading) {
     return (
