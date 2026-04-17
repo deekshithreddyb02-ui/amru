@@ -497,11 +497,6 @@ const EmployeeManager = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
-                            {tasks.filter(t => t.assigned_to === emp.user_id).length} tasks
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
                           <div className="flex gap-1">
                             <Button variant="ghost" size="sm" title="Edit Details" onClick={() => openEditDialog(emp)}>
                               <Pencil className="w-4 h-4 text-primary" />
