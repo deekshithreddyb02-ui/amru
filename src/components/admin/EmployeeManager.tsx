@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
-import { Loader2, Plus, UserPlus, ClipboardList, RefreshCw, Trash2, Calendar, FolderTree, KeyRound, Pencil } from "lucide-react";
+import { Loader2, UserPlus, ClipboardList, RefreshCw, Trash2, FolderTree, KeyRound, Pencil } from "lucide-react";
 
 interface Employee {
   user_id: string;
@@ -20,17 +19,7 @@ interface Employee {
   role: string;
 }
 
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  assigned_to: string;
-  status: string;
-  priority: string;
-  due_date: string | null;
-  notes: string | null;
-  created_at: string;
-}
+
 
 interface RegionAssignment {
   id: string;
@@ -53,9 +42,8 @@ const ALL_INDIAN_STATES = [
 const EmployeeManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"employees" | "tasks" | "regions">("employees");
+  const [tab, setTab] = useState<"employees" | "regions">("employees");
 
   // Create employee form
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -73,15 +61,6 @@ const EmployeeManager = () => {
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
-
-  // Create task form
-  const [showTaskDialog, setShowTaskDialog] = useState(false);
-  const [creatingTask, setCreatingTask] = useState(false);
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
-  const [taskAssignee, setTaskAssignee] = useState("");
-  const [taskPriority, setTaskPriority] = useState("medium");
-  const [taskDueDate, setTaskDueDate] = useState("");
 
   // Region assignments
   const [regionAssignments, setRegionAssignments] = useState<RegionAssignment[]>([]);
@@ -129,12 +108,7 @@ const EmployeeManager = () => {
         setEmployees([]);
       }
 
-      const { data: taskData, error: taskError } = await supabase
-        .from("employee_tasks")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (taskError) throw taskError;
-      setTasks((taskData || []) as Task[]);
+
 
       const { data: regionData } = await supabase
         .from("lead_region_assignments")
@@ -290,63 +264,7 @@ const EmployeeManager = () => {
     }
   };
 
-  const createTask = async () => {
-    if (!taskTitle || !taskAssignee) {
-      toast({ title: "Error", description: "Title and assignee are required", variant: "destructive" });
-      return;
-    }
-    setCreatingTask(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase.from("employee_tasks").insert({
-        title: taskTitle,
-        description: taskDesc || null,
-        assigned_to: taskAssignee,
-        assigned_by: user!.id,
-        priority: taskPriority as any,
-        due_date: taskDueDate || null,
-      } as any);
 
-      if (error) throw error;
-
-      toast({ title: "Task Created" });
-      setShowTaskDialog(false);
-      setTaskTitle("");
-      setTaskDesc("");
-      setTaskAssignee("");
-      setTaskPriority("medium");
-      setTaskDueDate("");
-      fetchData();
-    } catch (error: any) {
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
-    } finally {
-      setCreatingTask(false);
-    }
-  };
-
-  const deleteTask = async (taskId: string) => {
-    if (!confirm("Delete this task?")) return;
-    try {
-      const { error } = await supabase.from("employee_tasks").delete().eq("id", taskId);
-      if (error) throw error;
-      setTasks(tasks.filter(t => t.id !== taskId));
-      toast({ title: "Task Deleted" });
-    } catch (error: any) {
-      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
-    }
-  };
-
-  const getEmployeeName = (userId: string) => {
-    const emp = employees.find(e => e.user_id === userId);
-    return emp?.full_name || userId.slice(0, 8);
-  };
-
-  const priorityColors: Record<string, string> = {
-    low: "bg-muted text-muted-foreground",
-    medium: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-    high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-    urgent: "bg-destructive/10 text-destructive",
-  };
 
   if (loading) {
     return (
@@ -366,9 +284,9 @@ const EmployeeManager = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ClipboardList className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold text-primary">Admin & Task Management</h2>
+            <h2 className="text-2xl font-bold text-primary">Admin Management</h2>
           </div>
-          <p className="text-sm text-muted-foreground">Create admin accounts, assign tasks, and manage lead regions</p>
+          <p className="text-sm text-muted-foreground">Create admin accounts and manage lead regions</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
           <RefreshCw className="w-4 h-4" />
@@ -380,7 +298,6 @@ const EmployeeManager = () => {
       <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
         {[
           { key: "employees" as const, label: "Admins", count: employees.length },
-          { key: "tasks" as const, label: "Tasks", count: tasks.length },
           { key: "regions" as const, label: "Lead Regions", count: regionAssignments.length },
         ].map(({ key, label, count }) => (
           <Button
@@ -483,7 +400,6 @@ const EmployeeManager = () => {
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Role</TableHead>
-                      <TableHead>Tasks</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -496,11 +412,6 @@ const EmployeeManager = () => {
                         <TableCell>
                           <Badge variant={emp.role === "admin" ? "default" : "secondary"}>
                             {emp.role === "admin" ? "Super Admin" : "Admin"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {tasks.filter(t => t.assigned_to === emp.user_id).length} tasks
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -526,105 +437,7 @@ const EmployeeManager = () => {
         </div>
       )}
 
-      {/* Tasks Tab */}
-      {tab === "tasks" && (
-        <div className="space-y-4">
-          <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
-            <DialogTrigger asChild>
-              <Button className="gap-2" disabled={employees.length === 0}>
-                <Plus className="w-4 h-4" />
-                Assign New Task
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Assign Task to Admin</DialogTitle>
-                <DialogDescription>Create and assign a task to an admin</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <Input placeholder="Task Title *" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} />
-                <Textarea placeholder="Description (optional)" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} rows={3} />
-                <Select value={taskAssignee} onValueChange={setTaskAssignee}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Assign to admin *" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map((emp) => (
-                      <SelectItem key={emp.user_id} value={emp.user_id}>
-                        {emp.full_name} ({emp.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={taskPriority} onValueChange={setTaskPriority}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="date" value={taskDueDate} onChange={(e) => setTaskDueDate(e.target.value)} className="pl-10" placeholder="Due date (optional)" />
-                </div>
-                <Button onClick={createTask} disabled={creatingTask} className="w-full">
-                  {creatingTask ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                  Create Task
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
-          <Card>
-            <CardContent className="pt-6">
-              {tasks.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No tasks yet. Assign one above.</p>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Assigned To</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tasks.map((task) => (
-                      <TableRow key={task.id}>
-                        <TableCell className="font-medium">{task.title}</TableCell>
-                        <TableCell>{getEmployeeName(task.assigned_to)}</TableCell>
-                        <TableCell>
-                          <Badge className={priorityColors[task.priority] || ""}>{task.priority}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={task.status === "completed" ? "default" : "secondary"}>
-                            {task.status.replace("_", " ")}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {task.due_date ? new Date(task.due_date).toLocaleDateString() : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => deleteTask(task.id)}>
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Lead Regions Tab */}
       {tab === "regions" && (
