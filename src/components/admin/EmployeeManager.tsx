@@ -129,12 +129,7 @@ const EmployeeManager = () => {
         setEmployees([]);
       }
 
-      const { data: taskData, error: taskError } = await supabase
-        .from("employee_tasks")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (taskError) throw taskError;
-      setTasks((taskData || []) as Task[]);
+
 
       const { data: regionData } = await supabase
         .from("lead_region_assignments")
