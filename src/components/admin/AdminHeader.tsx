@@ -87,14 +87,14 @@ const AdminHeader = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5">
-            <User className="w-4 h-4 text-primary-foreground/70" />
-            <div className="flex flex-col">
-              <span className="text-xs font-medium leading-tight truncate max-w-[180px]">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 bg-white/10 rounded-lg px-2 sm:px-3 py-1.5">
+            <User className="w-4 h-4 text-primary-foreground/70 shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-medium leading-tight truncate max-w-[110px] sm:max-w-[180px]">
                 {userName || "Admin"}
               </span>
-              <span className="text-[10px] text-primary-foreground/60 leading-tight truncate max-w-[180px]">
+              <span className="text-[10px] text-primary-foreground/60 leading-tight truncate max-w-[110px] sm:max-w-[180px]">
                 {userEmail}
               </span>
             </div>
