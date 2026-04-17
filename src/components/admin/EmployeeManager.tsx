@@ -19,17 +19,7 @@ interface Employee {
   role: string;
 }
 
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  assigned_to: string;
-  status: string;
-  priority: string;
-  due_date: string | null;
-  notes: string | null;
-  created_at: string;
-}
+
 
 interface RegionAssignment {
   id: string;
