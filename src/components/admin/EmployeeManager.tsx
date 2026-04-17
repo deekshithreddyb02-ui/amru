@@ -380,7 +380,6 @@ const EmployeeManager = () => {
       <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
         {[
           { key: "employees" as const, label: "Admins", count: employees.length },
-          { key: "tasks" as const, label: "Tasks", count: tasks.length },
           { key: "regions" as const, label: "Lead Regions", count: regionAssignments.length },
         ].map(({ key, label, count }) => (
           <Button
