@@ -178,7 +178,7 @@ const EmployeeDashboard = () => {
           <div className="flex items-center gap-3">
             <img src={defaultLogo} alt="Logo" className="w-10 h-10 object-contain rounded-full bg-white/10 p-0.5" />
             <div className="flex flex-col">
-              <span className="text-sm font-semibold leading-tight">Employee Dashboard</span>
+              <span className="text-sm font-semibold leading-tight">Admin Dashboard</span>
               <span className="text-xs text-primary-foreground/70">Task Management</span>
             </div>
           </div>
