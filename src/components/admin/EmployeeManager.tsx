@@ -42,9 +42,8 @@ const ALL_INDIAN_STATES = [
 const EmployeeManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"employees" | "tasks" | "regions">("employees");
+  const [tab, setTab] = useState<"employees" | "regions">("employees");
 
   // Create employee form
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -62,15 +61,6 @@ const EmployeeManager = () => {
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
-
-  // Create task form
-  const [showTaskDialog, setShowTaskDialog] = useState(false);
-  const [creatingTask, setCreatingTask] = useState(false);
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
-  const [taskAssignee, setTaskAssignee] = useState("");
-  const [taskPriority, setTaskPriority] = useState("medium");
-  const [taskDueDate, setTaskDueDate] = useState("");
 
   // Region assignments
   const [regionAssignments, setRegionAssignments] = useState<RegionAssignment[]>([]);
