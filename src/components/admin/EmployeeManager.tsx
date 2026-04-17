@@ -366,9 +366,9 @@ const EmployeeManager = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ClipboardList className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold text-primary">Admin & Task Management</h2>
+            <h2 className="text-2xl font-bold text-primary">Admin Management</h2>
           </div>
-          <p className="text-sm text-muted-foreground">Create admin accounts, assign tasks, and manage lead regions</p>
+          <p className="text-sm text-muted-foreground">Create admin accounts and manage lead regions</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
           <RefreshCw className="w-4 h-4" />
