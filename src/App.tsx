@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 // Lazy load non-critical routes to reduce initial bundle size
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
+const SuperAdmin = lazy(() => import("./pages/SuperAdmin"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
@@ -33,6 +34,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/super-admin" element={<SuperAdmin />} />
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/employee" element={<EmployeeDashboard />} />
               <Route path="/change-password" element={<ChangePassword />} />
