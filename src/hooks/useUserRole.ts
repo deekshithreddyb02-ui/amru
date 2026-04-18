@@ -22,14 +22,16 @@ export const useUserRole = () => {
 
         setUserId(session.user.id);
 
-        // Get role
-        const { data: roleData } = await supabase
+        // Get all roles, then pick the highest priority
+        const { data: roleRows } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+          .eq("user_id", session.user.id);
 
-        setRole((roleData?.role as AppRole) || "user");
+        const roles = (roleRows || []).map((r: any) => r.role as AppRole);
+        const priority: AppRole[] = ["super_admin", "admin", "employee", "user"];
+        const best = priority.find((r) => roles.includes(r)) || "user";
+        setRole(best);
 
         // Check must_change_password
         const { data: profile } = await supabase
