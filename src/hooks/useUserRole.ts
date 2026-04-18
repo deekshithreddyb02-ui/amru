@@ -56,5 +56,13 @@ export const useUserRole = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  return { role, loading, userId, mustChangePassword, isAdmin: role === "admin", isEmployee: role === "employee" };
+  return {
+    role,
+    loading,
+    userId,
+    mustChangePassword,
+    isSuperAdmin: role === "super_admin",
+    isAdmin: role === "admin" || role === "super_admin",
+    isEmployee: role === "employee",
+  };
 };
