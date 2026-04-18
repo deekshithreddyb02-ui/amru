@@ -393,22 +393,28 @@ export type Database = {
       }
       lead_region_assignments: {
         Row: {
-          biz_area: string
+          assignee_role: string
+          biz_area: string | null
           created_at: string
           employee_id: string
           id: string
+          region_key: string | null
         }
         Insert: {
-          biz_area: string
+          assignee_role?: string
+          biz_area?: string | null
           created_at?: string
           employee_id: string
           id?: string
+          region_key?: string | null
         }
         Update: {
-          biz_area?: string
+          assignee_role?: string
+          biz_area?: string | null
           created_at?: string
           employee_id?: string
           id?: string
+          region_key?: string | null
         }
         Relationships: []
       }
