@@ -12,11 +12,7 @@ interface BrandingMeta {
 
 const DEFAULT_COMPANY_NAME = "Amruta HydroGeo Services";
 
-interface AdminHeaderProps {
-  subtitle?: string;
-}
-
-const AdminHeader = ({ subtitle = "Admin Dashboard" }: AdminHeaderProps) => {
+const AdminHeader = () => {
   const navigate = useNavigate();
   const [logo, setLogo] = useState(defaultLogo);
   const [companyName, setCompanyName] = useState(DEFAULT_COMPANY_NAME);
@@ -87,7 +83,7 @@ const AdminHeader = ({ subtitle = "Admin Dashboard" }: AdminHeaderProps) => {
             <span className="text-sm font-semibold leading-tight truncate max-w-[200px] md:max-w-none">
               {companyName}
             </span>
-            <span className="text-xs text-primary-foreground/70">{subtitle}</span>
+            <span className="text-xs text-primary-foreground/70">Admin Dashboard</span>
           </div>
         </div>
 
