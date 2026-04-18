@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAdmin } from "@/hooks/useAdmin";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,9 +48,9 @@ interface Message {
   created_at: string;
 }
 
-const Admin = () => {
+const SuperAdmin = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: adminLoading } = useAdmin();
+  const { isAdmin, isSuperAdmin, loading: adminLoading } = useUserRole();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -91,16 +91,22 @@ const Admin = () => {
   const isRevealed = (id: string, field: string) => revealedFields.has(`${id}-${field}`);
 
   useEffect(() => {
-    if (!adminLoading && !isAdmin) {
+    if (adminLoading) return;
+    if (!isAdmin) {
       navigate("/admin-login");
+      return;
     }
-  }, [isAdmin, adminLoading, navigate]);
+    // Regular admins are not allowed on the Super Admin dashboard
+    if (!isSuperAdmin) {
+      navigate("/admin", { replace: true });
+    }
+  }, [isAdmin, isSuperAdmin, adminLoading, navigate]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isSuperAdmin) {
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isSuperAdmin]);
 
   const fetchData = async () => {
     setLoadingData(true);
