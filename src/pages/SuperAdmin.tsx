@@ -24,6 +24,7 @@ import LeadsManager from "@/components/admin/LeadsManager";
 import SettingsModule from "@/components/admin/SettingsModule";
 import AdminHeader from "@/components/admin/AdminHeader";
 import EmployeeManager from "@/components/admin/EmployeeManager";
+import RegionAssignmentManager from "@/components/admin/RegionAssignmentManager";
 
 interface User {
   id: string;
@@ -405,17 +406,13 @@ const SuperAdmin = () => {
                 <Mail className="w-4 h-4 shrink-0" />
                 <span className="truncate">Leads</span>
               </TabsTrigger>
-              <TabsTrigger value="users" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
-                <Users className="w-4 h-4 shrink-0" />
-                <span className="truncate">Users</span>
+              <TabsTrigger value="employees" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
+                <ClipboardList className="w-4 h-4 shrink-0" />
+                <span className="truncate">Admins</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
                 <BarChart3 className="w-4 h-4 shrink-0" />
                 <span className="truncate">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="employees" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
-                <ClipboardList className="w-4 h-4 shrink-0" />
-                <span className="truncate">Admins</span>
               </TabsTrigger>
               <TabsTrigger value="modify" className="flex-1 gap-1 md:gap-2 py-2.5 md:py-3 px-2 md:px-6 rounded-lg text-xs md:text-sm font-medium text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all min-w-0">
                 <Settings className="w-4 h-4 shrink-0" />
@@ -433,7 +430,10 @@ const SuperAdmin = () => {
             </TabsContent>
 
             <TabsContent value="employees">
-              <EmployeeManager />
+              <div className="space-y-8">
+                <RegionAssignmentManager />
+                <EmployeeManager />
+              </div>
             </TabsContent>
 
             <TabsContent value="users">
