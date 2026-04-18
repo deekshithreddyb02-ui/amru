@@ -391,7 +391,7 @@ const SuperAdmin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Tabs defaultValue="leads">
-        <AdminHeader />
+        <AdminHeader subtitle="Super Admin Dashboard" />
 
       <main className="container mx-auto px-4 py-8">
         <motion.div
@@ -850,4 +850,4 @@ const SuperAdmin = () => {
   );
 };
 
-export default Admin;
+export default SuperAdmin;
