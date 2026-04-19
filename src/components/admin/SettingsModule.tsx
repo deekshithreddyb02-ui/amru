@@ -4,6 +4,7 @@ import {
   LayoutList, BarChart3, Sparkles, Info, HelpCircle, MessageSquareQuote,
   Wrench, Image, Navigation, MapPin, PanelBottom, Scale, Phone,
   ExternalLink, ChevronRight, Settings, Globe, Layers, Shield, Palette,
+  Award,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
 import BrandingEditor from "@/components/admin/BrandingEditor";
 import LoginSecurityEditor from "@/components/admin/LoginSecurityEditor";
+import CertificationsEditor from "@/components/admin/CertificationsEditor";
 
 interface SettingsItem {
   key: string;
@@ -63,6 +65,7 @@ const settingsGroups: SettingsGroup[] = [
       { key: "testimonials", label: "Testimonials", icon: MessageSquareQuote, description: "Client reviews & ratings" },
       { key: "feedback", label: "Customer Feedback", icon: BarChart3, description: "Feedback media & highlights" },
       { key: "gallery", label: "Project Gallery", icon: Image, description: "Photos from field & projects" },
+      { key: "certifications", label: "Certifications & Partnerships", icon: Award, description: "Edit certification cards & icons" },
     ],
   },
   {
@@ -201,6 +204,7 @@ const SettingsModule = () => {
           {activeKey === "services" && <ServiceEditor />}
           {activeKey === "gallery" && <GalleryEditor />}
           {activeKey === "feedback" && <FeedbackEditor />}
+          {activeKey === "certifications" && <CertificationsEditor />}
           {activeKey === "navbar" && <NavbarEditor />}
           {activeKey === "offices" && <OfficeEditor />}
           {activeKey === "contacts" && <ContactEditor />}
