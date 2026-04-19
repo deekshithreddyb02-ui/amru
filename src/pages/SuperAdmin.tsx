@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAdmin } from "@/hooks/useAdmin";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,9 +48,9 @@ interface Message {
   created_at: string;
 }
 
-const Admin = () => {
+const SuperAdmin = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: adminLoading } = useAdmin();
+  const { isSuperAdmin, isAdmin, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -91,16 +91,21 @@ const Admin = () => {
   const isRevealed = (id: string, field: string) => revealedFields.has(`${id}-${field}`);
 
   useEffect(() => {
-    if (!adminLoading && !isAdmin) {
-      navigate("/admin-login");
+    if (!roleLoading) {
+      if (!isAdmin) {
+        navigate("/admin-login");
+      } else if (!isSuperAdmin) {
+        // Regular admins go to the simplified dashboard
+        navigate("/admin");
+      }
     }
-  }, [isAdmin, adminLoading, navigate]);
+  }, [isAdmin, isSuperAdmin, roleLoading, navigate]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isSuperAdmin) {
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isSuperAdmin]);
 
   const fetchData = async () => {
     setLoadingData(true);
@@ -372,7 +377,7 @@ const Admin = () => {
   };
 
 
-  if (adminLoading || loadingData) {
+  if (roleLoading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -385,7 +390,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Tabs defaultValue="leads">
-        <AdminHeader />
+        <AdminHeader subtitle="Super Admin Dashboard" />
 
       <main className="container mx-auto px-4 py-8">
         <motion.div
