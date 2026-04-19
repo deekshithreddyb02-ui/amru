@@ -393,22 +393,28 @@ export type Database = {
       }
       lead_region_assignments: {
         Row: {
-          biz_area: string
+          assignee_role: string
+          biz_area: string | null
           created_at: string
           employee_id: string
           id: string
+          region_key: string | null
         }
         Insert: {
-          biz_area: string
+          assignee_role?: string
+          biz_area?: string | null
           created_at?: string
           employee_id: string
           id?: string
+          region_key?: string | null
         }
         Update: {
-          biz_area?: string
+          assignee_role?: string
+          biz_area?: string | null
           created_at?: string
           employee_id?: string
           id?: string
+          region_key?: string | null
         }
         Relationships: []
       }
@@ -817,9 +823,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user" | "employee"
+      app_role: "admin" | "user" | "employee" | "super_admin"
       booking_status:
         | "pending"
         | "confirmed"
@@ -962,7 +969,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "employee"],
+      app_role: ["admin", "user", "employee", "super_admin"],
       booking_status: [
         "pending",
         "confirmed",
