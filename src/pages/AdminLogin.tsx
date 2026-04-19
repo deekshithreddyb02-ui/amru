@@ -16,19 +16,21 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role, loading: roleLoading, mustChangePassword, isAdmin, isEmployee } = useUserRole();
+  const { role, loading: roleLoading, mustChangePassword, isAdmin, isSuperAdmin, isEmployee } = useUserRole();
 
   useEffect(() => {
     if (!roleLoading) {
       if (mustChangePassword) {
         navigate("/change-password");
+      } else if (isSuperAdmin) {
+        navigate("/super-admin");
       } else if (isAdmin) {
         navigate("/admin");
       } else if (isEmployee) {
         navigate("/employee");
       }
     }
-  }, [role, roleLoading, mustChangePassword, navigate, isAdmin, isEmployee]);
+  }, [role, roleLoading, mustChangePassword, navigate, isAdmin, isSuperAdmin, isEmployee]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +79,8 @@ const AdminLogin = () => {
         .eq('user_id', data.user.id);
 
       const roles = (rolesData || []).map(r => r.role);
-      const isAdminRole = roles.includes('admin');
+      const isSuperAdminRole = roles.includes('super_admin');
+      const isAdminRole = roles.includes('admin') || isSuperAdminRole;
       const isEmployeeRole = roles.includes('employee');
 
       if (roleError || (!isAdminRole && !isEmployeeRole)) {
@@ -107,7 +110,10 @@ const AdminLogin = () => {
         return;
       }
 
-      if (isAdminRole) {
+      if (isSuperAdminRole) {
+        toast({ title: "Welcome Super Admin!", description: "Redirecting to dashboard..." });
+        navigate("/super-admin");
+      } else if (isAdminRole) {
         toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
         navigate("/admin");
       } else {
