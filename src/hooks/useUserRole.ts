@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "employee" | "user";
+export type AppRole = "super_admin" | "admin" | "employee" | "user";
 
 export const useUserRole = () => {
   const [role, setRole] = useState<AppRole | null>(null);
@@ -22,14 +22,18 @@ export const useUserRole = () => {
 
         setUserId(session.user.id);
 
-        // Get role
-        const { data: roleData } = await supabase
+        // Get all roles for this user; pick highest-priority role
+        const { data: rolesData } = await supabase
           .from("user_roles")
           .select("role")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
+          .eq("user_id", session.user.id);
 
-        setRole((roleData?.role as AppRole) || "user");
+        const roles = (rolesData || []).map((r) => r.role as AppRole);
+        let resolved: AppRole = "user";
+        if (roles.includes("super_admin")) resolved = "super_admin";
+        else if (roles.includes("admin")) resolved = "admin";
+        else if (roles.includes("employee")) resolved = "employee";
+        setRole(resolved);
 
         // Check must_change_password
         const { data: profile } = await supabase
@@ -56,5 +60,14 @@ export const useUserRole = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  return { role, loading, userId, mustChangePassword, isAdmin: role === "admin", isEmployee: role === "employee" };
+  return {
+    role,
+    loading,
+    userId,
+    mustChangePassword,
+    isSuperAdmin: role === "super_admin",
+    // isAdmin is true for both admin and super_admin (legacy convenience)
+    isAdmin: role === "admin" || role === "super_admin",
+    isEmployee: role === "employee",
+  };
 };
