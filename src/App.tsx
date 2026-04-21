@@ -20,8 +20,10 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const CrmLayout = lazy(() => import("./components/crm/CrmLayout"));
 const CrmDashboard = lazy(() => import("./pages/crm/CrmDashboard"));
 const CrmLeads = lazy(() => import("./pages/crm/CrmLeads"));
+const CrmContacts = lazy(() => import("./pages/crm/CrmContacts"));
+const CrmOrganizations = lazy(() => import("./pages/crm/CrmOrganizations"));
+const CrmDeals = lazy(() => import("./pages/crm/CrmDealsKanban"));
 const CrmWorkspacesAdmin = lazy(() => import("./pages/crm/CrmWorkspacesAdmin"));
-const CrmDeals = lazy(() => import("./pages/crm/CrmPlaceholder").then((m) => ({ default: m.CrmDeals })));
 const CrmReports = lazy(() => import("./pages/crm/CrmPlaceholder").then((m) => ({ default: m.CrmReports })));
 
 const queryClient = new QueryClient();
@@ -53,6 +55,8 @@ const App = () => {
               <Route path="/crm/:slug" element={<CrmLayout />}>
                 <Route path="dashboard" element={<CrmDashboard />} />
                 <Route path="leads" element={<CrmLeads />} />
+                <Route path="contacts" element={<CrmContacts />} />
+                <Route path="organizations" element={<CrmOrganizations />} />
                 <Route path="deals" element={<CrmDeals />} />
                 <Route path="reports" element={<CrmReports />} />
               </Route>

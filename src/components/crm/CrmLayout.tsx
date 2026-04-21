@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 const NAV = [
   { to: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "leads", label: "Leads", icon: Users },
+  { to: "contacts", label: "Contacts", icon: UserRound },
+  { to: "organizations", label: "Organizations", icon: Building },
   { to: "deals", label: "Deals", icon: Briefcase },
   { to: "reports", label: "Reports", icon: FileText },
 ];
