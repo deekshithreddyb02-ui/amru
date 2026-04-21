@@ -16,6 +16,14 @@ const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// CRM (Amruta Geo CRM)
+const CrmLayout = lazy(() => import("./components/crm/CrmLayout"));
+const CrmDashboard = lazy(() => import("./pages/crm/CrmDashboard"));
+const CrmLeads = lazy(() => import("./pages/crm/CrmLeads"));
+const CrmWorkspacesAdmin = lazy(() => import("./pages/crm/CrmWorkspacesAdmin"));
+const CrmDeals = lazy(() => import("./pages/crm/CrmPlaceholder").then((m) => ({ default: m.CrmDeals })));
+const CrmReports = lazy(() => import("./pages/crm/CrmPlaceholder").then((m) => ({ default: m.CrmReports })));
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -38,6 +46,17 @@ const App = () => {
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/employee" element={<EmployeeDashboard />} />
               <Route path="/change-password" element={<ChangePassword />} />
+
+              {/* Amruta Geo CRM */}
+              <Route path="/crm/admin/workspaces" element={<CrmWorkspacesAdmin />} />
+              <Route path="/crm" element={<CrmLayout />} />
+              <Route path="/crm/:slug" element={<CrmLayout />}>
+                <Route path="dashboard" element={<CrmDashboard />} />
+                <Route path="leads" element={<CrmLeads />} />
+                <Route path="deals" element={<CrmDeals />} />
+                <Route path="reports" element={<CrmReports />} />
+              </Route>
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
