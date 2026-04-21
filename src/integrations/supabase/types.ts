@@ -202,6 +202,156 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_lead_activities: {
+        Row: {
+          activity_type: string
+          actor_id: string | null
+          content: string | null
+          created_at: string
+          id: string
+          lead_id: string
+          metadata: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          activity_type: string
+          actor_id?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          activity_type?: string
+          actor_id?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_activities_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          ai_hot_score: number | null
+          assigned_to: string | null
+          biz_area: string | null
+          biz_cost: number | null
+          city: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          expected_close: string | null
+          full_name: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          phone: string | null
+          pincode: string | null
+          service_needed: string | null
+          source_enquiry_id: string | null
+          stage: string
+          state: string | null
+          status: string
+          street: string | null
+          updated_at: string
+          whatsapp: string | null
+          workspace_id: string
+        }
+        Insert: {
+          ai_hot_score?: number | null
+          assigned_to?: string | null
+          biz_area?: string | null
+          biz_cost?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expected_close?: string | null
+          full_name: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          phone?: string | null
+          pincode?: string | null
+          service_needed?: string | null
+          source_enquiry_id?: string | null
+          stage?: string
+          state?: string | null
+          status?: string
+          street?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+          workspace_id: string
+        }
+        Update: {
+          ai_hot_score?: number | null
+          assigned_to?: string | null
+          biz_area?: string | null
+          biz_cost?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expected_close?: string | null
+          full_name?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          phone?: string | null
+          pincode?: string | null
+          service_needed?: string | null
+          source_enquiry_id?: string | null
+          stage?: string
+          state?: string | null
+          status?: string
+          street?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_leads_source_enquiry_id_fkey"
+            columns: ["source_enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "contact_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_ping_history: {
         Row: {
           crm_label: string | null
@@ -235,6 +385,68 @@ export type Database = {
           state_key?: string
           status?: string
           status_code?: number | null
+        }
+        Relationships: []
+      }
+      crm_workspace_members: {
+        Row: {
+          created_at: string
+          crm_role: Database["public"]["Enums"]["app_role"]
+          id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          crm_role?: Database["public"]["Enums"]["app_role"]
+          id?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          crm_role?: Database["public"]["Enums"]["app_role"]
+          id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_workspaces: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          region_key: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          region_key: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          region_key?: string
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -852,6 +1064,14 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_crm_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+          _workspace_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -859,7 +1079,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_crm_member: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      resolve_crm_workspace: {
+        Args: { _country: string; _state: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
