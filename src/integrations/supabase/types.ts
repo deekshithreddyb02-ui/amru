@@ -862,7 +862,18 @@ export type Database = {
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user" | "employee" | "super_admin"
+      app_role:
+        | "admin"
+        | "user"
+        | "employee"
+        | "super_admin"
+        | "crm_admin"
+        | "crm_sales_mgr"
+        | "crm_sales_rep"
+        | "crm_support"
+        | "crm_marketing"
+        | "crm_technician"
+        | "crm_viewer"
       booking_status:
         | "pending"
         | "confirmed"
@@ -1005,7 +1016,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "employee", "super_admin"],
+      app_role: [
+        "admin",
+        "user",
+        "employee",
+        "super_admin",
+        "crm_admin",
+        "crm_sales_mgr",
+        "crm_sales_rep",
+        "crm_support",
+        "crm_marketing",
+        "crm_technician",
+        "crm_viewer",
+      ],
       booking_status: [
         "pending",
         "confirmed",
