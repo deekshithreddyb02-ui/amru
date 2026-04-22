@@ -5,8 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, RefreshCw, Search } from "lucide-react";
+import { ArrowRightLeft, Loader2, RefreshCw, Search } from "lucide-react";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
+import ConvertLeadDialog from "@/components/crm/ConvertLeadDialog";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -36,6 +37,7 @@ const CrmLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [convertLead, setConvertLead] = useState<Lead | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -110,6 +112,7 @@ const CrmLeads = () => {
                   <th className="px-4 py-3 font-medium">Service</th>
                   <th className="px-4 py-3 font-medium">Stage</th>
                   <th className="px-4 py-3 font-medium">Created</th>
+                  <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +135,18 @@ const CrmLeads = () => {
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {new Date(l.created_at).toLocaleDateString("en-IN")}
                     </td>
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => setConvertLead(l)}
+                        disabled={l.stage === "won" || l.stage === "lost"}
+                      >
+                        <ArrowRightLeft className="h-3.5 w-3.5" />
+                        Convert
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -139,6 +154,17 @@ const CrmLeads = () => {
           </div>
         )}
       </Card>
+
+      <ConvertLeadDialog
+        workspaceId={workspace.id}
+        lead={convertLead}
+        open={!!convertLead}
+        onOpenChange={(v) => !v && setConvertLead(null)}
+        onDone={() => {
+          setConvertLead(null);
+          load();
+        }}
+      />
     </div>
   );
 };

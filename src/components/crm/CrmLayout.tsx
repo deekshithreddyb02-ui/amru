@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ const NAV = [
   { to: "deals", label: "Deals", icon: Briefcase },
   { to: "activities", label: "Activities", icon: ListChecks },
   { to: "calendar", label: "Calendar", icon: CalendarDays },
+  { to: "tickets", label: "Support", icon: LifeBuoy },
+  { to: "hydrogeo", label: "HydroGeo", icon: Droplet },
   { to: "reports", label: "Reports", icon: FileText },
 ];
 

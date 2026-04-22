@@ -113,6 +113,7 @@ export type Database = {
           crm_status: string | null
           distance: string | null
           email: string
+          enquiry_type: string
           expected_close: string | null
           firstname: string | null
           id: string
@@ -146,6 +147,7 @@ export type Database = {
           crm_status?: string | null
           distance?: string | null
           email: string
+          enquiry_type?: string
           expected_close?: string | null
           firstname?: string | null
           id?: string
@@ -179,6 +181,7 @@ export type Database = {
           crm_status?: string | null
           distance?: string | null
           email?: string
+          enquiry_type?: string
           expected_close?: string | null
           firstname?: string | null
           id?: string
@@ -465,6 +468,125 @@ export type Database = {
           },
         ]
       }
+      crm_hydrogeo_enquiries: {
+        Row: {
+          area_size: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          estimated_cost: number | null
+          expected_depth_ft: number | null
+          id: string
+          latitude: number | null
+          lead_id: string | null
+          longitude: number | null
+          notes: string | null
+          num_scans: number | null
+          preferred_visit_date: string | null
+          recommendation: string | null
+          site_address: string | null
+          site_city: string | null
+          site_name: string | null
+          site_pincode: string | null
+          site_state: string | null
+          soil_type: string | null
+          source_enquiry_id: string | null
+          survey_findings: string | null
+          survey_status: string
+          terrain_type: string | null
+          updated_at: string
+          water_source_type: string | null
+          workspace_id: string
+        }
+        Insert: {
+          area_size?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_cost?: number | null
+          expected_depth_ft?: number | null
+          id?: string
+          latitude?: number | null
+          lead_id?: string | null
+          longitude?: number | null
+          notes?: string | null
+          num_scans?: number | null
+          preferred_visit_date?: string | null
+          recommendation?: string | null
+          site_address?: string | null
+          site_city?: string | null
+          site_name?: string | null
+          site_pincode?: string | null
+          site_state?: string | null
+          soil_type?: string | null
+          source_enquiry_id?: string | null
+          survey_findings?: string | null
+          survey_status?: string
+          terrain_type?: string | null
+          updated_at?: string
+          water_source_type?: string | null
+          workspace_id: string
+        }
+        Update: {
+          area_size?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_cost?: number | null
+          expected_depth_ft?: number | null
+          id?: string
+          latitude?: number | null
+          lead_id?: string | null
+          longitude?: number | null
+          notes?: string | null
+          num_scans?: number | null
+          preferred_visit_date?: string | null
+          recommendation?: string | null
+          site_address?: string | null
+          site_city?: string | null
+          site_name?: string | null
+          site_pincode?: string | null
+          site_state?: string | null
+          soil_type?: string | null
+          source_enquiry_id?: string | null
+          survey_findings?: string | null
+          survey_status?: string
+          terrain_type?: string | null
+          updated_at?: string
+          water_source_type?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_hydrogeo_enquiries_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_hydrogeo_enquiries_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_hydrogeo_enquiries_source_enquiry_id_fkey"
+            columns: ["source_enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "contact_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_hydrogeo_enquiries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_lead_activities: {
         Row: {
           activity_type: string
@@ -715,6 +837,114 @@ export type Database = {
           status_code?: number | null
         }
         Relationships: []
+      }
+      crm_support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          due_at: string | null
+          id: string
+          lead_id: string | null
+          organization_id: string | null
+          priority: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          source_enquiry_id: string | null
+          status: string
+          subject: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          lead_id?: string | null
+          organization_id?: string | null
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          source_enquiry_id?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          lead_id?: string | null
+          organization_id?: string | null
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          source_enquiry_id?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_support_tickets_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_support_tickets_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_support_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_support_tickets_source_enquiry_id_fkey"
+            columns: ["source_enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "contact_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_support_tickets_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_workspace_members: {
         Row: {
