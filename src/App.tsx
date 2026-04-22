@@ -23,6 +23,8 @@ const CrmLeads = lazy(() => import("./pages/crm/CrmLeads"));
 const CrmContacts = lazy(() => import("./pages/crm/CrmContacts"));
 const CrmOrganizations = lazy(() => import("./pages/crm/CrmOrganizations"));
 const CrmDeals = lazy(() => import("./pages/crm/CrmDealsKanban"));
+const CrmActivities = lazy(() => import("./pages/crm/CrmActivities"));
+const CrmCalendar = lazy(() => import("./pages/crm/CrmCalendar"));
 const CrmWorkspacesAdmin = lazy(() => import("./pages/crm/CrmWorkspacesAdmin"));
 const CrmReports = lazy(() => import("./pages/crm/CrmPlaceholder").then((m) => ({ default: m.CrmReports })));
 
@@ -58,6 +60,8 @@ const App = () => {
                 <Route path="contacts" element={<CrmContacts />} />
                 <Route path="organizations" element={<CrmOrganizations />} />
                 <Route path="deals" element={<CrmDeals />} />
+                <Route path="activities" element={<CrmActivities />} />
+                <Route path="calendar" element={<CrmCalendar />} />
                 <Route path="reports" element={<CrmReports />} />
               </Route>
 
