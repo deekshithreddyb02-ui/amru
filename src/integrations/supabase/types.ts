@@ -202,6 +202,114 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_activities: {
+        Row: {
+          activity_type: string
+          assigned_to: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          deal_id: string | null
+          description: string | null
+          due_at: string | null
+          duration_minutes: number | null
+          id: string
+          lead_id: string | null
+          location: string | null
+          meeting_url: string | null
+          organization_id: string | null
+          priority: string
+          reminded: boolean
+          reminder_minutes_before: number | null
+          status: string
+          subject: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          activity_type?: string
+          assigned_to?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string | null
+          description?: string | null
+          due_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          location?: string | null
+          meeting_url?: string | null
+          organization_id?: string | null
+          priority?: string
+          reminded?: boolean
+          reminder_minutes_before?: number | null
+          status?: string
+          subject: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          activity_type?: string
+          assigned_to?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string | null
+          description?: string | null
+          due_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          location?: string | null
+          meeting_url?: string | null
+          organization_id?: string | null
+          priority?: string
+          reminded?: boolean
+          reminder_minutes_before?: number | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contacts: {
         Row: {
           city: string | null
