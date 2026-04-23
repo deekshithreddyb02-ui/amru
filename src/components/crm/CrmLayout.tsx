@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
+import CrmNotificationBell from "./CrmNotificationBell";
 
 const NAV = [
   { to: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -24,6 +25,9 @@ const NAV = [
   { to: "calendar", label: "Calendar", icon: CalendarDays },
   { to: "tickets", label: "Support", icon: LifeBuoy },
   { to: "hydrogeo", label: "HydroGeo", icon: Droplet },
+  { to: "documents", label: "Documents", icon: FolderOpen },
+  { to: "quotations", label: "Quotations", icon: FileSpreadsheet },
+  { to: "invoices", label: "Invoices", icon: Receipt },
   { to: "reports", label: "Reports", icon: FileText },
 ];
 
@@ -104,6 +108,7 @@ const CrmLayout = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <CrmNotificationBell workspaceSlug={current.slug} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">

@@ -468,6 +468,122 @@ export type Database = {
           },
         ]
       }
+      crm_documents: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          description: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          is_shared: boolean
+          lead_id: string | null
+          mime_type: string | null
+          name: string
+          organization_id: string | null
+          parent_document_id: string | null
+          share_token: string | null
+          ticket_id: string | null
+          updated_at: string
+          uploaded_by: string | null
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_shared?: boolean
+          lead_id?: string | null
+          mime_type?: string | null
+          name: string
+          organization_id?: string | null
+          parent_document_id?: string | null
+          share_token?: string | null
+          ticket_id?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number
+          workspace_id: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_shared?: boolean
+          lead_id?: string | null
+          mime_type?: string | null
+          name?: string
+          organization_id?: string | null
+          parent_document_id?: string | null
+          share_token?: string | null
+          ticket_id?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_documents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "crm_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "crm_support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_hydrogeo_enquiries: {
         Row: {
           area_size: string | null
@@ -580,6 +696,201 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_hydrogeo_enquiries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_invoice_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          hsn_sac: string | null
+          id: string
+          invoice_id: string
+          position: number
+          quantity: number
+          rate: number
+          tax_rate: number
+          unit: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description: string
+          hsn_sac?: string | null
+          id?: string
+          invoice_id: string
+          position?: number
+          quantity?: number
+          rate?: number
+          tax_rate?: number
+          unit?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          hsn_sac?: string | null
+          id?: string
+          invoice_id?: string
+          position?: number
+          quantity?: number
+          rate?: number
+          tax_rate?: number
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "crm_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_invoices: {
+        Row: {
+          cgst: number
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_address: string | null
+          customer_email: string | null
+          customer_gstin: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_state: string | null
+          deal_id: string | null
+          discount: number
+          due_date: string | null
+          gst_type: string
+          id: string
+          igst: number
+          invoice_number: string
+          issue_date: string
+          lead_id: string | null
+          notes: string | null
+          organization_id: string | null
+          paid_amount: number
+          quotation_id: string | null
+          sgst: number
+          status: string
+          subtotal: number
+          terms: string | null
+          total: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          cgst?: number
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gstin?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          customer_state?: string | null
+          deal_id?: string | null
+          discount?: number
+          due_date?: string | null
+          gst_type?: string
+          id?: string
+          igst?: number
+          invoice_number: string
+          issue_date?: string
+          lead_id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          paid_amount?: number
+          quotation_id?: string | null
+          sgst?: number
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          cgst?: number
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gstin?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_state?: string | null
+          deal_id?: string | null
+          discount?: number
+          due_date?: string | null
+          gst_type?: string
+          id?: string
+          igst?: number
+          invoice_number?: string
+          issue_date?: string
+          lead_id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          paid_amount?: number
+          quotation_id?: string | null
+          sgst?: number
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_invoices_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_invoices_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_invoices_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_invoices_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "crm_quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_invoices_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
@@ -737,6 +1048,59 @@ export type Database = {
           },
         ]
       }
+      crm_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          read_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          title: string
+          type: string
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title: string
+          type?: string
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_notifications_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_organizations: {
         Row: {
           city: string | null
@@ -802,6 +1166,60 @@ export type Database = {
           },
         ]
       }
+      crm_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_id: string
+          method: string
+          notes: string | null
+          paid_at: string
+          recorded_by: string | null
+          reference: string | null
+          workspace_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_id: string
+          method?: string
+          notes?: string | null
+          paid_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          method?: string
+          notes?: string | null
+          paid_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "crm_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_payments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_ping_history: {
         Row: {
           crm_label: string | null
@@ -837,6 +1255,185 @@ export type Database = {
           status_code?: number | null
         }
         Relationships: []
+      }
+      crm_quotation_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          hsn_sac: string | null
+          id: string
+          position: number
+          quantity: number
+          quotation_id: string
+          rate: number
+          tax_rate: number
+          unit: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description: string
+          hsn_sac?: string | null
+          id?: string
+          position?: number
+          quantity?: number
+          quotation_id: string
+          rate?: number
+          tax_rate?: number
+          unit?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          hsn_sac?: string | null
+          id?: string
+          position?: number
+          quantity?: number
+          quotation_id?: string
+          rate?: number
+          tax_rate?: number
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "crm_quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_quotations: {
+        Row: {
+          cgst: number
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_address: string | null
+          customer_email: string | null
+          customer_gstin: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_state: string | null
+          deal_id: string | null
+          discount: number
+          gst_type: string
+          id: string
+          igst: number
+          lead_id: string | null
+          notes: string | null
+          organization_id: string | null
+          quotation_number: string
+          sgst: number
+          status: string
+          subtotal: number
+          terms: string | null
+          total: number
+          updated_at: string
+          valid_until: string | null
+          workspace_id: string
+        }
+        Insert: {
+          cgst?: number
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gstin?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          customer_state?: string | null
+          deal_id?: string | null
+          discount?: number
+          gst_type?: string
+          id?: string
+          igst?: number
+          lead_id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          quotation_number: string
+          sgst?: number
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          valid_until?: string | null
+          workspace_id: string
+        }
+        Update: {
+          cgst?: number
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gstin?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_state?: string | null
+          deal_id?: string | null
+          discount?: number
+          gst_type?: string
+          id?: string
+          igst?: number
+          lead_id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          quotation_number?: string
+          sgst?: number
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          valid_until?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_quotations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotations_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_support_tickets: {
         Row: {
