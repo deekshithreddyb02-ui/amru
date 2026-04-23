@@ -169,11 +169,11 @@ const CrmInvoices = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Outstanding</div>
-          <div className="text-2xl font-bold text-amber-700">{formatINR(totalDue)}</div>
+          <div className="text-2xl font-bold text-primary">{formatINR(totalDue)}</div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Total collected</div>
-          <div className="text-2xl font-bold text-green-700">{formatINR(totalPaid)}</div>
+          <div className="text-2xl font-bold text-foreground">{formatINR(totalPaid)}</div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Overdue invoices</div>
@@ -226,8 +226,8 @@ const CrmInvoices = () => {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right font-medium">{formatINR(r.total)}</td>
-                      <td className="px-4 py-3 text-right text-green-700">{formatINR(r.paid_amount)}</td>
-                      <td className={`px-4 py-3 text-right ${due > 0 ? "text-amber-700 font-medium" : "text-muted-foreground"}`}>
+                      <td className="px-4 py-3 text-right text-foreground">{formatINR(r.paid_amount)}</td>
+                      <td className={`px-4 py-3 text-right ${due > 0 ? "text-primary font-medium" : "text-muted-foreground"}`}>
                         {formatINR(due)}
                       </td>
                       <td className="px-4 py-3 text-xs">
