@@ -27,8 +27,16 @@ type Quotation = {
   customer_email: string | null;
   total: number;
   status: string;
+  approval_status: string | null;
   valid_until: string | null;
   created_at: string;
+};
+
+const approvalColor: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground",
+  pending: "bg-yellow-100 text-yellow-900",
+  approved: "bg-green-100 text-green-900",
+  rejected: "bg-red-100 text-red-900",
 };
 
 const statusColor: Record<string, string> = {
@@ -50,7 +58,7 @@ const CrmQuotations = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("crm_quotations")
-      .select("id, quotation_number, customer_name, customer_email, total, status, valid_until, created_at")
+      .select("id, quotation_number, customer_name, customer_email, total, status, approval_status, valid_until, created_at")
       .eq("workspace_id", workspace.id)
       .order("created_at", { ascending: false })
       .limit(200);
@@ -66,11 +74,19 @@ const CrmQuotations = () => {
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("crm_quotations").update({ status }).eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) { toast.error(error.message); return; }
     setRows((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
+  };
+
+  const updateApproval = async (id: string, approval_status: string) => {
+    const updates: any = { approval_status };
+    const { data: { user } } = await supabase.auth.getUser();
+    if (approval_status === "pending") updates.submitted_at = new Date().toISOString();
+    if (approval_status === "approved") { updates.approved_at = new Date().toISOString(); updates.approved_by = user?.id; }
+    const { error } = await supabase.from("crm_quotations").update(updates).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setRows((p) => p.map((r) => (r.id === id ? { ...r, approval_status } : r)));
+    toast.success(`Quotation ${approval_status}`);
   };
 
   const filtered = rows.filter(
@@ -127,6 +143,7 @@ const CrmQuotations = () => {
                   <th className="px-4 py-3 font-medium text-right">Total</th>
                   <th className="px-4 py-3 font-medium">Valid until</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Approval</th>
                   <th className="px-4 py-3 font-medium">Created</th>
                 </tr>
               </thead>
@@ -155,6 +172,19 @@ const CrmQuotations = () => {
                           <SelectItem value="accepted">Accepted</SelectItem>
                           <SelectItem value="rejected">Rejected</SelectItem>
                           <SelectItem value="expired">Expired</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Select value={r.approval_status || "draft"} onValueChange={(v) => updateApproval(r.id, v)}>
+                        <SelectTrigger className={`h-7 text-xs w-32 ${approvalColor[r.approval_status || "draft"] || ""}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
                         </SelectContent>
                       </Select>
                     </td>
