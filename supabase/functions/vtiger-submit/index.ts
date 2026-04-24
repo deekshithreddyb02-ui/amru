@@ -176,17 +176,47 @@ serve(async (req) => {
         if (!matchedCrm) matchedCrm = crmConfigs.find(c => c.enabled && c.crm_url) || null;
       }
 
-      // Fallback default
+      // Fallback default — credentials sourced exclusively from Supabase secrets.
+      // Never hardcode CRM tokens in source: leaked tokens let anyone bypass
+      // edge-function rate limiting and post directly to the CRM.
       if (!matchedCrm) {
-        matchedCrm = {
-          label: "Default",
-          state_key: "telangana",
-          crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
-          token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
-          public_id: "85432a838b51f53a6bc4ec937b64ee40",
-          form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
-          enabled: true,
-        };
+        const fallbackToken = Deno.env.get("DEFAULT_CRM_TOKEN") || "";
+        const fallbackPublicId = Deno.env.get("DEFAULT_CRM_PUBLIC_ID") || "";
+        const fallbackUrl = Deno.env.get("DEFAULT_CRM_URL") || "";
+        const fallbackFormName = Deno.env.get("DEFAULT_CRM_FORM_NAME") || "";
+
+        if (fallbackToken && fallbackPublicId && fallbackUrl) {
+          matchedCrm = {
+            label: "Default",
+            state_key: "telangana",
+            crm_url: fallbackUrl,
+            token: fallbackToken,
+            public_id: fallbackPublicId,
+            form_name: fallbackFormName || "Enquiry Form",
+            enabled: true,
+          };
+        } else {
+          // No CRM configured — skip CRM dispatch but still report db save outcome.
+          console.warn("No CRM config available and no DEFAULT_CRM_* secrets set; skipping CRM dispatch.");
+        }
+      }
+
+      if (!matchedCrm) {
+        // Skip the CRM step gracefully.
+        const overallSuccess = routing.store_in_db ? dbSaveSuccess : true;
+        return new Response(
+          JSON.stringify({
+            success: overallSuccess,
+            stateKey,
+            crmLabel: "",
+            dbSaved: routing.store_in_db ? dbSaveSuccess : "skipped",
+            crmSent: "no_crm_configured",
+            message: overallSuccess
+              ? "Enquiry saved. CRM dispatch skipped (no CRM configured)."
+              : "Submission failed. Please try again later.",
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       crmLabel = matchedCrm.label;
