@@ -232,6 +232,7 @@ const CrmInvoices = () => {
                   <th className="px-4 py-3 font-medium text-right">Due</th>
                   <th className="px-4 py-3 font-medium">Due date</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Approval</th>
                   <th className="px-4 py-3 font-medium text-right">Action</th>
                 </tr>
               </thead>
@@ -259,6 +260,19 @@ const CrmInvoices = () => {
                         <Badge variant="secondary" className={`text-xs ${statusColor[r.status] || ""}`}>
                           {r.status}
                         </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Select value={r.approval_status || "draft"} onValueChange={(v) => updateApproval(r.id, v)}>
+                          <SelectTrigger className={`h-7 text-xs w-32 ${approvalColor[r.approval_status || "draft"] || ""}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </td>
                       <td className="px-4 py-3 text-right">
                         {due > 0 && r.status !== "cancelled" && (
