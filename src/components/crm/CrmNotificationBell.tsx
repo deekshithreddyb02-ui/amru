@@ -48,7 +48,7 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       channel = supabase
-        .channel("crm_notifications_user")
+        .channel(`crm_notifications_user_${session.user.id}`)
         .on(
           "postgres_changes",
           {
