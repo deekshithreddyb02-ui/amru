@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,9 @@ const NAV = [
   { to: "documents", label: "Documents", icon: FolderOpen },
   { to: "quotations", label: "Quotations", icon: FileSpreadsheet },
   { to: "invoices", label: "Invoices", icon: Receipt },
+  { to: "meetings", label: "Meetings", icon: Mic },
   { to: "reports", label: "Reports", icon: FileText },
+  { to: "audit", label: "Audit log", icon: History },
 ];
 
 const CrmLayout = () => {
@@ -134,10 +136,10 @@ const CrmLayout = () => {
                 {role === "super_admin" && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => navigate("/crm/admin/workspaces")}
-                      className="cursor-pointer"
-                    >
+                    <DropdownMenuItem onClick={() => navigate("/crm/admin/analytics")} className="cursor-pointer">
+                      <BarChart3 className="h-4 w-4 mr-2" />Cross-CRM analytics
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/crm/admin/workspaces")} className="cursor-pointer">
                       Manage workspaces…
                     </DropdownMenuItem>
                   </>

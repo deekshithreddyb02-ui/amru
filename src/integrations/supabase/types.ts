@@ -313,6 +313,56 @@ export type Database = {
           },
         ]
       }
+      crm_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          changes: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_label: string | null
+          entity_type: string
+          id: string
+          metadata: Json | null
+          workspace_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          workspace_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_audit_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contacts: {
         Row: {
           city: string | null
@@ -755,6 +805,9 @@ export type Database = {
       }
       crm_invoices: {
         Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
           cgst: number
           contact_id: string | null
           created_at: string
@@ -779,8 +832,10 @@ export type Database = {
           organization_id: string | null
           paid_amount: number
           quotation_id: string | null
+          rejection_reason: string | null
           sgst: number
           status: string
+          submitted_at: string | null
           subtotal: number
           terms: string | null
           total: number
@@ -788,6 +843,9 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           cgst?: number
           contact_id?: string | null
           created_at?: string
@@ -812,8 +870,10 @@ export type Database = {
           organization_id?: string | null
           paid_amount?: number
           quotation_id?: string | null
+          rejection_reason?: string | null
           sgst?: number
           status?: string
+          submitted_at?: string | null
           subtotal?: number
           terms?: string | null
           total?: number
@@ -821,6 +881,9 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           cgst?: number
           contact_id?: string | null
           created_at?: string
@@ -845,8 +908,10 @@ export type Database = {
           organization_id?: string | null
           paid_amount?: number
           quotation_id?: string | null
+          rejection_reason?: string | null
           sgst?: number
           status?: string
+          submitted_at?: string | null
           subtotal?: number
           terms?: string | null
           total?: number
@@ -946,6 +1011,54 @@ export type Database = {
           },
         ]
       }
+      crm_lead_scoring_history: {
+        Row: {
+          ai_score: number | null
+          computed_at: string
+          final_score: number | null
+          id: string
+          lead_id: string
+          reasoning: string | null
+          rule_score: number | null
+          workspace_id: string
+        }
+        Insert: {
+          ai_score?: number | null
+          computed_at?: string
+          final_score?: number | null
+          id?: string
+          lead_id: string
+          reasoning?: string | null
+          rule_score?: number | null
+          workspace_id: string
+        }
+        Update: {
+          ai_score?: number | null
+          computed_at?: string
+          final_score?: number | null
+          id?: string
+          lead_id?: string
+          reasoning?: string | null
+          rule_score?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_scoring_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_scoring_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_leads: {
         Row: {
           ai_hot_score: number | null
@@ -965,6 +1078,8 @@ export type Database = {
           notes: string | null
           phone: string | null
           pincode: string | null
+          score_reasoning: string | null
+          score_updated_at: string | null
           service_needed: string | null
           source_enquiry_id: string | null
           stage: string
@@ -993,6 +1108,8 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           pincode?: string | null
+          score_reasoning?: string | null
+          score_updated_at?: string | null
           service_needed?: string | null
           source_enquiry_id?: string | null
           stage?: string
@@ -1021,6 +1138,8 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           pincode?: string | null
+          score_reasoning?: string | null
+          score_updated_at?: string | null
           service_needed?: string | null
           source_enquiry_id?: string | null
           stage?: string
@@ -1041,6 +1160,111 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_meeting_summaries: {
+        Row: {
+          action_items: Json | null
+          activity_id: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          deal_id: string | null
+          error_message: string | null
+          follow_ups: Json | null
+          id: string
+          lead_id: string | null
+          meeting_date: string | null
+          participants: Json | null
+          source_audio_path: string | null
+          source_type: string
+          status: string
+          summary: string | null
+          title: string
+          transcript: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          action_items?: Json | null
+          activity_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string | null
+          error_message?: string | null
+          follow_ups?: Json | null
+          id?: string
+          lead_id?: string | null
+          meeting_date?: string | null
+          participants?: Json | null
+          source_audio_path?: string | null
+          source_type?: string
+          status?: string
+          summary?: string | null
+          title: string
+          transcript?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          action_items?: Json | null
+          activity_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deal_id?: string | null
+          error_message?: string | null
+          follow_ups?: Json | null
+          id?: string
+          lead_id?: string | null
+          meeting_date?: string | null
+          participants?: Json | null
+          source_audio_path?: string | null
+          source_type?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          transcript?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_meeting_summaries_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meeting_summaries_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meeting_summaries_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meeting_summaries_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meeting_summaries_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
@@ -1308,6 +1532,9 @@ export type Database = {
       }
       crm_quotations: {
         Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
           cgst: number
           contact_id: string | null
           created_at: string
@@ -1328,8 +1555,10 @@ export type Database = {
           notes: string | null
           organization_id: string | null
           quotation_number: string
+          rejection_reason: string | null
           sgst: number
           status: string
+          submitted_at: string | null
           subtotal: number
           terms: string | null
           total: number
@@ -1338,6 +1567,9 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           cgst?: number
           contact_id?: string | null
           created_at?: string
@@ -1358,8 +1590,10 @@ export type Database = {
           notes?: string | null
           organization_id?: string | null
           quotation_number: string
+          rejection_reason?: string | null
           sgst?: number
           status?: string
+          submitted_at?: string | null
           subtotal?: number
           terms?: string | null
           total?: number
@@ -1368,6 +1602,9 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
           cgst?: number
           contact_id?: string | null
           created_at?: string
@@ -1388,8 +1625,10 @@ export type Database = {
           notes?: string | null
           organization_id?: string | null
           quotation_number?: string
+          rejection_reason?: string | null
           sgst?: number
           status?: string
+          submitted_at?: string | null
           subtotal?: number
           terms?: string | null
           total?: number
@@ -1428,6 +1667,74 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_quotations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_reports: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          content_data: Json | null
+          content_markdown: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          generated_at: string | null
+          id: string
+          parameters: Json
+          rejection_reason: string | null
+          submitted_at: string | null
+          template_key: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          content_data?: Json | null
+          content_markdown?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          generated_at?: string | null
+          id?: string
+          parameters?: Json
+          rejection_reason?: string | null
+          submitted_at?: string | null
+          template_key: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          content_data?: Json | null
+          content_markdown?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          generated_at?: string | null
+          id?: string
+          parameters?: Json
+          rejection_reason?: string | null
+          submitted_at?: string | null
+          template_key?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_reports_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
