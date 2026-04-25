@@ -103,7 +103,7 @@ const Column = ({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-72 shrink-0 bg-muted/30 rounded-lg border-t-4 ${tint} ${
+      className={`flex flex-col w-64 sm:w-72 shrink-0 bg-muted/30 rounded-lg border-t-4 ${tint} ${
         isOver ? "ring-2 ring-primary" : ""
       }`}
     >
