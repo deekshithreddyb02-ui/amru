@@ -79,6 +79,7 @@ const App = () => {
                 <Route path="invoices" element={<CrmInvoices />} />
                 <Route path="meetings" element={<CrmMeetings />} />
                 <Route path="reports" element={<CrmReports />} />
+                <Route path="project-reports" element={<CrmProjectReports />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
