@@ -30,7 +30,8 @@ const NAV = [
   { to: "quotations", label: "Quotations", icon: FileSpreadsheet },
   { to: "invoices", label: "Invoices", icon: Receipt },
   { to: "meetings", label: "Meetings", icon: Mic },
-  { to: "reports", label: "Reports", icon: FileText },
+  { to: "reports", label: "AI Reports", icon: FileText },
+  { to: "project-reports", label: "Project Reports", icon: ClipboardList },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
