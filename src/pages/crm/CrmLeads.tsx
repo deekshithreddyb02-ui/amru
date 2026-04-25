@@ -71,19 +71,19 @@ const CrmLeads = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-serif">Leads</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif">Leads</h1>
           <p className="text-muted-foreground text-sm">{workspace.name}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="pl-8 w-56"
+              className="pl-8 w-full sm:w-56"
             />
           </div>
           <Button variant="outline" size="icon" onClick={load} aria-label="Refresh">

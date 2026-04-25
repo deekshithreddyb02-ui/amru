@@ -71,11 +71,11 @@ const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-card border rounded-md p-3 shadow-sm cursor-grab active:cursor-grabbing select-none ${
+      className={`bg-card border rounded-md p-3 shadow-sm cursor-grab active:cursor-grabbing select-none touch-none ${
         isDragging || dragging ? "opacity-50" : ""
       }`}
     >
-      <div className="font-medium text-sm leading-tight">{deal.title}</div>
+      <div className="font-medium text-sm leading-tight break-words">{deal.title}</div>
       <div className="flex items-center gap-1 mt-1 text-sm font-semibold text-primary">
         <IndianRupee className="h-3.5 w-3.5" /> {fmtINR(Number(deal.amount)).replace("₹", "").trim()}
       </div>
@@ -103,7 +103,7 @@ const Column = ({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-72 shrink-0 bg-muted/30 rounded-lg border-t-4 ${tint} ${
+      className={`flex flex-col w-64 sm:w-72 shrink-0 bg-muted/30 rounded-lg border-t-4 ${tint} ${
         isOver ? "ring-2 ring-primary" : ""
       }`}
     >
@@ -221,14 +221,14 @@ const CrmDeals = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-serif">Deals</h1>
+          <h1 className="text-2xl sm:text-3xl font-serif">Deals</h1>
           <p className="text-muted-foreground text-sm">{workspace.name} · drag cards between stages</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="h-4 w-4" /> New deal</Button>
+            <Button className="gap-2 w-full sm:w-auto"><Plus className="h-4 w-4" /> New deal</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>New deal</DialogTitle></DialogHeader>
