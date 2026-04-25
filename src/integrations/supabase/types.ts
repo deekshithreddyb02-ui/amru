@@ -313,6 +313,316 @@ export type Database = {
           },
         ]
       }
+      crm_ai_report_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          report_id: string
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          report_id: string
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          report_id?: string
+          role?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ai_report_assignments_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "crm_ai_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ai_report_assignments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_ai_report_status_log: {
+        Row: {
+          by_user_id: string | null
+          changed_at: string
+          from_status: string | null
+          id: string
+          note: string | null
+          report_id: string
+          to_status: string
+          workspace_id: string
+        }
+        Insert: {
+          by_user_id?: string | null
+          changed_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          report_id: string
+          to_status: string
+          workspace_id: string
+        }
+        Update: {
+          by_user_id?: string | null
+          changed_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          report_id?: string
+          to_status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ai_report_status_log_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "crm_ai_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ai_report_status_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_ai_report_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_model: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          output_schema: Json | null
+          prompt_template: string
+          template_type: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_model?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          output_schema?: Json | null
+          prompt_template: string
+          template_type?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_model?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          output_schema?: Json | null
+          prompt_template?: string
+          template_type?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ai_report_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_ai_report_versions: {
+        Row: {
+          ai_model: string | null
+          ai_prompt: string | null
+          ai_response: Json | null
+          created_at: string
+          created_by: string | null
+          edited_markdown: string | null
+          id: string
+          is_current: boolean
+          photo_paths: Json | null
+          rendered_markdown: string | null
+          report_id: string
+          user_inputs: Json | null
+          version_no: number
+          workspace_id: string
+        }
+        Insert: {
+          ai_model?: string | null
+          ai_prompt?: string | null
+          ai_response?: Json | null
+          created_at?: string
+          created_by?: string | null
+          edited_markdown?: string | null
+          id?: string
+          is_current?: boolean
+          photo_paths?: Json | null
+          rendered_markdown?: string | null
+          report_id: string
+          user_inputs?: Json | null
+          version_no: number
+          workspace_id: string
+        }
+        Update: {
+          ai_model?: string | null
+          ai_prompt?: string | null
+          ai_response?: Json | null
+          created_at?: string
+          created_by?: string | null
+          edited_markdown?: string | null
+          id?: string
+          is_current?: boolean
+          photo_paths?: Json | null
+          rendered_markdown?: string | null
+          report_id?: string
+          user_inputs?: Json | null
+          version_no?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ai_report_versions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "crm_ai_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ai_report_versions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_ai_reports: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          created_by: string | null
+          current_version: number
+          customer_contact_id: string | null
+          customer_org_id: string | null
+          description: string | null
+          id: string
+          primary_owner_user_id: string | null
+          rejection_reason: string | null
+          related_to_id: string | null
+          related_to_type: string | null
+          sent_to_customer_at: string | null
+          status: string
+          template_id: string | null
+          template_type: string | null
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          customer_contact_id?: string | null
+          customer_org_id?: string | null
+          description?: string | null
+          id?: string
+          primary_owner_user_id?: string | null
+          rejection_reason?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          sent_to_customer_at?: string | null
+          status?: string
+          template_id?: string | null
+          template_type?: string | null
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version?: number
+          customer_contact_id?: string | null
+          customer_org_id?: string | null
+          description?: string | null
+          id?: string
+          primary_owner_user_id?: string | null
+          rejection_reason?: string | null
+          related_to_id?: string | null
+          related_to_type?: string | null
+          sent_to_customer_at?: string | null
+          status?: string
+          template_id?: string | null
+          template_type?: string | null
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ai_reports_customer_contact_id_fkey"
+            columns: ["customer_contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ai_reports_customer_org_id_fkey"
+            columns: ["customer_org_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ai_reports_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_ai_report_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ai_reports_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_audit_log: {
         Row: {
           action: string
