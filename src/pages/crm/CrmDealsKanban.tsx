@@ -71,11 +71,11 @@ const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-card border rounded-md p-3 shadow-sm cursor-grab active:cursor-grabbing select-none ${
+      className={`bg-card border rounded-md p-3 shadow-sm cursor-grab active:cursor-grabbing select-none touch-none ${
         isDragging || dragging ? "opacity-50" : ""
       }`}
     >
-      <div className="font-medium text-sm leading-tight">{deal.title}</div>
+      <div className="font-medium text-sm leading-tight break-words">{deal.title}</div>
       <div className="flex items-center gap-1 mt-1 text-sm font-semibold text-primary">
         <IndianRupee className="h-3.5 w-3.5" /> {fmtINR(Number(deal.amount)).replace("₹", "").trim()}
       </div>
