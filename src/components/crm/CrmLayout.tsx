@@ -105,23 +105,65 @@ const CrmLayout = () => {
 
   const myRole = roleInWorkspace(current.id) || (role === "super_admin" ? "crm_admin" : "—");
 
+  const sidebarNav = (
+    <nav className="p-3 space-y-1">
+      {NAV.map(({ to, label, icon: Icon }) => (
+        <NavLink
+          key={to}
+          to={`/crm/${current.slug}/${to}`}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
+              isActive
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground hover:bg-muted"
+            }`
+          }
+        >
+          <Icon className="h-4 w-4 shrink-0" />
+          {label}
+        </NavLink>
+      ))}
+    </nav>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top bar */}
       <header className="border-b bg-card sticky top-0 z-30">
-        <div className="flex items-center justify-between px-4 sm:px-6 h-14">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-primary" />
-            <span className="font-serif text-lg">Amruta Geo CRM</span>
+        <div className="flex items-center justify-between gap-2 px-3 sm:px-6 h-14">
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Mobile hamburger */}
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden -ml-2" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 p-0 bg-card">
+                <div className="h-14 px-4 flex items-center gap-2 border-b">
+                  <Building2 className="h-5 w-5 text-primary" />
+                  <span className="font-serif text-base">Amruta Geo CRM</span>
+                </div>
+                {sidebarNav}
+                <div className="p-3 border-t text-xs text-muted-foreground">
+                  <div>Role</div>
+                  <div className="font-medium text-foreground">{myRole}</div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <Building2 className="h-5 w-5 text-primary shrink-0" />
+            <span className="font-serif text-base sm:text-lg truncate">
+              <span className="hidden sm:inline">Amruta Geo </span>CRM
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <CrmNotificationBell workspaceSlug={current.slug} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <span className="font-medium">{current.name}</span>
-                  <ChevronDown className="h-4 w-4" />
+                <Button variant="outline" size="sm" className="gap-1.5 px-2 sm:px-3 max-w-[140px] sm:max-w-none">
+                  <span className="font-medium truncate">{current.name}</span>
+                  <ChevronDown className="h-4 w-4 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 bg-popover">
@@ -156,45 +198,30 @@ const CrmLayout = () => {
             <Button
               variant="ghost"
               size="sm"
+              className="px-2 sm:px-3"
               onClick={async () => {
                 await supabase.auth.signOut();
                 navigate("/");
               }}
             >
-              Sign out
+              <span className="hidden sm:inline">Sign out</span>
+              <span className="sm:hidden text-xs">Exit</span>
             </Button>
           </div>
         </div>
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
+        {/* Desktop sidebar */}
         <aside className="hidden md:flex flex-col w-56 border-r bg-card min-h-[calc(100vh-3.5rem)] sticky top-14">
-          <nav className="p-3 space-y-1">
-            {NAV.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={`/crm/${current.slug}/${to}`}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-muted"
-                  }`
-                }
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </NavLink>
-            ))}
-          </nav>
+          {sidebarNav}
           <div className="mt-auto p-3 border-t text-xs text-muted-foreground">
             <div>Role</div>
             <div className="font-medium text-foreground">{myRole}</div>
           </div>
         </aside>
 
-        <main className="flex-1 p-4 sm:p-6 max-w-full overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-6 max-w-full overflow-x-hidden">
           <Outlet context={{ workspace: current, myRole }} />
         </main>
       </div>
