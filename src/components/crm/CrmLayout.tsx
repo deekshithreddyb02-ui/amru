@@ -37,8 +37,13 @@ const NAV = [
 const CrmLayout = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { role, loading: roleLoading, userId } = useUserRole();
   const { workspaces, loading: wsLoading, roleInWorkspace } = useCrmWorkspaces();
+
+  // Auto-close mobile nav on route change
+  useEffect(() => { setMobileNavOpen(false); }, [location.pathname]);
 
   const current = useMemo(
     () => workspaces.find((w) => w.slug === slug) || null,
