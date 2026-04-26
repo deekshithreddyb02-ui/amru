@@ -320,7 +320,7 @@ const CrmWorkspacesAdmin = () => {
                         <SelectContent>
                           {CRM_ROLES.map((r) => (
                             <SelectItem key={r} value={r}>
-                              {r}
+                              {ROLE_LABEL[r] || r}
                             </SelectItem>
                           ))}
                         </SelectContent>
