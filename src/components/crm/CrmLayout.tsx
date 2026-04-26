@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,14 @@ const NAV = [
   { to: "hydrogeo", label: "HydroGeo", icon: Droplet },
   { to: "documents", label: "Documents", icon: FolderOpen },
   { to: "quotations", label: "Quotations", icon: FileSpreadsheet },
+  { to: "sales-orders", label: "Sales Orders", icon: ShoppingCart },
   { to: "invoices", label: "Invoices", icon: Receipt },
+  { to: "products", label: "Products", icon: Package },
+  { to: "vendors", label: "Vendors", icon: Truck },
+  { to: "purchase-orders", label: "Purchase Orders", icon: ClipboardCheck },
+  { to: "campaigns", label: "Campaigns", icon: Megaphone },
+  { to: "web-forms", label: "Web Forms", icon: FormInput },
+  { to: "email-templates", label: "Email Templates", icon: Mail },
   { to: "meetings", label: "Meetings", icon: Mic },
   { to: "reports", label: "AI Reports", icon: FileText },
   { to: "project-reports", label: "Project Reports", icon: ClipboardList },
