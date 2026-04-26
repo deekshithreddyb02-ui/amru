@@ -2052,6 +2052,56 @@ export type Database = {
           },
         ]
       }
+      crm_role_permissions: {
+        Row: {
+          can_approve: boolean
+          can_create: boolean
+          can_delete: boolean
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          module: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          can_approve?: boolean
+          can_create?: boolean
+          can_delete?: boolean
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_role_permissions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_support_tickets: {
         Row: {
           assigned_to: string | null
@@ -2164,21 +2214,27 @@ export type Database = {
         Row: {
           created_at: string
           crm_role: Database["public"]["Enums"]["app_role"]
+          department: string | null
           id: string
+          manager_user_id: string | null
           user_id: string
           workspace_id: string
         }
         Insert: {
           created_at?: string
           crm_role?: Database["public"]["Enums"]["app_role"]
+          department?: string | null
           id?: string
+          manager_user_id?: string | null
           user_id: string
           workspace_id: string
         }
         Update: {
           created_at?: string
           crm_role?: Database["public"]["Enums"]["app_role"]
+          department?: string | null
           id?: string
+          manager_user_id?: string | null
           user_id?: string
           workspace_id?: string
         }
@@ -2825,6 +2881,15 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
+      crm_has_permission: {
+        Args: {
+          _module: string
+          _perm: string
+          _user_id: string
+          _workspace_id: string
+        }
+        Returns: boolean
+      }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       get_users_with_emails: {
         Args: never
@@ -2874,6 +2939,12 @@ export type Database = {
         | "crm_marketing"
         | "crm_technician"
         | "crm_viewer"
+        | "crm_ceo"
+        | "crm_support_mgr"
+        | "crm_marketing_mgr"
+        | "crm_ops_mgr"
+        | "crm_accountant"
+        | "crm_field_staff"
       booking_status:
         | "pending"
         | "confirmed"
@@ -3028,6 +3099,12 @@ export const Constants = {
         "crm_marketing",
         "crm_technician",
         "crm_viewer",
+        "crm_ceo",
+        "crm_support_mgr",
+        "crm_marketing_mgr",
+        "crm_ops_mgr",
+        "crm_accountant",
+        "crm_field_staff",
       ],
       booking_status: [
         "pending",
