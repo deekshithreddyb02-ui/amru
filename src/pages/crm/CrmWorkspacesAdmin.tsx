@@ -43,13 +43,35 @@ type MemberRow = {
 
 const CRM_ROLES = [
   "crm_admin",
+  "crm_ceo",
   "crm_sales_mgr",
   "crm_sales_rep",
+  "crm_support_mgr",
   "crm_support",
+  "crm_marketing_mgr",
   "crm_marketing",
+  "crm_ops_mgr",
+  "crm_accountant",
   "crm_technician",
+  "crm_field_staff",
   "crm_viewer",
 ] as const;
+
+const ROLE_LABEL: Record<string, string> = {
+  crm_admin: "CRM Admin",
+  crm_ceo: "CEO",
+  crm_sales_mgr: "Sales Manager",
+  crm_sales_rep: "Sales Executive",
+  crm_support_mgr: "Support Manager",
+  crm_support: "Support Executive",
+  crm_marketing_mgr: "Marketing Manager",
+  crm_marketing: "Marketing Executive",
+  crm_ops_mgr: "Operations Manager",
+  crm_accountant: "Accountant",
+  crm_technician: "Technician",
+  crm_field_staff: "Field Staff",
+  crm_viewer: "Viewer",
+};
 
 const CrmWorkspacesAdmin = () => {
   const navigate = useNavigate();
