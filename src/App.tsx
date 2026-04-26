@@ -36,6 +36,7 @@ const CrmProjectReports = lazy(() => import("./pages/crm/CrmProjectReports"));
 const CrmMeetings = lazy(() => import("./pages/crm/CrmMeetings"));
 const CrmAuditLog = lazy(() => import("./pages/crm/CrmAuditLog"));
 const CrmCrossAnalytics = lazy(() => import("./pages/crm/CrmCrossAnalytics"));
+const CrmPerformance = lazy(() => import("./pages/crm/CrmPerformance"));
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => {
                 <Route path="meetings" element={<CrmMeetings />} />
                 <Route path="reports" element={<CrmReports />} />
                 <Route path="project-reports" element={<CrmProjectReports />} />
+                <Route path="performance" element={<CrmPerformance />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
