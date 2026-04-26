@@ -1,6 +1,45 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { AppRole } from "./useUserRole";
+
+// Full set of CRM roles stored in app_role enum (broader than useUserRole's narrow union)
+export type CrmRole =
+  | "super_admin"
+  | "admin"
+  | "employee"
+  | "user"
+  | "crm_admin"
+  | "crm_ceo"
+  | "crm_sales_mgr"
+  | "crm_sales_rep"
+  | "crm_support_mgr"
+  | "crm_support"
+  | "crm_marketing_mgr"
+  | "crm_marketing"
+  | "crm_ops_mgr"
+  | "crm_accountant"
+  | "crm_technician"
+  | "crm_field_staff"
+  | "crm_viewer";
+
+export const CRM_ROLE_LABELS: Record<CrmRole, string> = {
+  super_admin: "Super Admin",
+  admin: "Admin",
+  employee: "Employee",
+  user: "User",
+  crm_admin: "CRM Admin",
+  crm_ceo: "CEO",
+  crm_sales_mgr: "Sales Manager",
+  crm_sales_rep: "Sales Executive",
+  crm_support_mgr: "Support Manager",
+  crm_support: "Support Executive",
+  crm_marketing_mgr: "Marketing Manager",
+  crm_marketing: "Marketing Executive",
+  crm_ops_mgr: "Operations Manager",
+  crm_accountant: "Accountant",
+  crm_technician: "Technician",
+  crm_field_staff: "Field Staff",
+  crm_viewer: "Viewer",
+};
 
 export type CrmModule =
   | "leads"
