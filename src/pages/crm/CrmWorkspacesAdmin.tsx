@@ -100,6 +100,7 @@ const CrmWorkspacesAdmin = () => {
   const { role, loading: roleLoading } = useUserRole();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [members, setMembers] = useState<MemberRow[]>([]);
+  const [perms, setPerms] = useState<PermRow[]>([]);
   const [emails, setEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
@@ -118,13 +119,15 @@ const CrmWorkspacesAdmin = () => {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: ws }, { data: m }, { data: u }] = await Promise.all([
+    const [{ data: ws }, { data: m }, { data: u }, { data: p }] = await Promise.all([
       supabase.from("crm_workspaces").select("*").order("name"),
       supabase.from("crm_workspace_members").select("*"),
       supabase.rpc("get_users_with_emails"),
+      supabase.from("crm_role_permissions").select("*"),
     ]);
     setWorkspaces((ws as Workspace[]) || []);
     setMembers((m as MemberRow[]) || []);
+    setPerms((p as PermRow[]) || []);
     const map: Record<string, string> = {};
     (u || []).forEach((row: { user_id: string; email: string }) => {
       map[row.user_id] = row.email;
