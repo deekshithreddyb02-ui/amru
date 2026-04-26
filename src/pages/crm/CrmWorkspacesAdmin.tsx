@@ -345,20 +345,22 @@ const CrmWorkspacesAdmin = () => {
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50">
                       <tr className="text-left">
-                        <th className="px-4 py-2 font-medium">Email</th>
-                        <th className="px-4 py-2 font-medium">Role</th>
-                        <th className="px-4 py-2 font-medium w-12"></th>
+                        <th className="px-3 py-2 font-medium">Email</th>
+                        <th className="px-3 py-2 font-medium">Role</th>
+                        <th className="px-3 py-2 font-medium">Reports to</th>
+                        <th className="px-3 py-2 font-medium">Department</th>
+                        <th className="px-3 py-2 font-medium w-12"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {wsMembers.map((m) => (
                         <tr key={m.id} className="border-t">
-                          <td className="px-4 py-2">
+                          <td className="px-3 py-2">
                             {emails[m.user_id] || (
                               <Badge variant="outline">unknown user</Badge>
                             )}
                           </td>
-                          <td className="px-4 py-2">
+                          <td className="px-3 py-2">
                             <Select
                               value={m.crm_role}
                               onValueChange={(v) => updateRole(m.id, v)}
@@ -369,13 +371,48 @@ const CrmWorkspacesAdmin = () => {
                               <SelectContent>
                                 {CRM_ROLES.map((r) => (
                                   <SelectItem key={r} value={r}>
-                                    {r}
+                                    {ROLE_LABEL[r] || r}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           </td>
-                          <td className="px-4 py-2">
+                          <td className="px-3 py-2">
+                            <Select
+                              value={m.manager_user_id || "none"}
+                              onValueChange={(v) =>
+                                updateMemberField(m.id, { manager_user_id: v === "none" ? null : v })
+                              }
+                            >
+                              <SelectTrigger className="h-8 w-44">
+                                <SelectValue placeholder="—" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">— none —</SelectItem>
+                                {wsMembers
+                                  .filter((mm) => mm.user_id !== m.user_id)
+                                  .map((mm) => (
+                                    <SelectItem key={mm.user_id} value={mm.user_id}>
+                                      {emails[mm.user_id] || mm.user_id.slice(0, 8)}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                          </td>
+                          <td className="px-3 py-2">
+                            <Input
+                              className="h-8 w-36"
+                              defaultValue={m.department || ""}
+                              placeholder="e.g. Sales"
+                              onBlur={(e) => {
+                                const v = e.target.value.trim() || null;
+                                if (v !== (m.department || null)) {
+                                  updateMemberField(m.id, { department: v });
+                                }
+                              }}
+                            />
+                          </td>
+                          <td className="px-3 py-2">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -394,6 +431,57 @@ const CrmWorkspacesAdmin = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Permissions matrix */}
+        {selectedWs && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">
+                Permissions matrix · {selectedWs.name}
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Toggle per-role × per-module access. Super Admin and CRM Admin always have full access.
+              </p>
+            </CardHeader>
+            <CardContent className="p-0 overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-muted/50 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium">Role</th>
+                    <th className="px-3 py-2 text-left font-medium">Module</th>
+                    {PERMS.map((p) => (
+                      <th key={p} className="px-2 py-2 font-medium capitalize text-center w-16">{p}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {CRM_ROLES.filter((r) => r !== "crm_admin").map((roleKey) =>
+                    PERM_MODULES.map((mod) => {
+                      const row = wsPerms.find((p) => p.role === roleKey && p.module === mod);
+                      if (!row) return null;
+                      return (
+                        <tr key={`${roleKey}-${mod}`} className="border-t hover:bg-muted/30">
+                          <td className="px-3 py-1.5 whitespace-nowrap">{ROLE_LABEL[roleKey]}</td>
+                          <td className="px-3 py-1.5 capitalize text-muted-foreground">{mod.replace("_", " ")}</td>
+                          {(["can_view","can_create","can_edit","can_delete","can_approve"] as const).map((k) => (
+                            <td key={k} className="px-2 py-1.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={row[k]}
+                                onChange={() => togglePerm(row, k)}
+                                className="h-4 w-4 cursor-pointer accent-primary"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
