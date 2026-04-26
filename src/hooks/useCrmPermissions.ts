@@ -79,7 +79,7 @@ export type CrmPerm = "view" | "create" | "edit" | "delete" | "approve";
 export type CrmPermissionRow = {
   id: string;
   workspace_id: string;
-  role: AppRole;
+  role: CrmRole;
   module: CrmModule;
   can_view: boolean;
   can_create: boolean;
@@ -95,7 +95,7 @@ export type CrmPermissionRow = {
  */
 export const useCrmPermissions = (workspaceId: string | undefined) => {
   const [rows, setRows] = useState<CrmPermissionRow[]>([]);
-  const [myRole, setMyRole] = useState<AppRole | null>(null);
+  const [myRole, setMyRole] = useState<CrmRole | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -120,7 +120,7 @@ export const useCrmPermissions = (workspaceId: string | undefined) => {
               .from("user_roles")
               .select("role")
               .eq("user_id", uid)
-          : Promise.resolve({ data: [] as { role: AppRole }[] }),
+          : Promise.resolve({ data: [] as { role: CrmRole }[] }),
         uid
           ? supabase
               .from("crm_workspace_members")
@@ -128,14 +128,14 @@ export const useCrmPermissions = (workspaceId: string | undefined) => {
               .eq("workspace_id", workspaceId)
               .eq("user_id", uid)
               .maybeSingle()
-          : Promise.resolve({ data: null as { crm_role: AppRole } | null }),
+          : Promise.resolve({ data: null as { crm_role: CrmRole } | null }),
       ]);
 
       setRows((perms as CrmPermissionRow[]) || []);
       setIsSuperAdmin(
-        (roles || []).some((r) => (r as { role: AppRole }).role === "super_admin")
+        (roles || []).some((r) => (r as { role: CrmRole }).role === "super_admin")
       );
-      setMyRole(((member as { crm_role: AppRole } | null)?.crm_role) || null);
+      setMyRole(((member as { crm_role: CrmRole } | null)?.crm_role) || null);
     } finally {
       setLoading(false);
     }
