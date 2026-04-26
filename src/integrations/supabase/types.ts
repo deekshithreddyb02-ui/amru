@@ -673,6 +673,176 @@ export type Database = {
           },
         ]
       }
+      crm_campaign_members: {
+        Row: {
+          campaign_id: string
+          clicked_at: string | null
+          contact_id: string | null
+          created_at: string
+          email: string | null
+          id: string
+          lead_id: string | null
+          opened_at: string | null
+          phone: string | null
+          sent_at: string | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          campaign_id: string
+          clicked_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          lead_id?: string | null
+          opened_at?: string | null
+          phone?: string | null
+          sent_at?: string | null
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          campaign_id?: string
+          clicked_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          lead_id?: string | null
+          opened_at?: string | null
+          phone?: string | null
+          sent_at?: string | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaign_members_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_members_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_members_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaign_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_campaigns: {
+        Row: {
+          actual_revenue: number | null
+          audience_filter: Json | null
+          budget: number | null
+          channel: string
+          completed_at: string | null
+          cost: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          email_template_id: string | null
+          expected_revenue: number | null
+          id: string
+          name: string
+          scheduled_at: string | null
+          started_at: string | null
+          status: string
+          total_bounces: number | null
+          total_clicks: number | null
+          total_leads_generated: number | null
+          total_opens: number | null
+          total_recipients: number | null
+          total_sent: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actual_revenue?: number | null
+          audience_filter?: Json | null
+          budget?: number | null
+          channel?: string
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          email_template_id?: string | null
+          expected_revenue?: number | null
+          id?: string
+          name: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          total_bounces?: number | null
+          total_clicks?: number | null
+          total_leads_generated?: number | null
+          total_opens?: number | null
+          total_recipients?: number | null
+          total_sent?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actual_revenue?: number | null
+          audience_filter?: Json | null
+          budget?: number | null
+          channel?: string
+          completed_at?: string | null
+          cost?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          email_template_id?: string | null
+          expected_revenue?: number | null
+          id?: string
+          name?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          total_bounces?: number | null
+          total_clicks?: number | null
+          total_leads_generated?: number | null
+          total_opens?: number | null
+          total_recipients?: number | null
+          total_sent?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_campaigns_email_template_id_fkey"
+            columns: ["email_template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_email_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_campaigns_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contacts: {
         Row: {
           city: string | null
@@ -937,6 +1107,59 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_email_templates: {
+        Row: {
+          body_html: string
+          body_text: string | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          subject: string
+          updated_at: string
+          variables: Json | null
+          workspace_id: string
+        }
+        Insert: {
+          body_html: string
+          body_text?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          subject: string
+          updated_at?: string
+          variables?: Json | null
+          workspace_id: string
+        }
+        Update: {
+          body_html?: string
+          body_text?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          subject?: string
+          updated_at?: string
+          variables?: Json | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_email_templates_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
@@ -1375,6 +1598,7 @@ export type Database = {
           assigned_to: string | null
           biz_area: string | null
           biz_cost: number | null
+          campaign_id: string | null
           city: string | null
           country: string | null
           created_at: string
@@ -1384,6 +1608,7 @@ export type Database = {
           full_name: string
           id: string
           latitude: number | null
+          lead_source: string | null
           longitude: number | null
           notes: string | null
           phone: string | null
@@ -1397,6 +1622,7 @@ export type Database = {
           status: string
           street: string | null
           updated_at: string
+          web_form_id: string | null
           whatsapp: string | null
           workspace_id: string
         }
@@ -1405,6 +1631,7 @@ export type Database = {
           assigned_to?: string | null
           biz_area?: string | null
           biz_cost?: number | null
+          campaign_id?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -1414,6 +1641,7 @@ export type Database = {
           full_name: string
           id?: string
           latitude?: number | null
+          lead_source?: string | null
           longitude?: number | null
           notes?: string | null
           phone?: string | null
@@ -1427,6 +1655,7 @@ export type Database = {
           status?: string
           street?: string | null
           updated_at?: string
+          web_form_id?: string | null
           whatsapp?: string | null
           workspace_id: string
         }
@@ -1435,6 +1664,7 @@ export type Database = {
           assigned_to?: string | null
           biz_area?: string | null
           biz_cost?: number | null
+          campaign_id?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -1444,6 +1674,7 @@ export type Database = {
           full_name?: string
           id?: string
           latitude?: number | null
+          lead_source?: string | null
           longitude?: number | null
           notes?: string | null
           phone?: string | null
@@ -1457,15 +1688,30 @@ export type Database = {
           status?: string
           street?: string | null
           updated_at?: string
+          web_form_id?: string | null
           whatsapp?: string | null
           workspace_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "crm_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_leads_source_enquiry_id_fkey"
             columns: ["source_enquiry_id"]
             isOneToOne: false
             referencedRelation: "contact_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_web_form_id_fkey"
+            columns: ["web_form_id"]
+            isOneToOne: false
+            referencedRelation: "crm_web_forms"
             referencedColumns: ["id"]
           },
           {
@@ -1790,6 +2036,248 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_products: {
+        Row: {
+          category: string | null
+          cost_price: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          hsn_sac: string | null
+          id: string
+          is_active: boolean
+          name: string
+          product_type: string
+          reorder_level: number
+          sku: string | null
+          stock_quantity: number
+          tax_rate: number
+          unit: string | null
+          unit_price: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          category?: string | null
+          cost_price?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          hsn_sac?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          product_type?: string
+          reorder_level?: number
+          sku?: string | null
+          stock_quantity?: number
+          tax_rate?: number
+          unit?: string | null
+          unit_price?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          category?: string | null
+          cost_price?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          hsn_sac?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          product_type?: string
+          reorder_level?: number
+          sku?: string | null
+          stock_quantity?: number
+          tax_rate?: number
+          unit?: string | null
+          unit_price?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_purchase_order_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          hsn_sac: string | null
+          id: string
+          position: number
+          product_id: string | null
+          purchase_order_id: string
+          quantity: number
+          rate: number
+          tax_rate: number
+          unit: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description: string
+          hsn_sac?: string | null
+          id?: string
+          position?: number
+          product_id?: string | null
+          purchase_order_id: string
+          quantity?: number
+          rate?: number
+          tax_rate?: number
+          unit?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          hsn_sac?: string | null
+          id?: string
+          position?: number
+          product_id?: string | null
+          purchase_order_id?: string
+          quantity?: number
+          rate?: number
+          tax_rate?: number
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_purchase_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "crm_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "crm_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_purchase_orders: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          cgst: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          discount: number
+          expected_delivery: string | null
+          gst_type: string
+          id: string
+          igst: number
+          notes: string | null
+          order_date: string
+          po_number: string
+          sgst: number
+          status: string
+          subtotal: number
+          terms: string | null
+          total: number
+          updated_at: string
+          vendor_address: string | null
+          vendor_email: string | null
+          vendor_gstin: string | null
+          vendor_id: string | null
+          vendor_name: string
+          vendor_phone: string | null
+          workspace_id: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          cgst?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount?: number
+          expected_delivery?: string | null
+          gst_type?: string
+          id?: string
+          igst?: number
+          notes?: string | null
+          order_date?: string
+          po_number: string
+          sgst?: number
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          vendor_address?: string | null
+          vendor_email?: string | null
+          vendor_gstin?: string | null
+          vendor_id?: string | null
+          vendor_name: string
+          vendor_phone?: string | null
+          workspace_id: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          cgst?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount?: number
+          expected_delivery?: string | null
+          gst_type?: string
+          id?: string
+          igst?: number
+          notes?: string | null
+          order_date?: string
+          po_number?: string
+          sgst?: number
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          vendor_address?: string | null
+          vendor_email?: string | null
+          vendor_gstin?: string | null
+          vendor_id?: string | null
+          vendor_name?: string
+          vendor_phone?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_purchase_orders_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "crm_vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_purchase_orders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_quotation_items: {
         Row: {
           amount: number
@@ -2102,6 +2590,207 @@ export type Database = {
           },
         ]
       }
+      crm_sales_order_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          hsn_sac: string | null
+          id: string
+          position: number
+          product_id: string | null
+          quantity: number
+          rate: number
+          sales_order_id: string
+          tax_rate: number
+          unit: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description: string
+          hsn_sac?: string | null
+          id?: string
+          position?: number
+          product_id?: string | null
+          quantity?: number
+          rate?: number
+          sales_order_id: string
+          tax_rate?: number
+          unit?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          hsn_sac?: string | null
+          id?: string
+          position?: number
+          product_id?: string | null
+          quantity?: number
+          rate?: number
+          sales_order_id?: string
+          tax_rate?: number
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sales_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "crm_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sales_order_items_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "crm_sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_sales_orders: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          cgst: number
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_address: string | null
+          customer_email: string | null
+          customer_gstin: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_state: string | null
+          deal_id: string | null
+          delivery_date: string | null
+          discount: number
+          gst_type: string
+          id: string
+          igst: number
+          notes: string | null
+          order_date: string
+          organization_id: string | null
+          quotation_id: string | null
+          sgst: number
+          so_number: string
+          status: string
+          subtotal: number
+          terms: string | null
+          total: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          cgst?: number
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gstin?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          customer_state?: string | null
+          deal_id?: string | null
+          delivery_date?: string | null
+          discount?: number
+          gst_type?: string
+          id?: string
+          igst?: number
+          notes?: string | null
+          order_date?: string
+          organization_id?: string | null
+          quotation_id?: string | null
+          sgst?: number
+          so_number: string
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          cgst?: number
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gstin?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_state?: string | null
+          deal_id?: string | null
+          delivery_date?: string | null
+          discount?: number
+          gst_type?: string
+          id?: string
+          igst?: number
+          notes?: string | null
+          order_date?: string
+          organization_id?: string | null
+          quotation_id?: string | null
+          sgst?: number
+          so_number?: string
+          status?: string
+          subtotal?: number
+          terms?: string | null
+          total?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sales_orders_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sales_orders_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sales_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sales_orders_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "crm_quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sales_orders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_support_tickets: {
         Row: {
           assigned_to: string | null
@@ -2203,6 +2892,155 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_support_tickets_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_vendors: {
+        Row: {
+          city: string | null
+          contact_person: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          gstin: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          pan: string | null
+          payment_terms: string | null
+          phone: string | null
+          pincode: string | null
+          state: string | null
+          street: string | null
+          updated_at: string
+          website: string | null
+          workspace_id: string
+        }
+        Insert: {
+          city?: string | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          pan?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          pincode?: string | null
+          state?: string | null
+          street?: string | null
+          updated_at?: string
+          website?: string | null
+          workspace_id: string
+        }
+        Update: {
+          city?: string | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          gstin?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          pan?: string | null
+          payment_terms?: string | null
+          phone?: string | null
+          pincode?: string | null
+          state?: string | null
+          street?: string | null
+          updated_at?: string
+          website?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_vendors_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_web_forms: {
+        Row: {
+          auto_assign_to: string | null
+          campaign_id: string | null
+          created_at: string
+          created_by: string | null
+          default_lead_source: string | null
+          description: string | null
+          fields: Json
+          id: string
+          is_active: boolean
+          name: string
+          redirect_url: string | null
+          slug: string
+          thank_you_message: string | null
+          total_submissions: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          auto_assign_to?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_lead_source?: string | null
+          description?: string | null
+          fields?: Json
+          id?: string
+          is_active?: boolean
+          name: string
+          redirect_url?: string | null
+          slug: string
+          thank_you_message?: string | null
+          total_submissions?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          auto_assign_to?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_lead_source?: string | null
+          description?: string | null
+          fields?: Json
+          id?: string
+          is_active?: boolean
+          name?: string
+          redirect_url?: string | null
+          slug?: string
+          thank_you_message?: string | null
+          total_submissions?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_web_forms_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "crm_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_web_forms_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
