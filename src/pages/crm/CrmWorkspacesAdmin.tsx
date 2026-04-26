@@ -38,8 +38,30 @@ type MemberRow = {
   workspace_id: string;
   user_id: string;
   crm_role: string;
+  manager_user_id: string | null;
+  department: string | null;
   email?: string;
 };
+
+type PermRow = {
+  id: string;
+  workspace_id: string;
+  role: string;
+  module: string;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+  can_approve: boolean;
+};
+
+const PERM_MODULES = [
+  "leads", "contacts", "organizations", "deals", "activities",
+  "tickets", "hydrogeo", "documents", "quotations", "invoices",
+  "payments", "reports", "project_reports", "performance",
+] as const;
+
+const PERMS = ["view", "create", "edit", "delete", "approve"] as const;
 
 const CRM_ROLES = [
   "crm_admin",
