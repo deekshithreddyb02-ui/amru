@@ -201,6 +201,31 @@ const CrmWorkspacesAdmin = () => {
     }
   };
 
+  const updateMemberField = async (id: string, patch: Partial<MemberRow>) => {
+    const { error } = await supabase
+      .from("crm_workspace_members")
+      .update(patch as never)
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Failed", description: error.message, variant: "destructive" });
+    } else {
+      load();
+    }
+  };
+
+  const togglePerm = async (row: PermRow, key: "can_view" | "can_create" | "can_edit" | "can_delete" | "can_approve") => {
+    const next = !row[key];
+    setPerms((prev) => prev.map((p) => (p.id === row.id ? { ...p, [key]: next } : p)));
+    const { error } = await supabase
+      .from("crm_role_permissions")
+      .update({ [key]: next })
+      .eq("id", row.id);
+    if (error) {
+      toast({ title: "Failed", description: error.message, variant: "destructive" });
+      load();
+    }
+  };
+
   if (roleLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -211,6 +236,7 @@ const CrmWorkspacesAdmin = () => {
 
   const selectedWs = workspaces.find((w) => w.id === selected);
   const wsMembers = members.filter((m) => m.workspace_id === selected);
+  const wsPerms = perms.filter((p) => p.workspace_id === selected);
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6">
