@@ -99,6 +99,9 @@ const App = () => {
                 <Route path="campaigns" element={<CrmCampaigns />} />
                 <Route path="web-forms" element={<CrmWebForms />} />
                 <Route path="email-templates" element={<CrmEmailTemplates />} />
+                <Route path="workflows" element={<CrmWorkflows />} />
+                <Route path="approvals" element={<CrmApprovals />} />
+                <Route path="sla" element={<CrmSla />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
