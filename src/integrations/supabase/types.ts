@@ -3992,6 +3992,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
+      crm_eval_condition: {
+        Args: { _cond: Json; _old: Json; _row: Json }
+        Returns: boolean
+      }
       crm_has_permission: {
         Args: {
           _module: string
@@ -4000,6 +4004,16 @@ export type Database = {
           _workspace_id: string
         }
         Returns: boolean
+      }
+      crm_run_action: {
+        Args: {
+          _action: Json
+          _entity_id: string
+          _entity_type: string
+          _row: Json
+          _workspace_id: string
+        }
+        Returns: Json
       }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       get_users_with_emails: {
