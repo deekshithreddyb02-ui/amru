@@ -94,7 +94,7 @@ const CrmWorkflows = () => {
       .select("*")
       .eq("workspace_id", workspace.id)
       .order("created_at", { ascending: false });
-    setRows((data as Rule[]) || []);
+    setRows(((data || []) as unknown) as Rule[]);
     setLoading(false);
   };
 
