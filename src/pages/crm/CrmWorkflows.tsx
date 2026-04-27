@@ -21,8 +21,24 @@ import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
 type Action = {
-  type: "assign" | "notify" | "create_task" | "send_email" | "update_field" | "create_approval";
-  config: Record<string, string>;
+  type:
+    | "assign_user"
+    | "create_notification"
+    | "create_activity"
+    | "update_field"
+    | "create_approval_request";
+  [key: string]: string | undefined;
+};
+
+type Execution = {
+  id: string;
+  workflow_id: string;
+  entity_type: string;
+  entity_id: string | null;
+  trigger_event: string;
+  status: string;
+  error_message: string | null;
+  executed_at: string;
 };
 
 type Rule = {
