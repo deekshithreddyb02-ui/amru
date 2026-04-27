@@ -69,7 +69,7 @@ const empty = {
 const CrmApprovals = () => {
   const { workspace } = useOutletContext<Ctx>();
   const [rows, setRows] = useState<Approval[]>([]);
-  const [members, setMembers] = useState<{ user_id: string; email: string | null }[]>([]);
+  const [members, setMembers] = useState<{ user_id: string; crm_role: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
@@ -89,12 +89,12 @@ const CrmApprovals = () => {
         .order("created_at", { ascending: false }),
       supabase
         .from("crm_workspace_members")
-        .select("user_id, email")
+        .select("user_id, crm_role")
         .eq("workspace_id", workspace.id),
     ]);
     setMe(session?.user?.id ?? null);
     setRows((data as Approval[]) || []);
-    setMembers((mem as { user_id: string; email: string | null }[]) || []);
+    setMembers((mem as { user_id: string; crm_role: string }[]) || []);
     setLoading(false);
   };
 
