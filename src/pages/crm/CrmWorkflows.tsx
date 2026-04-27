@@ -14,32 +14,23 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Search, Workflow, Trash2 } from "lucide-react";
+import {
+  Tabs, TabsContent, TabsList, TabsTrigger,
+} from "@/components/ui/tabs";
+import { Loader2, Plus, Search, Workflow, Trash2, History } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
-type Action = {
-  type:
-    | "assign_user"
-    | "create_notification"
-    | "create_activity"
-    | "update_field"
-    | "create_approval_request";
-  [key: string]: string | undefined;
-};
+type ActionType =
+  | "assign_user"
+  | "create_notification"
+  | "create_activity"
+  | "update_field"
+  | "create_approval_request";
 
-type Execution = {
-  id: string;
-  workflow_id: string;
-  entity_type: string;
-  entity_id: string | null;
-  trigger_event: string;
-  status: string;
-  error_message: string | null;
-  executed_at: string;
-};
+type Action = { type: ActionType } & Record<string, string>;
 
 type Rule = {
   id: string;
@@ -56,61 +47,79 @@ type Rule = {
   last_run_at: string | null;
 };
 
+type Execution = {
+  id: string;
+  workflow_id: string;
+  entity_type: string;
+  entity_id: string | null;
+  trigger_event: string;
+  status: string;
+  error_message: string | null;
+  executed_at: string;
+};
+
 const ENTITY_TYPES = [
-  { value: "lead", label: "Lead" },
-  { value: "deal", label: "Deal" },
-  { value: "ticket", label: "Support Ticket" },
-  { value: "activity", label: "Activity" },
-  { value: "invoice", label: "Invoice" },
-  { value: "quotation", label: "Quotation" },
+  { value: "crm_leads", label: "Lead" },
+  { value: "crm_deals", label: "Deal" },
+  { value: "crm_support_tickets", label: "Support Ticket" },
+  { value: "crm_activities", label: "Activity" },
+  { value: "crm_invoices", label: "Invoice" },
 ];
 
 const TRIGGER_EVENTS = [
   { value: "on_create", label: "When created" },
   { value: "on_update", label: "When updated" },
-  { value: "on_status_change", label: "When status changes" },
-  { value: "on_overdue", label: "When overdue" },
+  { value: "on_status_change", label: "When a field changes" },
 ];
 
-const ACTION_TYPES = [
-  { value: "assign", label: "Assign owner" },
-  { value: "notify", label: "Send notification" },
-  { value: "create_task", label: "Create task" },
-  { value: "send_email", label: "Send email" },
+const ACTION_TYPES: { value: ActionType; label: string }[] = [
+  { value: "assign_user", label: "Assign user" },
+  { value: "create_notification", label: "Send notification" },
+  { value: "create_activity", label: "Create task" },
   { value: "update_field", label: "Update field" },
-  { value: "create_approval", label: "Request approval" },
+  { value: "create_approval_request", label: "Request approval" },
 ];
 
 const empty = {
   name: "",
   description: "",
-  entity_type: "lead",
+  entity_type: "crm_leads",
   trigger_event: "on_create",
   trigger_field: "",
   trigger_value: "",
   is_active: true,
 };
 
+const newAction = (type: ActionType): Action => ({ type });
+
 const CrmWorkflows = () => {
   const { workspace } = useOutletContext<Ctx>();
   const [rows, setRows] = useState<Rule[]>([]);
+  const [executions, setExecutions] = useState<Execution[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
-  const [actions, setActions] = useState<Action[]>([
-    { type: "notify", config: { message: "" } },
-  ]);
+  const [actions, setActions] = useState<Action[]>([newAction("create_notification")]);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("crm_workflow_rules")
-      .select("*")
-      .eq("workspace_id", workspace.id)
-      .order("created_at", { ascending: false });
-    setRows(((data || []) as unknown) as Rule[]);
+    const [{ data: rulesData }, { data: execData }] = await Promise.all([
+      supabase
+        .from("crm_workflow_rules")
+        .select("*")
+        .eq("workspace_id", workspace.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("crm_workflow_executions")
+        .select("id, workflow_id, entity_type, entity_id, trigger_event, status, error_message, executed_at")
+        .eq("workspace_id", workspace.id)
+        .order("executed_at", { ascending: false })
+        .limit(50),
+    ]);
+    setRows(((rulesData || []) as unknown) as Rule[]);
+    setExecutions((execData as Execution[]) || []);
     setLoading(false);
   };
 
@@ -121,7 +130,7 @@ const CrmWorkflows = () => {
 
   const reset = () => {
     setForm(empty);
-    setActions([{ type: "notify", config: { message: "" } }]);
+    setActions([newAction("create_notification")]);
   };
 
   const save = async () => {
@@ -166,8 +175,7 @@ const CrmWorkflows = () => {
     load();
   };
 
-  const addAction = () =>
-    setActions((a) => [...a, { type: "notify", config: { message: "" } }]);
+  const addAction = () => setActions((a) => [...a, newAction("create_notification")]);
 
   const updateAction = (i: number, patch: Partial<Action>) =>
     setActions((a) => a.map((act, idx) => (idx === i ? { ...act, ...patch } : act)));
@@ -175,9 +183,85 @@ const CrmWorkflows = () => {
   const removeAction = (i: number) =>
     setActions((a) => a.filter((_, idx) => idx !== i));
 
+  const renderActionFields = (act: Action, i: number) => {
+    switch (act.type) {
+      case "assign_user":
+        return (
+          <Input
+            placeholder="User ID (UUID)"
+            value={act.user_id || ""}
+            onChange={(e) => updateAction(i, { user_id: e.target.value })}
+          />
+        );
+      case "create_notification":
+        return (
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            <Input
+              placeholder="Title"
+              value={act.title || ""}
+              onChange={(e) => updateAction(i, { title: e.target.value })}
+            />
+            <Input
+              placeholder="Body"
+              value={act.body || ""}
+              onChange={(e) => updateAction(i, { body: e.target.value })}
+            />
+          </div>
+        );
+      case "create_activity":
+        return (
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            <Input
+              placeholder="Subject"
+              value={act.subject || ""}
+              onChange={(e) => updateAction(i, { subject: e.target.value })}
+            />
+            <Input
+              type="number"
+              placeholder="Due in hours"
+              value={act.due_in_hours || ""}
+              onChange={(e) => updateAction(i, { due_in_hours: e.target.value })}
+            />
+          </div>
+        );
+      case "update_field":
+        return (
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            <Input
+              placeholder="Field name"
+              value={act.field || ""}
+              onChange={(e) => updateAction(i, { field: e.target.value })}
+            />
+            <Input
+              placeholder="New value"
+              value={act.value || ""}
+              onChange={(e) => updateAction(i, { value: e.target.value })}
+            />
+          </div>
+        );
+      case "create_approval_request":
+        return (
+          <div className="grid grid-cols-2 gap-2 flex-1">
+            <Input
+              placeholder="Title"
+              value={act.title || ""}
+              onChange={(e) => updateAction(i, { title: e.target.value })}
+            />
+            <Input
+              placeholder="Approver user ID"
+              value={act.approver_user_id || ""}
+              onChange={(e) => updateAction(i, { approver_user_id: e.target.value })}
+            />
+          </div>
+        );
+    }
+  };
+
   const filtered = rows.filter((r) =>
     !q || r.name.toLowerCase().includes(q.toLowerCase())
   );
+
+  const ruleName = (id: string) => rows.find((r) => r.id === id)?.name || "—";
 
   return (
     <div className="space-y-4">
@@ -187,7 +271,7 @@ const CrmWorkflows = () => {
             <Workflow className="h-6 w-6 text-primary" /> Workflow Rules
           </h1>
           <p className="text-sm text-muted-foreground">
-            Automate actions when records are created, updated, or overdue.
+            Automate actions when records are created, updated, or change status.
           </p>
         </div>
         <div className="flex gap-2">
@@ -260,7 +344,7 @@ const CrmWorkflows = () => {
                       />
                     </div>
                     <div>
-                      <Label>New value</Label>
+                      <Label>New value (optional)</Label>
                       <Input
                         value={form.trigger_value}
                         onChange={(e) => setForm({ ...form, trigger_value: e.target.value })}
@@ -282,44 +366,16 @@ const CrmWorkflows = () => {
                       <div key={i} className="flex gap-2 items-start border rounded-md p-2">
                         <Select
                           value={act.type}
-                          onValueChange={(v) => updateAction(i, { type: v as Action["type"] })}
+                          onValueChange={(v) => updateAction(i, { type: v as ActionType })}
                         >
-                          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                          <SelectTrigger className="w-44 shrink-0"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             {ACTION_TYPES.map((a) => (
                               <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
-                        <Input
-                          className="flex-1"
-                          placeholder={
-                            act.type === "assign" ? "User ID or 'round_robin'" :
-                            act.type === "notify" ? "Notification message" :
-                            act.type === "create_task" ? "Task subject" :
-                            act.type === "send_email" ? "Email template ID" :
-                            act.type === "update_field" ? "field=value" :
-                            "Approval title"
-                          }
-                          value={
-                            act.config.message ||
-                            act.config.user_id ||
-                            act.config.subject ||
-                            act.config.template_id ||
-                            act.config.field ||
-                            act.config.title || ""
-                          }
-                          onChange={(e) => {
-                            const k =
-                              act.type === "assign" ? "user_id" :
-                              act.type === "notify" ? "message" :
-                              act.type === "create_task" ? "subject" :
-                              act.type === "send_email" ? "template_id" :
-                              act.type === "update_field" ? "field" :
-                              "title";
-                            updateAction(i, { config: { ...act.config, [k]: e.target.value } });
-                          }}
-                        />
+                        <div className="flex-1">{renderActionFields(act, i)}</div>
                         <Button
                           type="button"
                           variant="ghost"
@@ -359,55 +415,101 @@ const CrmWorkflows = () => {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
-      ) : filtered.length === 0 ? (
-        <Card className="p-8 text-center text-sm text-muted-foreground">
-          No workflow rules yet. Create your first one to automate actions.
-        </Card>
       ) : (
-        <div className="grid gap-3">
-          {filtered.map((r) => (
-            <Card key={r.id} className="p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-medium truncate">{r.name}</h3>
-                    <Badge variant={r.is_active ? "default" : "secondary"}>
-                      {r.is_active ? "Active" : "Paused"}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {ENTITY_TYPES.find((e) => e.value === r.entity_type)?.label || r.entity_type}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {TRIGGER_EVENTS.find((e) => e.value === r.trigger_event)?.label || r.trigger_event}
-                    </Badge>
-                  </div>
-                  {r.description && (
-                    <p className="text-sm text-muted-foreground mt-1">{r.description}</p>
-                  )}
-                  <div className="text-xs text-muted-foreground mt-1.5">
-                    {(r.actions || []).length} action{(r.actions || []).length === 1 ? "" : "s"} •
-                    {" "}{r.run_count} run{r.run_count === 1 ? "" : "s"}
-                    {r.last_run_at && ` • last: ${new Date(r.last_run_at).toLocaleString()}`}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={r.is_active}
-                    onCheckedChange={(v) => toggle(r.id, v)}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => remove(r.id)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+        <Tabs defaultValue="rules">
+          <TabsList>
+            <TabsTrigger value="rules">Rules ({rows.length})</TabsTrigger>
+            <TabsTrigger value="log">
+              <History className="h-3.5 w-3.5 mr-1" /> Recent runs ({executions.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="rules" className="mt-4">
+            {filtered.length === 0 ? (
+              <Card className="p-8 text-center text-sm text-muted-foreground">
+                No workflow rules yet. Create your first one to automate actions.
+              </Card>
+            ) : (
+              <div className="grid gap-3">
+                {filtered.map((r) => (
+                  <Card key={r.id} className="p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-medium truncate">{r.name}</h3>
+                          <Badge variant={r.is_active ? "default" : "secondary"}>
+                            {r.is_active ? "Active" : "Paused"}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {ENTITY_TYPES.find((e) => e.value === r.entity_type)?.label || r.entity_type}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {TRIGGER_EVENTS.find((e) => e.value === r.trigger_event)?.label || r.trigger_event}
+                          </Badge>
+                        </div>
+                        {r.description && (
+                          <p className="text-sm text-muted-foreground mt-1">{r.description}</p>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-1.5">
+                          {(r.actions || []).length} action{(r.actions || []).length === 1 ? "" : "s"} •
+                          {" "}{r.run_count} run{r.run_count === 1 ? "" : "s"}
+                          {r.last_run_at && ` • last: ${new Date(r.last_run_at).toLocaleString()}`}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={r.is_active}
+                          onCheckedChange={(v) => toggle(r.id, v)}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => remove(r.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
               </div>
-            </Card>
-          ))}
-        </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="log" className="mt-4">
+            {executions.length === 0 ? (
+              <Card className="p-8 text-center text-sm text-muted-foreground">
+                No workflow runs yet. They'll appear here as rules fire.
+              </Card>
+            ) : (
+              <Card className="divide-y">
+                {executions.map((e) => (
+                  <div key={e.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                    <Badge
+                      variant="outline"
+                      className={
+                        e.status === "success"
+                          ? "bg-emerald-500/15 text-emerald-700 border-emerald-500/30"
+                          : "bg-destructive/15 text-destructive border-destructive/30"
+                      }
+                    >
+                      {e.status}
+                    </Badge>
+                    <span className="font-medium truncate flex-1 min-w-0">{ruleName(e.workflow_id)}</span>
+                    <span className="text-xs text-muted-foreground">{e.trigger_event}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {ENTITY_TYPES.find((x) => x.value === e.entity_type)?.label || e.entity_type}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(e.executed_at).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
