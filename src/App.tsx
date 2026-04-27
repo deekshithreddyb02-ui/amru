@@ -44,6 +44,9 @@ const CrmPurchaseOrders = lazy(() => import("./pages/crm/CrmPurchaseOrders"));
 const CrmCampaigns = lazy(() => import("./pages/crm/CrmCampaigns"));
 const CrmWebForms = lazy(() => import("./pages/crm/CrmWebForms"));
 const CrmEmailTemplates = lazy(() => import("./pages/crm/CrmEmailTemplates"));
+const CrmWorkflows = lazy(() => import("./pages/crm/CrmWorkflows"));
+const CrmApprovals = lazy(() => import("./pages/crm/CrmApprovals"));
+const CrmSla = lazy(() => import("./pages/crm/CrmSla"));
 
 const queryClient = new QueryClient();
 
@@ -96,6 +99,9 @@ const App = () => {
                 <Route path="campaigns" element={<CrmCampaigns />} />
                 <Route path="web-forms" element={<CrmWebForms />} />
                 <Route path="email-templates" element={<CrmEmailTemplates />} />
+                <Route path="workflows" element={<CrmWorkflows />} />
+                <Route path="approvals" element={<CrmApprovals />} />
+                <Route path="sla" element={<CrmSla />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 

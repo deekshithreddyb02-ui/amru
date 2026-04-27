@@ -623,6 +623,83 @@ export type Database = {
           },
         ]
       }
+      crm_approval_requests: {
+        Row: {
+          amount: number | null
+          approver_role: string | null
+          approver_user_id: string | null
+          created_at: string
+          currency: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          description: string | null
+          due_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          request_type: string
+          requested_by: string
+          status: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          amount?: number | null
+          approver_role?: string | null
+          approver_user_id?: string | null
+          created_at?: string
+          currency?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          description?: string | null
+          due_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          request_type: string
+          requested_by: string
+          status?: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          amount?: number | null
+          approver_role?: string | null
+          approver_user_id?: string | null
+          created_at?: string
+          currency?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          description?: string | null
+          due_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          request_type?: string
+          requested_by?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_approval_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_audit_log: {
         Row: {
           action: string
@@ -2791,24 +2868,85 @@ export type Database = {
           },
         ]
       }
+      crm_sla_policies: {
+        Row: {
+          business_hours_only: boolean
+          created_at: string
+          description: string | null
+          first_response_minutes: number
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          priority: string
+          resolution_minutes: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          business_hours_only?: boolean
+          created_at?: string
+          description?: string | null
+          first_response_minutes?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          priority: string
+          resolution_minutes?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          business_hours_only?: boolean
+          created_at?: string
+          description?: string | null
+          first_response_minutes?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          priority?: string
+          resolution_minutes?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sla_policies_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_support_tickets: {
         Row: {
           assigned_to: string | null
           category: string
+          closed_at: string | null
           contact_id: string | null
           created_at: string
           created_by: string | null
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          customer_satisfaction: number | null
           description: string | null
           due_at: string | null
+          escalated_at: string | null
+          first_responded_at: string | null
+          first_response_due_at: string | null
           id: string
+          is_escalated: boolean
           lead_id: string | null
           organization_id: string | null
           priority: string
+          resolution_due_at: string | null
           resolution_notes: string | null
           resolved_at: string | null
+          sla_policy_id: string | null
           source_enquiry_id: string | null
           status: string
           subject: string
@@ -2818,20 +2956,28 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           category?: string
+          closed_at?: string | null
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          customer_satisfaction?: number | null
           description?: string | null
           due_at?: string | null
+          escalated_at?: string | null
+          first_responded_at?: string | null
+          first_response_due_at?: string | null
           id?: string
+          is_escalated?: boolean
           lead_id?: string | null
           organization_id?: string | null
           priority?: string
+          resolution_due_at?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
+          sla_policy_id?: string | null
           source_enquiry_id?: string | null
           status?: string
           subject: string
@@ -2841,20 +2987,28 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           category?: string
+          closed_at?: string | null
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          customer_satisfaction?: number | null
           description?: string | null
           due_at?: string | null
+          escalated_at?: string | null
+          first_responded_at?: string | null
+          first_response_due_at?: string | null
           id?: string
+          is_escalated?: boolean
           lead_id?: string | null
           organization_id?: string | null
           priority?: string
+          resolution_due_at?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
+          sla_policy_id?: string | null
           source_enquiry_id?: string | null
           status?: string
           subject?: string
@@ -3041,6 +3195,125 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_web_forms_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_workflow_executions: {
+        Row: {
+          actions_executed: Json
+          entity_id: string | null
+          entity_type: string
+          error_message: string | null
+          executed_at: string
+          id: string
+          status: string
+          trigger_event: string
+          workflow_id: string
+          workspace_id: string
+        }
+        Insert: {
+          actions_executed?: Json
+          entity_id?: string | null
+          entity_type: string
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          status?: string
+          trigger_event: string
+          workflow_id: string
+          workspace_id: string
+        }
+        Update: {
+          actions_executed?: Json
+          entity_id?: string | null
+          entity_type?: string
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          status?: string
+          trigger_event?: string
+          workflow_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_workflow_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workflow_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_workflow_executions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_workflow_rules: {
+        Row: {
+          actions: Json
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entity_type: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          name: string
+          run_count: number
+          trigger_event: string
+          trigger_field: string | null
+          trigger_value: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actions?: Json
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entity_type: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name: string
+          run_count?: number
+          trigger_event: string
+          trigger_field?: string | null
+          trigger_value?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actions?: Json
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entity_type?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name?: string
+          run_count?: number
+          trigger_event?: string
+          trigger_field?: string | null
+          trigger_value?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_workflow_rules_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
