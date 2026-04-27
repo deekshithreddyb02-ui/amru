@@ -40,6 +40,9 @@ const NAV = [
   { to: "reports", label: "AI Reports", icon: FileText },
   { to: "project-reports", label: "Project Reports", icon: ClipboardList },
   { to: "performance", label: "Performance", icon: TrendingUp },
+  { to: "workflows", label: "Workflows", icon: Workflow },
+  { to: "approvals", label: "Approvals", icon: ClipboardCheck },
+  { to: "sla", label: "SLA Policies", icon: Timer },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
