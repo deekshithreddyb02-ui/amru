@@ -302,7 +302,7 @@ const CrmApprovals = () => {
                   <SelectContent>
                     {members.map((m) => (
                       <SelectItem key={m.user_id} value={m.user_id}>
-                        {m.email || m.user_id.slice(0, 8)}
+                        {m.crm_role} • {m.user_id.slice(0, 8)}
                       </SelectItem>
                     ))}
                   </SelectContent>
