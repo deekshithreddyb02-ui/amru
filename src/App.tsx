@@ -107,6 +107,7 @@ const App = () => {
                 <Route path="workflows" element={<CrmWorkflows />} />
                 <Route path="approvals" element={<CrmApprovals />} />
                 <Route path="sla" element={<CrmSla />} />
+                <Route path="customer-portal" element={<CrmCustomerPortal />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
