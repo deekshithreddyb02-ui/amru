@@ -2946,6 +2946,7 @@ export type Database = {
           resolution_due_at: string | null
           resolution_notes: string | null
           resolved_at: string | null
+          sla_breach_notified: boolean
           sla_policy_id: string | null
           source_enquiry_id: string | null
           status: string
@@ -2977,6 +2978,7 @@ export type Database = {
           resolution_due_at?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
+          sla_breach_notified?: boolean
           sla_policy_id?: string | null
           source_enquiry_id?: string | null
           status?: string
@@ -3008,6 +3010,7 @@ export type Database = {
           resolution_due_at?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
+          sla_breach_notified?: boolean
           sla_policy_id?: string | null
           source_enquiry_id?: string | null
           status?: string
@@ -3269,6 +3272,9 @@ export type Database = {
           last_run_at: string | null
           name: string
           run_count: number
+          schedule_cron: string | null
+          schedule_filter: Json | null
+          schedule_target_module: string | null
           trigger_event: string
           trigger_field: string | null
           trigger_value: string | null
@@ -3287,6 +3293,9 @@ export type Database = {
           last_run_at?: string | null
           name: string
           run_count?: number
+          schedule_cron?: string | null
+          schedule_filter?: Json | null
+          schedule_target_module?: string | null
           trigger_event: string
           trigger_field?: string | null
           trigger_value?: string | null
@@ -3305,6 +3314,9 @@ export type Database = {
           last_run_at?: string | null
           name?: string
           run_count?: number
+          schedule_cron?: string | null
+          schedule_filter?: Json | null
+          schedule_target_module?: string | null
           trigger_event?: string
           trigger_field?: string | null
           trigger_value?: string | null
@@ -4015,6 +4027,7 @@ export type Database = {
         }
         Returns: Json
       }
+      crm_run_scheduled_workflows: { Args: never; Returns: Json }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       get_users_with_emails: {
         Args: never
