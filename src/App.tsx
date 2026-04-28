@@ -50,6 +50,7 @@ const CrmSla = lazy(() => import("./pages/crm/CrmSla"));
 const CrmCustomerPortal = lazy(() => import("./pages/crm/CrmCustomerPortal"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const CrmReportingHub = lazy(() => import("./pages/crm/CrmReportingHub"));
+const CrmFieldVisits = lazy(() => import("./pages/crm/CrmFieldVisits"));
 
 const queryClient = new QueryClient();
 
