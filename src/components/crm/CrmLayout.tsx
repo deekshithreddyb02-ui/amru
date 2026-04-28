@@ -43,6 +43,7 @@ const NAV = [
   { to: "workflows", label: "Workflows", icon: Workflow },
   { to: "approvals", label: "Approvals", icon: ClipboardCheck },
   { to: "sla", label: "SLA Policies", icon: Timer },
+  { to: "customer-portal", label: "Customer Portal", icon: Link2 },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
