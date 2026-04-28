@@ -47,6 +47,8 @@ const CrmEmailTemplates = lazy(() => import("./pages/crm/CrmEmailTemplates"));
 const CrmWorkflows = lazy(() => import("./pages/crm/CrmWorkflows"));
 const CrmApprovals = lazy(() => import("./pages/crm/CrmApprovals"));
 const CrmSla = lazy(() => import("./pages/crm/CrmSla"));
+const CrmCustomerPortal = lazy(() => import("./pages/crm/CrmCustomerPortal"));
+const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,9 @@ const App = () => {
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/employee" element={<EmployeeDashboard />} />
               <Route path="/change-password" element={<ChangePassword />} />
+
+              {/* Public customer portal (token-gated) */}
+              <Route path="/portal/:token" element={<CustomerPortal />} />
 
               {/* Amruta Geo CRM */}
               <Route path="/crm/admin/workspaces" element={<CrmWorkspacesAdmin />} />
@@ -102,6 +107,7 @@ const App = () => {
                 <Route path="workflows" element={<CrmWorkflows />} />
                 <Route path="approvals" element={<CrmApprovals />} />
                 <Route path="sla" element={<CrmSla />} />
+                <Route path="customer-portal" element={<CrmCustomerPortal />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
