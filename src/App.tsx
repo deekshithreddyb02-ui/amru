@@ -47,6 +47,8 @@ const CrmEmailTemplates = lazy(() => import("./pages/crm/CrmEmailTemplates"));
 const CrmWorkflows = lazy(() => import("./pages/crm/CrmWorkflows"));
 const CrmApprovals = lazy(() => import("./pages/crm/CrmApprovals"));
 const CrmSla = lazy(() => import("./pages/crm/CrmSla"));
+const CrmCustomerPortal = lazy(() => import("./pages/crm/CrmCustomerPortal"));
+const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 
 const queryClient = new QueryClient();
 
