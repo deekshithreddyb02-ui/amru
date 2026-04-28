@@ -26,6 +26,7 @@ const NAV = [
   { to: "calendar", label: "Calendar", icon: CalendarDays },
   { to: "tickets", label: "Support", icon: LifeBuoy },
   { to: "hydrogeo", label: "HydroGeo", icon: Droplet },
+  { to: "field-visits", label: "Field Visits", icon: MapPin },
   { to: "documents", label: "Documents", icon: FolderOpen },
   { to: "quotations", label: "Quotations", icon: FileSpreadsheet },
   { to: "sales-orders", label: "Sales Orders", icon: ShoppingCart },
