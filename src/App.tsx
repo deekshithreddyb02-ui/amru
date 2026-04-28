@@ -111,6 +111,7 @@ const App = () => {
                 <Route path="sla" element={<CrmSla />} />
                 <Route path="customer-portal" element={<CrmCustomerPortal />} />
                 <Route path="reporting-hub" element={<CrmReportingHub />} />
+                <Route path="field-visits" element={<CrmFieldVisits />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
