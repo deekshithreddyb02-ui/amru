@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2 } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ const NAV = [
   { to: "calendar", label: "Calendar", icon: CalendarDays },
   { to: "tickets", label: "Support", icon: LifeBuoy },
   { to: "hydrogeo", label: "HydroGeo", icon: Droplet },
+  { to: "field-visits", label: "Field Visits", icon: MapPin },
   { to: "documents", label: "Documents", icon: FolderOpen },
   { to: "quotations", label: "Quotations", icon: FileSpreadsheet },
   { to: "sales-orders", label: "Sales Orders", icon: ShoppingCart },

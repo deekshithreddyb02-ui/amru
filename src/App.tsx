@@ -50,6 +50,7 @@ const CrmSla = lazy(() => import("./pages/crm/CrmSla"));
 const CrmCustomerPortal = lazy(() => import("./pages/crm/CrmCustomerPortal"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const CrmReportingHub = lazy(() => import("./pages/crm/CrmReportingHub"));
+const CrmFieldVisits = lazy(() => import("./pages/crm/CrmFieldVisits"));
 
 const queryClient = new QueryClient();
 
@@ -110,6 +111,7 @@ const App = () => {
                 <Route path="sla" element={<CrmSla />} />
                 <Route path="customer-portal" element={<CrmCustomerPortal />} />
                 <Route path="reporting-hub" element={<CrmReportingHub />} />
+                <Route path="field-visits" element={<CrmFieldVisits />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 

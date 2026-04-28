@@ -1244,6 +1244,114 @@ export type Database = {
           },
         ]
       }
+      crm_field_visits: {
+        Row: {
+          assigned_to: string | null
+          checkin_at: string | null
+          checkin_lat: number | null
+          checkin_lng: number | null
+          checkout_at: string | null
+          checkout_lat: number | null
+          checkout_lng: number | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          customer_rating: number | null
+          findings: string | null
+          hydrogeo_id: string | null
+          id: string
+          lead_id: string | null
+          next_action: string | null
+          organization_id: string | null
+          photo_paths: Json | null
+          recommendations: string | null
+          scheduled_at: string | null
+          signature_path: string | null
+          site_address: string | null
+          site_city: string | null
+          site_state: string | null
+          status: string
+          ticket_id: string | null
+          title: string
+          updated_at: string
+          visit_number: string | null
+          visit_type: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          checkin_at?: string | null
+          checkin_lat?: number | null
+          checkin_lng?: number | null
+          checkout_at?: string | null
+          checkout_lat?: number | null
+          checkout_lng?: number | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_rating?: number | null
+          findings?: string | null
+          hydrogeo_id?: string | null
+          id?: string
+          lead_id?: string | null
+          next_action?: string | null
+          organization_id?: string | null
+          photo_paths?: Json | null
+          recommendations?: string | null
+          scheduled_at?: string | null
+          signature_path?: string | null
+          site_address?: string | null
+          site_city?: string | null
+          site_state?: string | null
+          status?: string
+          ticket_id?: string | null
+          title: string
+          updated_at?: string
+          visit_number?: string | null
+          visit_type?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          checkin_at?: string | null
+          checkin_lat?: number | null
+          checkin_lng?: number | null
+          checkout_at?: string | null
+          checkout_lat?: number | null
+          checkout_lng?: number | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          customer_rating?: number | null
+          findings?: string | null
+          hydrogeo_id?: string | null
+          id?: string
+          lead_id?: string | null
+          next_action?: string | null
+          organization_id?: string | null
+          photo_paths?: Json | null
+          recommendations?: string | null
+          scheduled_at?: string | null
+          signature_path?: string | null
+          site_address?: string | null
+          site_city?: string | null
+          site_state?: string | null
+          status?: string
+          ticket_id?: string | null
+          title?: string
+          updated_at?: string
+          visit_number?: string | null
+          visit_type?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       crm_hydrogeo_enquiries: {
         Row: {
           area_size: string | null
