@@ -2113,6 +2113,63 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_portal_tokens: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string | null
+          entity_id: string | null
+          entity_type: string | null
+          expires_at: string | null
+          id: string
+          last_viewed_at: string | null
+          organization_id: string | null
+          revoked_at: string | null
+          scope: string
+          token: string
+          view_count: number
+          workspace_id: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          expires_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          organization_id?: string | null
+          revoked_at?: string | null
+          scope?: string
+          token: string
+          view_count?: number
+          workspace_id: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          expires_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          organization_id?: string | null
+          revoked_at?: string | null
+          scope?: string
+          token?: string
+          view_count?: number
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       crm_products: {
         Row: {
           category: string | null
