@@ -38,6 +38,7 @@ const CrmAuditLog = lazy(() => import("./pages/crm/CrmAuditLog"));
 const CrmCrossAnalytics = lazy(() => import("./pages/crm/CrmCrossAnalytics"));
 const CrmPerformance = lazy(() => import("./pages/crm/CrmPerformance"));
 const CrmProducts = lazy(() => import("./pages/crm/CrmProducts"));
+const CrmInventory = lazy(() => import("./pages/crm/CrmInventory"));
 const CrmVendors = lazy(() => import("./pages/crm/CrmVendors"));
 const CrmSalesOrders = lazy(() => import("./pages/crm/CrmSalesOrders"));
 const CrmPurchaseOrders = lazy(() => import("./pages/crm/CrmPurchaseOrders"));
@@ -100,6 +101,7 @@ const App = () => {
                 <Route path="project-reports" element={<CrmProjectReports />} />
                 <Route path="performance" element={<CrmPerformance />} />
                 <Route path="products" element={<CrmProducts />} />
+                <Route path="inventory" element={<CrmInventory />} />
                 <Route path="vendors" element={<CrmVendors />} />
                 <Route path="sales-orders" element={<CrmSalesOrders />} />
                 <Route path="purchase-orders" element={<CrmPurchaseOrders />} />
