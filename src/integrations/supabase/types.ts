@@ -3086,6 +3086,51 @@ export type Database = {
           },
         ]
       }
+      crm_stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          movement_type: string
+          notes: string | null
+          performed_by: string | null
+          product_id: string
+          quantity: number
+          reference_id: string | null
+          reference_number: string | null
+          reference_type: string | null
+          unit_cost: number | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          movement_type: string
+          notes?: string | null
+          performed_by?: string | null
+          product_id: string
+          quantity: number
+          reference_id?: string | null
+          reference_number?: string | null
+          reference_type?: string | null
+          unit_cost?: number | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          movement_type?: string
+          notes?: string | null
+          performed_by?: string | null
+          product_id?: string
+          quantity?: number
+          reference_id?: string | null
+          reference_number?: string | null
+          reference_type?: string | null
+          unit_cost?: number | null
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       crm_support_tickets: {
         Row: {
           assigned_to: string | null
