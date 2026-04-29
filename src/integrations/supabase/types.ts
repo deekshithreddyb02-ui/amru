@@ -1244,6 +1244,99 @@ export type Database = {
           },
         ]
       }
+      crm_expenses: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          expense_date: string
+          expense_number: string | null
+          field_visit_id: string | null
+          id: string
+          payment_method: string
+          project_id: string | null
+          purchase_order_id: string | null
+          receipt_path: string | null
+          reimbursable: boolean
+          reimbursed_at: string | null
+          rejection_reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          tax_amount: number
+          title: string
+          updated_at: string
+          vendor_id: string | null
+          vendor_name: string | null
+          workspace_id: string
+        }
+        Insert: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          expense_date?: string
+          expense_number?: string | null
+          field_visit_id?: string | null
+          id?: string
+          payment_method?: string
+          project_id?: string | null
+          purchase_order_id?: string | null
+          receipt_path?: string | null
+          reimbursable?: boolean
+          reimbursed_at?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          tax_amount?: number
+          title: string
+          updated_at?: string
+          vendor_id?: string | null
+          vendor_name?: string | null
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          expense_date?: string
+          expense_number?: string | null
+          field_visit_id?: string | null
+          id?: string
+          payment_method?: string
+          project_id?: string | null
+          purchase_order_id?: string | null
+          receipt_path?: string | null
+          reimbursable?: boolean
+          reimbursed_at?: string | null
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          tax_amount?: number
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+          vendor_name?: string | null
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       crm_field_visits: {
         Row: {
           assigned_to: string | null
