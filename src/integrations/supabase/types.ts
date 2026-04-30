@@ -1337,6 +1337,96 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_feedback_surveys: {
+        Row: {
+          category: string | null
+          comment: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          expires_at: string | null
+          field_visit_id: string | null
+          follow_up_done: boolean
+          follow_up_notes: string | null
+          follow_up_required: boolean
+          id: string
+          invoice_id: string | null
+          organization_id: string | null
+          question: string
+          responded_at: string | null
+          score: number | null
+          sent_at: string
+          status: string
+          survey_type: string
+          ticket_id: string | null
+          token: string
+          trigger_source: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          category?: string | null
+          comment?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          expires_at?: string | null
+          field_visit_id?: string | null
+          follow_up_done?: boolean
+          follow_up_notes?: string | null
+          follow_up_required?: boolean
+          id?: string
+          invoice_id?: string | null
+          organization_id?: string | null
+          question?: string
+          responded_at?: string | null
+          score?: number | null
+          sent_at?: string
+          status?: string
+          survey_type?: string
+          ticket_id?: string | null
+          token?: string
+          trigger_source?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          category?: string | null
+          comment?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          expires_at?: string | null
+          field_visit_id?: string | null
+          follow_up_done?: boolean
+          follow_up_notes?: string | null
+          follow_up_required?: boolean
+          id?: string
+          invoice_id?: string | null
+          organization_id?: string | null
+          question?: string
+          responded_at?: string | null
+          score?: number | null
+          sent_at?: string
+          status?: string
+          survey_type?: string
+          ticket_id?: string | null
+          token?: string
+          trigger_source?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       crm_field_visits: {
         Row: {
           assigned_to: string | null
