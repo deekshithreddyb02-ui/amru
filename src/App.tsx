@@ -55,6 +55,7 @@ const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const CrmReportingHub = lazy(() => import("./pages/crm/CrmReportingHub"));
 const CrmFieldVisits = lazy(() => import("./pages/crm/CrmFieldVisits"));
 const CrmFeedback = lazy(() => import("./pages/crm/CrmFeedback"));
+const CrmCommissions = lazy(() => import("./pages/crm/CrmCommissions"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
 const queryClient = new QueryClient();
@@ -122,6 +123,7 @@ const App = () => {
                 <Route path="reporting-hub" element={<CrmReportingHub />} />
                 <Route path="field-visits" element={<CrmFieldVisits />} />
                 <Route path="feedback" element={<CrmFeedback />} />
+                <Route path="commissions" element={<CrmCommissions />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 

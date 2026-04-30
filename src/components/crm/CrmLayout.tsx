@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin, Warehouse, Wallet, ReceiptText, MessageCircle } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin, Warehouse, Wallet, ReceiptText, MessageCircle, Award } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ const NAV = [
   { to: "sla", label: "SLA Policies", icon: Timer },
   { to: "customer-portal", label: "Customer Portal", icon: Link2 },
   { to: "feedback", label: "Feedback", icon: MessageCircle },
+  { to: "commissions", label: "Commissions", icon: Award },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
