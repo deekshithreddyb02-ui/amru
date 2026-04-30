@@ -54,6 +54,8 @@ const CrmCustomerPortal = lazy(() => import("./pages/crm/CrmCustomerPortal"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const CrmReportingHub = lazy(() => import("./pages/crm/CrmReportingHub"));
 const CrmFieldVisits = lazy(() => import("./pages/crm/CrmFieldVisits"));
+const CrmFeedback = lazy(() => import("./pages/crm/CrmFeedback"));
+const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
 const queryClient = new QueryClient();
 
@@ -80,6 +82,7 @@ const App = () => {
 
               {/* Public customer portal (token-gated) */}
               <Route path="/portal/:token" element={<CustomerPortal />} />
+              <Route path="/feedback/:token" element={<FeedbackResponse />} />
 
               {/* Amruta Geo CRM */}
               <Route path="/crm/admin/workspaces" element={<CrmWorkspacesAdmin />} />
@@ -118,6 +121,7 @@ const App = () => {
                 <Route path="customer-portal" element={<CrmCustomerPortal />} />
                 <Route path="reporting-hub" element={<CrmReportingHub />} />
                 <Route path="field-visits" element={<CrmFieldVisits />} />
+                <Route path="feedback" element={<CrmFeedback />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
