@@ -920,6 +920,135 @@ export type Database = {
           },
         ]
       }
+      crm_commission_rules: {
+        Row: {
+          applies_to: string
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          flat_percentage: number
+          id: string
+          is_active: boolean
+          min_deal_value: number
+          name: string
+          priority: number
+          rule_type: string
+          tiers: Json | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          applies_to?: string
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          flat_percentage?: number
+          id?: string
+          is_active?: boolean
+          min_deal_value?: number
+          name: string
+          priority?: number
+          rule_type?: string
+          tiers?: Json | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          applies_to?: string
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          flat_percentage?: number
+          id?: string
+          is_active?: boolean
+          min_deal_value?: number
+          name?: string
+          priority?: number
+          rule_type?: string
+          tiers?: Json | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      crm_commissions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          base_amount: number
+          commission_amount: number
+          created_at: string
+          currency: string
+          deal_id: string | null
+          earned_date: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          paid_at: string | null
+          payout_reference: string | null
+          percentage: number
+          rule_id: string | null
+          source_type: string
+          status: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          base_amount?: number
+          commission_amount?: number
+          created_at?: string
+          currency?: string
+          deal_id?: string | null
+          earned_date?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payout_reference?: string | null
+          percentage?: number
+          rule_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          base_amount?: number
+          commission_amount?: number
+          created_at?: string
+          currency?: string
+          deal_id?: string | null
+          earned_date?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payout_reference?: string | null
+          percentage?: number
+          rule_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       crm_contacts: {
         Row: {
           city: string | null
@@ -4397,6 +4526,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
+      crm_calc_commission: {
+        Args: { _base: number; _rule_id: string }
+        Returns: number
+      }
       crm_eval_condition: {
         Args: { _cond: Json; _old: Json; _row: Json }
         Returns: boolean
