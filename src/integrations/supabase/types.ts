@@ -2534,6 +2534,180 @@ export type Database = {
           },
         ]
       }
+      crm_message_templates: {
+        Row: {
+          body: string
+          category: string | null
+          channel: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          language: string | null
+          name: string
+          updated_at: string
+          variables: string[] | null
+          workspace_id: string
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string | null
+          name: string
+          updated_at?: string
+          variables?: string[] | null
+          workspace_id: string
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          language?: string | null
+          name?: string
+          updated_at?: string
+          variables?: string[] | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_message_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_messages: {
+        Row: {
+          body: string
+          channel: string
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          delivered_at: string | null
+          direction: string
+          error_message: string | null
+          id: string
+          lead_id: string | null
+          provider: string | null
+          provider_message_id: string | null
+          read_at: string | null
+          recipient_name: string | null
+          recipient_phone: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          template_id: string | null
+          ticket_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          body: string
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          delivered_at?: string | null
+          direction?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient_name?: string | null
+          recipient_phone: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          template_id?: string | null
+          ticket_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          delivered_at?: string | null
+          direction?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string | null
+          provider?: string | null
+          provider_message_id?: string | null
+          read_at?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          template_id?: string | null
+          ticket_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_messages_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_messages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_message_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "crm_support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_notifications: {
         Row: {
           body: string | null
