@@ -152,6 +152,7 @@ const CrmContracts = () => {
     const { data: { user } } = await supabase.auth.getUser();
     const payload = {
       workspace_id: workspace.id,
+      contract_number: "",
       title: form.title,
       contract_type: form.contract_type,
       customer_name: form.customer_name,
