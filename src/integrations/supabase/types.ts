@@ -1115,6 +1115,215 @@ export type Database = {
           },
         ]
       }
+      crm_contract_renewals: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: string
+          new_end_date: string
+          new_start_date: string
+          new_value: number | null
+          notes: string | null
+          previous_end_date: string | null
+          renewed_at: string | null
+          renewed_by: string | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: string
+          new_end_date: string
+          new_start_date: string
+          new_value?: number | null
+          notes?: string | null
+          previous_end_date?: string | null
+          renewed_at?: string | null
+          renewed_by?: string | null
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: string
+          new_end_date?: string
+          new_start_date?: string
+          new_value?: number | null
+          notes?: string | null
+          previous_end_date?: string | null
+          renewed_at?: string | null
+          renewed_by?: string | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contract_renewals_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contract_renewals_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contracts: {
+        Row: {
+          auto_renew: boolean
+          billing_frequency: string | null
+          cancelled_at: string | null
+          cancelled_reason: string | null
+          contact_id: string | null
+          contract_number: string
+          contract_type: string
+          contract_value: number
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          deal_id: string | null
+          document_url: string | null
+          end_date: string
+          id: string
+          notes: string | null
+          notice_period_days: number | null
+          organization_id: string | null
+          owner_id: string | null
+          payment_terms: string | null
+          renewal_date: string | null
+          renewal_period_months: number | null
+          scope_of_work: string | null
+          service_level: string | null
+          signed_by_company_at: string | null
+          signed_by_customer_at: string | null
+          start_date: string
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          visits_completed: number | null
+          visits_per_year: number | null
+          workspace_id: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          billing_frequency?: string | null
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
+          contact_id?: string | null
+          contract_number: string
+          contract_type?: string
+          contract_value?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          deal_id?: string | null
+          document_url?: string | null
+          end_date: string
+          id?: string
+          notes?: string | null
+          notice_period_days?: number | null
+          organization_id?: string | null
+          owner_id?: string | null
+          payment_terms?: string | null
+          renewal_date?: string | null
+          renewal_period_months?: number | null
+          scope_of_work?: string | null
+          service_level?: string | null
+          signed_by_company_at?: string | null
+          signed_by_customer_at?: string | null
+          start_date: string
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          visits_completed?: number | null
+          visits_per_year?: number | null
+          workspace_id: string
+        }
+        Update: {
+          auto_renew?: boolean
+          billing_frequency?: string | null
+          cancelled_at?: string | null
+          cancelled_reason?: string | null
+          contact_id?: string | null
+          contract_number?: string
+          contract_type?: string
+          contract_value?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          deal_id?: string | null
+          document_url?: string | null
+          end_date?: string
+          id?: string
+          notes?: string | null
+          notice_period_days?: number | null
+          organization_id?: string | null
+          owner_id?: string | null
+          payment_terms?: string | null
+          renewal_date?: string | null
+          renewal_period_months?: number | null
+          scope_of_work?: string | null
+          service_level?: string | null
+          signed_by_company_at?: string | null
+          signed_by_customer_at?: string | null
+          start_date?: string
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          visits_completed?: number | null
+          visits_per_year?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contracts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contracts_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "crm_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contracts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_deals: {
         Row: {
           amount: number
