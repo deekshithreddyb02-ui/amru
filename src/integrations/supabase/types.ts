@@ -1992,6 +1992,62 @@ export type Database = {
           },
         ]
       }
+      crm_import_jobs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_type: string
+          errors: Json | null
+          failed_rows: number
+          field_mapping: Json | null
+          file_name: string | null
+          id: string
+          status: string
+          success_rows: number
+          total_rows: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_type: string
+          errors?: Json | null
+          failed_rows?: number
+          field_mapping?: Json | null
+          file_name?: string | null
+          id?: string
+          status?: string
+          success_rows?: number
+          total_rows?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_type?: string
+          errors?: Json | null
+          failed_rows?: number
+          field_mapping?: Json | null
+          file_name?: string | null
+          id?: string
+          status?: string
+          success_rows?: number
+          total_rows?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_import_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_invoice_items: {
         Row: {
           amount: number
