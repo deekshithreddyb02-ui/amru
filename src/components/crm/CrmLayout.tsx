@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin, Warehouse, Wallet, ReceiptText, MessageCircle, Award, FileSignature, MessageSquare, Database } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin, Warehouse, Wallet, ReceiptText, MessageCircle, Award, FileSignature, MessageSquare, Database, CheckSquare } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,7 @@ const NAV = [
   { to: "contracts", label: "Contracts/AMC", icon: FileSignature },
   { to: "messages", label: "WhatsApp/SMS", icon: MessageSquare },
   { to: "import", label: "Import / Migrate", icon: Database },
+  { to: "tasks", label: "My Tasks", icon: CheckSquare },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
