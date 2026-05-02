@@ -4017,6 +4017,187 @@ export type Database = {
           },
         ]
       }
+      crm_task_time_logs: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          started_at: string
+          task_id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at: string
+          task_id: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          task_id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_task_time_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "crm_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_task_time_logs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_tasks: {
+        Row: {
+          actual_hours: number | null
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          due_time: string | null
+          estimated_hours: number | null
+          id: string
+          is_recurring: boolean | null
+          parent_task_id: string | null
+          priority: string
+          progress: number | null
+          recurrence_pattern: string | null
+          related_contact_id: string | null
+          related_deal_id: string | null
+          related_lead_id: string | null
+          related_ticket_id: string | null
+          reminder_at: string | null
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actual_hours?: number | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          due_time?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_recurring?: boolean | null
+          parent_task_id?: string | null
+          priority?: string
+          progress?: number | null
+          recurrence_pattern?: string | null
+          related_contact_id?: string | null
+          related_deal_id?: string | null
+          related_lead_id?: string | null
+          related_ticket_id?: string | null
+          reminder_at?: string | null
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actual_hours?: number | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          due_time?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_recurring?: boolean | null
+          parent_task_id?: string | null
+          priority?: string
+          progress?: number | null
+          recurrence_pattern?: string | null
+          related_contact_id?: string | null
+          related_deal_id?: string | null
+          related_lead_id?: string | null
+          related_ticket_id?: string | null
+          reminder_at?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "crm_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_related_contact_id_fkey"
+            columns: ["related_contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_related_deal_id_fkey"
+            columns: ["related_deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_related_lead_id_fkey"
+            columns: ["related_lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_related_ticket_id_fkey"
+            columns: ["related_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "crm_support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_vendors: {
         Row: {
           city: string | null
