@@ -133,6 +133,7 @@ const App = () => {
                 <Route path="messages" element={<CrmMessages />} />
                 <Route path="import" element={<CrmImport />} />
                 <Route path="tasks" element={<CrmTasks />} />
+                <Route path="notifications" element={<CrmNotifications />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
