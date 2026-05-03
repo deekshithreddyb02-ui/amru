@@ -37,8 +37,7 @@ const FeedbackResponse = () => {
       }
 
       const { data, error } = await supabase.functions.invoke("feedback-response", {
-        method: "GET",
-        body: { token },
+        body: { action: "load", token },
       });
 
       if (error || !data?.survey) {
