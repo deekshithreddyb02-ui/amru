@@ -60,6 +60,7 @@ const CrmContracts = lazy(() => import("./pages/crm/CrmContracts"));
 const CrmMessages = lazy(() => import("./pages/crm/CrmMessages"));
 const CrmImport = lazy(() => import("./pages/crm/CrmImport"));
 const CrmTasks = lazy(() => import("./pages/crm/CrmTasks"));
+const CrmNotifications = lazy(() => import("./pages/crm/CrmNotifications"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
 const queryClient = new QueryClient();
