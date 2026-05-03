@@ -165,6 +165,19 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
             </div>
           )}
         </ScrollArea>
+        <div className="border-t p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs"
+            onClick={() => {
+              setOpen(false);
+              navigate(`/crm/${workspaceSlug}/notifications`);
+            }}
+          >
+            View all notifications
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
