@@ -2764,6 +2764,56 @@ export type Database = {
           },
         ]
       }
+      crm_notification_preferences: {
+        Row: {
+          created_at: string
+          digest_frequency: string
+          email_enabled: boolean
+          id: string
+          in_app_enabled: boolean
+          muted_types: string[]
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          digest_frequency?: string
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          muted_types?: string[]
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          digest_frequency?: string
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          muted_types?: string[]
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_notification_preferences_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_notifications: {
         Row: {
           body: string | null
