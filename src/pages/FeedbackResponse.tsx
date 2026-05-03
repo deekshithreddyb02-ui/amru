@@ -16,6 +16,10 @@ type Survey = {
   expires_at: string | null;
 };
 
+const invalidLinkMessage = "This feedback link is invalid or has expired.";
+const genericLoadError = "We couldn't load this survey right now. Please try again shortly.";
+const commentLimit = 2000;
+
 const FeedbackResponse = () => {
   const { token } = useParams<{ token: string }>();
   const [survey, setSurvey] = useState<Survey | null>(null);
@@ -27,14 +31,26 @@ const FeedbackResponse = () => {
 
   useEffect(() => {
     (async () => {
-      if (!token) return;
-      const { data } = await supabase
-        .from("crm_feedback_surveys")
-        .select("id,survey_type,question,customer_name,status,expires_at")
-        .eq("token", token)
-        .maybeSingle();
-      setSurvey(data as Survey | null);
-      if (data?.status === "responded") setSubmitted(true);
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("feedback-response", {
+        body: { action: "load", token },
+      });
+
+      if (error || !data?.survey) {
+        setSurvey(null);
+        if (data?.error && data.error !== "Survey not available") {
+          toast({ title: "Unable to load survey", description: genericLoadError, variant: "destructive" });
+        }
+        setLoading(false);
+        return;
+      }
+
+      setSurvey(data.survey as Survey);
+      if (data.survey.status === "responded") setSubmitted(true);
       setLoading(false);
     })();
   }, [token]);
@@ -44,14 +60,23 @@ const FeedbackResponse = () => {
       toast({ title: "Please pick a rating", variant: "destructive" });
       return;
     }
+
+    if (comment.trim().length > commentLimit) {
+      toast({ title: "Comment is too long", description: `Please keep it under ${commentLimit} characters.`, variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
-    const { error } = await supabase
-      .from("crm_feedback_surveys")
-      .update({ score, comment: comment || null })
-      .eq("token", token!);
+    const { data, error } = await supabase.functions.invoke("feedback-response", {
+      body: {
+        token,
+        score,
+        comment,
+      },
+    });
     setSubmitting(false);
-    if (error) {
-      toast({ title: "Submission failed", description: error.message, variant: "destructive" });
+    if (error || !data?.ok) {
+      toast({ title: "Submission failed", description: data?.error || error?.message || "Please try again.", variant: "destructive" });
       return;
     }
     setSubmitted(true);
@@ -70,7 +95,7 @@ const FeedbackResponse = () => {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="p-8 max-w-md text-center">
           <h1 className="text-xl font-semibold mb-2">Survey not available</h1>
-          <p className="text-muted-foreground">This feedback link is invalid or has expired.</p>
+          <p className="text-muted-foreground">{invalidLinkMessage}</p>
         </Card>
       </div>
     );
@@ -144,6 +169,7 @@ const FeedbackResponse = () => {
             onChange={(e) => setComment(e.target.value)}
             className="mt-1"
           />
+          <p className="mt-2 text-xs text-right text-muted-foreground">{comment.trim().length}/{commentLimit}</p>
         </div>
 
         <Button className="w-full mt-6" size="lg" onClick={submit} disabled={submitting || score === null}>
