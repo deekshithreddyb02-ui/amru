@@ -55,6 +55,7 @@ const NAV = [
   { to: "messages", label: "WhatsApp/SMS", icon: MessageSquare },
   { to: "import", label: "Import / Migrate", icon: Database },
   { to: "tasks", label: "My Tasks", icon: CheckSquare },
+  { to: "notifications", label: "Notifications", icon: Bell },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
