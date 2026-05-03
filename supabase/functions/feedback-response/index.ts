@@ -89,8 +89,36 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => null);
+    const action = typeof body?.action === "string" ? body.action : "submit";
     const token = sanitizeToken(body?.token);
     if (!token) return json(400, { error: "Invalid survey link" });
+
+    if (action === "load") {
+      const { data, error } = await supabase
+        .from("crm_feedback_surveys")
+        .select("id,survey_type,question,customer_name,status,expires_at")
+        .eq("token", token)
+        .maybeSingle();
+
+      if (error) return json(500, { error: "Failed to load survey" });
+      if (!data) return json(404, { error: "Survey not available" });
+
+      const isExpired = data.expires_at && new Date(data.expires_at).getTime() <= Date.now();
+      if (data.status === "expired" || isExpired) {
+        return json(404, { error: "Survey not available" });
+      }
+
+      return json(200, {
+        survey: {
+          id: data.id,
+          survey_type: data.survey_type,
+          question: data.question,
+          customer_name: data.customer_name,
+          status: data.status,
+          expires_at: data.expires_at,
+        },
+      });
+    }
 
     const { data: survey, error: surveyError } = await supabase
       .from("crm_feedback_surveys")
@@ -113,15 +141,21 @@ Deno.serve(async (req) => {
     const score = normalizeScore(survey.survey_type, body?.score);
     const comment = normalizeComment(body?.comment);
 
-    const { error: updateError } = await supabase
+    const { data: updatedRow, error: updateError } = await supabase
       .from("crm_feedback_surveys")
       .update({ score, comment })
+      .select("id")
       .eq("id", survey.id)
       .eq("token", token)
-      .eq("status", "sent");
+      .eq("status", "sent")
+      .maybeSingle();
 
     if (updateError) {
       return json(500, { error: "Failed to submit feedback" });
+    }
+
+    if (!updatedRow) {
+      return json(409, { error: "Feedback has already been submitted" });
     }
 
     return json(200, { ok: true });
