@@ -274,7 +274,18 @@ const CrmWorkflows = () => {
             Automate actions when records are created, updated, or change status.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              const { error } = await supabase.functions.invoke("crm-scheduled-workflows");
+              if (error) toast({ title: "Run failed", description: error.message, variant: "destructive" });
+              else { toast({ title: "Scheduled rules executed" }); load(); }
+            }}
+          >
+            Run scheduled now
+          </Button>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
