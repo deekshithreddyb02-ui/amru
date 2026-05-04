@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin, Warehouse, Wallet, ReceiptText, MessageCircle, Award, FileSignature, MessageSquare, Database, CheckSquare, Bell } from "lucide-react";
+import { Building2, LayoutDashboard, Users, Briefcase, FileText, Loader2, ChevronDown, UserRound, Building, ListChecks, CalendarDays, LifeBuoy, Droplet, FolderOpen, FileSpreadsheet, Receipt, Mic, History, BarChart3, Menu, ClipboardList, TrendingUp, Package, Truck, ShoppingCart, ClipboardCheck, Megaphone, FormInput, Mail, Workflow, Timer, Link2, MapPin, Warehouse, Wallet, ReceiptText, MessageCircle, Award, FileSignature, MessageSquare, Database, CheckSquare, Bell, Activity } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import CrmNotificationBell from "./CrmNotificationBell";
+import CrmMobileBottomNav from "./CrmMobileBottomNav";
 
 const NAV = [
   { to: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -56,6 +57,7 @@ const NAV = [
   { to: "import", label: "Import / Migrate", icon: Database },
   { to: "tasks", label: "My Tasks", icon: CheckSquare },
   { to: "notifications", label: "Notifications", icon: Bell },
+  { to: "activity-feed", label: "Activity Feed", icon: Activity },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
@@ -246,10 +248,12 @@ const CrmLayout = () => {
           </div>
         </aside>
 
-        <main className="flex-1 p-3 sm:p-6 max-w-full overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-6 pb-20 md:pb-6 max-w-full overflow-x-hidden">
           <Outlet context={{ workspace: current, myRole }} />
         </main>
       </div>
+
+      <CrmMobileBottomNav slug={current.slug} />
     </div>
   );
 };
