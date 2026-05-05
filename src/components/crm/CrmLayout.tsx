@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import CrmNotificationBell from "./CrmNotificationBell";
 import CrmMobileBottomNav from "./CrmMobileBottomNav";
+import CrmCopilotDrawer from "./CrmCopilotDrawer";
 
 const NAV = [
   { to: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -58,6 +59,8 @@ const NAV = [
   { to: "tasks", label: "My Tasks", icon: CheckSquare },
   { to: "notifications", label: "Notifications", icon: Bell },
   { to: "activity-feed", label: "Activity Feed", icon: Activity },
+  { to: "dashboards", label: "Custom Dashboards", icon: BarChart3 },
+  { to: "integrations", label: "Integrations", icon: Link2 },
   { to: "audit", label: "Audit log", icon: History },
 ];
 
@@ -185,6 +188,7 @@ const CrmLayout = () => {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            <CrmCopilotDrawer workspaceId={current.id} />
             <CrmNotificationBell workspaceSlug={current.slug} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
