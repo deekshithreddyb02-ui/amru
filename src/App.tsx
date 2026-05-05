@@ -62,6 +62,9 @@ const CrmImport = lazy(() => import("./pages/crm/CrmImport"));
 const CrmTasks = lazy(() => import("./pages/crm/CrmTasks"));
 const CrmNotifications = lazy(() => import("./pages/crm/CrmNotifications"));
 const CrmActivityFeed = lazy(() => import("./pages/crm/CrmActivityFeed"));
+const CrmDashboards = lazy(() => import("./pages/crm/CrmDashboards"));
+const CrmIntegrations = lazy(() => import("./pages/crm/CrmIntegrations"));
+const CrmFieldMode = lazy(() => import("./pages/crm/CrmFieldMode"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
 const queryClient = new QueryClient();
@@ -136,6 +139,9 @@ const App = () => {
                 <Route path="tasks" element={<CrmTasks />} />
                 <Route path="notifications" element={<CrmNotifications />} />
                 <Route path="activity-feed" element={<CrmActivityFeed />} />
+                <Route path="dashboards" element={<CrmDashboards />} />
+                <Route path="integrations" element={<CrmIntegrations />} />
+                <Route path="field-mode" element={<CrmFieldMode />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 

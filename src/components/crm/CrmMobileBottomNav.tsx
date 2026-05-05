@@ -1,11 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Users, Briefcase, CheckSquare, Bell, Activity } from "lucide-react";
+import { LayoutDashboard, Users, Briefcase, MapPin, Bell, Activity } from "lucide-react";
 
 const ITEMS = [
   { to: "dashboard", label: "Home", icon: LayoutDashboard },
   { to: "leads", label: "Leads", icon: Users },
   { to: "deals", label: "Deals", icon: Briefcase },
-  { to: "tasks", label: "Tasks", icon: CheckSquare },
+  { to: "field-mode", label: "Field", icon: MapPin },
   { to: "activity-feed", label: "Feed", icon: Activity },
   { to: "notifications", label: "Alerts", icon: Bell },
 ];

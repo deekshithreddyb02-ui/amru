@@ -1324,6 +1324,44 @@ export type Database = {
           },
         ]
       }
+      crm_copilot_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          title: string | null
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_copilot_conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_deals: {
         Row: {
           amount: number
@@ -1774,6 +1812,7 @@ export type Database = {
           checkout_at: string | null
           checkout_lat: number | null
           checkout_lng: number | null
+          client_uuid: string | null
           contact_id: string | null
           created_at: string
           created_by: string | null
@@ -1794,6 +1833,7 @@ export type Database = {
           site_city: string | null
           site_state: string | null
           status: string
+          synced_offline: boolean
           ticket_id: string | null
           title: string
           updated_at: string
@@ -1809,6 +1849,7 @@ export type Database = {
           checkout_at?: string | null
           checkout_lat?: number | null
           checkout_lng?: number | null
+          client_uuid?: string | null
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1829,6 +1870,7 @@ export type Database = {
           site_city?: string | null
           site_state?: string | null
           status?: string
+          synced_offline?: boolean
           ticket_id?: string | null
           title: string
           updated_at?: string
@@ -1844,6 +1886,7 @@ export type Database = {
           checkout_at?: string | null
           checkout_lat?: number | null
           checkout_lng?: number | null
+          client_uuid?: string | null
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1864,6 +1907,7 @@ export type Database = {
           site_city?: string | null
           site_state?: string | null
           status?: string
+          synced_offline?: boolean
           ticket_id?: string | null
           title?: string
           updated_at?: string
@@ -3827,6 +3871,53 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_sales_orders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_saved_dashboards: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          is_shared: boolean
+          layout: Json
+          name: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          is_shared?: boolean
+          layout?: Json
+          name: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          is_shared?: boolean
+          layout?: Json
+          name?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_saved_dashboards_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
