@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Sparkles, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -93,7 +93,7 @@ export default function CrmCopilotDrawer({ workspaceId }: { workspaceId?: string
         <SheetHeader className="p-4 border-b">
           <SheetTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> CRM Copilot</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="flex-1" ref={scrollRef as any}>
+        <div ref={scrollRef} className="flex-1 overflow-y-auto">
           <div className="p-4 space-y-3">
             {msgs.map((m, i) => (
               <div key={i} className={`rounded-lg px-3 py-2 text-sm ${m.role === "user" ? "bg-primary text-primary-foreground ml-8" : "bg-muted mr-8"}`}>
@@ -103,7 +103,7 @@ export default function CrmCopilotDrawer({ workspaceId }: { workspaceId?: string
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </div>
         <div className="p-3 border-t flex gap-2">
           <Input
             value={input}
