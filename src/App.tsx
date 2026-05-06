@@ -65,6 +65,10 @@ const CrmActivityFeed = lazy(() => import("./pages/crm/CrmActivityFeed"));
 const CrmDashboards = lazy(() => import("./pages/crm/CrmDashboards"));
 const CrmIntegrations = lazy(() => import("./pages/crm/CrmIntegrations"));
 const CrmFieldMode = lazy(() => import("./pages/crm/CrmFieldMode"));
+const CrmTerritories = lazy(() => import("./pages/crm/CrmTerritories"));
+const CrmForecast = lazy(() => import("./pages/crm/CrmForecast"));
+const CrmDataQuality = lazy(() => import("./pages/crm/CrmDataQuality"));
+const QuotationSign = lazy(() => import("./pages/QuotationSign"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
 const queryClient = new QueryClient();
@@ -93,6 +97,7 @@ const App = () => {
               {/* Public customer portal (token-gated) */}
               <Route path="/portal/:token" element={<CustomerPortal />} />
               <Route path="/feedback/:token" element={<FeedbackResponse />} />
+              <Route path="/sign/:token" element={<QuotationSign />} />
 
               {/* Amruta Geo CRM */}
               <Route path="/crm/admin/workspaces" element={<CrmWorkspacesAdmin />} />
@@ -142,6 +147,9 @@ const App = () => {
                 <Route path="dashboards" element={<CrmDashboards />} />
                 <Route path="integrations" element={<CrmIntegrations />} />
                 <Route path="field-mode" element={<CrmFieldMode />} />
+                <Route path="territories" element={<CrmTerritories />} />
+                <Route path="forecast" element={<CrmForecast />} />
+                <Route path="data-quality" element={<CrmDataQuality />} />
                 <Route path="audit" element={<CrmAuditLog />} />
               </Route>
 
