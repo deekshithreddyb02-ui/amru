@@ -89,7 +89,16 @@ const CrmQuotations = () => {
     toast.success(`Quotation ${approval_status}`);
   };
 
-  const filtered = rows.filter(
+  const createSignLink = async (r: Quotation) => {
+    const token = crypto.randomUUID().replace(/-/g, "");
+    const { error } = await supabase.from("crm_signing_tokens" as any).insert({
+      token, workspace_id: workspace.id, quotation_id: r.id, signer_email: r.customer_email,
+    });
+    if (error) return toast.error(error.message);
+    const url = `${window.location.origin}/sign/${token}`;
+    try { await navigator.clipboard.writeText(url); toast.success("Signing link copied to clipboard"); }
+    catch { toast.success(`Link: ${url}`); }
+  };
     (r) =>
       !q ||
       r.quotation_number.toLowerCase().includes(q.toLowerCase()) ||
