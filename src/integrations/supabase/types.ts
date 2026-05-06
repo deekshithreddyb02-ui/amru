@@ -1451,6 +1451,47 @@ export type Database = {
           },
         ]
       }
+      crm_dedupe_merges: {
+        Row: {
+          created_at: string
+          entity_type: string
+          id: string
+          merged_id: string
+          merged_snapshot: Json | null
+          performed_by: string | null
+          primary_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type: string
+          id?: string
+          merged_id: string
+          merged_snapshot?: Json | null
+          performed_by?: string | null
+          primary_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string
+          id?: string
+          merged_id?: string
+          merged_snapshot?: Json | null
+          performed_by?: string | null
+          primary_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_dedupe_merges_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_documents: {
         Row: {
           contact_id: string | null
@@ -3415,6 +3456,70 @@ export type Database = {
           },
         ]
       }
+      crm_quotation_signatures: {
+        Row: {
+          id: string
+          ip_address: string | null
+          quotation_id: string
+          signature_data_url: string
+          signed_at: string
+          signer_company: string | null
+          signer_email: string | null
+          signer_name: string
+          token: string | null
+          user_agent: string | null
+          workspace_id: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          quotation_id: string
+          signature_data_url: string
+          signed_at?: string
+          signer_company?: string | null
+          signer_email?: string | null
+          signer_name: string
+          token?: string | null
+          user_agent?: string | null
+          workspace_id: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          quotation_id?: string
+          signature_data_url?: string
+          signed_at?: string
+          signer_company?: string | null
+          signer_email?: string | null
+          signer_name?: string
+          token?: string | null
+          user_agent?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_quotation_signatures_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "crm_quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotation_signatures_token_fkey"
+            columns: ["token"]
+            isOneToOne: false
+            referencedRelation: "crm_signing_tokens"
+            referencedColumns: ["token"]
+          },
+          {
+            foreignKeyName: "crm_quotation_signatures_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_quotations: {
         Row: {
           approval_status: string
@@ -3925,6 +4030,54 @@ export type Database = {
           },
         ]
       }
+      crm_signing_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          quotation_id: string
+          signer_email: string | null
+          token: string
+          used_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          quotation_id: string
+          signer_email?: string | null
+          token: string
+          used_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          quotation_id?: string
+          signer_email?: string | null
+          token?: string
+          used_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_signing_tokens_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "crm_quotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signing_tokens_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_sla_policies: {
         Row: {
           business_hours_only: boolean
@@ -4332,6 +4485,109 @@ export type Database = {
           },
           {
             foreignKeyName: "crm_tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_territories: {
+        Row: {
+          countries: string[]
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          owner_user_id: string | null
+          region_keys: string[]
+          rules: Json
+          states: string[]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          countries?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          owner_user_id?: string | null
+          region_keys?: string[]
+          rules?: Json
+          states?: string[]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          countries?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          owner_user_id?: string | null
+          region_keys?: string[]
+          rules?: Json
+          states?: string[]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_territories_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_user_quotas: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          period_end: string
+          period_start: string
+          target_amount: number
+          target_deals: number
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          period_end: string
+          period_start: string
+          target_amount?: number
+          target_deals?: number
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          target_amount?: number
+          target_deals?: number
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_user_quotas_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "crm_workspaces"
@@ -5275,7 +5531,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      crm_forecast_summary: {
+        Row: {
+          deal_count: number | null
+          month: string | null
+          owner_id: string | null
+          stage: string | null
+          total_amount: number | null
+          weighted_amount: number | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deals_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       admin_delete_user: { Args: { _target_user_id: string }; Returns: boolean }
