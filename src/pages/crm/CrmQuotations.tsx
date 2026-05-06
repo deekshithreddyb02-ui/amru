@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileSpreadsheet, Plus, Search, Loader2, RefreshCw } from "lucide-react";
+import { FileSpreadsheet, Plus, Search, Loader2, RefreshCw, FileSignature } from "lucide-react";
 import InvoiceFormDialog from "@/components/crm/InvoiceFormDialog";
 import { formatINR } from "@/lib/gst";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
@@ -145,6 +145,7 @@ const CrmQuotations = () => {
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Approval</th>
                   <th className="px-4 py-3 font-medium">Created</th>
+                  <th className="px-4 py-3 font-medium">E-sign</th>
                 </tr>
               </thead>
               <tbody>
@@ -190,6 +191,11 @@ const CrmQuotations = () => {
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {new Date(r.created_at).toLocaleDateString("en-IN")}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => createSignLink(r)}>
+                        <FileSignature className="h-3 w-3" /> Send
+                      </Button>
                     </td>
                   </tr>
                 ))}
