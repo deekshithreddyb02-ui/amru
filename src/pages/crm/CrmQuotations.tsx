@@ -99,6 +99,8 @@ const CrmQuotations = () => {
     try { await navigator.clipboard.writeText(url); toast.success("Signing link copied to clipboard"); }
     catch { toast.success(`Link: ${url}`); }
   };
+
+  const filtered = rows.filter(
     (r) =>
       !q ||
       r.quotation_number.toLowerCase().includes(q.toLowerCase()) ||
