@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Phone, MapPin, ListChecks, FileText, MessageSquare, Activity, Loader2 } from "lucide-react";
+import { Mail, Phone, ListChecks, FileText, MessageSquare, Activity, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CrmRecordView, { type SummaryField, type RelatedTab } from "@/components/crm/vtiger/CrmRecordView";
