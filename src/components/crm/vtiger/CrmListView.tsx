@@ -222,7 +222,7 @@ export default function CrmListView<T extends { id: string }>({
                 <tr className="text-left">
                   <th className="px-3 py-2 w-8">
                     <Checkbox
-                      checked={allChecked || (someChecked && "indeterminate")}
+                      checked={allChecked ? true : someChecked ? "indeterminate" : false}
                       onCheckedChange={toggleAll}
                       aria-label="Select all"
                     />
