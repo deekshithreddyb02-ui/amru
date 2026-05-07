@@ -79,6 +79,16 @@
     --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.2);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
+
+    /* Vtiger-style CRM tokens (utilitarian white/blue) */
+    --vt-blue: 211 100% 36%;
+    --vt-blue-hover: 211 100% 30%;
+    --vt-bar: 0 0% 100%;
+    --vt-bar-border: 210 16% 88%;
+    --vt-row-hover: 210 30% 97%;
+    --vt-row-selected: 211 100% 96%;
+    --vt-text: 210 20% 18%;
+    --vt-muted: 210 10% 45%;
   }
 
   .dark {
