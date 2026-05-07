@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowRightLeft, Loader2, RefreshCw, Search } from "lucide-react";
+import { ArrowRightLeft } from "lucide-react";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import ConvertLeadDialog from "@/components/crm/ConvertLeadDialog";
+import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -24,7 +23,7 @@ type Lead = {
   created_at: string;
 };
 
-const stageColor: Record<string, string> = {
+const stageTone: Record<string, string> = {
   new: "bg-primary/10 text-primary",
   contacted: "bg-secondary/20 text-secondary-foreground",
   qualified: "bg-[hsl(var(--teal))]/15 text-[hsl(var(--teal))]",
@@ -34,9 +33,9 @@ const stageColor: Record<string, string> = {
 
 const CrmLeads = () => {
   const { workspace } = useOutletContext<Ctx>();
+  const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
   const [convertLead, setConvertLead] = useState<Lead | null>(null);
 
   const load = async () => {
@@ -46,7 +45,7 @@ const CrmLeads = () => {
       .select("id,full_name,email,phone,city,state,service_needed,stage,status,created_at")
       .eq("workspace_id", workspace.id)
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(500);
     if (error) console.error(error);
     setLeads((data as Lead[]) || []);
     setLoading(false);
@@ -57,115 +56,91 @@ const CrmLeads = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace.id]);
 
-  const filtered = leads.filter((l) => {
-    if (!q) return true;
-    const s = q.toLowerCase();
-    return (
-      l.full_name?.toLowerCase().includes(s) ||
-      l.email?.toLowerCase().includes(s) ||
-      l.phone?.toLowerCase().includes(s) ||
-      l.city?.toLowerCase().includes(s) ||
-      l.service_needed?.toLowerCase().includes(s)
-    );
-  });
+  const savedViews: SavedView[] = [
+    { id: "all", label: "All Leads" },
+    { id: "open", label: "Open Leads", filter: (l: Lead) => !["won", "lost"].includes(l.stage) },
+    { id: "new", label: "New This Week", filter: (l: Lead) => Date.now() - new Date(l.created_at).getTime() < 7 * 86400000 },
+    { id: "qualified", label: "Qualified", filter: (l: Lead) => l.stage === "qualified" },
+    { id: "won", label: "Won", filter: (l: Lead) => l.stage === "won" },
+  ];
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-serif">Leads</h1>
-          <p className="text-muted-foreground text-sm">{workspace.name}</p>
-        </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className="pl-8 w-full sm:w-56"
-            />
-          </div>
-          <Button variant="outline" size="icon" onClick={load} aria-label="Refresh">
-            <RefreshCw className="h-4 w-4" />
+  const columns: Column<Lead>[] = [
+    {
+      key: "full_name",
+      label: "Name",
+      render: (l) => (
+        <button
+          className="font-medium text-primary hover:underline text-left"
+          onClick={(e) => { e.stopPropagation(); navigate(`/crm/${workspace.slug}/leads/${l.id}`); }}
+          data-no-row-click
+        >
+          {l.full_name}
+        </button>
+      ),
+    },
+    { key: "email", label: "Email", render: (l) => l.email || "—" },
+    { key: "phone", label: "Phone", render: (l) => l.phone || "—" },
+    {
+      key: "location",
+      label: "Location",
+      render: (l) => [l.city, l.state].filter(Boolean).join(", ") || "—",
+    },
+    { key: "service_needed", label: "Service", render: (l) => l.service_needed || "—", defaultVisible: true },
+    {
+      key: "stage",
+      label: "Stage",
+      render: (l) => (
+        <Badge variant="secondary" className={stageTone[l.stage] || ""}>{l.stage}</Badge>
+      ),
+    },
+    {
+      key: "created_at",
+      label: "Created",
+      render: (l) => new Date(l.created_at).toLocaleDateString("en-IN"),
+    },
+    {
+      key: "actions",
+      label: "",
+      className: "text-right w-24",
+      render: (l) => (
+        <div data-no-row-click>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 text-xs"
+            disabled={l.stage === "won" || l.stage === "lost"}
+            onClick={(e) => { e.stopPropagation(); setConvertLead(l); }}
+          >
+            <ArrowRightLeft className="h-3 w-3" />
+            Convert
           </Button>
         </div>
-      </div>
+      ),
+    },
+  ];
 
-      <Card className="overflow-hidden">
-        {loading ? (
-          <div className="p-12 flex items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-muted-foreground text-sm">
-            No leads yet. New website enquiries from {workspace.name} will appear here automatically.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr className="text-left">
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Contact</th>
-                  <th className="px-4 py-3 font-medium">Location</th>
-                  <th className="px-4 py-3 font-medium">Service</th>
-                  <th className="px-4 py-3 font-medium">Stage</th>
-                  <th className="px-4 py-3 font-medium">Created</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((l) => (
-                  <tr key={l.id} className="border-t hover:bg-muted/30">
-                    <td className="px-4 py-3 font-medium">{l.full_name}</td>
-                    <td className="px-4 py-3">
-                      <div className="text-xs">{l.email || "—"}</div>
-                      <div className="text-xs text-muted-foreground">{l.phone || ""}</div>
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {[l.city, l.state].filter(Boolean).join(", ") || "—"}
-                    </td>
-                    <td className="px-4 py-3 text-xs">{l.service_needed || "—"}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary" className={stageColor[l.stage] || ""}>
-                        {l.stage}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {new Date(l.created_at).toLocaleDateString("en-IN")}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="gap-1.5"
-                        onClick={() => setConvertLead(l)}
-                        disabled={l.stage === "won" || l.stage === "lost"}
-                      >
-                        <ArrowRightLeft className="h-3.5 w-3.5" />
-                        Convert
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
-
+  return (
+    <>
+      <CrmListView<Lead>
+        title="Leads"
+        subtitle={workspace.name}
+        rows={leads}
+        loading={loading}
+        columns={columns}
+        savedViews={savedViews}
+        defaultViewId="all"
+        searchKeys={["full_name", "email", "phone", "city", "service_needed"]}
+        onRefresh={load}
+        onRowClick={(l) => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+      />
       <ConvertLeadDialog
         workspaceId={workspace.id}
         lead={convertLead}
         open={!!convertLead}
         onOpenChange={(v) => !v && setConvertLead(null)}
-        onDone={() => {
-          setConvertLead(null);
-          load();
-        }}
+        onDone={() => { setConvertLead(null); load(); }}
       />
-    </div>
+    </>
   );
 };
 
