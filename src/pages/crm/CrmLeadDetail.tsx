@@ -40,12 +40,14 @@ export default function CrmLeadDetail() {
       .maybeSingle();
     setLead(l);
 
-    const [act, doc] = await Promise.all([
-      supabase.from("crm_activities").select("id,subject,activity_type,status,due_at").eq("lead_id", id).order("created_at", { ascending: false }).limit(50),
-      supabase.from("crm_documents").select("id,name,created_at").eq("related_entity_id", id).order("created_at", { ascending: false }).limit(50),
-    ]);
+    const act = await supabase
+      .from("crm_activities")
+      .select("id,subject,activity_type,status,due_at")
+      .eq("lead_id", id)
+      .order("created_at", { ascending: false })
+      .limit(50);
     setActivities(act.data || []);
-    setDocs(doc.data || []);
+    setDocs([]);
     setLoading(false);
   };
 
