@@ -20,6 +20,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const CrmLayout = lazy(() => import("./components/crm/CrmLayout"));
 const CrmDashboard = lazy(() => import("./pages/crm/CrmDashboard"));
 const CrmLeads = lazy(() => import("./pages/crm/CrmLeads"));
+const CrmLeadDetail = lazy(() => import("./pages/crm/CrmLeadDetail"));
 const CrmContacts = lazy(() => import("./pages/crm/CrmContacts"));
 const CrmOrganizations = lazy(() => import("./pages/crm/CrmOrganizations"));
 const CrmDeals = lazy(() => import("./pages/crm/CrmDealsKanban"));
@@ -106,6 +107,7 @@ const App = () => {
               <Route path="/crm/:slug" element={<CrmLayout />}>
                 <Route path="dashboard" element={<CrmDashboard />} />
                 <Route path="leads" element={<CrmLeads />} />
+                <Route path="leads/:id" element={<CrmLeadDetail />} />
                 <Route path="contacts" element={<CrmContacts />} />
                 <Route path="organizations" element={<CrmOrganizations />} />
                 <Route path="deals" element={<CrmDeals />} />
