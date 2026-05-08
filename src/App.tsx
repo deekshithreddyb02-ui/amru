@@ -22,7 +22,9 @@ const CrmDashboard = lazy(() => import("./pages/crm/CrmDashboard"));
 const CrmLeads = lazy(() => import("./pages/crm/CrmLeads"));
 const CrmLeadDetail = lazy(() => import("./pages/crm/CrmLeadDetail"));
 const CrmContacts = lazy(() => import("./pages/crm/CrmContacts"));
+const CrmContactDetail = lazy(() => import("./pages/crm/CrmContactDetail"));
 const CrmOrganizations = lazy(() => import("./pages/crm/CrmOrganizations"));
+const CrmOrganizationDetail = lazy(() => import("./pages/crm/CrmOrganizationDetail"));
 const CrmDeals = lazy(() => import("./pages/crm/CrmDealsKanban"));
 const CrmActivities = lazy(() => import("./pages/crm/CrmActivities"));
 const CrmCalendar = lazy(() => import("./pages/crm/CrmCalendar"));
@@ -109,7 +111,9 @@ const App = () => {
                 <Route path="leads" element={<CrmLeads />} />
                 <Route path="leads/:id" element={<CrmLeadDetail />} />
                 <Route path="contacts" element={<CrmContacts />} />
+                <Route path="contacts/:id" element={<CrmContactDetail />} />
                 <Route path="organizations" element={<CrmOrganizations />} />
+                <Route path="organizations/:id" element={<CrmOrganizationDetail />} />
                 <Route path="deals" element={<CrmDeals />} />
                 <Route path="activities" element={<CrmActivities />} />
                 <Route path="calendar" element={<CrmCalendar />} />
