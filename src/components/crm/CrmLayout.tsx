@@ -15,6 +15,7 @@ import CrmMobileBottomNav from "./CrmMobileBottomNav";
 import CrmCopilotDrawer from "./CrmCopilotDrawer";
 import CrmQuickCreate from "./vtiger/CrmQuickCreate";
 import CrmGlobalSearch from "./vtiger/CrmGlobalSearch";
+import CrmSidebar from "./vtiger/CrmSidebar";
 import { ALL_MODULES } from "./vtiger/navConfig";
 import logoImg from "@/assets/logo-optimized.webp";
 
