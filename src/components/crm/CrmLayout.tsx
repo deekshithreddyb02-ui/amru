@@ -255,9 +255,12 @@ const CrmLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 px-3 sm:px-5 py-4 pb-20 md:pb-6 max-w-full overflow-x-hidden">
-        <Outlet context={{ workspace: current, myRole }} />
-      </main>
+      <div className="flex-1 flex min-h-0">
+        <CrmSidebar slug={current.slug} />
+        <main className="flex-1 px-3 sm:px-5 py-4 pb-20 md:pb-6 max-w-full overflow-x-hidden">
+          <Outlet context={{ workspace: current, myRole }} />
+        </main>
+      </div>
 
       {/* Vtiger-style footer */}
       <footer className="bg-white border-t border-[hsl(var(--vt-bar-border))] py-2 text-center text-[11px] text-[hsl(var(--vt-muted))]">
