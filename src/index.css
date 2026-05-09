@@ -83,10 +83,12 @@
     /* Vtiger-style CRM tokens (utilitarian white/blue) */
     --vt-blue: 211 100% 36%;
     --vt-blue-hover: 211 100% 30%;
+    --vt-orange: 16 100% 53%;
+    --vt-orange-hover: 16 100% 46%;
     --vt-bar: 0 0% 100%;
     --vt-bar-border: 210 16% 88%;
-    --vt-row-hover: 210 30% 97%;
-    --vt-row-selected: 211 100% 96%;
+    --vt-row-hover: 16 100% 97%;
+    --vt-row-selected: 16 100% 94%;
     --vt-text: 210 20% 18%;
     --vt-muted: 210 10% 45%;
   }
