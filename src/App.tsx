@@ -77,8 +77,19 @@ const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
-  const handleSplashFinished = useCallback(() => setShowSplash(false), []);
+  // Only show splash on first visit to the home page in this session.
+  // Skip entirely on CRM/admin/auth routes — they already have their own loaders.
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const path = window.location.pathname;
+    if (path !== "/" && path !== "") return false;
+    if (sessionStorage.getItem("splash_shown") === "1") return false;
+    return true;
+  });
+  const handleSplashFinished = useCallback(() => {
+    try { sessionStorage.setItem("splash_shown", "1"); } catch {}
+    setShowSplash(false);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

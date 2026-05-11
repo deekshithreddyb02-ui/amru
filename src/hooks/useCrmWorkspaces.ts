@@ -59,7 +59,10 @@ export const useCrmWorkspaces = () => {
 
   useEffect(() => {
     refresh();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => refresh());
+    // Avoid refetch on TOKEN_REFRESHED / INITIAL_SESSION which fire frequently.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") refresh();
+    });
     return () => subscription.unsubscribe();
   }, [refresh]);
 

@@ -10,9 +10,11 @@ export const useUserRole = () => {
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const check = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (cancelled) return;
         if (!session?.user) {
           setRole(null);
           setUserId(null);
@@ -22,11 +24,12 @@ export const useUserRole = () => {
 
         setUserId(session.user.id);
 
-        // Get all roles for this user; pick highest-priority role
-        const { data: rolesData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
+        // Parallelize roles + profile fetch
+        const [{ data: rolesData }, { data: profile }] = await Promise.all([
+          supabase.from("user_roles").select("role").eq("user_id", session.user.id),
+          supabase.from("profiles").select("must_change_password").eq("user_id", session.user.id).maybeSingle(),
+        ]);
+        if (cancelled) return;
 
         const roles = (rolesData || []).map((r) => r.role as AppRole);
         let resolved: AppRole = "user";
@@ -34,30 +37,27 @@ export const useUserRole = () => {
         else if (roles.includes("admin")) resolved = "admin";
         else if (roles.includes("employee")) resolved = "employee";
         setRole(resolved);
-
-        // Check must_change_password
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("must_change_password")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
         setMustChangePassword(profile?.must_change_password === true);
       } catch (error) {
-        console.error("Error checking role:", error);
-        setRole(null);
+        if (!cancelled) {
+          console.error("Error checking role:", error);
+          setRole(null);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     check();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      check();
+    // Only re-check on real sign-in/out, not on every token refresh.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        check();
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { cancelled = true; subscription.unsubscribe(); };
   }, []);
 
   return {
