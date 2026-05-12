@@ -113,7 +113,24 @@ const CrmLeads = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace.id]);
 
-  const list = SHARED_LISTS.find((l) => l.id === activeList) || SHARED_LISTS[0];
+  // Resolve active list: shared first, then DB saved view
+  const sharedList = SHARED_LISTS.find((l) => l.id === activeList);
+  const dbView = savedViews.find((v) => v.id === activeList);
+  const list: ListDef = sharedList || (dbView
+    ? { id: dbView.id, label: dbView.name, filter: undefined }
+    : SHARED_LISTS[0]);
+
+  // Apply DB view filters if active
+  const dbFilters: Record<string, string> = useMemo(() => {
+    if (!dbView || !Array.isArray(dbView.filters)) return {};
+    const o: Record<string, string> = {};
+    (dbView.filters as any[]).forEach((f) => {
+      if (f && f.field) o[f.field] = String(f.value ?? "");
+    });
+    return o;
+  }, [dbView]);
+
+  const effectiveFilters = { ...dbFilters, ...filters };
 
   const filtered = useMemo(() => {
     let out = leads;
@@ -129,7 +146,7 @@ const CrmLeads = () => {
         primary_email: l.email || "",
         assigned_to: "",
       };
-      return Object.entries(filters).every(([k, v]) =>
+      return Object.entries(effectiveFilters).every(([k, v]) =>
         !v ? true : (fields[k] || "").toLowerCase().includes(v.toLowerCase())
       );
     });
@@ -141,7 +158,7 @@ const CrmLeads = () => {
       return 0;
     });
     return out;
-  }, [leads, list, filters, sortBy, sortDir]);
+  }, [leads, list, effectiveFilters, sortBy, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
