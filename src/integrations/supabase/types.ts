@@ -4030,6 +4030,59 @@ export type Database = {
           },
         ]
       }
+      crm_saved_views: {
+        Row: {
+          columns: string[]
+          created_at: string
+          filters: Json
+          id: string
+          is_default: boolean
+          is_shared: boolean
+          module: string
+          name: string
+          sort: Json | null
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          columns?: string[]
+          created_at?: string
+          filters?: Json
+          id?: string
+          is_default?: boolean
+          is_shared?: boolean
+          module: string
+          name: string
+          sort?: Json | null
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          columns?: string[]
+          created_at?: string
+          filters?: Json
+          id?: string
+          is_default?: boolean
+          is_shared?: boolean
+          module?: string
+          name?: string
+          sort?: Json | null
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_saved_views_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_signing_tokens: {
         Row: {
           created_at: string
@@ -4544,6 +4597,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      crm_user_column_prefs: {
+        Row: {
+          columns: string[]
+          id: string
+          module: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          columns?: string[]
+          id?: string
+          module: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          columns?: string[]
+          id?: string
+          module?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       crm_user_quotas: {
         Row: {
