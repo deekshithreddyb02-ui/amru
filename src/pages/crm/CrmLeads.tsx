@@ -28,6 +28,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LayoutGrid, List as ListIcon, X } from "lucide-react";
+import CrmKanban from "@/components/crm/vtiger/CrmKanban";
+import { useSavedViews } from "@/hooks/useSavedViews";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
