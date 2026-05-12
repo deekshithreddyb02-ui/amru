@@ -579,6 +579,59 @@ const CrmLeads = () => {
         onOpenChange={(v) => !v && setConvertLead(null)}
         onDone={() => { setConvertLead(null); load(); }}
       />
+
+      {/* Save current filters as a list */}
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save current filters as a list</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="lv-name">List name</Label>
+              <Input
+                id="lv-name"
+                value={saveName}
+                onChange={(e) => setSaveName(e.target.value)}
+                placeholder="e.g. My Hot Telangana Leads"
+                autoFocus
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="lv-shared" className="cursor-pointer">Share with workspace</Label>
+              <Switch id="lv-shared" checked={saveShared} onCheckedChange={setSaveShared} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Captures column filters currently applied. Active list: <span className="font-medium">{list.label}</span>.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button
+              disabled={!saveName.trim()}
+              onClick={async () => {
+                const filtersArr = Object.entries(filters)
+                  .filter(([, v]) => v && v.trim())
+                  .map(([field, value]) => ({ field, op: "contains", value }));
+                const created = await createView({
+                  name: saveName.trim(),
+                  filters: filtersArr,
+                  is_shared: saveShared,
+                });
+                if (created) {
+                  toast.success("List saved");
+                  setActiveList((created as any).id);
+                  setSaveOpen(false);
+                } else {
+                  toast.error("Could not save list");
+                }
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
