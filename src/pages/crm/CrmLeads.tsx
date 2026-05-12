@@ -224,7 +224,11 @@ const CrmLeads = () => {
           <aside className="w-[260px] border-r bg-white flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <span className="text-[12px] font-semibold tracking-wide text-foreground">LISTS</span>
-              <button className="h-6 w-6 inline-flex items-center justify-center border rounded text-muted-foreground hover:bg-muted">
+              <button
+                onClick={() => { setSaveName(""); setSaveShared(false); setSaveOpen(true); }}
+                title="Save current filters as a list"
+                className="h-6 w-6 inline-flex items-center justify-center border rounded text-muted-foreground hover:bg-muted"
+              >
                 <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -261,6 +265,45 @@ const CrmLeads = () => {
                     </button>
                   );
                 })}
+              {savedViews.length > 0 && (
+                <>
+                  <div className="px-4 mt-4 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground">
+                    MY LISTS
+                  </div>
+                  {savedViews
+                    .filter((v) => v.name.toLowerCase().includes(listSearch.toLowerCase()))
+                    .map((v) => {
+                      const active = v.id === activeList;
+                      return (
+                        <div
+                          key={v.id}
+                          className={cn(
+                            "group w-full flex items-center justify-between px-4 py-1.5 text-[13px] hover:bg-muted/40",
+                            active && "bg-primary/10 text-primary font-medium"
+                          )}
+                        >
+                          <button
+                            onClick={() => { setActiveList(v.id); setFilters({}); setPage(1); }}
+                            className="flex-1 text-left truncate"
+                          >
+                            {v.name}{v.is_shared ? "" : " ·"}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await removeView(v.id);
+                              if (activeList === v.id) setActiveList("all");
+                              toast.success("List removed");
+                            }}
+                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                            title="Delete list"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                </>
+              )}
               <div className="px-4 mt-4 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground">
                 TAGS
               </div>
