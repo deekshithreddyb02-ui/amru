@@ -348,30 +348,59 @@ const CrmLeads = () => {
               </DropdownMenu>
             </div>
             <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-              <span>
-                {startIdx} to {endIdx} of {filtered.length}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="outline" size="icon" className="h-7 w-7">
-                <MoreVertical className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
+              <div className="inline-flex items-center border rounded overflow-hidden mr-2">
+                <button
+                  onClick={() => setViewMode("list")}
+                  title="List view"
+                  className={cn(
+                    "h-7 w-7 inline-flex items-center justify-center",
+                    viewMode === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  )}
+                >
+                  <ListIcon className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("kanban")}
+                  title="Kanban view"
+                  className={cn(
+                    "h-7 w-7 inline-flex items-center justify-center border-l",
+                    viewMode === "kanban" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  )}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              {viewMode === "list" && (
+                <>
+                  <span>
+                    {startIdx} to {endIdx} of {filtered.length}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-7 w-7">
+                    <MoreVertical className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+              {viewMode === "kanban" && (
+                <span>{filtered.length} records</span>
+              )}
             </div>
           </div>
 
