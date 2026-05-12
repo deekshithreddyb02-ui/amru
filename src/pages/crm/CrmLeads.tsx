@@ -404,11 +404,53 @@ const CrmLeads = () => {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Body: list or kanban */}
           <div className="flex-1 overflow-auto">
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
+            ) : viewMode === "kanban" ? (
+              <div className="p-3">
+                <CrmKanban
+                  columns={[
+                    { id: "new",        label: "New",        tone: "bg-slate-400" },
+                    { id: "contacted",  label: "Contacted",  tone: "bg-blue-400" },
+                    { id: "qualified",  label: "Qualified",  tone: "bg-emerald-500" },
+                    { id: "proposal",   label: "Proposal",   tone: "bg-amber-500" },
+                    { id: "won",        label: "Won",        tone: "bg-green-600" },
+                    { id: "lost",       label: "Lost",       tone: "bg-red-500" },
+                  ]}
+                  items={filtered}
+                  groupBy={(l) => l.stage || "new"}
+                  onCardClick={(l) => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+                  onMove={async (id, to) => {
+                    setLeads((prev) => prev.map((l) => l.id === id ? { ...l, stage: to } : l));
+                    const { error } = await supabase
+                      .from("crm_leads")
+                      .update({ stage: to })
+                      .eq("id", id);
+                    if (error) {
+                      toast.error("Could not move lead");
+                      load();
+                    }
+                  }}
+                  renderCard={(l) => (
+                    <div className="space-y-1">
+                      <div className="font-medium truncate">{l.full_name || "Untitled"}</div>
+                      {l.organization?.name && (
+                        <div className="text-[11px] text-muted-foreground truncate">{l.organization.name}</div>
+                      )}
+                      {l.email && <div className="text-[11px] text-muted-foreground truncate">{l.email}</div>}
+                      {l.phone && <div className="text-[11px] text-muted-foreground">{l.phone}</div>}
+                      {l.service_needed && (
+                        <div className="text-[10px] inline-block px-1.5 py-0.5 rounded bg-primary/10 text-primary mt-1">
+                          {l.service_needed}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                />
               </div>
             ) : (
               <table className="w-full border-collapse">
