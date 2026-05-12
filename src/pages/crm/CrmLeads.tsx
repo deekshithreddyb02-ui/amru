@@ -28,6 +28,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LayoutGrid, List as ListIcon, X } from "lucide-react";
+import CrmKanban from "@/components/crm/vtiger/CrmKanban";
+import { useSavedViews } from "@/hooks/useSavedViews";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -79,6 +88,11 @@ const CrmLeads = () => {
   const [listSearch, setListSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [saveShared, setSaveShared] = useState(false);
+  const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
 
   const load = async () => {
     setLoading(true);
@@ -99,7 +113,24 @@ const CrmLeads = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace.id]);
 
-  const list = SHARED_LISTS.find((l) => l.id === activeList) || SHARED_LISTS[0];
+  // Resolve active list: shared first, then DB saved view
+  const sharedList = SHARED_LISTS.find((l) => l.id === activeList);
+  const dbView = savedViews.find((v) => v.id === activeList);
+  const list: ListDef = sharedList || (dbView
+    ? { id: dbView.id, label: dbView.name, filter: undefined }
+    : SHARED_LISTS[0]);
+
+  // Apply DB view filters if active
+  const dbFilters: Record<string, string> = useMemo(() => {
+    if (!dbView || !Array.isArray(dbView.filters)) return {};
+    const o: Record<string, string> = {};
+    (dbView.filters as any[]).forEach((f) => {
+      if (f && f.field) o[f.field] = String(f.value ?? "");
+    });
+    return o;
+  }, [dbView]);
+
+  const effectiveFilters = { ...dbFilters, ...filters };
 
   const filtered = useMemo(() => {
     let out = leads;
@@ -115,7 +146,7 @@ const CrmLeads = () => {
         primary_email: l.email || "",
         assigned_to: "",
       };
-      return Object.entries(filters).every(([k, v]) =>
+      return Object.entries(effectiveFilters).every(([k, v]) =>
         !v ? true : (fields[k] || "").toLowerCase().includes(v.toLowerCase())
       );
     });
@@ -127,7 +158,7 @@ const CrmLeads = () => {
       return 0;
     });
     return out;
-  }, [leads, list, filters, sortBy, sortDir]);
+  }, [leads, list, effectiveFilters, sortBy, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -193,7 +224,11 @@ const CrmLeads = () => {
           <aside className="w-[260px] border-r bg-white flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b">
               <span className="text-[12px] font-semibold tracking-wide text-foreground">LISTS</span>
-              <button className="h-6 w-6 inline-flex items-center justify-center border rounded text-muted-foreground hover:bg-muted">
+              <button
+                onClick={() => { setSaveName(""); setSaveShared(false); setSaveOpen(true); }}
+                title="Save current filters as a list"
+                className="h-6 w-6 inline-flex items-center justify-center border rounded text-muted-foreground hover:bg-muted"
+              >
                 <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -230,6 +265,45 @@ const CrmLeads = () => {
                     </button>
                   );
                 })}
+              {savedViews.length > 0 && (
+                <>
+                  <div className="px-4 mt-4 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground">
+                    MY LISTS
+                  </div>
+                  {savedViews
+                    .filter((v) => v.name.toLowerCase().includes(listSearch.toLowerCase()))
+                    .map((v) => {
+                      const active = v.id === activeList;
+                      return (
+                        <div
+                          key={v.id}
+                          className={cn(
+                            "group w-full flex items-center justify-between px-4 py-1.5 text-[13px] hover:bg-muted/40",
+                            active && "bg-primary/10 text-primary font-medium"
+                          )}
+                        >
+                          <button
+                            onClick={() => { setActiveList(v.id); setFilters({}); setPage(1); }}
+                            className="flex-1 text-left truncate"
+                          >
+                            {v.name}{v.is_shared ? "" : " ·"}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await removeView(v.id);
+                              if (activeList === v.id) setActiveList("all");
+                              toast.success("List removed");
+                            }}
+                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                            title="Delete list"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                </>
+              )}
               <div className="px-4 mt-4 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground">
                 TAGS
               </div>
@@ -274,38 +348,109 @@ const CrmLeads = () => {
               </DropdownMenu>
             </div>
             <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-              <span>
-                {startIdx} to {endIdx} of {filtered.length}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="outline" size="icon" className="h-7 w-7">
-                <MoreVertical className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
+              <div className="inline-flex items-center border rounded overflow-hidden mr-2">
+                <button
+                  onClick={() => setViewMode("list")}
+                  title="List view"
+                  className={cn(
+                    "h-7 w-7 inline-flex items-center justify-center",
+                    viewMode === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  )}
+                >
+                  <ListIcon className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("kanban")}
+                  title="Kanban view"
+                  className={cn(
+                    "h-7 w-7 inline-flex items-center justify-center border-l",
+                    viewMode === "kanban" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  )}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              {viewMode === "list" && (
+                <>
+                  <span>
+                    {startIdx} to {endIdx} of {filtered.length}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-7 w-7">
+                    <MoreVertical className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </>
+              )}
+              {viewMode === "kanban" && (
+                <span>{filtered.length} records</span>
+              )}
             </div>
           </div>
 
-          {/* Table */}
+          {/* Body: list or kanban */}
           <div className="flex-1 overflow-auto">
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
+            ) : viewMode === "kanban" ? (
+              <div className="p-3">
+                <CrmKanban
+                  columns={[
+                    { id: "new",        label: "New",        tone: "bg-slate-400" },
+                    { id: "contacted",  label: "Contacted",  tone: "bg-blue-400" },
+                    { id: "qualified",  label: "Qualified",  tone: "bg-emerald-500" },
+                    { id: "proposal",   label: "Proposal",   tone: "bg-amber-500" },
+                    { id: "won",        label: "Won",        tone: "bg-green-600" },
+                    { id: "lost",       label: "Lost",       tone: "bg-red-500" },
+                  ]}
+                  items={filtered}
+                  groupBy={(l) => l.stage || "new"}
+                  onCardClick={(l) => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+                  onMove={async (id, to) => {
+                    setLeads((prev) => prev.map((l) => l.id === id ? { ...l, stage: to } : l));
+                    const { error } = await supabase
+                      .from("crm_leads")
+                      .update({ stage: to })
+                      .eq("id", id);
+                    if (error) {
+                      toast.error("Could not move lead");
+                      load();
+                    }
+                  }}
+                  renderCard={(l) => (
+                    <div className="space-y-1">
+                      <div className="font-medium truncate">{l.full_name || "Untitled"}</div>
+                      {l.organization?.name && (
+                        <div className="text-[11px] text-muted-foreground truncate">{l.organization.name}</div>
+                      )}
+                      {l.email && <div className="text-[11px] text-muted-foreground truncate">{l.email}</div>}
+                      {l.phone && <div className="text-[11px] text-muted-foreground">{l.phone}</div>}
+                      {l.service_needed && (
+                        <div className="text-[10px] inline-block px-1.5 py-0.5 rounded bg-primary/10 text-primary mt-1">
+                          {l.service_needed}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                />
               </div>
             ) : (
               <table className="w-full border-collapse">
@@ -434,6 +579,59 @@ const CrmLeads = () => {
         onOpenChange={(v) => !v && setConvertLead(null)}
         onDone={() => { setConvertLead(null); load(); }}
       />
+
+      {/* Save current filters as a list */}
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save current filters as a list</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="lv-name">List name</Label>
+              <Input
+                id="lv-name"
+                value={saveName}
+                onChange={(e) => setSaveName(e.target.value)}
+                placeholder="e.g. My Hot Telangana Leads"
+                autoFocus
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="lv-shared" className="cursor-pointer">Share with workspace</Label>
+              <Switch id="lv-shared" checked={saveShared} onCheckedChange={setSaveShared} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Captures column filters currently applied. Active list: <span className="font-medium">{list.label}</span>.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSaveOpen(false)}>Cancel</Button>
+            <Button
+              disabled={!saveName.trim()}
+              onClick={async () => {
+                const filtersArr = Object.entries(filters)
+                  .filter(([, v]) => v && v.trim())
+                  .map(([field, value]) => ({ field, op: "contains", value }));
+                const created = await createView({
+                  name: saveName.trim(),
+                  filters: filtersArr,
+                  is_shared: saveShared,
+                });
+                if (created) {
+                  toast.success("List saved");
+                  setActiveList((created as any).id);
+                  setSaveOpen(false);
+                } else {
+                  toast.error("Could not save list");
+                }
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
