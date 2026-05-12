@@ -88,6 +88,11 @@ const CrmLeads = () => {
   const [listSearch, setListSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [saveShared, setSaveShared] = useState(false);
+  const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
 
   const load = async () => {
     setLoading(true);
