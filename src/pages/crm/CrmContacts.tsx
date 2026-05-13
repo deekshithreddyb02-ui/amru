@@ -15,6 +15,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
+import { exportCsv } from "@/lib/csv";
+import { Download } from "lucide-react";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
