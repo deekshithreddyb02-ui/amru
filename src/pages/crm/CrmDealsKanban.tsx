@@ -113,6 +113,9 @@ const Column = ({
           <span className="text-xs text-muted-foreground">{deals.length}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">{fmtINR(total)}</div>
+        <div className="text-[10px] text-muted-foreground/70 mt-0.5">
+          Weighted: {fmtINR(deals.reduce((s, d) => s + (Number(d.amount || 0) * Number(d.probability || 0)) / 100, 0))}
+        </div>
       </div>
       <div className="p-2 space-y-2 min-h-32 flex-1">
         {deals.map((d) => <DealCard key={d.id} deal={d} />)}
@@ -218,6 +221,13 @@ const CrmDeals = () => {
   };
 
   const activeDeal = deals.find((d) => d.id === activeId) || null;
+
+  const openPipeline = deals.filter((d) => d.stage !== "won" && d.stage !== "lost");
+  const totalPipeline = openPipeline.reduce((s, d) => s + Number(d.amount || 0), 0);
+  const weightedForecast = openPipeline.reduce(
+    (s, d) => s + (Number(d.amount || 0) * Number(d.probability || 0)) / 100, 0,
+  );
+  const wonTotal = deals.filter((d) => d.stage === "won").reduce((s, d) => s + Number(d.amount || 0), 0);
 
   return (
     <div className="space-y-4">
