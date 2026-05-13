@@ -37,6 +37,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { exportCsv } from "@/lib/csv";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -342,8 +343,27 @@ const CrmLeads = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   <DropdownMenuItem onClick={load}>Refresh</DropdownMenuItem>
-                  <DropdownMenuItem>Export</DropdownMenuItem>
-                  <DropdownMenuItem>Import</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      exportCsv("leads", filtered, [
+                        { key: "full_name", label: "Name" },
+                        { key: "email", label: "Email" },
+                        { key: "phone", label: "Phone" },
+                        { key: "city", label: "City" },
+                        { key: "state", label: "State" },
+                        { key: "service_needed", label: "Service" },
+                        { key: "stage", label: "Stage" },
+                        { key: "status", label: "Status" },
+                        { key: "company", label: "Company", get: (r) => r.organization?.name || "" },
+                        { key: "created_at", label: "Created" },
+                      ])
+                    }
+                  >
+                    Export to CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/crm/${workspace.slug}/import`)}>
+                    Import
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

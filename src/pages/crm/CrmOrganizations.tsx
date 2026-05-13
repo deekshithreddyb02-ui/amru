@@ -12,6 +12,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
+import { exportCsv } from "@/lib/csv";
+import { Download } from "lucide-react";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -118,6 +120,27 @@ const CrmOrganizations = () => {
         onRefresh={load}
         onCreate={() => setOpen(true)}
         onRowClick={(o) => navigate(`/crm/${workspace.slug}/organizations/${o.id}`)}
+        rightActions={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1"
+            onClick={() =>
+              exportCsv("organizations", rows, [
+                { key: "name", label: "Name" },
+                { key: "industry", label: "Industry" },
+                { key: "city", label: "City" },
+                { key: "state", label: "State" },
+                { key: "email", label: "Email" },
+                { key: "phone", label: "Phone" },
+                { key: "website", label: "Website" },
+              ])
+            }
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline text-xs">Export</span>
+          </Button>
+        }
       />
 
       <Dialog open={open} onOpenChange={setOpen}>
