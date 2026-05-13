@@ -296,8 +296,35 @@ const InvoiceFormDialog = ({ open, onOpenChange, mode, workspaceId, onSaved }: P
             <div className="space-y-2">
               {items.map((it, idx) => (
                 <div key={idx} className="grid grid-cols-12 gap-2 items-start">
+                  <Select
+                    value=""
+                    onValueChange={(pid) => {
+                      const p = products.find((x) => x.id === pid);
+                      if (!p) return;
+                      updateItem(idx, {
+                        description: p.name,
+                        hsn_sac: p.hsn_sac || "",
+                        unit: p.unit || "nos",
+                        rate: Number(p.unit_price) || 0,
+                        tax_rate: Number(p.tax_rate) || 18,
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="col-span-2 h-9 text-xs">
+                      <SelectValue placeholder="Pick product…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.length === 0 ? (
+                        <div className="px-2 py-1.5 text-xs text-muted-foreground">No products</div>
+                      ) : (
+                        products.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                   <Input
-                    className="col-span-4"
+                    className="col-span-2"
                     placeholder="Description"
                     value={it.description}
                     onChange={(e) => updateItem(idx, { description: e.target.value })}
