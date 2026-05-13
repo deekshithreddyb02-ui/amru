@@ -139,6 +139,26 @@ const CrmContacts = () => {
         onRefresh={load}
         onCreate={() => setOpen(true)}
         onRowClick={(c) => navigate(`/crm/${workspace.slug}/contacts/${c.id}`)}
+        rightActions={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1"
+            onClick={() =>
+              exportCsv("contacts", rows, [
+                { key: "full_name", label: "Name" },
+                { key: "title", label: "Title" },
+                { key: "organization", label: "Organization", get: (r) => r.organization?.name || "" },
+                { key: "email", label: "Email" },
+                { key: "phone", label: "Phone" },
+                { key: "city", label: "City" },
+              ])
+            }
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline text-xs">Export</span>
+          </Button>
+        }
       />
 
       <Dialog open={open} onOpenChange={setOpen}>
