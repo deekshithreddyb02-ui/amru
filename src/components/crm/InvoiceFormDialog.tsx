@@ -41,6 +41,15 @@ const blankItem = (): LineItem => ({
   tax_rate: 18,
 });
 
+type Product = {
+  id: string;
+  name: string;
+  hsn_sac: string | null;
+  unit: string | null;
+  unit_price: number;
+  tax_rate: number;
+};
+
 const InvoiceFormDialog = ({ open, onOpenChange, mode, workspaceId, onSaved }: Props) => {
   const [saving, setSaving] = useState(false);
   const [docNumber, setDocNumber] = useState("");
@@ -57,6 +66,18 @@ const InvoiceFormDialog = ({ open, onOpenChange, mode, workspaceId, onSaved }: P
   const [notes, setNotes] = useState("");
   const [terms, setTerms] = useState("");
   const [items, setItems] = useState<LineItem[]>([blankItem()]);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from("crm_products")
+      .select("id,name,hsn_sac,unit,unit_price,tax_rate")
+      .eq("workspace_id", workspaceId)
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data }) => setProducts((data as Product[]) || []));
+  }, [open, workspaceId]);
 
   useEffect(() => {
     if (!open) return;
