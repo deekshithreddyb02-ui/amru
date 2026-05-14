@@ -33,7 +33,7 @@ export async function convertQuotationToSalesOrder(quotationId: string) {
   const { data: { session } } = await supabase.auth.getSession();
   const so_number = `SO-${Date.now().toString().slice(-8)}`;
   const { data: so, error } = await supabase
-    .from("crm_sales_orders")
+    .from("crm_sales_orders" as any)
     .insert({
       ...pick(q),
       so_number,
@@ -58,7 +58,7 @@ export async function convertQuotationToInvoice(quotationId: string) {
   const { data: { session } } = await supabase.auth.getSession();
   const invoice_number = `INV-${Date.now().toString().slice(-8)}`;
   const { data: inv, error } = await supabase
-    .from("crm_invoices")
+    .from("crm_invoices" as any)
     .insert({
       ...pick(q),
       invoice_number,
