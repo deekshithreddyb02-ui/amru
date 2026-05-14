@@ -104,6 +104,20 @@ const CrmQuotations = () => {
     catch { toast.success(`Link: ${url}`); }
   };
 
+  const convert = async (r: Quotation, target: "sales_order" | "invoice") => {
+    try {
+      if (target === "sales_order") {
+        const so = await convertQuotationToSalesOrder(r.id);
+        toast.success(`Sales order ${(so as any).so_number} created`);
+      } else {
+        const inv = await convertQuotationToInvoice(r.id);
+        toast.success(`Invoice ${(inv as any).invoice_number} created`);
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Conversion failed");
+    }
+  };
+
   const filtered = rows.filter(
     (r) =>
       !q ||
