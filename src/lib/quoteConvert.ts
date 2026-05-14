@@ -47,7 +47,7 @@ export async function convertQuotationToSalesOrder(quotationId: string) {
   if (items.length) {
     const { error: ierr } = await supabase
       .from("crm_sales_order_items")
-      .insert(items.map((it) => ({ ...it, sales_order_id: so.id })));
+      .insert(items.map((it) => ({ ...it, sales_order_id: (so as any).id })));
     if (ierr) throw ierr;
   }
   return so;
@@ -81,7 +81,7 @@ export async function convertQuotationToInvoice(quotationId: string) {
         tax_rate: it.tax_rate,
         amount: it.amount,
         position: it.position,
-        invoice_id: inv.id,
+        invoice_id: (inv as any).id,
       })));
     if (ierr) throw ierr;
   }
