@@ -96,41 +96,7 @@ const CrmLayout = () => {
       <header className="sticky top-0 z-30">
         {/* Row 1: white utility bar */}
         <div className="bg-white border-b border-[hsl(var(--vt-bar-border))]">
-          <div className="flex items-center h-12 pr-3 sm:pr-4">
-            {/* Hamburger */}
-            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-              <SheetTrigger asChild>
-                <button
-                  className="h-12 w-12 flex items-center justify-center text-[hsl(var(--vt-text))] hover:bg-[hsl(var(--vt-row-hover))]"
-                  aria-label="Open menu"
-                >
-                  <Menu className="h-5 w-5" />
-                </button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 bg-card">
-                <div className="h-12 px-4 flex items-center gap-2 border-b">
-                  <span className="font-semibold text-base">All Modules</span>
-                </div>
-                <nav className="p-2 space-y-0.5 overflow-y-auto h-[calc(100vh-3rem)]">
-                  {ALL_MODULES.map((m) => (
-                    <NavLink
-                      key={m.to}
-                      to={`/crm/${current.slug}/${m.to}`}
-                      className={({ isActive }) =>
-                        `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                          isActive
-                            ? "bg-[hsl(var(--vt-orange))] text-white"
-                            : "text-foreground hover:bg-muted"
-                        }`
-                      }
-                    >
-                      <m.icon className="h-4 w-4 shrink-0" />
-                      {m.label}
-                    </NavLink>
-                  ))}
-                </nav>
-              </SheetContent>
-            </Sheet>
+          <div className="flex items-center h-12 pl-3 pr-3 sm:pr-4">
 
             {/* Logo block: logo + AMRUTA + orange CRM tile */}
             <button
