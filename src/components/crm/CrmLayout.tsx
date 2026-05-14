@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Loader2, Menu, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
