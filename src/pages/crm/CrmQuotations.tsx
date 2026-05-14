@@ -12,11 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileSpreadsheet, Plus, Search, Loader2, RefreshCw, FileSignature } from "lucide-react";
+import { FileSpreadsheet, Plus, Search, Loader2, RefreshCw, FileSignature, ArrowRightCircle } from "lucide-react";
 import InvoiceFormDialog from "@/components/crm/InvoiceFormDialog";
 import { formatINR } from "@/lib/gst";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import { toast } from "sonner";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { convertQuotationToInvoice, convertQuotationToSalesOrder } from "@/lib/quoteConvert";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
