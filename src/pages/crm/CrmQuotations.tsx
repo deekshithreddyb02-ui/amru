@@ -175,6 +175,7 @@ const CrmQuotations = () => {
                   <th className="px-4 py-3 font-medium">Approval</th>
                   <th className="px-4 py-3 font-medium">Created</th>
                   <th className="px-4 py-3 font-medium">E-sign</th>
+                  <th className="px-4 py-3 font-medium">Convert</th>
                 </tr>
               </thead>
               <tbody>
