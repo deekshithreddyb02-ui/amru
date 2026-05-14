@@ -1,41 +1,39 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronRight, Mail, FolderOpen, type LucideIcon } from "lucide-react";
+import { ChevronDown, Mail, FolderOpen } from "lucide-react";
 import { PINNED, GROUPS } from "./navConfig";
-
-const groupIcon = (label: string): LucideIcon => {
-  const m = GROUPS.find((g) => g.label === label);
-  return m?.items[0]?.icon || ChevronRight;
-};
 
 export default function CrmSidebar({ slug }: { slug: string }) {
   const loc = useLocation();
   const isActiveModule = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
-  const wrapRef = useRef<HTMLElement>(null);
 
-  // Close flyout on route change
-  useEffect(() => { setOpenGroup(null); }, [loc.pathname]);
+  // Track which groups are open. Default: open the group containing the active route.
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    GROUPS.forEach((g) => {
+      init[g.label] = g.items.some((i) => loc.pathname.startsWith(`/crm/${slug}/${i.to}`));
+    });
+    return init;
+  });
 
-  // Close when clicking outside
+  // Auto-open the group of the active route when path changes
   useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpenGroup(null);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+    setOpenGroups((cur) => {
+      const next = { ...cur };
+      GROUPS.forEach((g) => {
+        if (g.items.some((i) => loc.pathname.startsWith(`/crm/${slug}/${i.to}`))) {
+          next[g.label] = true;
+        }
+      });
+      return next;
+    });
+  }, [loc.pathname, slug]);
 
   const toggle = (label: string) =>
-    setOpenGroup((cur) => (cur === label ? null : label));
-
-  const activeItems = openGroup ? GROUPS.find((g) => g.label === openGroup)?.items ?? [] : [];
+    setOpenGroups((cur) => ({ ...cur, [label]: !cur[label] }));
 
   return (
-    <aside
-      ref={wrapRef}
-      className="hidden md:flex flex-col w-[220px] shrink-0 bg-[#2c3e50] text-white/90 relative"
-    >
+    <aside className="hidden md:flex flex-col w-[230px] shrink-0 bg-[#2c3e50] text-white/90">
       <nav className="flex-1 py-1 overflow-y-auto">
         {PINNED.map((p) => {
           const active = isActiveModule(p.to);
@@ -43,7 +41,6 @@ export default function CrmSidebar({ slug }: { slug: string }) {
             <NavLink
               key={p.to}
               to={`/crm/${slug}/${p.to}`}
-              onClick={() => setOpenGroup(null)}
               className={`flex items-center gap-3 h-11 px-4 text-[13px] tracking-wide transition-colors ${
                 active
                   ? "bg-[#1f2d3a] text-white border-l-[3px] border-[hsl(var(--vt-orange))]"
@@ -57,24 +54,42 @@ export default function CrmSidebar({ slug }: { slug: string }) {
         })}
 
         {GROUPS.map((g) => {
-          const Icon = groupIcon(g.label);
           const active = g.items.some((i) => isActiveModule(i.to));
-          const open = openGroup === g.label;
+          const open = !!openGroups[g.label];
           return (
-            <button
-              key={g.label}
-              type="button"
-              onClick={() => toggle(g.label)}
-              className={`w-full flex items-center justify-between h-11 px-4 text-[12.5px] uppercase tracking-wider transition-colors ${
-                active || open ? "bg-[#1f2d3a]" : "hover:bg-[#243342]"
-              } ${active ? "border-l-[3px] border-[hsl(var(--vt-orange))]" : ""}`}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <Icon className="h-4 w-4 shrink-0" />
+            <div key={g.label}>
+              <button
+                type="button"
+                onClick={() => toggle(g.label)}
+                className={`w-full flex items-center justify-between h-10 px-4 text-[11px] uppercase tracking-wider transition-colors ${
+                  active ? "bg-[#1f2d3a] text-white" : "text-white/70 hover:bg-[#243342]"
+                }`}
+              >
                 <span className="font-semibold truncate">{g.label}</span>
-              </div>
-              <ChevronRight className={`h-3.5 w-3.5 opacity-70 transition-transform ${open ? "rotate-90" : ""}`} />
-            </button>
+                <ChevronDown className={`h-3.5 w-3.5 opacity-70 transition-transform ${open ? "" : "-rotate-90"}`} />
+              </button>
+              {open && (
+                <div className="bg-[#26384a]">
+                  {g.items.map((it, idx) => {
+                    const itActive = isActiveModule(it.to);
+                    return (
+                      <NavLink
+                        key={`${g.label}-${it.to}-${idx}`}
+                        to={`/crm/${slug}/${it.to}`}
+                        className={`flex items-center gap-3 h-9 pl-9 pr-4 text-[13px] transition-colors ${
+                          itActive
+                            ? "bg-[#1f2d3a] text-white border-l-[3px] border-[hsl(var(--vt-orange))]"
+                            : "hover:bg-[#2c3e50] text-white/85"
+                        }`}
+                      >
+                        <it.icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
+                        <span className="truncate">{it.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
 
@@ -82,7 +97,6 @@ export default function CrmSidebar({ slug }: { slug: string }) {
 
         <NavLink
           to={`/crm/${slug}/email-templates`}
-          onClick={() => setOpenGroup(null)}
           className={({ isActive }) =>
             `flex items-center gap-3 h-11 px-4 text-[13px] transition-colors ${
               isActive ? "bg-[#1f2d3a]" : "hover:bg-[#243342]"
@@ -94,7 +108,6 @@ export default function CrmSidebar({ slug }: { slug: string }) {
         </NavLink>
         <NavLink
           to={`/crm/${slug}/documents`}
-          onClick={() => setOpenGroup(null)}
           className={({ isActive }) =>
             `flex items-center gap-3 h-11 px-4 text-[13px] transition-colors ${
               isActive ? "bg-[#1f2d3a]" : "hover:bg-[#243342]"
@@ -105,33 +118,6 @@ export default function CrmSidebar({ slug }: { slug: string }) {
           <span>Documents</span>
         </NavLink>
       </nav>
-
-      {/* Right-side flyout panel */}
-      {openGroup && (
-        <div className="absolute left-full top-0 bottom-0 z-40 w-[230px] bg-[#34495e] text-white/90 shadow-xl border-l border-black/20 py-1 overflow-y-auto">
-          <div className="px-4 py-2 text-[11px] uppercase tracking-wider text-white/60 font-semibold">
-            {openGroup}
-          </div>
-          {activeItems.map((it, idx) => {
-            const itActive = isActiveModule(it.to);
-            return (
-              <NavLink
-                key={`${it.to}-${idx}`}
-                to={`/crm/${slug}/${it.to}`}
-                onClick={() => setOpenGroup(null)}
-                className={`flex items-center gap-3 h-10 px-4 text-[13px] transition-colors ${
-                  itActive
-                    ? "bg-[#2c3e50] text-white border-l-[3px] border-[hsl(var(--vt-orange))]"
-                    : "hover:bg-[#2c3e50]"
-                }`}
-              >
-                <it.icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
-                <span className="truncate">{it.label}</span>
-              </NavLink>
-            );
-          })}
-        </div>
-      )}
     </aside>
   );
 }
