@@ -12,11 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileSpreadsheet, Plus, Search, Loader2, RefreshCw, FileSignature } from "lucide-react";
+import { FileSpreadsheet, Plus, Search, Loader2, RefreshCw, FileSignature, ArrowRightCircle } from "lucide-react";
 import InvoiceFormDialog from "@/components/crm/InvoiceFormDialog";
 import { formatINR } from "@/lib/gst";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import { toast } from "sonner";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { convertQuotationToInvoice, convertQuotationToSalesOrder } from "@/lib/quoteConvert";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -100,6 +104,20 @@ const CrmQuotations = () => {
     catch { toast.success(`Link: ${url}`); }
   };
 
+  const convert = async (r: Quotation, target: "sales_order" | "invoice") => {
+    try {
+      if (target === "sales_order") {
+        const so = await convertQuotationToSalesOrder(r.id);
+        toast.success(`Sales order ${(so as any).so_number} created`);
+      } else {
+        const inv = await convertQuotationToInvoice(r.id);
+        toast.success(`Invoice ${(inv as any).invoice_number} created`);
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Conversion failed");
+    }
+  };
+
   const filtered = rows.filter(
     (r) =>
       !q ||
@@ -157,6 +175,7 @@ const CrmQuotations = () => {
                   <th className="px-4 py-3 font-medium">Approval</th>
                   <th className="px-4 py-3 font-medium">Created</th>
                   <th className="px-4 py-3 font-medium">E-sign</th>
+                  <th className="px-4 py-3 font-medium">Convert</th>
                 </tr>
               </thead>
               <tbody>
@@ -207,6 +226,23 @@ const CrmQuotations = () => {
                       <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => createSignLink(r)}>
                         <FileSignature className="h-3 w-3" /> Send
                       </Button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                            <ArrowRightCircle className="h-3 w-3" /> Convert
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => convert(r, "sales_order")}>
+                            To Sales Order
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => convert(r, "invoice")}>
+                            To Invoice
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
