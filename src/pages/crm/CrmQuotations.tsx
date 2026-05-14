@@ -227,6 +227,23 @@ const CrmQuotations = () => {
                         <FileSignature className="h-3 w-3" /> Send
                       </Button>
                     </td>
+                    <td className="px-4 py-3">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                            <ArrowRightCircle className="h-3 w-3" /> Convert
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => convert(r, "sales_order")}>
+                            To Sales Order
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => convert(r, "invoice")}>
+                            To Invoice
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
                   </tr>
                 ))}
               </tbody>
