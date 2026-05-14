@@ -8,7 +8,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
 import { supabase } from "@/integrations/supabase/client";
 import CrmNotificationBell from "./CrmNotificationBell";
 import CrmMobileBottomNav from "./CrmMobileBottomNav";
