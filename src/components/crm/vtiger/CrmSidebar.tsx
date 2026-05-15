@@ -170,7 +170,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
       </button>
 
       {/* Collapsed-mode flyout panel */}
-      {collapsed && flyout && (
+      {flyout && (
         <div className="absolute left-full top-0 z-40 w-[230px] bg-[#34495e] text-white/90 shadow-xl border-l border-black/20 py-1 max-h-full overflow-y-auto">
           <div className="px-4 py-2 text-[11px] uppercase tracking-wider text-white/60 font-semibold">
             {flyout}
