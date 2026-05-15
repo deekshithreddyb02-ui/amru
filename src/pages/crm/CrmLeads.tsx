@@ -93,6 +93,9 @@ const CrmLeads = () => {
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saveShared, setSaveShared] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [newLead, setNewLead] = useState({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
   const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
 
   const load = async () => {
@@ -216,7 +219,7 @@ const CrmLeads = () => {
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-muted-foreground">{list.label}</span>
         </div>
-        <Button size="sm" className="h-8 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground">
+        <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Lead
         </Button>
       </div>
