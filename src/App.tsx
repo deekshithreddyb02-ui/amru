@@ -71,6 +71,7 @@ const CrmFieldMode = lazy(() => import("./pages/crm/CrmFieldMode"));
 const CrmTerritories = lazy(() => import("./pages/crm/CrmTerritories"));
 const CrmForecast = lazy(() => import("./pages/crm/CrmForecast"));
 const CrmDataQuality = lazy(() => import("./pages/crm/CrmDataQuality"));
+const CrmWebsiteSettings = lazy(() => import("./pages/crm/CrmWebsiteSettings"));
 const QuotationSign = lazy(() => import("./pages/QuotationSign"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
@@ -102,7 +103,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin" element={<CrmLayout />} />
               <Route path="/super-admin" element={<SuperAdmin />} />
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/employee" element={<EmployeeDashboard />} />
@@ -168,6 +169,8 @@ const App = () => {
                 <Route path="forecast" element={<CrmForecast />} />
                 <Route path="data-quality" element={<CrmDataQuality />} />
                 <Route path="audit" element={<CrmAuditLog />} />
+                <Route path="website-settings" element={<CrmWebsiteSettings />} />
+                <Route path="website-settings/:section" element={<CrmWebsiteSettings />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
