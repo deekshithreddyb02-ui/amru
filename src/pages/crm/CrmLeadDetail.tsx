@@ -27,6 +27,7 @@ export default function CrmLeadDetail() {
   const [activities, setActivities] = useState<any[]>([]);
   const [docs, setDocs] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
+  const [enquiry, setEnquiry] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
 
@@ -42,11 +43,23 @@ export default function CrmLeadDetail() {
 
     const act = await supabase
       .from("crm_activities")
-      .select("id,subject,activity_type,status,due_at")
+      .select("id,subject,activity_type,status,due_at,description,created_at,created_by")
       .eq("lead_id", id)
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .order("created_at", { ascending: true })
+      .limit(200);
     setActivities(act.data || []);
+
+    if (l?.source_enquiry_id) {
+      const { data: e } = await supabase
+        .from("contact_messages")
+        .select("id,name,email,phone,message,service,service_needed,enquiry_type,created_at")
+        .eq("id", l.source_enquiry_id)
+        .maybeSingle();
+      setEnquiry(e);
+    } else {
+      setEnquiry(null);
+    }
+
     setDocs([]);
     setLoading(false);
   };
