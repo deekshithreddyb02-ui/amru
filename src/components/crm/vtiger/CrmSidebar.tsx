@@ -23,6 +23,13 @@ export default function CrmSidebar({ slug }: { slug: string }) {
     window.localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
+  // Listen for external toggle (from header hamburger)
+  useEffect(() => {
+    const onToggle = () => setCollapsed((c) => !c);
+    window.addEventListener("crm:toggle-sidebar", onToggle);
+    return () => window.removeEventListener("crm:toggle-sidebar", onToggle);
+  }, []);
+
   // Inline-expanded groups (when sidebar is expanded)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
