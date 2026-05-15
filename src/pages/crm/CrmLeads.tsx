@@ -100,23 +100,13 @@ const CrmLeads = () => {
     const { data, error } = await supabase
       .from("crm_leads")
       .select(
-        "id,full_name,email,phone,city,state,service_needed,stage,status,created_at,organization_id"
+        "id,full_name,email,phone,city,state,service_needed,stage,status,created_at"
       )
       .eq("workspace_id", workspace.id)
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error("Failed to load leads:", error);
-    const rows = (data || []) as any[];
-    const orgIds = Array.from(new Set(rows.map((r) => r.organization_id).filter(Boolean)));
-    let orgMap: Record<string, string> = {};
-    if (orgIds.length) {
-      const { data: orgs } = await supabase
-        .from("crm_organizations")
-        .select("id,name")
-        .in("id", orgIds);
-      (orgs || []).forEach((o: any) => { orgMap[o.id] = o.name; });
-    }
-    setLeads(rows.map((r) => ({ ...r, organization: r.organization_id ? { name: orgMap[r.organization_id] || "" } : null })) as Lead[]);
+    setLeads(((data || []) as any[]).map((r) => ({ ...r, organization: null })) as Lead[]);
     setLoading(false);
   };
 
