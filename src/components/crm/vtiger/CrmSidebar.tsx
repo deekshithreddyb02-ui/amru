@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Mail, FolderOpen, ShoppingBag, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Mail, FolderOpen, ShoppingBag, Settings, type LucideIcon } from "lucide-react";
 import { PINNED, GROUPS } from "./navConfig";
 
 const STORAGE_KEY = "crm.sidebar.collapsed";
@@ -169,6 +169,19 @@ export default function CrmSidebar({ slug }: { slug: string }) {
         >
           <FolderOpen className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Documents</span>}
+        </NavLink>
+        <NavLink
+          to={`/crm/${slug}/website-settings/crm-config`}
+          onClick={() => setFlyout(null)}
+          title={collapsed ? "CRM Settings" : undefined}
+          className={({ isActive }) =>
+            `flex items-center gap-3 h-11 ${collapsed ? "justify-center" : "px-4"} text-[13px] transition-colors ${
+              isActive ? "bg-[#1f2d3a]" : "hover:bg-[#243342]"
+            }`
+          }
+        >
+          <Settings className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>CRM Settings</span>}
         </NavLink>
       </nav>
 
