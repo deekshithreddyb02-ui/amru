@@ -664,6 +664,80 @@ const CrmLeads = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add new lead */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Lead</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Full Name *</Label>
+              <Input value={newLead.full_name} onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })} autoFocus />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Phone</Label>
+              <Input value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>City</Label>
+              <Input value={newLead.city} onChange={(e) => setNewLead({ ...newLead, city: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>State</Label>
+              <Input value={newLead.state} onChange={(e) => setNewLead({ ...newLead, state: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Service Needed</Label>
+              <Input value={newLead.service_needed} onChange={(e) => setNewLead({ ...newLead, service_needed: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Notes</Label>
+              <Input value={newLead.notes} onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddOpen(false)} disabled={adding}>Cancel</Button>
+            <Button
+              disabled={adding || !newLead.full_name.trim()}
+              onClick={async () => {
+                setAdding(true);
+                const { data: { session } } = await supabase.auth.getSession();
+                const { error } = await supabase.from("crm_leads").insert({
+                  workspace_id: workspace.id,
+                  full_name: newLead.full_name.trim(),
+                  email: newLead.email.trim() || null,
+                  phone: newLead.phone.trim() || null,
+                  city: newLead.city.trim() || null,
+                  state: newLead.state.trim() || null,
+                  country: "India",
+                  service_needed: newLead.service_needed.trim() || null,
+                  notes: newLead.notes.trim() || null,
+                  stage: "new",
+                  status: "open",
+                  created_by: session?.user?.id || null,
+                } as any);
+                setAdding(false);
+                if (error) {
+                  toast.error(error.message || "Could not create lead");
+                  return;
+                }
+                toast.success("Lead created");
+                setNewLead({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
+                setAddOpen(false);
+                load();
+              }}
+            >
+              {adding ? "Saving…" : "Create Lead"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
