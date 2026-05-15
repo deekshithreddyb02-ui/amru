@@ -145,6 +145,19 @@ export default function CrmSidebar({ slug }: { slug: string }) {
           {!collapsed && <span>Mail Manager</span>}
         </NavLink>
         <NavLink
+          to={`/crm/${slug}/integrations`}
+          onClick={() => setFlyout(null)}
+          title={collapsed ? "Extension Store" : undefined}
+          className={({ isActive }) =>
+            `flex items-center gap-3 h-11 ${collapsed ? "justify-center" : "px-4"} text-[13px] transition-colors ${
+              isActive ? "bg-[#1f2d3a]" : "hover:bg-[#243342]"
+            }`
+          }
+        >
+          <ShoppingBag className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Extension Store</span>}
+        </NavLink>
+        <NavLink
           to={`/crm/${slug}/documents`}
           onClick={() => setFlyout(null)}
           title={collapsed ? "Documents" : undefined}
