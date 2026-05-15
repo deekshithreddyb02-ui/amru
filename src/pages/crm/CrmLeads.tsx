@@ -93,6 +93,9 @@ const CrmLeads = () => {
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saveShared, setSaveShared] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [newLead, setNewLead] = useState({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
   const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
 
   const load = async () => {
@@ -100,23 +103,13 @@ const CrmLeads = () => {
     const { data, error } = await supabase
       .from("crm_leads")
       .select(
-        "id,full_name,email,phone,city,state,service_needed,stage,status,created_at,organization_id"
+        "id,full_name,email,phone,city,state,service_needed,stage,status,created_at"
       )
       .eq("workspace_id", workspace.id)
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) console.error("Failed to load leads:", error);
-    const rows = (data || []) as any[];
-    const orgIds = Array.from(new Set(rows.map((r) => r.organization_id).filter(Boolean)));
-    let orgMap: Record<string, string> = {};
-    if (orgIds.length) {
-      const { data: orgs } = await supabase
-        .from("crm_organizations")
-        .select("id,name")
-        .in("id", orgIds);
-      (orgs || []).forEach((o: any) => { orgMap[o.id] = o.name; });
-    }
-    setLeads(rows.map((r) => ({ ...r, organization: r.organization_id ? { name: orgMap[r.organization_id] || "" } : null })) as Lead[]);
+    setLeads(((data || []) as any[]).map((r) => ({ ...r, organization: null })) as Lead[]);
     setLoading(false);
   };
 
@@ -226,7 +219,7 @@ const CrmLeads = () => {
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-muted-foreground">{list.label}</span>
         </div>
-        <Button size="sm" className="h-8 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground">
+        <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="h-4 w-4" /> Add Lead
         </Button>
       </div>
@@ -667,6 +660,80 @@ const CrmLeads = () => {
               }}
             >
               Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add new lead */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Lead</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Full Name *</Label>
+              <Input value={newLead.full_name} onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })} autoFocus />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Phone</Label>
+              <Input value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>City</Label>
+              <Input value={newLead.city} onChange={(e) => setNewLead({ ...newLead, city: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>State</Label>
+              <Input value={newLead.state} onChange={(e) => setNewLead({ ...newLead, state: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Service Needed</Label>
+              <Input value={newLead.service_needed} onChange={(e) => setNewLead({ ...newLead, service_needed: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Notes</Label>
+              <Input value={newLead.notes} onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddOpen(false)} disabled={adding}>Cancel</Button>
+            <Button
+              disabled={adding || !newLead.full_name.trim()}
+              onClick={async () => {
+                setAdding(true);
+                const { data: { session } } = await supabase.auth.getSession();
+                const { error } = await supabase.from("crm_leads").insert({
+                  workspace_id: workspace.id,
+                  full_name: newLead.full_name.trim(),
+                  email: newLead.email.trim() || null,
+                  phone: newLead.phone.trim() || null,
+                  city: newLead.city.trim() || null,
+                  state: newLead.state.trim() || null,
+                  country: "India",
+                  service_needed: newLead.service_needed.trim() || null,
+                  notes: newLead.notes.trim() || null,
+                  stage: "new",
+                  status: "open",
+                  created_by: session?.user?.id || null,
+                } as any);
+                setAdding(false);
+                if (error) {
+                  toast.error(error.message || "Could not create lead");
+                  return;
+                }
+                toast.success("Lead created");
+                setNewLead({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
+                setAddOpen(false);
+                load();
+              }}
+            >
+              {adding ? "Saving…" : "Create Lead"}
             </Button>
           </DialogFooter>
         </DialogContent>
