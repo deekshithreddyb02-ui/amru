@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Mail, FolderOpen, ShoppingBag, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Mail, FolderOpen, ShoppingBag, Settings, type LucideIcon } from "lucide-react";
 import { PINNED, GROUPS } from "./navConfig";
 
 const STORAGE_KEY = "crm.sidebar.collapsed";
