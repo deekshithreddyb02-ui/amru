@@ -105,6 +105,25 @@ export const GROUPS: ModuleGroup[] = [
       { to: "website-settings/legal",          label: "Legal Notice",       icon: Scale },
     ],
   },
+  {
+    label: "Settings",
+    items: [
+      { to: "website-settings/crm-config",     label: "CRM Settings",       icon: Settings },
+      { to: "admin/workspaces",                label: "Manage Users",       icon: UserCog },
+      { to: "admin/analytics",                 label: "Cross Analytics",    icon: BarChart3 },
+      { to: "audit",                           label: "Audit Log",          icon: Shield },
+      { to: "integrations",                    label: "Integrations",       icon: ExternalLink },
+      { to: "workflows",                       label: "Workflows",          icon: Sparkles },
+      { to: "approvals",                       label: "Approvals",          icon: ClipboardCheck },
+      { to: "territories",                     label: "Territories",        icon: MapPin },
+      { to: "data-quality",                    label: "Data Quality",       icon: Shield },
+      { to: "import",                          label: "Import / Export",    icon: FolderOpen },
+    ],
+  },
+];
+
+export const EXTRA_PINNED: ModuleItem[] = [
+  { to: "integrations", label: "Extension Store", icon: ShoppingBag },
 ];
 
 export const ALL_MODULES: ModuleItem[] = [
