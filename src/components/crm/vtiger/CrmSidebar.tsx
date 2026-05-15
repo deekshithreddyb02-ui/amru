@@ -100,59 +100,32 @@ export default function CrmSidebar({ slug }: { slug: string }) {
         {GROUPS.map((g) => {
           const Icon = groupIcon(g.label);
           const active = g.items.some((i) => isActiveModule(i.to));
-          const open = !!openGroups[g.label];
           const flyoutOpen = flyout === g.label;
 
-          if (collapsed) {
-            return (
-              <button
-                key={g.label}
-                type="button"
-                onClick={() => setFlyout((cur) => (cur === g.label ? null : g.label))}
-                title={g.label}
-                className={`w-full flex items-center justify-center h-11 transition-colors ${
-                  active || flyoutOpen ? "bg-[#1f2d3a]" : "hover:bg-[#243342]"
-                } ${active ? "border-l-[3px] border-[hsl(var(--vt-orange))]" : ""}`}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-              </button>
-            );
-          }
-
           return (
-            <div key={g.label}>
-              <button
-                type="button"
-                onClick={() => toggleGroup(g.label)}
-                className={`w-full flex items-center justify-between h-10 px-4 text-[11px] uppercase tracking-wider transition-colors ${
-                  active ? "bg-[#1f2d3a] text-white" : "text-white/70 hover:bg-[#243342]"
-                }`}
-              >
-                <span className="font-semibold truncate">{g.label}</span>
-                <ChevronDown className={`h-3.5 w-3.5 opacity-70 transition-transform ${open ? "" : "-rotate-90"}`} />
-              </button>
-              {open && (
-                <div className="bg-[#26384a]">
-                  {g.items.map((it, idx) => {
-                    const itActive = isActiveModule(it.to);
-                    return (
-                      <NavLink
-                        key={`${g.label}-${it.to}-${idx}`}
-                        to={`/crm/${slug}/${it.to}`}
-                        className={`flex items-center gap-3 h-9 pl-9 pr-4 text-[13px] transition-colors ${
-                          itActive
-                            ? "bg-[#1f2d3a] text-white border-l-[3px] border-[hsl(var(--vt-orange))]"
-                            : "hover:bg-[#2c3e50] text-white/85"
-                        }`}
-                      >
-                        <it.icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
-                        <span className="truncate">{it.label}</span>
-                      </NavLink>
-                    );
-                  })}
-                </div>
+            <button
+              key={g.label}
+              type="button"
+              onClick={() => setFlyout((cur) => (cur === g.label ? null : g.label))}
+              title={collapsed ? g.label : undefined}
+              className={`w-full flex items-center h-11 transition-colors ${
+                collapsed ? "justify-center" : "justify-between px-4 gap-3"
+              } ${
+                active || flyoutOpen ? "bg-[#1f2d3a] text-white" : "text-white/85 hover:bg-[#243342]"
+              } ${active ? "border-l-[3px] border-[hsl(var(--vt-orange))]" : ""}`}
+            >
+              {collapsed ? (
+                <Icon className="h-4 w-4 shrink-0" />
+              ) : (
+                <>
+                  <span className="flex items-center gap-3 min-w-0">
+                    <Icon className="h-4 w-4 shrink-0 opacity-80" />
+                    <span className="text-[13px] tracking-wide truncate">{g.label}</span>
+                  </span>
+                  <ChevronRight className={`h-3.5 w-3.5 opacity-70 transition-transform ${flyoutOpen ? "rotate-90" : ""}`} />
+                </>
               )}
-            </div>
+            </button>
           );
         })}
 
