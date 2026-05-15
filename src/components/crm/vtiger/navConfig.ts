@@ -4,6 +4,8 @@ import {
   Warehouse, Truck, ClipboardCheck, Megaphone, Mail, FileText, ClipboardList,
   Wrench, BookOpen, MessageSquare, HelpCircle, FileSignature, Diamond,
   Rss, Globe, Trash2, Phone, Coins, Contact2, Building2,
+  Palette, LayoutList, BarChart3, Navigation, PanelBottom, Sparkles, Info,
+  MessageSquareQuote, Image as ImageIcon, Award, MapPin, ExternalLink, Shield, Scale,
 } from "lucide-react";
 import type { ModuleItem, ModuleGroup } from "./CrmModuleNav";
 
@@ -77,6 +79,29 @@ export const GROUPS: ModuleGroup[] = [
       { to: "integrations",    label: "Our Sites",       icon: Globe },
       { to: "audit",           label: "Recycle Bin",     icon: Trash2 },
       { to: "messages",        label: "PBX Manager",     icon: Phone },
+    ],
+  },
+  {
+    label: "Website Settings",
+    items: [
+      { to: "website-settings/branding",       label: "Branding & Assets",  icon: Palette },
+      { to: "website-settings/page-layout",    label: "Page Layout",        icon: LayoutList },
+      { to: "website-settings/site-stats",     label: "Site Statistics",    icon: BarChart3 },
+      { to: "website-settings/navbar",         label: "Navigation Bar",     icon: Navigation },
+      { to: "website-settings/footer",         label: "Footer",             icon: PanelBottom },
+      { to: "website-settings/hero",           label: "Hero Banner",        icon: Sparkles },
+      { to: "website-settings/about",          label: "About Us",           icon: Info },
+      { to: "website-settings/whyus",          label: "Why Choose Us",      icon: HelpCircle },
+      { to: "website-settings/services",       label: "Services",           icon: Wrench },
+      { to: "website-settings/testimonials",   label: "Testimonials",       icon: MessageSquareQuote },
+      { to: "website-settings/feedback",       label: "Customer Feedback",  icon: BarChart3 },
+      { to: "website-settings/gallery",        label: "Project Gallery",    icon: ImageIcon },
+      { to: "website-settings/certifications", label: "Certifications",     icon: Award },
+      { to: "website-settings/offices",        label: "Office Locations",   icon: MapPin },
+      { to: "website-settings/contacts",       label: "Contact Info",       icon: Phone },
+      { to: "website-settings/crm-config",     label: "CRM Config",         icon: ExternalLink },
+      { to: "website-settings/login-security", label: "Login Security",     icon: Shield },
+      { to: "website-settings/legal",          label: "Legal Notice",       icon: Scale },
     ],
   },
 ];
