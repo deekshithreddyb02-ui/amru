@@ -98,6 +98,16 @@ const CrmLayout = () => {
         <div className="bg-white border-b border-[hsl(var(--vt-bar-border))]">
           <div className="flex items-center h-12 pl-3 pr-3 sm:pr-4">
 
+            {/* Hamburger: toggles sidebar (desktop) */}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("crm:toggle-sidebar"))}
+              aria-label="Toggle sidebar"
+              className="hidden md:flex h-8 w-8 mr-2 items-center justify-center rounded text-[hsl(var(--vt-muted))] hover:text-[hsl(var(--vt-orange))] hover:bg-[hsl(var(--vt-row-hover))]"
+            >
+              <Menu className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+
             {/* Logo block: logo + AMRUTA + orange CRM tile */}
             <button
               onClick={() => navigate(`/crm/${current.slug}/dashboard`)}
