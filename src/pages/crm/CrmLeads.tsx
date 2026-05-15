@@ -209,11 +209,12 @@ const CrmLeads = () => {
   const COLS = [
     { key: "first_name", label: "First Name" },
     { key: "last_name", label: "Last Name" },
-    { key: "company", label: "Company" },
-    { key: "primary_phone", label: "Primary Phone" },
-    { key: "website", label: "Website" },
-    { key: "primary_email", label: "Primary Email" },
-    { key: "assigned_to", label: "Assigned To" },
+    { key: "primary_phone", label: "Phone" },
+    { key: "primary_email", label: "Email" },
+    { key: "service", label: "Service" },
+    { key: "city", label: "City" },
+    { key: "stage", label: "Stage" },
+    { key: "created", label: "Created" },
   ];
 
   return (
@@ -587,11 +588,18 @@ const CrmLeads = () => {
                               {last || "—"}
                             </button>
                           </td>
-                          <td className="px-3 py-2 border-r">{l.organization?.name || "—"}</td>
                           <td className="px-3 py-2 border-r">{l.phone || "—"}</td>
-                          <td className="px-3 py-2 border-r">—</td>
                           <td className="px-3 py-2 border-r">{l.email || "—"}</td>
-                          <td className="px-3 py-2 border-r">—</td>
+                          <td className="px-3 py-2 border-r">{l.service_needed || "—"}</td>
+                          <td className="px-3 py-2 border-r">{[l.city, l.state].filter(Boolean).join(", ") || "—"}</td>
+                          <td className="px-3 py-2 border-r">
+                            <span className="inline-block px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[11px] capitalize">
+                              {l.stage || "new"}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 border-r whitespace-nowrap text-muted-foreground">
+                            {new Date(l.created_at).toLocaleDateString("en-IN")}
+                          </td>
                         </tr>
                       );
                     })

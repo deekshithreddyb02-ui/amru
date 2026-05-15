@@ -27,6 +27,7 @@ export default function CrmLeadDetail() {
   const [activities, setActivities] = useState<any[]>([]);
   const [docs, setDocs] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
+  const [enquiry, setEnquiry] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
 
@@ -42,11 +43,23 @@ export default function CrmLeadDetail() {
 
     const act = await supabase
       .from("crm_activities")
-      .select("id,subject,activity_type,status,due_at")
+      .select("id,subject,activity_type,status,due_at,description,created_at,created_by")
       .eq("lead_id", id)
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .order("created_at", { ascending: true })
+      .limit(200);
     setActivities(act.data || []);
+
+    if (l?.source_enquiry_id) {
+      const { data: e } = await supabase
+        .from("contact_messages")
+        .select("id,name,email,phone,message,service,service_needed,enquiry_type,created_at")
+        .eq("id", l.source_enquiry_id)
+        .maybeSingle();
+      setEnquiry(e);
+    } else {
+      setEnquiry(null);
+    }
+
     setDocs([]);
     setLoading(false);
   };
@@ -105,6 +118,60 @@ export default function CrmLeadDetail() {
               <div className="text-sm whitespace-pre-wrap p-3 bg-muted/40 rounded-md">{lead.notes}</div>
             </div>
           )}
+        </div>
+      ),
+    },
+    {
+      id: "conversation",
+      label: "Conversation",
+      icon: MessageSquare,
+      count: (enquiry ? 1 : 0) + activities.length,
+      content: (
+        <div className="space-y-3">
+          {!enquiry && activities.length === 0 && (
+            <div className="text-sm text-muted-foreground py-4 text-center">
+              No conversation yet. Log a call, email, or note to start the thread.
+            </div>
+          )}
+          {enquiry && (
+            <div className="flex gap-2 items-start">
+              <div className="h-8 w-8 rounded-full bg-muted text-foreground flex items-center justify-center text-xs font-medium shrink-0">
+                {(enquiry.name || "?").charAt(0).toUpperCase()}
+              </div>
+              <div className="max-w-[80%] bg-muted rounded-lg rounded-tl-none px-3 py-2">
+                <div className="flex items-center gap-2 text-[11px] text-muted-foreground mb-1">
+                  <span className="font-medium text-foreground">{enquiry.name || "Customer"}</span>
+                  <span>· Website enquiry</span>
+                  <span>· {new Date(enquiry.created_at).toLocaleString("en-IN")}</span>
+                </div>
+                {(enquiry.service_needed || enquiry.service) && (
+                  <div className="text-[11px] text-primary font-medium mb-1">
+                    Re: {enquiry.service_needed || enquiry.service}
+                  </div>
+                )}
+                <div className="text-sm whitespace-pre-wrap">{enquiry.message || "—"}</div>
+              </div>
+            </div>
+          )}
+          {activities.map((a) => {
+            const isOutbound = ["call", "email", "whatsapp", "sms", "meeting"].includes(a.activity_type);
+            return (
+              <div key={a.id} className={`flex gap-2 items-start ${isOutbound ? "flex-row-reverse" : ""}`}>
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${isOutbound ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+                  {a.activity_type?.charAt(0).toUpperCase() || "•"}
+                </div>
+                <div className={`max-w-[80%] rounded-lg px-3 py-2 ${isOutbound ? "bg-primary/10 rounded-tr-none" : "bg-muted rounded-tl-none"}`}>
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground mb-1">
+                    <span className="font-medium text-foreground capitalize">{a.activity_type}</span>
+                    <span>· {a.status}</span>
+                    <span>· {new Date(a.created_at).toLocaleString("en-IN")}</span>
+                  </div>
+                  {a.subject && <div className="text-sm font-medium">{a.subject}</div>}
+                  {a.description && <div className="text-sm whitespace-pre-wrap text-muted-foreground">{a.description}</div>}
+                </div>
+              </div>
+            );
+          })}
         </div>
       ),
     },
