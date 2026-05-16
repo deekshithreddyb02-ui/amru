@@ -1,63 +1,45 @@
+## Goal
+Rebuild the CRM frontend (was deleted by a revert). The Lovable Cloud database still has the full CRM schema — workspaces, members, leads, deals, contacts, organizations, invoices, quotations, tickets, activities, workflows, audit log, commissions, etc. — so this is **frontend-only** work.
 
+## Entry
+- New route `/crm` (and `/crm/:workspaceSlug/...`), admin-only (uses existing `has_role` / `is_super_admin`).
+- Non-admins redirected to `/auth`.
 
-## Make Testimonials Fully Dynamic
+## Phased delivery
+We'll ship in 5 phases. Each phase is shippable and testable on its own.
 
-Replace the hardcoded testimonials with a database-driven system, including an admin editor to add, edit, reorder, and delete testimonials.
+### Phase 1 — Shell (this turn)
+- `/crm` route, auth guard, workspace picker (lists `crm_workspaces` the user belongs to).
+- `CrmLayout` with collapsible left sidebar + top bar.
+- Sidebar groups (Sales, Inventory, Support, Finance, HR, Settings) with flyout panels to the right.
+- Placeholder pages for every module so navigation works.
+- Dark "Vtiger-style" theme via design tokens.
 
----
+### Phase 2 — Sales core
+- Leads, Contacts, Organizations, Deals, Activities (list + detail + create/edit).
+- Kanban for Deals, table + filters for Leads.
 
-### What Changes
+### Phase 3 — Quote-to-cash
+- Quotations, Invoices, Payments, Products, Stock movements.
+- Auto-status sync (already handled by DB triggers).
 
-1. **New database table** (`testimonials`) to store testimonial entries with name, text, organization, display order, and visibility toggle.
+### Phase 4 — Support & ops
+- Support tickets, Field visits, Contracts, Feedback surveys, Tasks/time logs.
 
-2. **Updated Testimonials component** -- fetches from the database instead of using hardcoded data. Falls back to the existing hardcoded testimonials if the database is empty (so nothing breaks during migration).
+### Phase 5 — Admin & automation
+- Workspace members & permissions, Role permissions matrix, Workflow rules + executions, Approvals, Commissions, Audit log, Website Settings (CRM config), Integrations placeholder.
 
-3. **New admin editor** (`TestimonialsEditor.tsx`) -- lets admins add, edit, reorder, and delete testimonials. Follows the same pattern as the existing AboutEditor/WhyUsEditor.
+## Tech details
+- React Router nested routes under `/crm`.
+- `useCrmWorkspace()` hook resolves slug → workspace id, member role, permissions via `crm_has_permission` RPC.
+- All data access via existing tables + RPCs; no schema changes.
+- Reuse shadcn `Sidebar`, `Table`, `Dialog`, `Form`, `Tabs`, `Card`.
+- Lazy-load every module page to keep bundle small.
 
-4. **Admin dashboard update** -- adds a "Testimonials" tab to the admin panel.
+## Out of scope for now
+- Vtiger external sync (already lives in edge functions `vtiger-submit` / `crm-ping` / `crm-retry`; we'll wire UI to them in Phase 5).
+- Mail Manager / Documents file UI (Phase 4+).
+- Mobile-optimized layouts beyond responsive basics.
 
-5. **Seed the existing 4 testimonials** into the database so no content is lost.
-
----
-
-### Technical Details
-
-**1. Database Migration**
-
-```sql
-CREATE TABLE public.testimonials (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  organization text DEFAULT '',
-  text text NOT NULL,
-  display_order integer NOT NULL DEFAULT 0,
-  is_visible boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
-
--- Public read for visible testimonials
-CREATE POLICY "Anyone can view visible testimonials"
-  ON public.testimonials FOR SELECT USING (is_visible = true);
-
--- Admin full access
-CREATE POLICY "Admins can manage testimonials"
-  ON public.testimonials FOR ALL
-  USING (has_role(auth.uid(), 'admin'))
-  WITH CHECK (has_role(auth.uid(), 'admin'));
-```
-
-**2. Seed existing testimonials** (via insert tool) with the 4 current hardcoded entries.
-
-**3. `src/components/Testimonials.tsx`** -- fetch from `testimonials` table ordered by `display_order`. Keep hardcoded data as fallback while loading or if table is empty.
-
-**4. `src/components/admin/TestimonialsEditor.tsx`** -- CRUD interface with:
-- Add / edit / delete testimonials
-- Reorder via display_order
-- Toggle visibility
-- Same Card-based layout as other editors
-
-**5. `src/pages/Admin.tsx`** -- add a "Testimonials" tab between "Why Us" and "Services".
-
+## After approval
+I'll implement **Phase 1** in this turn so you can navigate the shell, then we iterate phase by phase.
