@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Droplets, Shield, Award } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useNoMotion } from "@/hooks/useNoMotion";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 const DEFAULT_BG = "https://images.timesproperty.com/blog/6313/A_Comprehensive_Guide_To_Rooftop_Rainwater_Harvesting.png";
 
@@ -16,10 +17,10 @@ const defaultServices = [
   "CGWB Registration Services",
 ];
 
-const stats = [
-  { icon: Award, value: "35+", label: "Years" },
-  { icon: Shield, value: "13,000+", label: "Projects" },
-  { icon: Droplets, value: "Pan India", label: "Coverage" },
+const staticStats = [
+  { icon: Award, labelKey: "years", label: "Years" },
+  { icon: Shield, labelKey: "projects", label: "Projects" },
+  { icon: Droplets, labelKey: "coverage", label: "Coverage" },
 ];
 
 const Hero = () => {
@@ -29,6 +30,14 @@ const Hero = () => {
   const backgroundImage = metadata?.backgroundImage || DEFAULT_BG;
   const services = metadata?.services || defaultServices;
   const noMotion = useNoMotion();
+  const { yearsExperience, projectsCompleted, serviceCoverage } = useAboutStats();
+
+  const statsValues: Record<string, string> = {
+    years: yearsExperience,
+    projects: projectsCompleted,
+    coverage: serviceCoverage,
+  };
+  const stats = staticStats.map((s) => ({ ...s, value: statsValues[s.labelKey] }));
 
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
@@ -78,7 +87,7 @@ const Hero = () => {
             {...m({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, delay: 0.3 } })}
             className="text-lg md:text-xl text-white/70 max-w-2xl mb-8 leading-relaxed"
           >
-            Comprehensive water management, environmental consulting & sustainable solutions backed by 35+ years of expertise.
+            Comprehensive water management, environmental consulting & sustainable solutions backed by {yearsExperience} years of expertise.
           </motion.p>
 
           {/* Services grid */}

@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { Menu, X, LogIn, LogOut, Shield } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Menu, X, LogIn, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { useAdmin } from "@/hooks/useAdmin";
+
 import { useSiteContent } from "@/hooks/useSiteContent";
 import defaultLogo from "@/assets/logo-small.webp";
 
@@ -15,12 +16,43 @@ interface NavbarMetadata {
   external_link: { name: string; url: string };
 }
 
+const CLICK_THRESHOLD = 5;
+const CLICK_WINDOW_MS = 2000;
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const { isAdmin } = useAdmin();
+  
   const { data: navbarContent } = useSiteContent("navbar");
+  const navigate = useNavigate();
+  const clickTimestamps = useRef<number[]>([]);
+
+  const handleLogoClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const now = Date.now();
+    // Keep only clicks within the time window
+    clickTimestamps.current = clickTimestamps.current.filter(
+      (t) => now - t < CLICK_WINDOW_MS
+    );
+    clickTimestamps.current.push(now);
+
+    if (clickTimestamps.current.length >= CLICK_THRESHOLD) {
+      clickTimestamps.current = [];
+      navigate("/admin-login");
+    } else {
+      // Single click → home (debounced to avoid navigating on rapid clicks)
+      setTimeout(() => {
+        if (clickTimestamps.current.length > 0 && clickTimestamps.current.length < CLICK_THRESHOLD) {
+          const latest = clickTimestamps.current[clickTimestamps.current.length - 1];
+          if (Date.now() - latest >= 300) {
+            clickTimestamps.current = [];
+            navigate("/");
+          }
+        }
+      }, 350);
+    }
+  }, [navigate]);
 
   const meta = navbarContent?.metadata as unknown as NavbarMetadata | undefined;
   const companyName = meta?.company_name || "Amruta Integrated Water Solutions Pvt. Ltd.";
@@ -74,7 +106,7 @@ const Navbar = () => {
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 md:h-16">
-          <a href="#home" className="flex items-center gap-2.5 group">
+          <a href="#home" onClick={handleLogoClick} className="flex items-center gap-2.5 group">
             <div className="relative">
               <img
                 src={logoSrc}
@@ -102,11 +134,6 @@ const Navbar = () => {
               <a href={externalLink.url} target="_blank" rel="noopener noreferrer"
                 className={`${pillCls} bg-white/10 text-white hover:bg-white/20 border border-white/10`}>
                 {externalLink.name}
-              </a>
-            )}
-            {isAdmin && (
-              <a href="/admin" className={`${pillCls} text-white border border-white/10`} style={{ background: 'hsl(var(--secondary) / 0.2)' }}>
-                <Shield className="w-3.5 h-3.5" /> Admin
               </a>
             )}
             {user ? (
@@ -147,13 +174,6 @@ const Navbar = () => {
                 <a href={externalLink.url} target="_blank" rel="noopener noreferrer"
                   className="bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-medium text-center border border-white/10">
                   {externalLink.name}
-                </a>
-              )}
-              {isAdmin && (
-                <a href="/admin" onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white border border-white/10"
-                  style={{ background: 'hsl(var(--secondary) / 0.2)' }}>
-                  <Shield className="w-4 h-4" /> Admin
                 </a>
               )}
               {user ? (

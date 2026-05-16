@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Building2, Users, Award, MapPin, LucideIcon } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useNoMotion } from "@/hooks/useNoMotion";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 const iconMap: Record<string, LucideIcon> = { Award, Building2, Users, MapPin };
 
@@ -20,6 +21,7 @@ const About = () => {
   const stats = metadata?.stats || defaultStats;
   const paragraphs = content.split("\n\n").filter(Boolean);
   const noMotion = useNoMotion();
+  const { yearsExperience } = useAboutStats();
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   return (
@@ -42,7 +44,7 @@ const About = () => {
                 return (
                   <p key={index} className="text-muted-foreground leading-relaxed">
                     {parts.map((part, i) =>
-                    i % 2 === 1 ? <strong key={i} className="text-foreground font-semibold">{part}</strong> : <span key={i}>{part}</span>
+                    i % 2 === 1 ? <strong key={i} className="text-foreground font-semibold">{part}</strong> : <span key={i}>{part.replace(/\d+\+?\s*years/gi, `${yearsExperience} years`)}</span>
                     )}
                   </p>);
 

@@ -7,17 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const ALLOWED_FIELDS = new Set([
-  'lastname', 'firstname', 'email', 'phone', 'mobile',
-  'company', 'designation', 'leadsource', 'description',
-  'cf_990', 'cf_994', 'cf_998', 'cf_1002', 'cf_1006', 'cf_1014', 'cf_1020', 'cf_1022', 'cf_1044',
-  'assigned_user_id', 'salutationtype', 'closingdate',
-  '__vtrftk', 'publicid', 'urlencodeenable', 'name',
-  'mailingstreet', 'mailingcity', 'mailingpobox',
-]);
-
 const MAX_FIELD_VALUE_LENGTH = 2000;
-const MAX_FIELDS = 30;
+const MAX_FIELDS = 40;
 
 const STATE_KEY_MAP: Record<string, string> = {
   maharashtra: "maharashtra",
@@ -25,6 +16,29 @@ const STATE_KEY_MAP: Record<string, string> = {
   andhrapradesh: "andhrapradesh",
   karnataka: "karnataka",
   others: "others",
+};
+
+// Default field mappings (Telangana original)
+const DEFAULT_FIELD_MAPPINGS: Record<string, string> = {
+  firstname: "firstname",
+  lastname: "lastname",
+  email: "email",
+  expected_close: "cf_1044",
+  whatsapp: "cf_1022",
+  primary_phone: "phone",
+  mobile_phone: "mobile",
+  biz_area: "cf_990",
+  distance: "cf_998",
+  service_needed: "cf_994",
+  num_scans: "cf_1014",
+  area_type: "cf_1002",
+  total_area: "cf_1006",
+  biz_cost: "cf_1020",
+  description: "description",
+  mailing_street: "mailingstreet",
+  mailing_city: "mailingcity",
+  mailing_state: "mailingstate",
+  mailing_pincode: "mailingpobox",
 };
 
 interface CrmConfig {
@@ -35,6 +49,7 @@ interface CrmConfig {
   public_id: string;
   form_name: string;
   enabled: boolean;
+  field_mappings?: Record<string, string>;
 }
 
 interface LeadRouting {
@@ -73,9 +88,7 @@ serve(async (req) => {
 
     // Rate limiting by email/phone
     const email = formData.email ? String(formData.email) : (dbRecord?.email || null);
-    // Ensure email is valid for rate limiting (skip if it's a generated placeholder)
     const rateLimitEmail = email && email.includes('@') && !email.endsWith('@enquiry.amrutageo.com') ? email : null;
-    // Rate limit by WhatsApp/phone number
     const rateLimitKey = dbRecord?.whatsapp || dbRecord?.phone || rateLimitEmail;
     if (rateLimitKey) {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -93,7 +106,7 @@ serve(async (req) => {
       }
     }
 
-    // Load CRM settings (includes routing config)
+    // Load CRM settings
     let routing: LeadRouting = { store_in_db: true, send_to_crm: true };
     let crmConfigs: CrmConfig[] = [];
 
@@ -129,10 +142,11 @@ serve(async (req) => {
       try {
         const sanitized: Record<string, any> = {};
         const allowedDbFields = new Set([
-          'name', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'name', 'firstname', 'email', 'phone', 'service', 'message', 'whatsapp',
+          'primary_phone', 'mobile_phone',
           'biz_area', 'distance', 'service_needed', 'num_scans',
-          'area_type', 'area_value', 'mailing_street', 'mailing_city',
-          'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
+          'area_type', 'area_value', 'biz_cost', 'mailing_street', 'mailing_city',
+          'mailing_state', 'mailing_pincode', 'latitude', 'longitude', 'country', 'expected_close',
         ]);
         for (const [k, v] of Object.entries(dbRecord)) {
           if (allowedDbFields.has(k)) {
@@ -162,34 +176,90 @@ serve(async (req) => {
         if (!matchedCrm) matchedCrm = crmConfigs.find(c => c.enabled && c.crm_url) || null;
       }
 
-      // Fallback default
+      // Fallback default — credentials sourced exclusively from Supabase secrets.
+      // Never hardcode CRM tokens in source: leaked tokens let anyone bypass
+      // edge-function rate limiting and post directly to the CRM.
       if (!matchedCrm) {
-        matchedCrm = {
-          label: "Default",
-          state_key: "telangana",
-          crm_url: "https://appscomsolutions.com/VTCRM/modules/Webforms/capture.php",
-          token: "sid:c13e250974b2e7ea0ef70de7fecdcc0cc6191ec5,1773737516",
-          public_id: "85432a838b51f53a6bc4ec937b64ee40",
-          form_name: "Enquiry Form: Telangana - Amruta HydroGeo Services",
-          enabled: true,
-        };
+        const fallbackToken = Deno.env.get("DEFAULT_CRM_TOKEN") || "";
+        const fallbackPublicId = Deno.env.get("DEFAULT_CRM_PUBLIC_ID") || "";
+        const fallbackUrl = Deno.env.get("DEFAULT_CRM_URL") || "";
+        const fallbackFormName = Deno.env.get("DEFAULT_CRM_FORM_NAME") || "";
+
+        if (fallbackToken && fallbackPublicId && fallbackUrl) {
+          matchedCrm = {
+            label: "Default",
+            state_key: "telangana",
+            crm_url: fallbackUrl,
+            token: fallbackToken,
+            public_id: fallbackPublicId,
+            form_name: fallbackFormName || "Enquiry Form",
+            enabled: true,
+          };
+        } else {
+          // No CRM configured — skip CRM dispatch but still report db save outcome.
+          console.warn("No CRM config available and no DEFAULT_CRM_* secrets set; skipping CRM dispatch.");
+        }
+      }
+
+      if (!matchedCrm) {
+        // Skip the CRM step gracefully.
+        const overallSuccess = routing.store_in_db ? dbSaveSuccess : true;
+        return new Response(
+          JSON.stringify({
+            success: overallSuccess,
+            stateKey,
+            crmLabel: "",
+            dbSaved: routing.store_in_db ? dbSaveSuccess : "skipped",
+            crmSent: "no_crm_configured",
+            message: overallSuccess
+              ? "Enquiry saved. CRM dispatch skipped (no CRM configured)."
+              : "Submission failed. Please try again later.",
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       crmLabel = matchedCrm.label;
 
+      // Get field mappings for this CRM (merge with defaults)
+      const fm = { ...DEFAULT_FIELD_MAPPINGS, ...(matchedCrm.field_mappings || {}) };
+
       try {
         const params = new URLSearchParams();
-        for (const [key, value] of entries) {
-          if (!ALLOWED_FIELDS.has(key)) continue;
-          if (key === '__vtrftk') { params.append(key, matchedCrm.token); continue; }
-          if (key === 'publicid') { params.append(key, matchedCrm.public_id); continue; }
-          if (key === 'name') { params.append(key, matchedCrm.form_name); continue; }
-          const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
-          params.append(key, strValue);
+        
+        // Build form data using per-CRM field mappings
+        // formData uses logical field names; we map them to CRM-specific field IDs
+        for (const [logicalKey, crmFieldId] of Object.entries(fm)) {
+          const value = formData[logicalKey];
+          if (value !== undefined && value !== null) {
+            const strValue = String(value).substring(0, MAX_FIELD_VALUE_LENGTH);
+            params.append(crmFieldId, strValue);
+          }
         }
-        if (!params.has('__vtrftk')) params.append('__vtrftk', matchedCrm.token);
-        if (!params.has('publicid')) params.append('publicid', matchedCrm.public_id);
-        if (!params.has('name')) params.append('name', matchedCrm.form_name);
+
+        // Also pass through any raw cf_* fields from formData that aren't in the mapping
+        // (for backward compatibility)
+        for (const [key, value] of entries) {
+          if (key.startsWith('cf_') || key === 'urlencodeenable') {
+            if (!params.has(key)) {
+              const strValue = String(value ?? "").substring(0, MAX_FIELD_VALUE_LENGTH);
+              params.append(key, strValue);
+            }
+          }
+        }
+
+        // Always set CRM auth fields
+        params.set('__vtrftk', matchedCrm.token);
+        params.set('publicid', matchedCrm.public_id);
+        params.set('name', matchedCrm.form_name);
+        if (!params.has('urlencodeenable')) params.set('urlencodeenable', '1');
+
+        // Pass through reCAPTCHA response if present
+        if (formData['g-recaptcha-response']) {
+          params.set('g-recaptcha-response', String(formData['g-recaptcha-response']));
+        }
+
+        console.log(`CRM [${matchedCrm.label}] sending to ${matchedCrm.crm_url} with ${params.toString().length} bytes`);
 
         const response = await fetch(matchedCrm.crm_url, {
           method: "POST",
@@ -200,11 +270,9 @@ serve(async (req) => {
         const responseText = await response.text();
         console.log(`CRM [${matchedCrm.label}] (state: ${stateKey}) response: ${response.status}, body: ${responseText.substring(0, 500)}`);
 
-        // Vtiger capture.php returns HTTP 200 even on failure, so check body
         if (response.ok) {
           try {
             const responseJson = JSON.parse(responseText);
-            // Vtiger returns {"success":false,"error":{"message":"..."}} on failure
             if (responseJson.success === false) {
               console.error(`CRM [${matchedCrm.label}] rejected: ${responseJson.error?.message || 'Unknown error'}`);
               crmSuccess = false;
@@ -212,7 +280,6 @@ serve(async (req) => {
               crmSuccess = true;
             }
           } catch {
-            // Non-JSON response (e.g. HTML redirect on success) — treat as success
             crmSuccess = true;
           }
         } else {
@@ -222,21 +289,19 @@ serve(async (req) => {
         console.error(`CRM [${crmLabel}] error:`, err);
       }
 
-      // Update CRM status in DB if we saved
+      // Update CRM status in DB
       if (dbSaveSuccess && dbRecord?.email) {
         const newStatus = crmSuccess ? "success" : "failed";
         await supabase
           .from("contact_messages")
-          .update({ crm_status: newStatus })
+          .update({ crm_status: newStatus, crm_label: crmLabel })
           .eq("email", dbRecord.email)
           .order("created_at", { ascending: false })
           .limit(1);
       }
     }
 
-    // Determine overall success
     const overallSuccess = (routing.store_in_db ? dbSaveSuccess : true) && (routing.send_to_crm ? crmSuccess : true);
-    // At least one action must be enabled
     const anyAction = routing.store_in_db || routing.send_to_crm;
 
     return new Response(

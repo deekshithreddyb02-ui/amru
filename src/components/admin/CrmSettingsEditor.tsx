@@ -8,9 +8,60 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Save, ExternalLink } from "lucide-react";
+import { Loader2, Save, ExternalLink, Settings2 } from "lucide-react";
 
-interface CrmConfig {
+export interface FieldMappings {
+  lastname: string;
+  expected_close: string;
+  whatsapp: string;
+  biz_area: string;
+  distance: string;
+  service_needed: string;
+  num_scans: string;
+  area_type: string;
+  total_area: string;
+  biz_cost: string;
+  description: string;
+  mailing_street: string;
+  mailing_city: string;
+  mailing_pincode: string;
+}
+
+export const DEFAULT_FIELD_MAPPINGS: FieldMappings = {
+  lastname: "lastname",
+  expected_close: "cf_1044",
+  whatsapp: "cf_1022",
+  biz_area: "cf_990",
+  distance: "cf_998",
+  service_needed: "cf_994",
+  num_scans: "cf_1014",
+  area_type: "cf_1002",
+  total_area: "cf_1006",
+  biz_cost: "cf_1020",
+  description: "description",
+  mailing_street: "mailingstreet",
+  mailing_city: "mailingcity",
+  mailing_pincode: "mailingpobox",
+};
+
+const FIELD_LABELS: Record<keyof FieldMappings, string> = {
+  lastname: "Last Name",
+  expected_close: "Expected Close Date",
+  whatsapp: "WhatsApp Number",
+  biz_area: "BIZ Area",
+  distance: "Distance",
+  service_needed: "Service Needed",
+  num_scans: "Number of Scans",
+  area_type: "Area Type",
+  total_area: "Total Area",
+  biz_cost: "Total BIZ Cost",
+  description: "Description",
+  mailing_street: "Mailing Street",
+  mailing_city: "Mailing City",
+  mailing_pincode: "Mailing PIN Code",
+};
+
+export interface CrmConfig {
   label: string;
   state_key: string;
   crm_url: string;
@@ -18,6 +69,7 @@ interface CrmConfig {
   public_id: string;
   form_name: string;
   enabled: boolean;
+  field_mappings?: FieldMappings;
 }
 
 interface LeadRouting {
@@ -41,12 +93,15 @@ const DEFAULT_CRMS: CrmConfig[] = STATE_SLOTS.map((s, i) => ({
   public_id: i === 1 ? "85432a838b51f53a6bc4ec937b64ee40" : "",
   form_name: i === 1 ? "Enquiry Form: Telangana - Amruta HydroGeo Services" : "",
   enabled: i === 1,
+  field_mappings: { ...DEFAULT_FIELD_MAPPINGS },
 }));
 
 const CrmSettingsEditor = () => {
   const { toast } = useToast();
   const [crms, setCrms] = useState<CrmConfig[]>(DEFAULT_CRMS);
   const [routing, setRouting] = useState<LeadRouting>({ store_in_db: true, send_to_crm: true });
+  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState(""); // legacy
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -66,15 +121,22 @@ const CrmSettingsEditor = () => {
               send_to_crm: v.routing.send_to_crm !== false,
             });
           }
+          if (v.recaptcha_site_key) setRecaptchaSiteKey(v.recaptcha_site_key);
+          if (v.turnstile_site_key) setTurnstileSiteKey(v.turnstile_site_key);
           if (Array.isArray(v.crms)) {
             const loaded = v.crms as CrmConfig[];
             const merged = STATE_SLOTS.map((slot) => {
               const existing = loaded.find(
                 (c) => c.state_key === slot.state_key || c.label?.toLowerCase() === slot.label.toLowerCase()
               );
-              return existing
-                ? { ...existing, state_key: slot.state_key }
-                : { ...DEFAULT_CRMS.find((d) => d.state_key === slot.state_key)! };
+              if (existing) {
+                return {
+                  ...existing,
+                  state_key: slot.state_key,
+                  field_mappings: existing.field_mappings ? { ...DEFAULT_FIELD_MAPPINGS, ...existing.field_mappings } : { ...DEFAULT_FIELD_MAPPINGS },
+                };
+              }
+              return { ...DEFAULT_CRMS.find((d) => d.state_key === slot.state_key)! };
             });
             setCrms(merged);
           } else if (v.crm_url) {
@@ -100,10 +162,18 @@ const CrmSettingsEditor = () => {
     setCrms((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
   };
 
+  const updateFieldMapping = (index: number, field: keyof FieldMappings, value: string) => {
+    setCrms((prev) => prev.map((c, i) => {
+      if (i !== index) return c;
+      const fm = c.field_mappings || { ...DEFAULT_FIELD_MAPPINGS };
+      return { ...c, field_mappings: { ...fm, [field]: value } };
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      const value = { crms, routing };
+      const value = { crms, routing, recaptcha_site_key: recaptchaSiteKey, turnstile_site_key: turnstileSiteKey };
       const { data: existing } = await (supabase as any)
         .from("site_settings")
         .select("id")
@@ -163,6 +233,37 @@ const CrmSettingsEditor = () => {
           </CardContent>
         </Card>
 
+        {/* Cloudflare Turnstile CAPTCHA Settings */}
+        <Card className="bg-muted/30 border-border/50">
+          <CardContent className="pt-4 space-y-3">
+            <p className="text-xs font-semibold text-foreground">🛡️ Cloudflare Turnstile (Recommended — Free)</p>
+            <p className="text-[10px] text-muted-foreground">
+              Enter the Turnstile Site Key from your{" "}
+              <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank" rel="noopener noreferrer" className="text-primary underline">Cloudflare dashboard</a>.
+              This shows a privacy-friendly, invisible or managed CAPTCHA on the enquiry form. Leave empty to disable.
+            </p>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Turnstile Site Key</Label>
+              <Input value={turnstileSiteKey} onChange={(e) => setTurnstileSiteKey(e.target.value)} placeholder="0x4AAAAAAA..." />
+            </div>
+            {turnstileSiteKey && recaptchaSiteKey && (
+              <p className="text-[10px] text-amber-600 font-medium">⚠ Both Turnstile and reCAPTCHA keys are set. Turnstile will be used (preferred).</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Legacy reCAPTCHA Settings */}
+        <Card className="bg-muted/30 border-border/50">
+          <CardContent className="pt-4 space-y-3">
+            <p className="text-xs font-semibold text-foreground/60">Google reCAPTCHA v2 (Legacy)</p>
+            <p className="text-[10px] text-muted-foreground">Legacy reCAPTCHA support. Turnstile above is recommended instead.</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">reCAPTCHA Site Key</Label>
+              <Input value={recaptchaSiteKey} onChange={(e) => setRecaptchaSiteKey(e.target.value)} placeholder="6LcXXXX..." />
+            </div>
+          </CardContent>
+        </Card>
+
         <Accordion type="multiple" className="space-y-2">
           {crms.map((crm, i) => (
             <AccordionItem key={i} value={`crm-${i}`} className="border rounded-lg px-4">
@@ -206,6 +307,36 @@ const CrmSettingsEditor = () => {
                   <Label className="text-xs font-medium">Form Name</Label>
                   <Input value={crm.form_name} onChange={(e) => updateCrm(i, { form_name: e.target.value })} placeholder="Enquiry Form: ..." />
                 </div>
+
+                {/* Per-CRM Field Mappings */}
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="fields" className="border rounded-md bg-muted/20">
+                    <AccordionTrigger className="px-3 py-2 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <Settings2 className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-xs font-medium">CRM Field ID Mappings</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-3 space-y-2">
+                      <p className="text-[10px] text-muted-foreground mb-2">
+                        Map each form field to the corresponding Vtiger custom field ID. Each CRM can have different field IDs (e.g., cf_1022 for Telangana, cf_2022 for Maharashtra).
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(Object.keys(FIELD_LABELS) as (keyof FieldMappings)[]).map((field) => (
+                          <div key={field} className="space-y-0.5">
+                            <Label className="text-[10px] text-muted-foreground">{FIELD_LABELS[field]}</Label>
+                            <Input
+                              value={crm.field_mappings?.[field] ?? DEFAULT_FIELD_MAPPINGS[field]}
+                              onChange={(e) => updateFieldMapping(i, field, e.target.value)}
+                              placeholder={DEFAULT_FIELD_MAPPINGS[field]}
+                              className="h-7 text-xs"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </AccordionContent>
             </AccordionItem>
           ))}

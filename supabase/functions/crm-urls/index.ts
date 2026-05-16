@@ -23,10 +23,14 @@ serve(async (req) => {
       .eq("key", "crm_settings")
       .maybeSingle();
 
-    const crms: { state_key: string; label: string; crm_url: string; enabled: boolean }[] = [];
+    const crms: { state_key: string; label: string; crm_url: string; enabled: boolean; field_mappings?: Record<string, string> }[] = [];
+    let recaptcha_site_key = "";
+    let turnstile_site_key = "";
 
     if (data?.value) {
       const v = data.value as any;
+      if (v.recaptcha_site_key) recaptcha_site_key = v.recaptcha_site_key;
+      if (v.turnstile_site_key) turnstile_site_key = v.turnstile_site_key;
       if (Array.isArray(v.crms)) {
         for (const c of v.crms) {
           crms.push({
@@ -34,19 +38,20 @@ serve(async (req) => {
             label: c.label || "",
             crm_url: c.crm_url || "",
             enabled: !!c.enabled,
+            field_mappings: c.field_mappings || undefined,
           });
         }
       }
     }
 
     return new Response(
-      JSON.stringify({ crms }),
+      JSON.stringify({ crms, recaptcha_site_key, turnstile_site_key }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("crm-urls error:", error);
     return new Response(
-      JSON.stringify({ crms: [] }),
+      JSON.stringify({ crms: [], recaptcha_site_key: "", turnstile_site_key: "" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

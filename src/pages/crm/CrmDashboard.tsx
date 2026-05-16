@@ -1,65 +1,84 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { crmSupabase as supabase } from "@/integrations/external-supabase/client";
-import { Users, Target, Receipt, LifeBuoy, Loader2 } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, TrendingUp, CheckCircle2, Clock } from "lucide-react";
+import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
-type Stats = { leads: number; deals: number; invoices: number; tickets: number };
+type Ctx = { workspace: CrmWorkspace; myRole: string };
 
-export default function CrmDashboard() {
-  const { slug } = useParams<{ slug: string }>();
-  const [stats, setStats] = useState<Stats | null>(null);
+type Stats = {
+  total: number;
+  open: number;
+  won: number;
+  newThisWeek: number;
+};
+
+const CrmDashboard = () => {
+  const { workspace } = useOutletContext<Ctx>();
+  const [stats, setStats] = useState<Stats>({ total: 0, open: 0, won: 0, newThisWeek: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      const sb = supabase as any;
-      const { data: ws } = await sb.from("crm_workspaces").select("id").eq("slug", slug!).maybeSingle();
-      if (!ws) return;
-      const wid = ws.id;
-      const [leads, deals, invoices, tickets] = await Promise.all([
-        sb.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
-        sb.from("crm_deals").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
-        sb.from("crm_invoices").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
-        sb.from("crm_support_tickets").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
+    const load = async () => {
+      setLoading(true);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [tot, open, won, week] = await Promise.all([
+        supabase.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id),
+        supabase.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).eq("status", "open"),
+        supabase.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).eq("stage", "won"),
+        supabase.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", workspace.id).gte("created_at", weekAgo),
       ]);
       setStats({
-        leads: leads.count || 0,
-        deals: deals.count || 0,
-        invoices: invoices.count || 0,
-        tickets: tickets.count || 0,
+        total: tot.count || 0,
+        open: open.count || 0,
+        won: won.count || 0,
+        newThisWeek: week.count || 0,
       });
-    })();
-  }, [slug]);
+      setLoading(false);
+    };
+    load();
+  }, [workspace.id]);
 
   const cards = [
-    { label: "Leads", value: stats?.leads, icon: Users, color: "from-blue-500/20 to-blue-500/5" },
-    { label: "Deals", value: stats?.deals, icon: Target, color: "from-emerald-500/20 to-emerald-500/5" },
-    { label: "Invoices", value: stats?.invoices, icon: Receipt, color: "from-amber-500/20 to-amber-500/5" },
-    { label: "Open Tickets", value: stats?.tickets, icon: LifeBuoy, color: "from-rose-500/20 to-rose-500/5" },
+    { label: "Total leads", value: stats.total, icon: Users, color: "text-primary" },
+    { label: "Open", value: stats.open, icon: Clock, color: "text-secondary" },
+    { label: "Won", value: stats.won, icon: CheckCircle2, color: "text-[hsl(var(--teal))]" },
+    { label: "New this week", value: stats.newThisWeek, icon: TrendingUp, color: "text-primary" },
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-serif">{workspace.name}</h1>
+        <p className="text-muted-foreground text-sm mt-1">CRM workspace dashboard</p>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map(c => (
-          <div key={c.label} className={`bg-gradient-to-br ${c.color} border border-white/5 rounded-lg p-5`}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-white/60">{c.label}</span>
-              <c.icon className="w-4 h-4 text-white/40" />
-            </div>
-            <div className="text-3xl font-bold">
-              {c.value === undefined ? <Loader2 className="w-5 h-5 animate-spin" /> : c.value}
-            </div>
-          </div>
+        {cards.map(({ label, value, icon: Icon, color }) => (
+          <Card key={label}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+              <Icon className={`h-4 w-4 ${color}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-serif">{loading ? "—" : value}</div>
+            </CardContent>
+          </Card>
         ))}
       </div>
-      <div className="mt-8 bg-[#0f1923] border border-white/5 rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-2">Welcome back</h2>
-        <p className="text-white/60 text-sm">
-          Use the sidebar to navigate modules. Phase 1 (shell) is ready — module screens
-          will come online phase by phase.
-        </p>
-      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Welcome to {workspace.name}</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-2">
+          <p>Phase 1 foundation is live. New website enquiries from this region now mirror here automatically.</p>
+          <p>Use the sidebar to view <strong>Leads</strong>. Deals, Reports and AI features arrive in Phase 2+.</p>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default CrmDashboard;

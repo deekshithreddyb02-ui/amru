@@ -94,14 +94,55 @@ const stagger = {
   })
 };
 
+// Load Cloudflare Turnstile script once
+let turnstileScriptLoaded = false;
+function loadTurnstileScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (turnstileScriptLoaded && (window as any).turnstile) {
+      resolve();
+      return;
+    }
+    const existing = document.querySelector('script[src*="turnstile"]');
+    if (existing) {
+      const check = setInterval(() => {
+        if ((window as any).turnstile?.render) {
+          clearInterval(check);
+          turnstileScriptLoaded = true;
+          resolve();
+        }
+      }, 100);
+      setTimeout(() => { clearInterval(check); reject(new Error("Turnstile load timeout")); }, 10000);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      const check = setInterval(() => {
+        if ((window as any).turnstile?.render) {
+          clearInterval(check);
+          turnstileScriptLoaded = true;
+          resolve();
+        }
+      }, 50);
+      setTimeout(() => { clearInterval(check); reject(new Error("Turnstile init timeout")); }, 5000);
+    };
+    script.onerror = () => reject(new Error("Failed to load Turnstile"));
+    document.head.appendChild(script);
+  });
+}
+
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [expectedClose, setExpectedClose] = useState(() => {
     const d = new Date();d.setDate(d.getDate() + 7);
     return d.toISOString().split("T")[0];
   });
   const [whatsapp, setWhatsapp] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [bizArea, setBizArea] = useState("Telangana");
   const [distance, setDistance] = useState("0-30 KM");
   const [serviceNeeded, setServiceNeeded] = useState(() => {
@@ -110,9 +151,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   });
   const [numScans, setNumScans] = useState("1");
   const [areaType, setAreaType] = useState("OPEN PLOT");
+  
   const [description, setDescription] = useState("");
   const [mailingStreet, setMailingStreet] = useState("");
   const [mailingCity, setMailingCity] = useState("");
+  const [mailingState, setMailingState] = useState("");
   const [mailingPoBox, setMailingPoBox] = useState("");
   const [detectedCountry, setDetectedCountry] = useState("");
 
@@ -124,6 +167,65 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   const [areaUnit, setAreaUnit] = useState<AreaUnit>("sqft");
   const [areaValue, setAreaValue] = useState("");
 
+  // Cloudflare Turnstile
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+
+  // Fetch Turnstile site key from CRM settings
+  useEffect(() => {
+    const fetchCrmConfig = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("crm-urls");
+        if (!error) {
+          // Support both turnstile and legacy recaptcha key
+          const key = data?.turnstile_site_key || data?.recaptcha_site_key;
+          if (key) setTurnstileSiteKey(key);
+        }
+      } catch { /* no CAPTCHA */ }
+    };
+    fetchCrmConfig();
+  }, []);
+
+  // Initialize Turnstile widget when site key is available
+  useEffect(() => {
+    if (!turnstileSiteKey || !turnstileRef.current) return;
+    
+    let mounted = true;
+    loadTurnstileScript().then(() => {
+      if (!mounted || !turnstileRef.current) return;
+      const turnstile = (window as any).turnstile;
+      if (!turnstile?.render) return;
+      
+      // Remove previous widget
+      if (turnstileWidgetId.current) {
+        try { turnstile.remove(turnstileWidgetId.current); } catch {}
+      }
+      turnstileRef.current.innerHTML = '';
+      
+      try {
+        turnstileWidgetId.current = turnstile.render(turnstileRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token: string) => setCaptchaToken(token),
+          'expired-callback': () => setCaptchaToken(""),
+          'error-callback': () => setCaptchaToken(""),
+          theme: 'light',
+          size: 'normal',
+        });
+      } catch (e) {
+        console.error("Turnstile render error:", e);
+      }
+    }).catch(console.error);
+    
+    return () => {
+      mounted = false;
+      if (turnstileWidgetId.current) {
+        try { (window as any).turnstile?.remove(turnstileWidgetId.current); } catch {}
+      }
+    };
+  }, [turnstileSiteKey]);
+
   const converted = useMemo(() => {
     const num = parseFloat(areaValue);
     if (!areaValue || isNaN(num) || num <= 0) return null;
@@ -132,8 +234,8 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
   // Build total area string for CRM
   const totalAreaText = useMemo(() => {
-    if (!converted) return "Gunta: \nAcres: \nSq.Yrds: \nSq.Ft:";
-    return `Gunta: ${converted.guntas}\nAcres: ${converted.acres}\nSq.Yrds: ${converted.sqyd}\nSq.Ft: ${converted.sqft}`;
+    if (!converted) return "";
+    return `Gunta: ${converted.guntas} | Acres: ${converted.acres} | Sq.Yrds: ${converted.sqyd} | Sq.Ft: ${converted.sqft}`;
   }, [converted]);
 
   // Google Maps URL
@@ -147,30 +249,32 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
     navigator.clipboard.writeText(text).then(() => toast.success(`${label} copied!`)).catch(() => toast.error("Copy failed"));
   };
 
-  // Auto-fill description from fields above
+  // Auto-fill description as a single readable sentence for CRM
   const autoDescription = useMemo(() => {
-    const parts: string[] = [];
-    if (lastName) parts.push(`Name: ${lastName}`);
-    if (whatsapp) parts.push(`WhatsApp: ${whatsapp}`);
-    parts.push(`Service: ${serviceNeeded}`);
-    parts.push(`Area Type: ${areaType}`);
-    if (converted) {
-      parts.push(`Area: ${areaValue} ${AREA_UNITS.find((u) => u.value === areaUnit)?.label}`);
-      parts.push(`  → Sq.Ft: ${converted.sqft} | Sq.M: ${converted.sqm} | Acres: ${converted.acres} | Guntas: ${converted.guntas}`);
-    }
-    parts.push(`BIZ Area: ${bizArea}`);
-    parts.push(`Distance: ${distance}`);
-    parts.push(`Scans: ${numScans}`);
-    if (coords) {
-      parts.push(`GPS: ${coords.lat}, ${coords.lng}`);
-      parts.push(`Maps: https://www.google.com/maps?q=${coords.lat},${coords.lng}`);
-    }
-    if (mailingStreet) parts.push(`Street: ${mailingStreet}`);
-    if (mailingCity) parts.push(`City: ${mailingCity}`);
-    if (mailingPoBox) parts.push(`PIN: ${mailingPoBox}`);
-    if (detectedCountry) parts.push(`Country: ${detectedCountry}`);
-    return parts.join("\n");
-  }, [lastName, whatsapp, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingPoBox, detectedCountry]);
+    const name = `${firstName} ${lastName}`.trim();
+    const areaLabel = AREA_UNITS.find((u) => u.value === areaUnit)?.label || areaUnit;
+    const areaInfo = converted
+      ? `${areaValue} ${areaLabel} (Sq.Ft: ${converted.sqft}, Acres: ${converted.acres}, Guntas: ${converted.guntas}, Sq.Yrds: ${converted.sqyd})`
+      : "";
+    const location = [mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry].filter(Boolean).join(", ");
+    const gps = coords ? `GPS: ${coords.lat}, ${coords.lng} | Maps: https://www.google.com/maps?q=${coords.lat},${coords.lng}` : "";
+
+    const sentence = [
+      name ? `Customer ${name}` : "",
+      whatsapp ? `WhatsApp ${whatsapp}` : "",
+      phoneNumber ? `Phone ${phoneNumber}` : "",
+      `requires ${serviceNeeded} service`,
+      `in ${bizArea} region`,
+      areaType ? `for ${areaType} property` : "",
+      areaInfo ? `with total area ${areaInfo}` : "",
+      distance ? `at distance ${distance}` : "",
+      numScans ? `needing ${numScans} scan(s)` : "",
+      location ? `located at ${location}` : "",
+      gps,
+    ].filter(Boolean).join(", ") + ".";
+
+    return sentence;
+  }, [firstName, lastName, whatsapp, phoneNumber, serviceNeeded, areaType, areaValue, areaUnit, converted, bizArea, distance, numScans, coords, mailingStreet, mailingCity, mailingState, mailingPoBox, detectedCountry]);
 
   // Sync auto description
   useEffect(() => {
@@ -199,10 +303,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             const country = a.country || "";
             setDetectedCountry(country);
 
-            // Build mailing street: road, neighbourhood, suburb, district, state, country
             const streetParts = [a.road, a.neighbourhood, a.suburb, a.state_district || a.county, a.state, country].filter(Boolean);
             setMailingStreet(streetParts.join(", "));
             setMailingCity(a.city || a.town || a.village || a.county || "");
+            setMailingState(a.state || "");
             setMailingPoBox(a.postcode || "");
 
             // Auto-detect BIZ Area from state
@@ -213,7 +317,6 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             if (state.includes("andhra")) setBizArea("AndhraPradesh");else
             setBizArea("Others");
 
-            // Auto-fill country code for phone
             const countryLower = country.toLowerCase();
             const code = COUNTRY_CODES[countryLower];
             if (code && !whatsapp) {
@@ -239,41 +342,61 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       toast.error("Please fill in all required fields.");
       return;
     }
+
+    // Validate CAPTCHA if enabled
+    if (turnstileSiteKey && !captchaToken) {
+      toast.error("Please complete the verification.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // CRM tokens are handled server-side by the edge function
-      const formData: Record<string, string> = {
-        urlencodeenable: "1",
-        lastname: lastName,
-        cf_1044: expectedClose,
-        cf_1022: whatsapp,
-        cf_990: bizArea,
-        cf_998: distance,
-        cf_994: serviceNeeded,
-        cf_1014: numScans,
-        cf_1002: areaType,
-        cf_1006: totalAreaText,
-        cf_1020: "",
-        description: description,
-        mailingstreet: mailingStreet,
-        mailingcity: mailingCity,
-        mailingpobox: mailingPoBox
-      };
-
-      // Submit to edge function which handles both DB save and CRM routing based on admin settings
-      // Generate a valid placeholder email from WhatsApp number for DB storage
+      // Use logical field names — the edge function maps them to per-CRM field IDs
       const sanitizedPhone = whatsapp.replace(/[^0-9]/g, '');
       const generatedEmail = sanitizedPhone ? `${sanitizedPhone}@enquiry.amrutageo.com` : 'unknown@enquiry.amrutageo.com';
 
+      const formData: Record<string, string> = {
+        urlencodeenable: "1",
+        firstname: firstName,
+        lastname: lastName,
+        email: generatedEmail,
+        expected_close: expectedClose,
+        whatsapp: whatsapp,
+        primary_phone: phoneNumber || whatsapp,
+        mobile_phone: phoneNumber || whatsapp,
+        biz_area: bizArea,
+        distance: distance,
+        service_needed: serviceNeeded,
+        num_scans: numScans,
+        area_type: areaType,
+        total_area: totalAreaText,
+        description: description,
+        mailing_street: mailingStreet,
+        mailing_city: mailingCity,
+        mailing_state: mailingState,
+        mailing_pincode: mailingPoBox,
+      };
+
+      // Include Turnstile token if available
+      if (captchaToken) {
+        formData['cf-turnstile-response'] = captchaToken;
+      }
+
+
+      const fullName = `${firstName} ${lastName}`.trim() || lastName;
+
       const { data, error } = await supabase.functions.invoke("vtiger-submit", {
         body: { formData, bizArea, dbRecord: {
-          name: lastName,
+          name: fullName,
+          firstname: firstName,
           email: generatedEmail,
-          phone: whatsapp,
+          phone: phoneNumber || whatsapp,
           service: serviceNeeded,
           message: description,
           whatsapp,
+          primary_phone: phoneNumber || whatsapp,
+          mobile_phone: phoneNumber || whatsapp,
           biz_area: bizArea,
           distance,
           service_needed: serviceNeeded,
@@ -282,6 +405,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           area_value: areaValue ? `${areaValue} ${AREA_UNITS.find(u => u.value === areaUnit)?.label || areaUnit}` : "",
           mailing_street: mailingStreet,
           mailing_city: mailingCity,
+          mailing_state: mailingState,
           mailing_pincode: mailingPoBox,
           latitude: coords?.lat || null,
           longitude: coords?.lng || null,
@@ -303,6 +427,11 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       toast.error("Could not submit enquiry. Please try again after sometime.");
     } finally {
       setIsSubmitting(false);
+      // Reset Turnstile
+      if (turnstileWidgetId.current && (window as any).turnstile) {
+        try { (window as any).turnstile.reset(turnstileWidgetId.current); } catch {}
+      }
+      setCaptchaToken("");
     }
   };
 
@@ -320,12 +449,21 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         onSubmit={(e) => {e.preventDefault();handleSubmit();}}>
         
 
-        {/* Name */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><User className="h-3.5 w-3.5 text-primary" /> Name <span className="text-destructive">*</span></Label>
-          <div className="relative">
-            <User className={fieldIcon} />
-            <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Your full name" className={inputCls} />
+        {/* First Name & Last Name */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> First Name</Label>
+            <div className="relative">
+              <User className={fieldIcon} />
+              <Input name="firstname" maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className={inputCls} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> Last Name <span className="text-destructive">*</span></Label>
+            <div className="relative">
+              <User className={fieldIcon} />
+              <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" className={inputCls} />
+            </div>
           </div>
         </motion.div>
 
@@ -334,7 +472,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <Label className={labelCls}><Calendar className="h-3.5 w-3.5 text-primary" /> Expected Close Date <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Calendar className={fieldIcon} />
-            <Input name="cf_1044" type="date" required value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
+            <Input name="expected_close" type="date" required value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
           </div>
         </motion.div>
 
@@ -343,7 +481,18 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           <Label className={labelCls}><Phone className="h-3.5 w-3.5 text-primary" /> WhatsApp Number <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Phone className={fieldIcon} />
-            <Input name="cf_1022" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
+            <Input name="whatsapp" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
+          </div>
+        </motion.div>
+
+        {/* Primary Phone & Mobile Phone */}
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Phone Number</Label>
+            <div className="relative">
+              <Phone className={fieldIcon} />
+              <Input name="phone_number" maxLength={15} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className={inputCls} />
+            </div>
           </div>
         </motion.div>
 
@@ -502,20 +651,40 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className={labelCls}><MailIcon className="h-3 w-3 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> State</Label>
             <div className="relative">
-              <MailIcon className={fieldIcon} />
-              <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
+              <MapPin className={fieldIcon} />
+              <Input name="mailingstate" value={mailingState} onChange={(e) => setMailingState(e.target.value)} placeholder="State" className={inputCls} />
             </div>
           </div>
         </motion.div>
+
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+          <Label className={labelCls}><MailIcon className="h-3.5 w-3.5 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+          <div className="relative">
+            <MailIcon className={fieldIcon} />
+            <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
+          </div>
+        </motion.div>
+
+        {/* Cloudflare Turnstile CAPTCHA */}
+        {turnstileSiteKey && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-2">
+            <div className="flex justify-center py-2">
+              <div ref={turnstileRef} />
+            </div>
+            {!captchaToken && (
+              <p className="text-[11px] text-destructive text-center font-medium">Please complete verification</p>
+            )}
+          </motion.div>
+        )}
 
         {/* Submit */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="pt-1">
           <Button
             type="submit"
             className="w-full gap-2.5 h-12 font-bold text-sm relative overflow-hidden bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 rounded-xl"
-            disabled={isSubmitting}>
+            disabled={isSubmitting || (!!turnstileSiteKey && !captchaToken)}>
             
             {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Send className="w-4 h-4" /> Submit Enquiry</>}
           </Button>

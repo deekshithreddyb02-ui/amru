@@ -4,6 +4,7 @@ import { Quote, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import testimonialsBg from "@/assets/testimonials-bg.jpg";
 import { useNoMotion } from "@/hooks/useNoMotion";
+import { useAboutStats } from "@/hooks/useAboutStats";
 
 const fallbackTestimonials = [
   { text: "This is - from Vatika Society - Balewadi- PUNE - having 3 Buildings & 193 Flats. We used to spend 7 to 8 tankers in a day and Rs. 70,000/- to 80,000/- in a month and totally Rs. 8 Lakh to 9 Lakh in a Year for Tankers. Earlier We had a failure with Convention method (survey done by other third party vendor) called Copper Dowsing Rods. We approached Amrutha Ground Water Discovery, to perform Ground Water Survey, and they visited and Survey done with an American Intelligent Ground Water Discovery Machine and they have suggested 4 Bore Points in the Report and out of which they have recommended Greatest Ground Water resource point and we have drilled it and got more than 2 inch of water and we switch the Motor on for 2 to 3 hours and gives us 7 to 8 tankers (80,000 Liters) and it is sufficient for ONE DAY consumption. Now we are saving around Rs. 70,000/- to 80,000/- in a month. Yearly we are saving around Rs. 8 Lack to 9 Lack. They have made us to realize the important", name: "Rajesh Lokhande", organization: "Vatika Society" },
@@ -24,6 +25,7 @@ const Testimonials = () => {
   const [direction, setDirection] = useState(1);
   const [testimonials, setTestimonials] = useState(fallbackTestimonials);
   const noMotion = useNoMotion();
+  const { projectsCompleted } = useAboutStats();
   const m = (props: Record<string, unknown>) => noMotion ? {} : props;
 
   useEffect(() => {
@@ -62,7 +64,7 @@ const Testimonials = () => {
             ))}
           </div>
           <h2 className="section-heading text-white mb-2">What Our Clients Say</h2>
-          <p className="text-white/50 text-sm mb-12">Trusted by 1000+ clients across India</p>
+          <p className="text-white/50 text-sm mb-12">Trusted by {projectsCompleted} clients across India</p>
         </motion.div>
 
         <div className="relative h-[280px] md:h-[250px] flex items-center justify-center touch-pan-y overflow-hidden">

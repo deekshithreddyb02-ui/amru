@@ -27,27 +27,35 @@ import {
 interface Lead {
   id: string;
   name: string;
+  firstname: string | null;
   email: string;
   phone: string | null;
   service: string | null;
   message: string;
   is_read: boolean;
+  is_completed: boolean;
   created_at: string;
   whatsapp: string | null;
+  primary_phone: string | null;
+  mobile_phone: string | null;
   biz_area: string | null;
   distance: string | null;
   service_needed: string | null;
   num_scans: string | null;
   area_type: string | null;
   area_value: string | null;
+  biz_cost: string | null;
   mailing_street: string | null;
   mailing_city: string | null;
+  mailing_state: string | null;
   mailing_pincode: string | null;
   latitude: string | null;
   longitude: string | null;
   country: string | null;
   expected_close: string | null;
   crm_status: string | null;
+  crm_label: string | null;
+  assigned_to: string | null;
 }
 
 interface LeadsManagerProps {
@@ -98,6 +106,11 @@ const BIZ_AREA_TABS = ["All", "Maharashtra", "Telangana", "Andhra Pradesh", "Kar
 
 const LEADS_PER_PAGE_OPTIONS = [50, 100];
 
+interface Employee {
+  user_id: string;
+  full_name: string;
+}
+
 const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -119,6 +132,66 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   const [deleteRangeTo, setDeleteRangeTo] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [assigningId, setAssigningId] = useState<string | null>(null);
+  const [togglingCompleted, setTogglingCompleted] = useState<string | null>(null);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("role", ["employee", "admin"]);
+      if (roles && roles.length > 0) {
+        const ids = roles.map(r => r.user_id);
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", ids);
+        const roleMap = new Map(roles.map(r => [r.user_id, r.role]));
+        setEmployees((profiles || []).map(p => ({
+          user_id: p.user_id,
+          full_name: `${p.full_name || "Unknown"}${roleMap.get(p.user_id) === "admin" ? " (Admin)" : ""}`,
+        })));
+      }
+    } catch (e) { /* ignore */ }
+  };
+
+  const assignLeadToEmployee = async (leadId: string, employeeId: string | null) => {
+    setAssigningId(leadId);
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ assigned_to: employeeId } as any)
+        .eq("id", leadId);
+      if (error) throw error;
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, assigned_to: employeeId } : l));
+      toast({ title: "Lead Assigned", description: employeeId ? "Lead assigned to employee" : "Assignment removed" });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    } finally {
+      setAssigningId(null);
+    }
+  };
+
+  const toggleCompleted = async (leadId: string, currentValue: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ is_completed: !currentValue } as any)
+        .eq("id", leadId);
+      if (error) throw error;
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, is_completed: !currentValue } : l));
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
+  };
+
+  const getEmployeeName = (userId: string | null) => {
+    if (!userId) return null;
+    const emp = employees.find(e => e.user_id === userId);
+    return emp?.full_name || userId.slice(0, 8);
+  };
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -137,7 +210,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
     }
   };
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { fetchLeads(); fetchEmployees(); }, []);
 
   const isIndiaLead = (lead: Lead) => {
     const country = (lead.country || "").trim().toLowerCase();
@@ -461,7 +534,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-[calc(100vh-10rem)]">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -562,10 +635,10 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
       )}
 
       {/* Desktop/Tablet: sidebar layout wrapper */}
-      <div className={isMobile ? "space-y-4" : "flex flex-row gap-4"}>
+      <div className={isMobile ? "flex-1 overflow-y-auto space-y-4" : "flex flex-row gap-4 flex-1 min-h-0"}>
         {/* Desktop sidebar */}
         {!isMobile && (
-          <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0">
+          <div className="flex flex-col gap-1.5 w-[200px] min-w-[200px] shrink-0 overflow-y-auto">
             {COUNTRY_TABS.map((t) => (
               <Button key={t} variant={countryTab === t ? "default" : "outline"} size="sm" onClick={() => { setCountryTab(t); setTab("All"); }} className="gap-1.5 justify-start">
                 {t === "All" ? "📁 All" : t === "India" ? "🇮🇳 India" : "🌍 Other Countries"}
@@ -586,7 +659,7 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="flex-1 min-w-0 overflow-y-auto space-y-4">
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -688,6 +761,8 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                       <TableHead className="py-1.5 min-w-[160px]">Location</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">Map</TableHead>
                       <TableHead className="py-1.5 min-w-[80px]">CRM</TableHead>
+                      <TableHead className="py-1.5 min-w-[130px]">Assigned To</TableHead>
+                      <TableHead className="py-1.5 min-w-[80px]">Completed</TableHead>
                       <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -741,6 +816,29 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                               ) : "-"}
                             </TableCell>
                             <TableCell className="py-1.5">{crmBadge(lead.crm_status)}</TableCell>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              <Select
+                                value={lead.assigned_to || "__none__"}
+                                onValueChange={(v) => assignLeadToEmployee(lead.id, v === "__none__" ? null : v)}
+                              >
+                                <SelectTrigger className="h-7 text-xs w-[120px]">
+                                  <SelectValue placeholder="Unassigned" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="__none__">Unassigned</SelectItem>
+                                  {employees.map(emp => (
+                                    <SelectItem key={emp.user_id} value={emp.user_id}>{emp.full_name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell className="py-1.5" onClick={e => e.stopPropagation()}>
+                              <Checkbox
+                                checked={lead.is_completed}
+                                onCheckedChange={() => toggleCompleted(lead.id, lead.is_completed)}
+                                aria-label={`Mark ${lead.name} as completed`}
+                              />
+                            </TableCell>
                             <TableCell className="py-1.5">
                               <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Send to CRM" disabled={sendingSingleCrmId === lead.id} onClick={() => sendSingleToCrm(lead)}>
@@ -754,21 +852,43 @@ const LeadsManager = ({ onRefresh }: LeadsManagerProps) => {
                           </TableRow>
                           {isExpanded && (
                             <TableRow key={`${lead.id}-detail`}>
-                              <TableCell colSpan={15} className="bg-muted/30 p-4">
+                              <TableCell colSpan={17} className="bg-muted/30 p-4">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                  <div><span className="text-muted-foreground text-xs">First Name:</span> <span className="font-medium">{lead.firstname || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Last Name:</span> <span className="font-medium">{lead.name || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Email:</span> <span className="font-medium">{lead.email || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">WhatsApp:</span> <span className="font-medium">{lead.whatsapp || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Primary Phone:</span> <span className="font-medium">{lead.primary_phone || lead.phone || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Mobile Phone:</span> <span className="font-medium">{lead.mobile_phone || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Service:</span> <span className="font-medium">{lead.service_needed || lead.service || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">BIZ Area:</span> <span className="font-medium">{lead.biz_area || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Distance:</span> <span className="font-medium">{lead.distance || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Scans:</span> <span className="font-medium">{lead.num_scans || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Area Type:</span> <span className="font-medium">{lead.area_type || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Area Value:</span> <span className="font-medium">{lead.area_value || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">BIZ Cost:</span> <span className="font-medium">{lead.biz_cost || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Expected Close:</span> <span className="font-medium">{lead.expected_close || "-"}</span></div>
-                                  <div><span className="text-muted-foreground text-xs">PIN Code:</span> <span className="font-medium">{lead.mailing_pincode || "-"}</span></div>
                                   <div><span className="text-muted-foreground text-xs">Country:</span> <span className="font-medium">{lead.country || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">City:</span> <span className="font-medium">{lead.mailing_city || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">State:</span> <span className="font-medium">{lead.mailing_state || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">PIN Code:</span> <span className="font-medium">{lead.mailing_pincode || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">CRM Status:</span> <span className="font-medium">{lead.crm_status || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">CRM Label:</span> <span className="font-medium">{lead.crm_label || "-"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Assigned To:</span> <span className="font-medium">{getEmployeeName(lead.assigned_to) || "Unassigned"}</span></div>
+                                  <div><span className="text-muted-foreground text-xs">Created:</span> <span className="font-medium">{new Date(lead.created_at).toLocaleString()}</span></div>
                                   {lead.latitude && lead.longitude && (
-                                    <div className="col-span-2"><span className="text-muted-foreground text-xs">GPS:</span> <span className="font-mono text-xs">{lead.latitude}, {lead.longitude}</span></div>
+                                    <div className="col-span-2"><span className="text-muted-foreground text-xs">GPS:</span> <span className="font-mono text-xs">{lead.latitude}, {lead.longitude}</span>
+                                      {getMapsUrl(lead.latitude, lead.longitude) && (
+                                        <a href={getMapsUrl(lead.latitude, lead.longitude)!} target="_blank" rel="noopener noreferrer" className="ml-2 text-primary hover:underline text-xs inline-flex items-center gap-0.5"><MapPin className="w-3 h-3" />View Map<ExternalLink className="w-3 h-3" /></a>
+                                      )}
+                                    </div>
                                   )}
                                   <div className="col-span-2 md:col-span-4">
-                                    <span className="text-muted-foreground text-xs">Street:</span>
+                                    <span className="text-muted-foreground text-xs">Street Address:</span>
                                     <p className="text-xs mt-0.5">{lead.mailing_street || "-"}</p>
                                   </div>
                                   <div className="col-span-2 md:col-span-4">
-                                    <span className="text-muted-foreground text-xs">Description:</span>
+                                    <span className="text-muted-foreground text-xs">Description / Message:</span>
                                     <pre className="text-xs mt-0.5 whitespace-pre-wrap font-sans bg-background/50 p-2 rounded border border-border/30">{lead.message}</pre>
                                   </div>
                                 </div>
