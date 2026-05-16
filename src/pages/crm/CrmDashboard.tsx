@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { crmSupabase as supabase } from "@/integrations/external-supabase/client";
 import { Users, Target, Receipt, LifeBuoy, Loader2 } from "lucide-react";
 
 type Stats = { leads: number; deals: number; invoices: number; tickets: number };
@@ -11,14 +11,15 @@ export default function CrmDashboard() {
 
   useEffect(() => {
     (async () => {
-      const { data: ws } = await supabase.from("crm_workspaces").select("id").eq("slug", slug!).maybeSingle();
+      const sb = supabase as any;
+      const { data: ws } = await sb.from("crm_workspaces").select("id").eq("slug", slug!).maybeSingle();
       if (!ws) return;
       const wid = ws.id;
       const [leads, deals, invoices, tickets] = await Promise.all([
-        supabase.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
-        supabase.from("crm_deals").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
-        supabase.from("crm_invoices").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
-        supabase.from("crm_support_tickets").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
+        sb.from("crm_leads").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
+        sb.from("crm_deals").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
+        sb.from("crm_invoices").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
+        sb.from("crm_support_tickets").select("id", { count: "exact", head: true }).eq("workspace_id", wid),
       ]);
       setStats({
         leads: leads.count || 0,
