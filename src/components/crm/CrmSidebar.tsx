@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { GROUPS, PINNED } from "./navConfig";
-import { supabase } from "@/integrations/supabase/client";
+import { crmSupabase as supabase } from "@/integrations/external-supabase/client";
 
 export default function CrmSidebar() {
   const { slug } = useParams<{ slug: string }>();
@@ -19,7 +19,7 @@ export default function CrmSidebar() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/auth";
+    window.location.href = "/crm/login";
   };
 
   return (

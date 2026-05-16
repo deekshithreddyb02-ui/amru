@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { crmSupabase as supabase } from "@/integrations/external-supabase/client";
 import { Building2, ArrowRight, Loader2 } from "lucide-react";
 
 type Workspace = { id: string; slug: string; name: string };
@@ -14,15 +14,17 @@ export default function CrmWorkspacePicker() {
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { nav("/auth?redirect=/crm"); return; }
+      if (!session) { nav("/crm/login"); return; }
 
-      // Check admin
+      // Check admin (optional — if user_roles is empty, allow access)
       const { data: roles } = await supabase
         .from("user_roles").select("role").eq("user_id", session.user.id);
-      const isAdmin = roles?.some(r => r.role === "admin" || r.role === "super_admin");
-      if (!isAdmin) { setError("Admin access required."); setLoading(false); return; }
+      if (roles && roles.length > 0) {
+        const isAdmin = roles.some((r: any) => r.role === "admin" || r.role === "super_admin");
+        if (!isAdmin) { setError("Admin access required."); setLoading(false); return; }
+      }
 
-      const { data, error: e } = await supabase
+      const { data, error: e } = await (supabase as any)
         .from("crm_workspaces").select("id, slug, name").order("name");
       if (e) setError(e.message);
       else setWorkspaces(data || []);
