@@ -13,6 +13,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CrmWorkspacePicker = lazy(() => import("./pages/crm/CrmWorkspacePicker"));
+const CrmLogin = lazy(() => import("./pages/crm/CrmLogin"));
 const CrmLayout = lazy(() => import("./components/crm/CrmLayout"));
 const CrmDashboard = lazy(() => import("./pages/crm/CrmDashboard"));
 const CrmModulePlaceholder = lazy(() => import("./pages/crm/CrmModulePlaceholder"));
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/crm/login" element={<CrmLogin />} />
               <Route path="/crm" element={<CrmWorkspacePicker />} />
               <Route path="/crm/:slug" element={<CrmLayout />}>
                 <Route index element={<CrmDashboard />} />
