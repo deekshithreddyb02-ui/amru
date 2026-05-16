@@ -12,6 +12,10 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const CrmWorkspacePicker = lazy(() => import("./pages/crm/CrmWorkspacePicker"));
+const CrmLayout = lazy(() => import("./components/crm/CrmLayout"));
+const CrmDashboard = lazy(() => import("./pages/crm/CrmDashboard"));
+const CrmModulePlaceholder = lazy(() => import("./pages/crm/CrmModulePlaceholder"));
 
 const queryClient = new QueryClient();
 
@@ -32,6 +36,13 @@ const App = () => {
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/crm" element={<CrmWorkspacePicker />} />
+              <Route path="/crm/:slug" element={<CrmLayout />}>
+                <Route index element={<CrmDashboard />} />
+                <Route path="dashboard" element={<CrmDashboard />} />
+                <Route path="website-settings/*" element={<CrmModulePlaceholder />} />
+                <Route path="*" element={<CrmModulePlaceholder />} />
+              </Route>
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
