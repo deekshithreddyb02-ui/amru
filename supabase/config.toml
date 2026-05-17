@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.crm-sign-quotation]
 verify_jwt = false
+
+[functions.external-mirror]
+verify_jwt = false

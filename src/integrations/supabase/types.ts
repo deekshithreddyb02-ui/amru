@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _mirror_config: {
+        Row: {
+          enabled: boolean
+          endpoint: string
+          id: number
+        }
+        Insert: {
+          enabled?: boolean
+          endpoint: string
+          id?: number
+        }
+        Update: {
+          enabled?: boolean
+          endpoint?: string
+          id?: number
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_date: string
