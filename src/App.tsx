@@ -118,6 +118,7 @@ const App = () => {
               {/* Amruta Geo CRM */}
               <Route path="/crm/admin/workspaces" element={<CrmWorkspacesAdmin />} />
               <Route path="/crm/admin/analytics" element={<CrmCrossAnalytics />} />
+              <Route path="/crm/admin/db-analytics" element={<CrmDbAnalytics />} />
               <Route path="/crm" element={<CrmLayout />} />
               <Route path="/crm/:slug" element={<CrmLayout />}>
                 <Route path="dashboard" element={<CrmDashboard />} />
