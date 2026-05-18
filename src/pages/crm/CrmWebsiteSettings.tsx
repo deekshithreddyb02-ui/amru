@@ -18,7 +18,7 @@ import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
 import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
-import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
+
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
@@ -52,8 +52,8 @@ export const WEBSITE_SETTING_SECTIONS: Section[] = [
   { key: "certifications", label: "Certifications", description: "Edit certification cards & icons", icon: Award, render: () => <CertificationsEditor /> },
   { key: "offices", label: "Office Locations", description: "Map coordinates & office details", icon: MapPin, render: () => <OfficeEditor /> },
   { key: "contacts", label: "Contact Info", description: "Phone, email & WhatsApp", icon: Phone, render: () => <ContactEditor /> },
-  { key: "crm-config", label: "CRM Settings", description: "CRM routing, ping & status", icon: ExternalLink, render: () => (
-    <div className="space-y-6"><CrmSettingsEditor /><CrmPingDashboard /></div>
+  { key: "crm-config", label: "CRM Settings", description: "CRM routing & status", icon: ExternalLink, render: () => (
+    <div className="space-y-6"><CrmSettingsEditor /></div>
   )},
   { key: "login-security", label: "Login Security", description: "Login attempt limits & lockout", icon: Shield, render: () => <LoginSecurityEditor /> },
   { key: "legal", label: "Legal Notice", description: "Terms, privacy & disclaimers", icon: Scale, render: () => <LegalNoticeEditor /> },
