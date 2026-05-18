@@ -41,6 +41,7 @@ const CrmProjectReports = lazy(() => import("./pages/crm/CrmProjectReports"));
 const CrmMeetings = lazy(() => import("./pages/crm/CrmMeetings"));
 const CrmAuditLog = lazy(() => import("./pages/crm/CrmAuditLog"));
 const CrmCrossAnalytics = lazy(() => import("./pages/crm/CrmCrossAnalytics"));
+const CrmDbAnalytics = lazy(() => import("./pages/crm/CrmDbAnalytics"));
 const CrmPerformance = lazy(() => import("./pages/crm/CrmPerformance"));
 const CrmProducts = lazy(() => import("./pages/crm/CrmProducts"));
 const CrmInventory = lazy(() => import("./pages/crm/CrmInventory"));
@@ -117,6 +118,7 @@ const App = () => {
               {/* Amruta Geo CRM */}
               <Route path="/crm/admin/workspaces" element={<CrmWorkspacesAdmin />} />
               <Route path="/crm/admin/analytics" element={<CrmCrossAnalytics />} />
+              <Route path="/crm/admin/db-analytics" element={<CrmDbAnalytics />} />
               <Route path="/crm" element={<CrmLayout />} />
               <Route path="/crm/:slug" element={<CrmLayout />}>
                 <Route path="dashboard" element={<CrmDashboard />} />
