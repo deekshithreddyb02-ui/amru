@@ -6,7 +6,7 @@ import {
   Rss, Globe, Trash2, Phone, Coins, Contact2, Building2,
   Palette, LayoutList, BarChart3, Navigation, PanelBottom, Sparkles, Info,
   MessageSquareQuote, Image as ImageIcon, Award, MapPin, ExternalLink, Shield, Scale,
-  ShoppingBag, Settings, UserCog,
+  ShoppingBag, Settings, UserCog, Database,
 } from "lucide-react";
 import type { ModuleItem, ModuleGroup } from "./CrmModuleNav";
 
