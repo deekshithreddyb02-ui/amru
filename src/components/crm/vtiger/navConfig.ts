@@ -6,7 +6,7 @@ import {
   Rss, Globe, Trash2, Phone, Coins, Contact2, Building2,
   Palette, LayoutList, BarChart3, Navigation, PanelBottom, Sparkles, Info,
   MessageSquareQuote, Image as ImageIcon, Award, MapPin, ExternalLink, Shield, Scale,
-  ShoppingBag, Settings, UserCog, Database,
+  ShoppingBag, Settings, UserCog, Database, ShieldCheck,
 } from "lucide-react";
 import type { ModuleItem, ModuleGroup } from "./CrmModuleNav";
 
@@ -108,6 +108,7 @@ export const GROUPS: ModuleGroup[] = [
   {
     label: "Settings",
     items: [
+      { to: "admin-center",                    label: "Admin Center",       icon: ShieldCheck },
       { to: "website-settings/crm-config",     label: "CRM Settings",       icon: Settings },
       { to: "admin/workspaces",                label: "Manage Users",       icon: UserCog },
       { to: "admin/analytics",                 label: "Cross Analytics",    icon: BarChart3 },

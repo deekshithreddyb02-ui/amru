@@ -22,10 +22,8 @@ const AdminLogin = () => {
     if (!roleLoading) {
       if (mustChangePassword) {
         navigate("/change-password");
-      } else if (isSuperAdmin) {
-        navigate("/super-admin");
       } else if (isAdmin) {
-        navigate("/admin");
+        navigate("/crm");
       } else if (isEmployee) {
         navigate("/employee");
       }
@@ -110,12 +108,9 @@ const AdminLogin = () => {
         return;
       }
 
-      if (isSuperAdminRole) {
-        toast({ title: "Welcome Super Admin!", description: "Redirecting to dashboard..." });
-        navigate("/super-admin");
-      } else if (isAdminRole) {
-        toast({ title: "Welcome Admin!", description: "Redirecting to dashboard..." });
-        navigate("/admin");
+      if (isAdminRole) {
+        toast({ title: isSuperAdminRole ? "Welcome Super Admin!" : "Welcome Admin!", description: "Redirecting to CRM..." });
+        navigate("/crm");
       } else {
         toast({ title: "Welcome!", description: "Redirecting to employee dashboard..." });
         navigate("/employee");
