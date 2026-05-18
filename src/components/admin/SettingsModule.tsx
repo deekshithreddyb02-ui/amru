@@ -21,7 +21,7 @@ import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
 import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
-import CrmPingDashboard from "@/components/admin/CrmPingDashboard";
+
 import SectionOrderEditor from "@/components/admin/SectionOrderEditor";
 import CustomSectionEditor from "@/components/admin/CustomSectionEditor";
 import SiteStatsEditor from "@/components/admin/SiteStatsEditor";
@@ -211,10 +211,7 @@ const SettingsModule = () => {
           {activeKey === "footer" && <FooterEditor />}
           {activeKey === "legal" && <LegalNoticeEditor />}
           {activeKey === "crm" && (
-            <div className="space-y-6">
-              <CrmSettingsEditor />
-              <CrmPingDashboard />
-            </div>
+            <CrmSettingsEditor />
           )}
           {activeKey === "login-security" && <LoginSecurityEditor />}
         </div>
