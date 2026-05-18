@@ -6,11 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SplashScreen from "@/components/SplashScreen";
 import Index from "./pages/Index";
+import { Navigate } from "react-router-dom";
 
 // Lazy load non-critical routes to reduce initial bundle size
 const Auth = lazy(() => import("./pages/Auth"));
-const Admin = lazy(() => import("./pages/Admin"));
-const SuperAdmin = lazy(() => import("./pages/SuperAdmin"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const ChangePassword = lazy(() => import("./pages/ChangePassword"));
@@ -42,6 +41,7 @@ const CrmMeetings = lazy(() => import("./pages/crm/CrmMeetings"));
 const CrmAuditLog = lazy(() => import("./pages/crm/CrmAuditLog"));
 const CrmCrossAnalytics = lazy(() => import("./pages/crm/CrmCrossAnalytics"));
 const CrmDbAnalytics = lazy(() => import("./pages/crm/CrmDbAnalytics"));
+const CrmAdminCenter = lazy(() => import("./pages/crm/CrmAdminCenter"));
 const CrmPerformance = lazy(() => import("./pages/crm/CrmPerformance"));
 const CrmProducts = lazy(() => import("./pages/crm/CrmProducts"));
 const CrmInventory = lazy(() => import("./pages/crm/CrmInventory"));
@@ -104,8 +104,8 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<CrmLayout />} />
-              <Route path="/super-admin" element={<SuperAdmin />} />
+              <Route path="/admin" element={<Navigate to="/crm" replace />} />
+              <Route path="/super-admin" element={<Navigate to="/crm" replace />} />
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/employee" element={<EmployeeDashboard />} />
               <Route path="/change-password" element={<ChangePassword />} />
@@ -173,6 +173,7 @@ const App = () => {
                 <Route path="audit" element={<CrmAuditLog />} />
                 <Route path="website-settings" element={<CrmWebsiteSettings />} />
                 <Route path="website-settings/:section" element={<CrmWebsiteSettings />} />
+                <Route path="admin-center" element={<CrmAdminCenter />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
