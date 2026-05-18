@@ -111,6 +111,7 @@ export const GROUPS: ModuleGroup[] = [
       { to: "website-settings/crm-config",     label: "CRM Settings",       icon: Settings },
       { to: "admin/workspaces",                label: "Manage Users",       icon: UserCog },
       { to: "admin/analytics",                 label: "Cross Analytics",    icon: BarChart3 },
+      { to: "admin/db-analytics",              label: "Database Analytics", icon: Database },
       { to: "audit",                           label: "Audit Log",          icon: Shield },
       { to: "integrations",                    label: "Integrations",       icon: ExternalLink },
       { to: "workflows",                       label: "Workflows",          icon: Sparkles },
