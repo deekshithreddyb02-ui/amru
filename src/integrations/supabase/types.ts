@@ -5686,6 +5686,20 @@ export type Database = {
       }
       crm_run_scheduled_workflows: { Args: never; Returns: Json }
       get_email_by_username: { Args: { _username: string }; Returns: string }
+      get_public_table_counts: {
+        Args: never
+        Returns: {
+          row_count: number
+          table_name: string
+        }[]
+      }
+      get_public_table_counts_unrestricted: {
+        Args: never
+        Returns: {
+          row_count: number
+          table_name: string
+        }[]
+      }
       get_users_with_emails: {
         Args: never
         Returns: {
