@@ -46,6 +46,8 @@ const CrmAdminCenter = () => {
   const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
   const [revealedFields, setRevealedFields] = useState<Set<string>>(new Set());
   const [resetCooldowns, setResetCooldowns] = useState<Record<string, number>>({});
+  const [verifyFilter, setVerifyFilter] = useState<VerificationStatus>("pending");
+
 
   const maskEmail = (email: string) => {
     const [local, domain] = email.split("@");
