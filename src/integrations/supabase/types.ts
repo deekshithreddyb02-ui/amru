@@ -5337,6 +5337,10 @@ export type Database = {
           updated_at: string
           user_id: string
           username: string | null
+          verification_note: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           created_at?: string
@@ -5348,6 +5352,10 @@ export type Database = {
           updated_at?: string
           user_id: string
           username?: string | null
+          verification_note?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           created_at?: string
@@ -5359,6 +5367,10 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+          verification_note?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -5649,6 +5661,10 @@ export type Database = {
     }
     Functions: {
       admin_delete_user: { Args: { _target_user_id: string }; Returns: boolean }
+      admin_set_verification_status: {
+        Args: { _note?: string; _status: string; _target_user_id: string }
+        Returns: boolean
+      }
       admin_update_user_role: {
         Args: {
           _new_role: Database["public"]["Enums"]["app_role"]
