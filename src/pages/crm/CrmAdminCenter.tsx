@@ -411,72 +411,169 @@ const CrmAdminCenter = () => {
               </div>
             )}
 
-            {userMgmtTab === "verification" && (
-              <Card><CardContent className="pt-6 space-y-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Signup Verification</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Control how new signups are verified.</p>
-                </div>
-                {[
-                  { key: "email_only", label: "Email Verification Only", desc: "Standard email verification.", icon: MailCheck },
-                  { key: "admin_approval", label: "Admin Approval Only", desc: "Requires admin approval to access.", icon: UserCog },
-                  { key: "email_and_approval", label: "Email + Admin Approval", desc: "Email verification AND admin approval.", icon: ShieldCheck },
-                ].map(({ key, label, desc, icon: Icon }) => (
-                  <div key={key} onClick={() => setVerificationMode(key)}
-                    className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      verificationMode === key ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${verificationMode === key ? "bg-primary/10" : "bg-muted"}`}>
-                        <Icon className={`w-5 h-5 ${verificationMode === key ? "text-primary" : "text-muted-foreground"}`} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{label}</span>
-                          {verificationMode === key && <Badge className="text-xs">Active</Badge>}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{desc}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <Button onClick={saveVerificationMode} disabled={savingVerification} className="w-full gap-2">
-                  {savingVerification ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Save Verification Settings
-                </Button>
+            {userMgmtTab === "verification" && (() => {
+              const pending = users.filter((u) => u.verification_status === "pending");
+              const approved = users.filter((u) => u.verification_status === "approved");
+              const rejected = users.filter((u) => u.verification_status === "rejected");
+              const list =
+                verifyFilter === "pending" ? pending :
+                verifyFilter === "approved" ? approved : rejected;
 
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Pending Approval</h3>
-                  {(() => {
-                    const pending = users.filter((u) => !u.is_approved && u.role !== "admin");
-                    if (pending.length === 0) return <p className="text-center text-muted-foreground py-4">No pending approvals</p>;
-                    return (
+              const stats = [
+                { key: "pending" as const, label: "Pending", count: pending.length, icon: Loader2, tone: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
+                { key: "approved" as const, label: "Approved", count: approved.length, icon: CheckCircle2, tone: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
+                { key: "rejected" as const, label: "Rejected", count: rejected.length, icon: XCircle, tone: "bg-destructive/15 text-destructive border-destructive/30" },
+              ];
+
+              return (
+                <div className="space-y-6">
+                  {/* Workflow header + stat cards as filters */}
+                  <Card><CardContent className="pt-6 space-y-4">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <ShieldCheck className="w-5 h-5 text-primary" />
+                          <h3 className="text-lg font-semibold">User Verification Workflow</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Review new signups, approve trusted users, or reject access. Rejected users keep their record but cannot sign in.
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
+                        <RefreshCw className="w-4 h-4" /> Refresh
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {stats.map(({ key, label, count, icon: Icon, tone }) => (
+                        <button
+                          key={key}
+                          onClick={() => setVerifyFilter(key)}
+                          className={`text-left p-4 rounded-xl border-2 transition-all ${
+                            verifyFilter === key ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className={tone}>
+                              <Icon className="w-3 h-3 mr-1" /> {label}
+                            </Badge>
+                            <span className="text-2xl font-bold">{count}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {list.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8 text-sm">
+                        No {verifyFilter} users.
+                      </p>
+                    ) : (
                       <Table>
                         <TableHeader><TableRow>
-                          <TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Actions</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Signed up</TableHead>
+                          {verifyFilter !== "pending" && <TableHead>Reviewed</TableHead>}
+                          {verifyFilter === "rejected" && <TableHead>Reason</TableHead>}
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow></TableHeader>
                         <TableBody>
-                          {pending.map((user) => (
+                          {list.map((user) => (
                             <TableRow key={user.id}>
-                              <TableCell>{user.full_name || "-"}</TableCell>
-                              <TableCell>{maskEmail(user.email)}</TableCell>
+                              <TableCell className="font-medium">{user.full_name || "—"}</TableCell>
+                              <TableCell className="text-sm">{maskEmail(user.email)}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
+                              </TableCell>
+                              {verifyFilter !== "pending" && (
+                                <TableCell className="text-sm text-muted-foreground">
+                                  {user.verified_at ? new Date(user.verified_at).toLocaleDateString() : "—"}
+                                </TableCell>
+                              )}
+                              {verifyFilter === "rejected" && (
+                                <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate" title={user.verification_note || ""}>
+                                  {user.verification_note || "—"}
+                                </TableCell>
+                              )}
                               <TableCell>
-                                <div className="flex gap-2">
-                                  <Button size="sm" onClick={() => approveUser(user.id)} className="gap-1"><CheckCircle2 className="w-3 h-3" /> Approve</Button>
-                                  <Button size="sm" variant="destructive" onClick={() => rejectUser(user.id)} className="gap-1"><XCircle className="w-3 h-3" /> Reject</Button>
+                                <div className="flex gap-2 justify-end flex-wrap">
+                                  {verifyFilter === "pending" && (
+                                    <>
+                                      <Button size="sm" onClick={() => approveUser(user.id)} className="gap-1">
+                                        <CheckCircle2 className="w-3 h-3" /> Approve
+                                      </Button>
+                                      <Button size="sm" variant="destructive" onClick={() => rejectUser(user.id)} className="gap-1">
+                                        <XCircle className="w-3 h-3" /> Reject
+                                      </Button>
+                                    </>
+                                  )}
+                                  {verifyFilter === "approved" && user.role !== "admin" && (
+                                    <Button size="sm" variant="outline" onClick={() => rejectUser(user.id)} className="gap-1">
+                                      <XCircle className="w-3 h-3" /> Revoke
+                                    </Button>
+                                  )}
+                                  {verifyFilter === "rejected" && (
+                                    <>
+                                      <Button size="sm" onClick={() => approveUser(user.id)} className="gap-1">
+                                        <CheckCircle2 className="w-3 h-3" /> Approve
+                                      </Button>
+                                      <Button size="sm" variant="outline" onClick={() => moveToPending(user.id)} className="gap-1">
+                                        Move to pending
+                                      </Button>
+                                      <Button size="sm" variant="destructive" onClick={() => deleteUser(user.id)} className="gap-1">
+                                        <Trash2 className="w-3 h-3" /> Delete
+                                      </Button>
+                                    </>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
-                    );
-                  })()}
+                    )}
+                  </CardContent></Card>
+
+                  {/* Signup verification policy */}
+                  <Card><CardContent className="pt-6 space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Settings className="w-5 h-5 text-primary" />
+                        <h3 className="text-lg font-semibold">Signup Verification Policy</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Control how new signups become approved.</p>
+                    </div>
+                    {[
+                      { key: "email_only", label: "Email Verification Only", desc: "Auto-approves after the user confirms their email.", icon: MailCheck },
+                      { key: "admin_approval", label: "Admin Approval Only", desc: "Every signup waits in Pending until an admin approves.", icon: UserCog },
+                      { key: "email_and_approval", label: "Email + Admin Approval", desc: "Requires both email confirmation and admin approval.", icon: ShieldCheck },
+                    ].map(({ key, label, desc, icon: Icon }) => (
+                      <div key={key} onClick={() => setVerificationMode(key)}
+                        className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                          verificationMode === key ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}>
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-lg ${verificationMode === key ? "bg-primary/10" : "bg-muted"}`}>
+                            <Icon className={`w-5 h-5 ${verificationMode === key ? "text-primary" : "text-muted-foreground"}`} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{label}</span>
+                              {verificationMode === key && <Badge className="text-xs">Active</Badge>}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{desc}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <Button onClick={saveVerificationMode} disabled={savingVerification} className="w-full gap-2">
+                      {savingVerification ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                      Save Verification Settings
+                    </Button>
+                  </CardContent></Card>
                 </div>
-              </CardContent></Card>
-            )}
+              );
+            })()}
+
 
             {userMgmtTab === "recycle" && (
               <Card><CardContent className="pt-6">
