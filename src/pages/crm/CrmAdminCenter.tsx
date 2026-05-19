@@ -172,29 +172,42 @@ const CrmAdminCenter = () => {
     } catch (error: any) { toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
     } finally { setSavingVerification(false); }
   };
-  const approveUser = async (userId: string) => {
+  const setVerification = async (userId: string, status: VerificationStatus, note?: string) => {
     try {
-      const { error } = await (supabase as any).from("profiles").update({ is_approved: true }).eq("user_id", userId);
+      const { error } = await (supabase as any).rpc("admin_set_verification_status", {
+        _target_user_id: userId,
+        _status: status,
+        _note: note ?? null,
+      });
       if (error) throw error;
-      setUsers(users.map((u) => (u.id === userId ? { ...u, is_approved: true } : u)));
-      toast({ title: "Success", description: "User approved" });
-    } catch (error: any) { toast({ title: "Error", description: sanitizeError(error), variant: "destructive" }); }
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId
+            ? {
+                ...u,
+                verification_status: status,
+                verification_note: note ?? null,
+                verified_at: new Date().toISOString(),
+                is_approved: status === "approved",
+              }
+            : u,
+        ),
+      );
+      toast({
+        title: status === "approved" ? "User approved" : status === "rejected" ? "User rejected" : "Moved to pending",
+        description: status === "rejected" ? "The user can no longer sign in." : undefined,
+      });
+    } catch (error: any) {
+      toast({ title: "Error", description: sanitizeError(error), variant: "destructive" });
+    }
   };
+
+  const approveUser = (userId: string) => setVerification(userId, "approved");
   const rejectUser = async (userId: string) => {
-    try {
-      const user = users.find((u) => u.id === userId);
-      if (user) {
-        await (supabase as any).from("deleted_users").insert({
-          original_user_id: userId, email: user.email, full_name: user.full_name, phone: user.phone, role: user.role,
-        });
-      }
-      const { error } = await supabase.rpc("admin_delete_user", { _target_user_id: userId });
-      if (error) throw error;
-      setUsers(users.filter((u) => u.id !== userId));
-      toast({ title: "Success", description: "User rejected and removed" });
-      fetchData();
-    } catch (error: any) { toast({ title: "Error", description: sanitizeError(error), variant: "destructive" }); }
+    const note = window.prompt("Reason for rejection (optional, shown to admins only):") || undefined;
+    return setVerification(userId, "rejected", note);
   };
+  const moveToPending = (userId: string) => setVerification(userId, "pending");
   const resetUserPassword = async (userId: string) => {
     const now = Date.now();
     if (resetCooldowns[userId] && now - resetCooldowns[userId] < 60000) {
