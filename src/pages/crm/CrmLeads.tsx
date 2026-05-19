@@ -150,6 +150,10 @@ const CrmLeads = () => {
         website: "",
         primary_email: l.email || "",
         assigned_to: "",
+        service: l.service_needed || "",
+        city: [l.city, l.state].filter(Boolean).join(", "),
+        stage: l.stage || "",
+        created: new Date(l.created_at).toLocaleDateString("en-IN"),
       };
       return Object.entries(effectiveFilters).every(([k, v]) =>
         !v ? true : (fields[k] || "").toLowerCase().includes(v.toLowerCase())
@@ -497,18 +501,37 @@ const CrmLeads = () => {
                   </tr>
                   <tr className="border-b bg-white">
                     <th className="px-2 py-1.5 border-r">
-                      <Button size="sm" className="h-7 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] w-full">
-                        <Search className="h-3 w-3" />
-                        Search
+                      <Button
+                        size="sm"
+                        onClick={() => { setFilters({}); setPage(1); }}
+                        title="Clear all column filters"
+                        className="h-7 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] w-full"
+                      >
+                        <X className="h-3 w-3" />
+                        Clear
                       </Button>
                     </th>
                     {COLS.map((c) => (
                       <th key={c.key} className="px-2 py-1.5 border-r">
-                        <Input
-                          value={filters[c.key] || ""}
-                          onChange={(e) => { setFilters({ ...filters, [c.key]: e.target.value }); setPage(1); }}
-                          className="h-7 text-[12px]"
-                        />
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground pointer-events-none" />
+                          <Input
+                            value={filters[c.key] || ""}
+                            onChange={(e) => { setFilters({ ...filters, [c.key]: e.target.value }); setPage(1); }}
+                            placeholder={`Search ${c.label.toLowerCase()}`}
+                            className="h-7 pl-6 pr-6 text-[12px]"
+                          />
+                          {filters[c.key] && (
+                            <button
+                              type="button"
+                              onClick={() => { const n = { ...filters }; delete n[c.key]; setFilters(n); setPage(1); }}
+                              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                              title="Clear"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
                       </th>
                     ))}
                   </tr>
