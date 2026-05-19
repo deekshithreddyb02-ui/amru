@@ -93,7 +93,14 @@ const CrmAdminCenter = () => {
       const profileMap = new Map();
       if (!profilesRes.error && profilesRes.data) {
         (profilesRes.data as any[]).forEach((p) =>
-          profileMap.set(p.user_id, { full_name: p.full_name || "", phone: p.phone || "", is_approved: p.is_approved !== false })
+          profileMap.set(p.user_id, {
+            full_name: p.full_name || "",
+            phone: p.phone || "",
+            is_approved: p.is_approved !== false,
+            verification_status: (p.verification_status as VerificationStatus) || (p.is_approved === false ? "pending" : "approved"),
+            verification_note: p.verification_note || null,
+            verified_at: p.verified_at || null,
+          })
         );
       }
 
@@ -105,16 +112,20 @@ const CrmAdminCenter = () => {
 
       const usersWithRoles: User[] = Array.from(userRoleMap.entries()).map(([userId, role]) => {
         const firstRole = (rolesRes.data || []).find((r) => r.user_id === userId);
+        const p = profileMap.get(userId);
         return {
           id: userId,
           email: emailMap.get(userId)?.email || userId,
           created_at: emailMap.get(userId)?.created_at || firstRole?.created_at || "",
           role,
-          full_name: profileMap.get(userId)?.full_name || "",
-          phone: profileMap.get(userId)?.phone || "",
+          full_name: p?.full_name || "",
+          phone: p?.phone || "",
           last_sign_in_at: emailMap.get(userId)?.last_sign_in_at || null,
           is_banned: emailMap.get(userId)?.is_banned || false,
-          is_approved: profileMap.get(userId)?.is_approved !== false,
+          is_approved: p?.is_approved !== false,
+          verification_status: p?.verification_status || "approved",
+          verification_note: p?.verification_note || null,
+          verified_at: p?.verified_at || null,
         };
       });
       setUsers(usersWithRoles);
