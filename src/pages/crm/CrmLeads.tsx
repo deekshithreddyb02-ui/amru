@@ -150,6 +150,10 @@ const CrmLeads = () => {
         website: "",
         primary_email: l.email || "",
         assigned_to: "",
+        service: l.service_needed || "",
+        city: [l.city, l.state].filter(Boolean).join(", "),
+        stage: l.stage || "",
+        created: new Date(l.created_at).toLocaleDateString("en-IN"),
       };
       return Object.entries(effectiveFilters).every(([k, v]) =>
         !v ? true : (fields[k] || "").toLowerCase().includes(v.toLowerCase())
