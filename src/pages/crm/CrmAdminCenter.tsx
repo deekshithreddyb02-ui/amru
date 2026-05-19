@@ -298,13 +298,14 @@ const CrmAdminCenter = () => {
 
             <div className="flex flex-wrap gap-1 p-1.5 bg-primary/5 border border-primary/10 rounded-xl">
               {[
-                { key: "users", label: "Users", icon: Users },
-                { key: "verification", label: "Verification", icon: CheckCircle2 },
-                { key: "recycle", label: "Recycle Bin", icon: Trash },
-              ].map(({ key, label, icon: Icon }) => (
+                { key: "users", label: "Users", icon: Users, badge: 0 },
+                { key: "verification", label: "Verification", icon: CheckCircle2, badge: users.filter((u) => u.verification_status === "pending").length },
+                { key: "recycle", label: "Recycle Bin", icon: Trash, badge: 0 },
+              ].map(({ key, label, icon: Icon, badge }) => (
                 <Button key={key} variant={userMgmtTab === key ? "default" : "ghost"} size="sm"
                   onClick={() => setUserMgmtTab(key)} className="flex-1 gap-2 py-2.5">
                   <Icon className="w-4 h-4" /> {label}
+                  {badge > 0 && <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-[10px] h-4">{badge}</Badge>}
                 </Button>
               ))}
             </div>
