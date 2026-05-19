@@ -21,10 +21,15 @@ import LeadsManager from "@/components/admin/LeadsManager";
 import SettingsModule from "@/components/admin/SettingsModule";
 import EmployeeManager from "@/components/admin/EmployeeManager";
 
+type VerificationStatus = "pending" | "approved" | "rejected";
+
 interface User {
   id: string; email: string; created_at: string; role: string;
   full_name: string; phone: string; last_sign_in_at: string | null;
   is_banned: boolean; is_approved: boolean;
+  verification_status: VerificationStatus;
+  verification_note: string | null;
+  verified_at: string | null;
 }
 
 const CrmAdminCenter = () => {
