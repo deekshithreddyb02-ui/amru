@@ -378,7 +378,8 @@ const CrmAdminCenter = () => {
                                 <div className="flex flex-col gap-1">
                                   <Badge variant={user.role === "admin" ? "default" : "secondary"}>{user.role}</Badge>
                                   {user.is_banned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
-                                  {!user.is_approved && <Badge variant="outline" className="text-xs">Pending</Badge>}
+                                  {user.verification_status === "pending" && <Badge variant="outline" className="text-xs bg-amber-500/15 text-amber-700 border-amber-500/30">Pending</Badge>}
+                                  {user.verification_status === "rejected" && <Badge variant="outline" className="text-xs bg-destructive/15 text-destructive border-destructive/30">Rejected</Badge>}
                                 </div>
                               </TableCell>
                               <TableCell>
