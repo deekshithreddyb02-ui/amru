@@ -1,10 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-};
+import { corsHeaders, requireAdmin } from "../_shared/auth.ts";
 
 const PRIMARY_URL = Deno.env.get("SUPABASE_URL")!;
 const PRIMARY_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -26,6 +21,10 @@ async function countExternal(ext: any, table: string): Promise<number | null> {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // AUTHN/AUTHZ: only admins (or internal service callers) may use this endpoint.
+  const auth = await requireAdmin(req);
+  if (!auth.ok) return auth.response;
+
   try {
     const primary = createClient(PRIMARY_URL, PRIMARY_KEY, { auth: { persistSession: false } });
     const ext = createClient(EXT_URL, EXT_KEY, { auth: { persistSession: false } });
@@ -33,7 +32,6 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const op = body.op || new URL(req.url).searchParams.get("op") || "stats";
 
-    // Get primary table counts via SECURITY DEFINER RPC
     const { data: counts, error: countsErr } = await primary.rpc("get_public_table_counts_unrestricted");
     if (countsErr) throw countsErr;
 
@@ -57,7 +55,6 @@ Deno.serve(async (req) => {
       for (const c of tables) {
         const table = c.table_name;
         try {
-          // fetch all rows from primary in batches
           const batchSize = 500;
           let from = 0;
           let synced = 0;
@@ -68,7 +65,6 @@ Deno.serve(async (req) => {
               .range(from, from + batchSize - 1);
             if (error) throw error;
             if (!data || data.length === 0) break;
-            // upsert to external; tables without `id` column will fail — skip those
             const { error: upErr } = await ext.from(table).upsert(data, { onConflict: "id" });
             if (upErr) {
               results.push({ table, ok: false, error: upErr.message, synced });

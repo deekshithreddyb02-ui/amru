@@ -19,16 +19,19 @@ export type Database = {
           enabled: boolean
           endpoint: string
           id: number
+          secret: string | null
         }
         Insert: {
           enabled?: boolean
           endpoint: string
           id?: number
+          secret?: string | null
         }
         Update: {
           enabled?: boolean
           endpoint?: string
           id?: number
+          secret?: string | null
         }
         Relationships: []
       }
