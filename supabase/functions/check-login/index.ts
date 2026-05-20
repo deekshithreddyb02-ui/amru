@@ -97,8 +97,8 @@ Deno.serve(async (req) => {
         allowed: !isBlocked,
         attempts_remaining: Math.max(0, maxAttempts - attemptCount),
         max_attempts: maxAttempts,
-        // Return email server-side so client can use it for signIn without calling RPC
-        email: email,
+        // SECURITY: Never expose resolved email — prevents username→email enumeration.
+        // Callers should use the `admin-signin` function which handles sign-in server-side.
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
