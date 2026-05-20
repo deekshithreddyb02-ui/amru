@@ -68,8 +68,13 @@ const ruleScore = (l: Lead): { score: number; reasons: string[] } => {
   return { score: Math.min(100, Math.round(s)), reasons };
 };
 
+import { requireAdmin } from "../_shared/auth.ts";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const _auth = await requireAdmin(req);
+  if (!_auth.ok) return _auth.response;
 
   try {
     const supabase = createClient(

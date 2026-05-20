@@ -1,13 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { corsHeaders, adminClient } from "../_shared/auth.ts";
 
 const EXT_URL = Deno.env.get("EXTERNAL_SUPABASE_URL")!;
 const EXT_KEY = Deno.env.get("EXTERNAL_SUPABASE_SERVICE_ROLE_KEY")!;
+
+// Allowlist of tables we are willing to mirror to the external project.
+// Anything not in this list is silently ignored.
+const TABLE_ALLOWLIST = new Set([
+  "crm_leads", "crm_contacts", "crm_organizations", "crm_deals", "crm_activities",
+  "crm_quotations", "crm_invoices", "crm_payments", "crm_support_tickets",
+  "crm_feedback_surveys", "crm_tasks", "crm_documents", "crm_field_visits",
+  "crm_expenses", "crm_products", "crm_hydrogeo_enquiries",
+  "contact_messages", "profiles", "site_settings",
+]);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -19,10 +24,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Verify caller has the mirror webhook secret stored in _mirror_config.secret.
+    const provided = req.headers.get("x-mirror-secret") ?? "";
+    if (!provided) {
+      return new Response(JSON.stringify({ error: "Missing mirror secret" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const sb = adminClient();
+    const { data: cfg } = await sb.from("_mirror_config").select("secret").eq("id", 1).maybeSingle();
+    if (!cfg?.secret || cfg.secret !== provided) {
+      return new Response(JSON.stringify({ error: "Invalid mirror secret" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { table, op, record, old_record } = await req.json();
     if (!table || !op) {
       return new Response(JSON.stringify({ error: "table and op required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!TABLE_ALLOWLIST.has(table)) {
+      return new Response(JSON.stringify({ ok: true, skipped: "table not allowed" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -30,7 +55,6 @@ Deno.serve(async (req) => {
 
     let result;
     if (op === "INSERT" || op === "UPDATE") {
-      // upsert by id (covers both)
       result = await ext.from(table).upsert(record, { onConflict: "id" });
     } else if (op === "DELETE") {
       const id = (old_record ?? record)?.id;

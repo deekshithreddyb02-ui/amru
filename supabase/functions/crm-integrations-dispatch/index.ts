@@ -1,9 +1,6 @@
-// Dispatch CRM events to Slack / Gmail via Lovable connector gateway.
-// No-ops gracefully when corresponding connector secret is missing.
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Dispatch CRM events to Slack / Gmail / Calendar via Lovable connector gateway.
+// Requires an authenticated CRM user (workspace member).
+import { corsHeaders, requireAuthenticated, adminClient } from "../_shared/auth.ts";
 
 const GW = "https://connector-gateway.lovable.dev";
 
@@ -67,7 +64,26 @@ async function createCalendarEvent(summary: string, description: string, start: 
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Require an authenticated CRM user (or internal service caller).
+  const auth = await requireAuthenticated(req);
+  if (!auth.ok) return auth.response;
+
+  // Caller must be a member of at least one CRM workspace (or service caller).
+  if (!auth.isService) {
+    const sb = adminClient();
+    const { count } = await sb
+      .from("crm_workspace_members")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", auth.userId);
+    if (!count) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   try {
     const body = await req.json();
     const { action, payload } = body ?? {};
@@ -88,11 +104,11 @@ Deno.serve(async (req) => {
       };
     }
     return new Response(JSON.stringify(result), {
-      headers: { ...cors, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     return new Response(JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }), {
-      status: 500, headers: { ...cors, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

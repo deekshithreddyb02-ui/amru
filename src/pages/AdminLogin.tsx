@@ -32,7 +32,7 @@ const AdminLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username.trim() || !password) {
       toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
       return;
@@ -40,41 +40,38 @@ const AdminLogin = () => {
 
     setLoading(true);
     try {
-      // Check login allowed AND resolve username→email server-side
-      const checkRes = await supabase.functions.invoke("check-login", {
-        body: { username: username.trim().toLowerCase() },
+      // Server-side sign-in: username never leaves the server resolved to an email.
+      const res = await supabase.functions.invoke("admin-signin", {
+        body: { username: username.trim().toLowerCase(), password },
       });
 
-      if (checkRes.error) throw checkRes.error;
+      if (res.error) throw res.error;
+      const data = res.data as any;
 
-      const email = checkRes.data?.email;
-
-      if (!email || !checkRes.data?.allowed) {
+      if (!data?.ok || !data?.session) {
         toast({
-          title: !email ? "Error" : "Account Temporarily Blocked",
-          description: !email
-            ? "Invalid username or password"
-            : `Too many failed attempts. Please try again later. (${checkRes.data?.max_attempts} max attempts per hour)`,
+          title: data?.blocked ? "Account Temporarily Blocked" : "Error",
+          description: data?.error || "Invalid username or password",
           variant: "destructive",
         });
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        await supabase.functions.invoke("record-login-attempt", {
-          body: { email, success: false },
-        });
-        throw error;
-      }
+      // Apply the returned session locally.
+      const { error: setErr } = await supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+      if (setErr) throw setErr;
+
+      const userId = data.user_id as string;
 
       // Check user role
       const { data: rolesData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', data.user.id);
+        .eq('user_id', userId);
 
       const roles = (rolesData || []).map(r => r.role);
       const isSuperAdminRole = roles.includes('super_admin');
@@ -83,23 +80,19 @@ const AdminLogin = () => {
 
       if (roleError || (!isAdminRole && !isEmployeeRole)) {
         await supabase.auth.signOut();
-        toast({ 
-          title: "Access Denied", 
-          description: "You don't have admin or employee privileges", 
-          variant: "destructive" 
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin or employee privileges",
+          variant: "destructive"
         });
         return;
       }
-
-      await supabase.functions.invoke("record-login-attempt", {
-        body: { email, success: true },
-      });
 
       // Check if must change password
       const { data: profile } = await supabase
         .from('profiles')
         .select('must_change_password')
-        .eq('user_id', data.user.id)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (profile?.must_change_password) {

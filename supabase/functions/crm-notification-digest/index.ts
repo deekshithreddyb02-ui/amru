@@ -2,10 +2,13 @@
 // Respects user preferences (digest_frequency, quiet_hours, in_app_enabled).
 // Designed to be called on a schedule (hourly) or manually.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+import { corsHeaders, requireAdmin } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const _auth = await requireAdmin(req);
+  if (!_auth.ok) return _auth.response;
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,

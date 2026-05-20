@@ -24,10 +24,15 @@ interface CrmConfig {
   enabled: boolean;
 }
 
+import { requireAdmin } from "../_shared/auth.ts";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const _auth = await requireAdmin(req);
+  if (!_auth.ok) return _auth.response;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
