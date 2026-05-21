@@ -597,7 +597,7 @@ const CrmLeads = () => {
                           <td className="px-3 py-2 border-r">
                             <button
                               className="text-primary hover:underline"
-                              onClick={() => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+                              onClick={() => setOpenLeadId(l.id)}
                             >
                               {first || "—"}
                             </button>
@@ -605,7 +605,7 @@ const CrmLeads = () => {
                           <td className="px-3 py-2 border-r">
                             <button
                               className="text-primary hover:underline"
-                              onClick={() => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+                              onClick={() => setOpenLeadId(l.id)}
                             >
                               {last || "—"}
                             </button>
