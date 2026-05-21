@@ -226,6 +226,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
         </div>
       )}
     </aside>
+    )}
     </div>
   );
 }
