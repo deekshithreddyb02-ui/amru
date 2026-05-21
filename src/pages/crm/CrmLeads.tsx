@@ -631,6 +631,21 @@ const CrmLeads = () => {
             )}
           </div>
         </main>
+
+        {openLeadId && (() => {
+          const idx = filtered.findIndex((l) => l.id === openLeadId);
+          return (
+            <LeadSidePanel
+              leadId={openLeadId}
+              workspaceSlug={workspace.slug}
+              onClose={() => setOpenLeadId(null)}
+              hasPrev={idx > 0}
+              hasNext={idx >= 0 && idx < filtered.length - 1}
+              onPrev={() => idx > 0 && setOpenLeadId(filtered[idx - 1].id)}
+              onNext={() => idx >= 0 && idx < filtered.length - 1 && setOpenLeadId(filtered[idx + 1].id)}
+            />
+          );
+        })()}
       </div>
 
       <ConvertLeadDialog
