@@ -38,6 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { exportCsv } from "@/lib/csv";
+import LeadSidePanel from "@/components/crm/LeadSidePanel";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -97,6 +98,7 @@ const CrmLeads = () => {
   const [adding, setAdding] = useState(false);
   const [newLead, setNewLead] = useState({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
   const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
+  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -560,7 +562,11 @@ const CrmLeads = () => {
                                 onChange={() => toggleOne(l.id)}
                                 className="h-3.5 w-3.5"
                               />
-                              <button className="text-muted-foreground hover:text-primary p-0.5">
+                              <button
+                                className="text-muted-foreground hover:text-primary p-0.5"
+                                onClick={() => setOpenLeadId(l.id)}
+                                title="Quick view"
+                              >
                                 <Eye className="h-3.5 w-3.5" />
                               </button>
                               <button className="text-muted-foreground hover:text-yellow-500 p-0.5">
@@ -591,7 +597,7 @@ const CrmLeads = () => {
                           <td className="px-3 py-2 border-r">
                             <button
                               className="text-primary hover:underline"
-                              onClick={() => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+                              onClick={() => setOpenLeadId(l.id)}
                             >
                               {first || "—"}
                             </button>
@@ -599,7 +605,7 @@ const CrmLeads = () => {
                           <td className="px-3 py-2 border-r">
                             <button
                               className="text-primary hover:underline"
-                              onClick={() => navigate(`/crm/${workspace.slug}/leads/${l.id}`)}
+                              onClick={() => setOpenLeadId(l.id)}
                             >
                               {last || "—"}
                             </button>
@@ -625,6 +631,21 @@ const CrmLeads = () => {
             )}
           </div>
         </main>
+
+        {openLeadId && (() => {
+          const idx = filtered.findIndex((l) => l.id === openLeadId);
+          return (
+            <LeadSidePanel
+              leadId={openLeadId}
+              workspaceSlug={workspace.slug}
+              onClose={() => setOpenLeadId(null)}
+              hasPrev={idx > 0}
+              hasNext={idx >= 0 && idx < filtered.length - 1}
+              onPrev={() => idx > 0 && setOpenLeadId(filtered[idx - 1].id)}
+              onNext={() => idx >= 0 && idx < filtered.length - 1 && setOpenLeadId(filtered[idx + 1].id)}
+            />
+          );
+        })()}
       </div>
 
       <ConvertLeadDialog
