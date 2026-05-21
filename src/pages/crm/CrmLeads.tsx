@@ -98,6 +98,7 @@ const CrmLeads = () => {
   const [adding, setAdding] = useState(false);
   const [newLead, setNewLead] = useState({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
   const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
+  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
