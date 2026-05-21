@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useOutletContext, useParams } from "react-router-dom";
+import { Link, useOutletContext, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Phone, ListChecks, FileText, MessageSquare, Activity, Loader2 } from "lucide-react";
+import { Mail, Phone, ListChecks, FileText, MessageSquare, Activity, Loader2, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CrmRecordView, { type SummaryField, type RelatedTab } from "@/components/crm/vtiger/CrmRecordView";
 import ConvertLeadDialog from "@/components/crm/ConvertLeadDialog";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
@@ -30,6 +31,33 @@ export default function CrmLeadDetail() {
   const [enquiry, setEnquiry] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [prevLeads, setPrevLeads] = useState<any[]>([]);
+  const [prevLoading, setPrevLoading] = useState(false);
+
+  const openDetails = async () => {
+    setDetailsOpen(true);
+    setPrevLoading(true);
+    const filters: string[] = [];
+    if (lead?.phone) filters.push(`phone.eq.${lead.phone}`);
+    if (lead?.whatsapp) filters.push(`whatsapp.eq.${lead.whatsapp}`);
+    if (lead?.email) filters.push(`email.eq.${lead.email}`);
+    if (filters.length === 0) {
+      setPrevLeads([]);
+      setPrevLoading(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("crm_leads")
+      .select("id,full_name,email,phone,whatsapp,service_needed,stage,status,city,state,created_at")
+      .eq("workspace_id", workspace.id)
+      .neq("id", lead.id)
+      .or(filters.join(","))
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setPrevLeads(data || []);
+    setPrevLoading(false);
+  };
 
   const load = async () => {
     if (!id) return;
@@ -243,6 +271,9 @@ export default function CrmLeadDetail() {
         summary={summary}
         actions={
           <>
+            <Button size="sm" variant="default" className="h-8 gap-1.5 bg-green-600 hover:bg-green-700 text-white" onClick={openDetails}>
+              <Eye className="h-3.5 w-3.5" /> View Details
+            </Button>
             {lead.email && (
               <Button asChild size="sm" variant="outline" className="h-8 gap-1.5">
                 <a href={`mailto:${lead.email}`}><Mail className="h-3.5 w-3.5" />Email</a>
@@ -272,6 +303,89 @@ export default function CrmLeadDetail() {
         onOpenChange={setConvertOpen}
         onDone={() => { setConvertOpen(false); load(); }}
       />
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Customer Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Contact</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                {[
+                  ["Full Name", lead.full_name],
+                  ["Email", lead.email],
+                  ["Phone", lead.phone],
+                  ["WhatsApp", lead.whatsapp],
+                  ["Company", lead.company],
+                  ["GSTIN", lead.gstin],
+                  ["Service Needed", lead.service_needed],
+                  ["Lead Source", lead.lead_source],
+                  ["Street", lead.street],
+                  ["City", lead.city],
+                  ["State", lead.state],
+                  ["Country", lead.country],
+                  ["Stage", lead.stage],
+                  ["Status", lead.status],
+                ].map(([k, v]) => (
+                  <div key={k as string} className="grid grid-cols-3 gap-2 border-b pb-1.5">
+                    <div className="text-muted-foreground text-xs">{k as string}</div>
+                    <div className="col-span-2 text-sm break-words">{(v as any) || "—"}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                Previous Leads from this Customer
+              </h3>
+              {prevLoading ? (
+                <div className="py-6 flex justify-center"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>
+              ) : prevLeads.length === 0 ? (
+                <div className="text-sm text-muted-foreground py-4 text-center border rounded-md">
+                  No other leads found for this customer.
+                </div>
+              ) : (
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 text-xs">
+                      <tr className="text-left">
+                        <th className="px-3 py-2 font-medium">Date</th>
+                        <th className="px-3 py-2 font-medium">Service</th>
+                        <th className="px-3 py-2 font-medium">Location</th>
+                        <th className="px-3 py-2 font-medium">Stage</th>
+                        <th className="px-3 py-2 font-medium"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {prevLeads.map((p) => (
+                        <tr key={p.id} className="border-t hover:bg-muted/30">
+                          <td className="px-3 py-2 text-xs">{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
+                          <td className="px-3 py-2 text-xs">{p.service_needed || "—"}</td>
+                          <td className="px-3 py-2 text-xs">{[p.city, p.state].filter(Boolean).join(", ") || "—"}</td>
+                          <td className="px-3 py-2 text-xs">
+                            <Badge variant="secondary" className="capitalize">{p.stage || "—"}</Badge>
+                          </td>
+                          <td className="px-3 py-2 text-right">
+                            <Link
+                              to={`/crm/${workspace.slug}/leads/${p.id}`}
+                              className="text-primary hover:underline text-xs"
+                              onClick={() => setDetailsOpen(false)}
+                            >
+                              Open
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
