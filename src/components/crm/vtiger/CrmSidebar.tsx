@@ -14,8 +14,9 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   const loc = useLocation();
   const isActiveModule = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
 
-  // Default: collapsed (icon rail). Expanding overlays on top of module content.
+  // Default: hidden. Hamburger toggles an overlay panel.
   const [collapsed, setCollapsed] = useState<boolean>(true);
+  const hidden = collapsed;
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
