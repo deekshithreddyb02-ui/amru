@@ -31,6 +31,33 @@ export default function CrmLeadDetail() {
   const [enquiry, setEnquiry] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [prevLeads, setPrevLeads] = useState<any[]>([]);
+  const [prevLoading, setPrevLoading] = useState(false);
+
+  const openDetails = async () => {
+    setDetailsOpen(true);
+    setPrevLoading(true);
+    const filters: string[] = [];
+    if (lead?.phone) filters.push(`phone.eq.${lead.phone}`);
+    if (lead?.whatsapp) filters.push(`whatsapp.eq.${lead.whatsapp}`);
+    if (lead?.email) filters.push(`email.eq.${lead.email}`);
+    if (filters.length === 0) {
+      setPrevLeads([]);
+      setPrevLoading(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("crm_leads")
+      .select("id,full_name,email,phone,whatsapp,service_needed,stage,status,city,state,created_at")
+      .eq("workspace_id", workspace.id)
+      .neq("id", lead.id)
+      .or(filters.join(","))
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setPrevLeads(data || []);
+    setPrevLoading(false);
+  };
 
   const load = async () => {
     if (!id) return;
