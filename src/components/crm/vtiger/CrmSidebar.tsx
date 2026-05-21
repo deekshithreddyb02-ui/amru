@@ -14,14 +14,17 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   const loc = useLocation();
   const isActiveModule = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
 
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
-  });
+  // Default: collapsed (icon rail). Expanding overlays on top of module content.
+  const [collapsed, setCollapsed] = useState<boolean>(true);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
+
+  // Auto-collapse whenever the user navigates to another module
+  useEffect(() => {
+    setCollapsed(true);
+  }, [loc.pathname]);
 
   // Listen for external toggle (from header hamburger)
   useEffect(() => {
@@ -70,9 +73,10 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   const flyoutItems = flyout ? GROUPS.find((g) => g.label === flyout)?.items ?? [] : [];
 
   return (
+    <div className="hidden md:block relative w-[56px] shrink-0">
     <aside
       ref={wrapRef}
-      className={`hidden md:flex flex-col shrink-0 bg-[#2c3e50] text-white/90 relative transition-[width] duration-200 ${
+      className={`absolute left-0 top-0 bottom-0 z-40 flex flex-col bg-[#2c3e50] text-white/90 transition-[width] duration-200 shadow-lg ${
         collapsed ? "w-[56px]" : "w-[230px]"
       }`}
     >
@@ -222,5 +226,6 @@ export default function CrmSidebar({ slug }: { slug: string }) {
         </div>
       )}
     </aside>
+    </div>
   );
 }
