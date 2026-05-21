@@ -562,7 +562,11 @@ const CrmLeads = () => {
                                 onChange={() => toggleOne(l.id)}
                                 className="h-3.5 w-3.5"
                               />
-                              <button className="text-muted-foreground hover:text-primary p-0.5">
+                              <button
+                                className="text-muted-foreground hover:text-primary p-0.5"
+                                onClick={() => setOpenLeadId(l.id)}
+                                title="Quick view"
+                              >
                                 <Eye className="h-3.5 w-3.5" />
                               </button>
                               <button className="text-muted-foreground hover:text-yellow-500 p-0.5">
