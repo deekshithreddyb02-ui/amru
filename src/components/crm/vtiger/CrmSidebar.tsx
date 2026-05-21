@@ -14,14 +14,18 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   const loc = useLocation();
   const isActiveModule = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
 
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
-  });
+  // Default: collapsed (icon rail). Expanding overlays on top of module content.
+  const [collapsed, setCollapsed] = useState<boolean>(true);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
+
+  // Auto-collapse whenever the user navigates to another module
+  useEffect(() => {
+    setCollapsed(true);
+    setFlyout(null);
+  }, [loc.pathname]);
 
   // Listen for external toggle (from header hamburger)
   useEffect(() => {
