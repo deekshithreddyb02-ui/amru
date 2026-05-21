@@ -389,14 +389,3 @@ export default function CrmLeadDetail() {
     </>
   );
 }
-      />
-      <ConvertLeadDialog
-        workspaceId={workspace.id}
-        lead={lead}
-        open={convertOpen}
-        onOpenChange={setConvertOpen}
-        onDone={() => { setConvertOpen(false); load(); }}
-      />
-    </>
-  );
-}
