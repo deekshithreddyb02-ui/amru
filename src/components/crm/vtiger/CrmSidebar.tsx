@@ -73,9 +73,10 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   const flyoutItems = flyout ? GROUPS.find((g) => g.label === flyout)?.items ?? [] : [];
 
   return (
+    <div className="hidden md:block relative w-[56px] shrink-0">
     <aside
       ref={wrapRef}
-      className={`hidden md:flex flex-col shrink-0 bg-[#2c3e50] text-white/90 relative transition-[width] duration-200 ${
+      className={`absolute left-0 top-0 bottom-0 z-40 flex flex-col bg-[#2c3e50] text-white/90 transition-[width] duration-200 shadow-lg ${
         collapsed ? "w-[56px]" : "w-[230px]"
       }`}
     >
