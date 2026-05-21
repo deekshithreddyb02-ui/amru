@@ -24,7 +24,6 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   // Auto-collapse whenever the user navigates to another module
   useEffect(() => {
     setCollapsed(true);
-    setFlyout(null);
   }, [loc.pathname]);
 
   // Listen for external toggle (from header hamburger)
