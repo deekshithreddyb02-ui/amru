@@ -38,6 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { exportCsv } from "@/lib/csv";
+import LeadSidePanel from "@/components/crm/LeadSidePanel";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
