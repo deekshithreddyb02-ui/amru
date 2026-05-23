@@ -19,9 +19,11 @@ type Props = {
   groups: ModuleGroup[];
 };
 
+const resolveTo = (slug: string, to: string) => (to.startsWith("/") ? to : `/crm/${slug}/${to}`);
+
 export default function CrmModuleNav({ slug, pinned, groups }: Props) {
   const loc = useLocation();
-  const isActive = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
+  const isActive = (to: string) => loc.pathname.startsWith(resolveTo(slug, to));
 
   return (
     <nav
