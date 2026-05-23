@@ -73,6 +73,7 @@ const CrmTerritories = lazy(() => import("./pages/crm/CrmTerritories"));
 const CrmForecast = lazy(() => import("./pages/crm/CrmForecast"));
 const CrmDataQuality = lazy(() => import("./pages/crm/CrmDataQuality"));
 const CrmWebsiteSettings = lazy(() => import("./pages/crm/CrmWebsiteSettings"));
+const CrmSettings = lazy(() => import("./pages/crm/CrmSettings"));
 const QuotationSign = lazy(() => import("./pages/QuotationSign"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
@@ -174,6 +175,7 @@ const App = () => {
                 <Route path="website-settings" element={<CrmWebsiteSettings />} />
                 <Route path="website-settings/:section" element={<CrmWebsiteSettings />} />
                 <Route path="admin-center" element={<CrmAdminCenter />} />
+                <Route path="crm-settings" element={<CrmSettings />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
