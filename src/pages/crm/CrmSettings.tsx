@@ -123,7 +123,7 @@ const CrmSettings = () => {
   }, [query]);
 
   const go = (item: Item) => {
-    if (item.to) navigate(`/crm/${slug}/${item.to}`);
+    if (item.to) navigate(item.to.startsWith("/") ? item.to : `/crm/${slug}/${item.to}`);
   };
 
   return (

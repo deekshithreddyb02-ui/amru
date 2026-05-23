@@ -10,9 +10,11 @@ const groupIcon = (label: string): LucideIcon => {
   return m?.items[0]?.icon || ChevronRight;
 };
 
+const resolveTo = (slug: string, to: string) => (to.startsWith("/") ? to : `/crm/${slug}/${to}`);
+
 export default function CrmSidebar({ slug }: { slug: string }) {
   const loc = useLocation();
-  const isActiveModule = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
+  const isActiveModule = (to: string) => loc.pathname.startsWith(resolveTo(slug, to));
 
   // Default: hidden. Hamburger toggles an overlay panel.
   const [collapsed, setCollapsed] = useState<boolean>(true);
@@ -38,7 +40,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     GROUPS.forEach((g) => {
-      init[g.label] = g.items.some((i) => loc.pathname.startsWith(`/crm/${slug}/${i.to}`));
+      init[g.label] = g.items.some((i) => loc.pathname.startsWith(resolveTo(slug, i.to)));
     });
     return init;
   });
@@ -47,7 +49,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
     setOpenGroups((cur) => {
       const next = { ...cur };
       GROUPS.forEach((g) => {
-        if (g.items.some((i) => loc.pathname.startsWith(`/crm/${slug}/${i.to}`))) {
+        if (g.items.some((i) => loc.pathname.startsWith(resolveTo(slug, i.to)))) {
           next[g.label] = true;
         }
       });
@@ -86,7 +88,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
           return (
             <NavLink
               key={p.to}
-              to={`/crm/${slug}/${p.to}`}
+              to={resolveTo(slug, p.to)}
               onClick={() => setFlyout(null)}
               title={collapsed ? p.label : undefined}
               className={`flex items-center gap-3 h-11 px-4 text-[13px] tracking-wide transition-colors ${
@@ -197,7 +199,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
             return (
               <NavLink
                 key={`${it.to}-${idx}`}
-                to={`/crm/${slug}/${it.to}`}
+                to={resolveTo(slug, it.to)}
                 onClick={() => setFlyout(null)}
                 className={`flex items-center gap-3 h-10 px-4 text-[13px] transition-colors ${
                   itActive

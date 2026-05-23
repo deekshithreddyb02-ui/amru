@@ -19,9 +19,11 @@ type Props = {
   groups: ModuleGroup[];
 };
 
+const resolveTo = (slug: string, to: string) => (to.startsWith("/") ? to : `/crm/${slug}/${to}`);
+
 export default function CrmModuleNav({ slug, pinned, groups }: Props) {
   const loc = useLocation();
-  const isActive = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
+  const isActive = (to: string) => loc.pathname.startsWith(resolveTo(slug, to));
 
   return (
     <nav
@@ -31,7 +33,7 @@ export default function CrmModuleNav({ slug, pinned, groups }: Props) {
       {pinned.map((m) => (
         <NavLink
           key={m.to}
-          to={`/crm/${slug}/${m.to}`}
+          to={resolveTo(slug, m.to)}
           className={({ isActive }) =>
             `inline-flex items-center gap-1.5 px-3 text-[13px] whitespace-nowrap border-b-2 transition-colors ${
               isActive
@@ -66,7 +68,7 @@ export default function CrmModuleNav({ slug, pinned, groups }: Props) {
               <DropdownMenuSeparator />
               {g.items.map((m) => (
                 <DropdownMenuItem key={m.to} asChild className="cursor-pointer">
-                  <NavLink to={`/crm/${slug}/${m.to}`} className="flex items-center gap-2">
+                  <NavLink to={resolveTo(slug, m.to)} className="flex items-center gap-2">
                     <m.icon className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-sm">{m.label}</span>
                   </NavLink>
