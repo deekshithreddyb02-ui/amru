@@ -10,9 +10,11 @@ const groupIcon = (label: string): LucideIcon => {
   return m?.items[0]?.icon || ChevronRight;
 };
 
+const resolveTo = (slug: string, to: string) => (to.startsWith("/") ? to : `/crm/${slug}/${to}`);
+
 export default function CrmSidebar({ slug }: { slug: string }) {
   const loc = useLocation();
-  const isActiveModule = (to: string) => loc.pathname.startsWith(`/crm/${slug}/${to}`);
+  const isActiveModule = (to: string) => loc.pathname.startsWith(resolveTo(slug, to));
 
   // Default: hidden. Hamburger toggles an overlay panel.
   const [collapsed, setCollapsed] = useState<boolean>(true);
