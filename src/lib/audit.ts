@@ -12,22 +12,10 @@ export interface AuditEntry {
   metadata?: Record<string, unknown>;
 }
 
-export async function logAudit(entry: AuditEntry) {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await (supabase as any).from("crm_audit_log").insert({
-      workspace_id: entry.workspace_id,
-      actor_id: user.id,
-      actor_email: user.email,
-      action: entry.action,
-      entity_type: entry.entity_type,
-      entity_id: entry.entity_id,
-      entity_label: entry.entity_label,
-      changes: entry.changes ?? null,
-      metadata: entry.metadata ?? null,
-    });
-  } catch (e) {
-    console.warn("Audit log failed (non-blocking):", e);
-  }
+export async function logAudit(_entry: AuditEntry) {
+  // No-op: audit log entries are written automatically by database triggers
+  // (crm_audit_trigger) using SECURITY DEFINER. Direct client inserts are
+  // disabled to prevent forgery of audit trail entries.
+  return;
 }
+
