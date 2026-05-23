@@ -108,6 +108,7 @@ export const GROUPS: ModuleGroup[] = [
   {
     label: "Settings",
     items: [
+      { to: "crm-settings",                    label: "CRM Settings",       icon: Settings },
       { to: "admin-center",                    label: "Admin Center",       icon: ShieldCheck },
       { to: "admin/workspaces",                label: "Manage Users",       icon: UserCog },
       { to: "admin/analytics",                 label: "Cross Analytics",    icon: BarChart3 },
