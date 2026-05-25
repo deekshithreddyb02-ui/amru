@@ -17,7 +17,7 @@ import {
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/ui/tabs";
-import { Loader2, Plus, Search, Workflow, Trash2, History } from "lucide-react";
+import { Loader2, Plus, Search, Workflow, Trash2, History, Pencil } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
@@ -99,6 +99,7 @@ const CrmWorkflows = () => {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(empty);
   const [actions, setActions] = useState<Action[]>([newAction("create_notification")]);
   const [saving, setSaving] = useState(false);
@@ -129,8 +130,27 @@ const CrmWorkflows = () => {
   }, [workspace?.id]);
 
   const reset = () => {
+    setEditingId(null);
     setForm(empty);
     setActions([newAction("create_notification")]);
+  };
+
+  const openEdit = (r: Rule) => {
+    setEditingId(r.id);
+    setForm({
+      name: r.name,
+      description: r.description || "",
+      entity_type: r.entity_type,
+      trigger_event: r.trigger_event,
+      trigger_field: r.trigger_field || "",
+      trigger_value: r.trigger_value || "",
+      is_active: r.is_active,
+    });
+    const acts = Array.isArray(r.actions) && r.actions.length > 0
+      ? (r.actions as Action[])
+      : [newAction("create_notification")];
+    setActions(acts);
+    setOpen(true);
   };
 
   const save = async () => {
@@ -139,9 +159,7 @@ const CrmWorkflows = () => {
       return;
     }
     setSaving(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    const { error } = await supabase.from("crm_workflow_rules").insert({
-      workspace_id: workspace.id,
+    const payload = {
       name: form.name,
       description: form.description || null,
       entity_type: form.entity_type,
@@ -150,14 +168,24 @@ const CrmWorkflows = () => {
       trigger_value: form.trigger_value || null,
       actions: actions as unknown as never,
       is_active: form.is_active,
-      created_by: session?.user?.id ?? null,
-    });
+    };
+    let error;
+    if (editingId) {
+      ({ error } = await supabase.from("crm_workflow_rules").update(payload).eq("id", editingId));
+    } else {
+      const { data: { session } } = await supabase.auth.getSession();
+      ({ error } = await supabase.from("crm_workflow_rules").insert({
+        ...payload,
+        workspace_id: workspace.id,
+        created_by: session?.user?.id ?? null,
+      }));
+    }
     setSaving(false);
     if (error) {
       toast({ title: "Could not save", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Workflow created" });
+    toast({ title: editingId ? "Workflow updated" : "Workflow created" });
     setOpen(false);
     reset();
     load();
@@ -301,7 +329,7 @@ const CrmWorkflows = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create workflow rule</DialogTitle>
+                <DialogTitle>{editingId ? "Edit workflow rule" : "Create workflow rule"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -414,7 +442,7 @@ const CrmWorkflows = () => {
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
                 <Button onClick={save} disabled={saving}>
                   {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                  Create rule
+                  {editingId ? "Save changes" : "Create rule"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -472,6 +500,14 @@ const CrmWorkflows = () => {
                           checked={r.is_active}
                           onCheckedChange={(v) => toggle(r.id, v)}
                         />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEdit(r)}
+                          title="Edit"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
