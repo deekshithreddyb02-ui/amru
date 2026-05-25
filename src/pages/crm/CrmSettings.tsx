@@ -16,7 +16,7 @@ const GROUPS: Group[] = [
   {
     key: "user-management", label: "USER MANAGEMENT", icon: Users,
     items: [
-      { label: "Users", to: "admin/workspaces", description: "Manage CRM users, roles and access." },
+      { label: "Users", to: "/crm/admin/workspaces", description: "Manage CRM users, roles and access." },
       { label: "Roles", to: "admin-center", description: "Define roles and hierarchy." },
       { label: "Profiles", to: "admin-center", description: "Profile-level permissions." },
       { label: "Groups", to: "admin-center", description: "User groups for sharing and assignment." },
