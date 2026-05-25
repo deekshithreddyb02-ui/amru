@@ -503,6 +503,14 @@ const CrmWorkflows = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => openEdit(r)}
+                          title="Edit"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => remove(r.id)}
                           className="text-destructive"
                         >
