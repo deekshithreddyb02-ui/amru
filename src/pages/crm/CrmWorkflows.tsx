@@ -329,7 +329,7 @@ const CrmWorkflows = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create workflow rule</DialogTitle>
+                <DialogTitle>{editingId ? "Edit workflow rule" : "Create workflow rule"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
