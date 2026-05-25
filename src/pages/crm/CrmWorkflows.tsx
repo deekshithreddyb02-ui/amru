@@ -442,7 +442,7 @@ const CrmWorkflows = () => {
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
                 <Button onClick={save} disabled={saving}>
                   {saving && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                  Create rule
+                  {editingId ? "Save changes" : "Create rule"}
                 </Button>
               </DialogFooter>
             </DialogContent>
