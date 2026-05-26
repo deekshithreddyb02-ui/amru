@@ -305,7 +305,20 @@ const CrmWorkflows = () => {
             Automate actions when records are created, updated, or change status.
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <Select
+            value={workspace.slug}
+            onValueChange={(slug) => navigate(`/crm/${slug}/workflows`)}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Workspace" />
+            </SelectTrigger>
+            <SelectContent>
+              {workspaces.map((w) => (
+                <SelectItem key={w.id} value={w.slug}>{w.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             size="sm"
             variant="outline"
