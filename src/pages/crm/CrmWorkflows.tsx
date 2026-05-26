@@ -101,6 +101,7 @@ const CrmWorkflows = () => {
   const { workspaces } = useCrmWorkspaces();
   const [rows, setRows] = useState<Rule[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
