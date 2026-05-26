@@ -95,7 +95,8 @@ const newAction = (type: ActionType): Action => ({ type });
 
 const CrmWorkflows = () => {
   const { workspace } = useOutletContext<Ctx>();
-  const [rows, setRows] = useState<Rule[]>([]);
+  const navigate = useNavigate();
+  const { workspaces } = useCrmWorkspaces();
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
