@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,6 +95,8 @@ const newAction = (type: ActionType): Action => ({ type });
 
 const CrmWorkflows = () => {
   const { workspace } = useOutletContext<Ctx>();
+  const navigate = useNavigate();
+  const { workspaces } = useCrmWorkspaces();
   const [rows, setRows] = useState<Rule[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -302,7 +305,20 @@ const CrmWorkflows = () => {
             Automate actions when records are created, updated, or change status.
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <Select
+            value={workspace.slug}
+            onValueChange={(slug) => navigate(`/crm/${slug}/workflows`)}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Workspace" />
+            </SelectTrigger>
+            <SelectContent>
+              {workspaces.map((w) => (
+                <SelectItem key={w.id} value={w.slug}>{w.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             size="sm"
             variant="outline"
