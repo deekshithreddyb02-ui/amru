@@ -177,12 +177,61 @@ const CrmWorkflows = () => {
 
   const save = async () => {
     if (!form.name.trim()) {
-      toast({ title: "Name required", variant: "destructive" });
+      toast({ title: "Name required", description: "Enter a name for this workflow rule.", variant: "destructive" });
       return;
     }
+    if (form.trigger_event === "on_status_change" && !form.trigger_field.trim()) {
+      toast({
+        title: "Trigger field required",
+        description: 'When using "When a field changes", you must specify which field to watch.',
+        variant: "destructive",
+      });
+      return;
+    }
+    if (actions.length === 0) {
+      toast({ title: "Add at least one action", variant: "destructive" });
+      return;
+    }
+    // Per-action validation
+    for (let i = 0; i < actions.length; i++) {
+      const a = actions[i];
+      const label = `Action #${i + 1} (${a.type})`;
+      if (a.type === "assign_user" && !a.user_id?.trim()) {
+        toast({ title: `${label}: missing user`, description: "Provide a user UUID to assign.", variant: "destructive" });
+        return;
+      }
+      if (a.type === "create_notification" && !a.title?.trim()) {
+        toast({ title: `${label}: missing title`, description: "Notification needs a title.", variant: "destructive" });
+        return;
+      }
+      if (a.type === "create_activity" && !a.subject?.trim()) {
+        toast({ title: `${label}: missing subject`, description: "Task needs a subject.", variant: "destructive" });
+        return;
+      }
+      if (a.type === "update_field" && (!a.field?.trim() || a.value === undefined)) {
+        toast({ title: `${label}: missing field/value`, variant: "destructive" });
+        return;
+      }
+      if (a.type === "create_approval_request" && !a.title?.trim()) {
+        toast({ title: `${label}: missing title`, variant: "destructive" });
+        return;
+      }
+    }
+
     setSaving(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      setSaving(false);
+      toast({
+        title: "Not signed in",
+        description: "Your session has expired. Please sign in again and retry.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const payload = {
-      name: form.name,
+      name: form.name.trim(),
       description: form.description || null,
       entity_type: form.entity_type,
       trigger_event: form.trigger_event,
@@ -191,23 +240,51 @@ const CrmWorkflows = () => {
       actions: actions as unknown as never,
       is_active: form.is_active,
     };
-    let error;
-    if (editingId) {
-      ({ error } = await supabase.from("crm_workflow_rules").update(payload).eq("id", editingId));
-    } else {
-      const { data: { session } } = await supabase.auth.getSession();
-      ({ error } = await supabase.from("crm_workflow_rules").insert({
-        ...payload,
-        workspace_id: workspace.id,
-        created_by: session?.user?.id ?? null,
-      }));
-    }
+
+    const op = editingId
+      ? supabase.from("crm_workflow_rules").update(payload).eq("id", editingId).select("id").maybeSingle()
+      : supabase.from("crm_workflow_rules").insert({
+          ...payload,
+          workspace_id: workspace.id,
+          created_by: session.user.id,
+        }).select("id").maybeSingle();
+
+    const { data: saved, error } = await op;
     setSaving(false);
+
     if (error) {
-      toast({ title: "Could not save", description: error.message, variant: "destructive" });
+      const code = (error as { code?: string }).code;
+      const details = (error as { details?: string }).details;
+      const hint = (error as { hint?: string }).hint;
+      let friendly = error.message || "Unknown database error";
+      if (code === "42501" || /row-level security|permission denied/i.test(friendly)) {
+        friendly = "You don't have permission to save workflow rules in this workspace. Ask a CRM admin to grant you the crm_admin role here.";
+      } else if (code === "23505") {
+        friendly = "A workflow rule with this name already exists in this workspace.";
+      } else if (code === "23502") {
+        friendly = `Missing required field: ${details || friendly}`;
+      } else if (code === "23503") {
+        friendly = `Invalid reference (foreign key): ${details || friendly}`;
+      }
+      toast({
+        title: editingId ? "Could not update workflow" : "Could not create workflow",
+        description: `${friendly}${code ? ` [${code}]` : ""}${hint ? ` — ${hint}` : ""}`,
+        variant: "destructive",
+      });
+      console.error("[CrmWorkflows] save failed", { code, message: error.message, details, hint, payload });
       return;
     }
-    toast({ title: editingId ? "Workflow updated" : "Workflow created" });
+
+    if (!saved?.id) {
+      toast({
+        title: "Saved but not visible",
+        description: "The save returned no row — usually a row-level security policy is blocking read access. Check your CRM role for this workspace.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({ title: editingId ? "Workflow updated" : "Workflow created", description: `ID: ${saved.id}` });
     setOpen(false);
     reset();
     load();
