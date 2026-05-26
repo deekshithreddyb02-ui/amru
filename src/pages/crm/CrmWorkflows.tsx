@@ -46,6 +46,8 @@ type Rule = {
   is_active: boolean;
   run_count: number;
   last_run_at: string | null;
+  updated_at: string | null;
+  updated_by: string | null;
 };
 
 type Execution = {
@@ -99,6 +101,7 @@ const CrmWorkflows = () => {
   const { workspaces } = useCrmWorkspaces();
   const [rows, setRows] = useState<Rule[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -122,8 +125,24 @@ const CrmWorkflows = () => {
         .order("executed_at", { ascending: false })
         .limit(50),
     ]);
-    setRows(((rulesData || []) as unknown) as Rule[]);
+    const rules = ((rulesData || []) as unknown) as Rule[];
+    setRows(rules);
     setExecutions((execData as Execution[]) || []);
+
+    const userIds = Array.from(new Set(rules.map((r) => r.updated_by).filter(Boolean) as string[]));
+    if (userIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, username")
+        .in("user_id", userIds);
+      const map: Record<string, string> = {};
+      (profs || []).forEach((p: { user_id: string; full_name: string | null; username: string | null }) => {
+        map[p.user_id] = p.full_name || p.username || "User";
+      });
+      setUserNames(map);
+    } else {
+      setUserNames({});
+    }
     setLoading(false);
   };
 
@@ -508,8 +527,14 @@ const CrmWorkflows = () => {
                         <div className="text-xs text-muted-foreground mt-1.5">
                           {(r.actions || []).length} action{(r.actions || []).length === 1 ? "" : "s"} •
                           {" "}{r.run_count} run{r.run_count === 1 ? "" : "s"}
-                          {r.last_run_at && ` • last: ${new Date(r.last_run_at).toLocaleString()}`}
+                          {r.last_run_at && ` • last run: ${new Date(r.last_run_at).toLocaleString()}`}
                         </div>
+                        {r.updated_at && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Updated {new Date(r.updated_at).toLocaleString()}
+                            {r.updated_by && ` by ${userNames[r.updated_by] || "Unknown user"}`}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Switch
