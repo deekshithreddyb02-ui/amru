@@ -97,6 +97,7 @@ const CrmWorkflows = () => {
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const { workspaces } = useCrmWorkspaces();
+  const [rows, setRows] = useState<Rule[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
