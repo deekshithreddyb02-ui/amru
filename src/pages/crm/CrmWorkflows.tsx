@@ -18,7 +18,7 @@ import {
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/ui/tabs";
-import { Loader2, Plus, Search, Workflow, Trash2, History, Pencil } from "lucide-react";
+import { Loader2, Plus, Search, Workflow, Trash2, History, Pencil, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
@@ -415,6 +415,18 @@ const CrmWorkflows = () => {
               ))}
             </SelectContent>
           </Select>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              await load();
+              toast({ title: "Workflows reloaded" });
+            }}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} />
+            Sync
+          </Button>
           <Button
             size="sm"
             variant="outline"
