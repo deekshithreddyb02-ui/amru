@@ -419,6 +419,18 @@ const CrmWorkflows = () => {
             size="sm"
             variant="outline"
             onClick={async () => {
+              await load();
+              toast({ title: "Workflows reloaded" });
+            }}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} />
+            Sync
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
               const { error } = await supabase.functions.invoke("crm-scheduled-workflows");
               if (error) toast({ title: "Run failed", description: error.message, variant: "destructive" });
               else { toast({ title: "Scheduled rules executed" }); load(); }
