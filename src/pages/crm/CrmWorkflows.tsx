@@ -527,8 +527,14 @@ const CrmWorkflows = () => {
                         <div className="text-xs text-muted-foreground mt-1.5">
                           {(r.actions || []).length} action{(r.actions || []).length === 1 ? "" : "s"} •
                           {" "}{r.run_count} run{r.run_count === 1 ? "" : "s"}
-                          {r.last_run_at && ` • last: ${new Date(r.last_run_at).toLocaleString()}`}
+                          {r.last_run_at && ` • last run: ${new Date(r.last_run_at).toLocaleString()}`}
                         </div>
+                        {r.updated_at && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Updated {new Date(r.updated_at).toLocaleString()}
+                            {r.updated_by && ` by ${userNames[r.updated_by] || "Unknown user"}`}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Switch
