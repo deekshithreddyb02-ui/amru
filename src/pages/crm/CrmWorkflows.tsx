@@ -46,6 +46,8 @@ type Rule = {
   is_active: boolean;
   run_count: number;
   last_run_at: string | null;
+  updated_at: string | null;
+  updated_by: string | null;
 };
 
 type Execution = {
