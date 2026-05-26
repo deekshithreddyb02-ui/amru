@@ -125,8 +125,24 @@ const CrmWorkflows = () => {
         .order("executed_at", { ascending: false })
         .limit(50),
     ]);
-    setRows(((rulesData || []) as unknown) as Rule[]);
+    const rules = ((rulesData || []) as unknown) as Rule[];
+    setRows(rules);
     setExecutions((execData as Execution[]) || []);
+
+    const userIds = Array.from(new Set(rules.map((r) => r.updated_by).filter(Boolean) as string[]));
+    if (userIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, username")
+        .in("user_id", userIds);
+      const map: Record<string, string> = {};
+      (profs || []).forEach((p: { user_id: string; full_name: string | null; username: string | null }) => {
+        map[p.user_id] = p.full_name || p.username || "User";
+      });
+      setUserNames(map);
+    } else {
+      setUserNames({});
+    }
     setLoading(false);
   };
 
