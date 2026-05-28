@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -103,6 +104,7 @@ const CrmWorkflows = () => {
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [reloadError, setReloadError] = useState<{ title: string; description: string } | null>(null);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -145,7 +147,9 @@ const CrmWorkflows = () => {
         }
         const suffix = [code ? `[${code}]` : "", hint ? `— ${hint}` : "", details ? `(${details})` : ""].filter(Boolean).join(" ");
         setLoading(false);
-        return { ok: false, error: { title, description: suffix ? `${description} ${suffix}` : description } };
+        const errOut = { title, description: suffix ? `${description} ${suffix}` : description };
+        setReloadError(errOut);
+        return { ok: false, error: errOut };
       }
 
       const rules = ((rulesRes.data || []) as unknown) as Rule[];
@@ -167,20 +171,20 @@ const CrmWorkflows = () => {
         setUserNames({});
       }
       setLoading(false);
+      setReloadError(null);
       return { ok: true };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       console.error("[CrmWorkflows] load threw", e);
       setLoading(false);
-      return {
-        ok: false,
-        error: {
-          title: "Failed to reload workflows",
-          description: /fetch|network/i.test(message)
-            ? "Network error — check your connection and try again."
-            : message,
-        },
+      const err = {
+        title: "Failed to reload workflows",
+        description: /fetch|network/i.test(message)
+          ? "Network error — check your connection and try again."
+          : message,
       };
+      setReloadError(err);
+      return { ok: false, error: err };
     }
   };
 
@@ -615,6 +619,21 @@ const CrmWorkflows = () => {
           </Dialog>
         </div>
       </div>
+
+      {reloadError && (
+        <Alert variant="destructive" className="relative">
+          <AlertTitle className="pr-8">{reloadError.title}</AlertTitle>
+          <AlertDescription className="break-words">{reloadError.description}</AlertDescription>
+          <button
+            type="button"
+            onClick={() => setReloadError(null)}
+            className="absolute right-2 top-2 text-xs opacity-70 hover:opacity-100"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </Alert>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
