@@ -152,7 +152,7 @@ export default function LeadSidePanel({
                 <div key={k} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2 text-[12.5px]">
                   <div className="text-muted-foreground">{k}</div>
                   <div className="text-foreground break-words whitespace-pre-wrap">
-                    {v == null || v === "" ? "" : String(v)}
+                    {v == null || v === "" ? "" : (typeof v === "object" ? v : String(v))}
                   </div>
                 </div>
               ))}
