@@ -457,8 +457,12 @@ const CrmWorkflows = () => {
             size="sm"
             variant="outline"
             onClick={async () => {
-              await load();
-              toast({ title: "Workflows reloaded" });
+              const res = await load();
+              if (res.ok) {
+                toast({ title: "Workflows reloaded" });
+              } else {
+                toast({ variant: "destructive", title: res.error.title, description: res.error.description });
+              }
             }}
             disabled={loading}
           >
