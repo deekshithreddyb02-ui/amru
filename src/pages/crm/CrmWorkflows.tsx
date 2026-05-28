@@ -103,6 +103,7 @@ const CrmWorkflows = () => {
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [reloadError, setReloadError] = useState<{ title: string; description: string } | null>(null);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
