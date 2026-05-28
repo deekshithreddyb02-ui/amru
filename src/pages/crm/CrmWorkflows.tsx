@@ -110,40 +110,78 @@ const CrmWorkflows = () => {
   const [actions, setActions] = useState<Action[]>([newAction("create_notification")]);
   const [saving, setSaving] = useState(false);
 
-  const load = async () => {
+  const load = async (): Promise<{ ok: true } | { ok: false; error: { title: string; description: string } }> => {
     setLoading(true);
-    const [{ data: rulesData }, { data: execData }] = await Promise.all([
-      supabase
-        .from("crm_workflow_rules")
-        .select("*")
-        .eq("workspace_id", workspace.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("crm_workflow_executions")
-        .select("id, workflow_id, entity_type, entity_id, trigger_event, status, error_message, executed_at")
-        .eq("workspace_id", workspace.id)
-        .order("executed_at", { ascending: false })
-        .limit(50),
-    ]);
-    const rules = ((rulesData || []) as unknown) as Rule[];
-    setRows(rules);
-    setExecutions((execData as Execution[]) || []);
+    try {
+      const [rulesRes, execRes] = await Promise.all([
+        supabase
+          .from("crm_workflow_rules")
+          .select("*")
+          .eq("workspace_id", workspace.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("crm_workflow_executions")
+          .select("id, workflow_id, entity_type, entity_id, trigger_event, status, error_message, executed_at")
+          .eq("workspace_id", workspace.id)
+          .order("executed_at", { ascending: false })
+          .limit(50),
+      ]);
 
-    const userIds = Array.from(new Set(rules.map((r) => r.updated_by).filter(Boolean) as string[]));
-    if (userIds.length) {
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("user_id, full_name, username")
-        .in("user_id", userIds);
-      const map: Record<string, string> = {};
-      (profs || []).forEach((p: { user_id: string; full_name: string | null; username: string | null }) => {
-        map[p.user_id] = p.full_name || p.username || "User";
-      });
-      setUserNames(map);
-    } else {
-      setUserNames({});
+      if (rulesRes.error || execRes.error) {
+        const which = rulesRes.error ? "workflow rules" : "execution history";
+        const err = (rulesRes.error || execRes.error)!;
+        const code = (err as { code?: string }).code;
+        const hint = (err as { hint?: string }).hint;
+        const details = (err as { details?: string }).details;
+        console.error("[CrmWorkflows] load failed", { which, code, message: err.message, details, hint });
+        let title = `Failed to load ${which}`;
+        let description = err.message || "Unknown error";
+        if (code === "42501" || /row-level security|permission/i.test(err.message)) {
+          title = "Permission denied";
+          description = `You don't have permission to view ${which} in this workspace. Ask a CRM admin to grant you access here.`;
+        } else if (code === "PGRST301" || /jwt|session|token/i.test(err.message)) {
+          title = "Session expired";
+          description = "Please sign in again to reload workflow rules.";
+        }
+        const suffix = [code ? `[${code}]` : "", hint ? `— ${hint}` : "", details ? `(${details})` : ""].filter(Boolean).join(" ");
+        setLoading(false);
+        return { ok: false, error: { title, description: suffix ? `${description} ${suffix}` : description } };
+      }
+
+      const rules = ((rulesRes.data || []) as unknown) as Rule[];
+      setRows(rules);
+      setExecutions((execRes.data as Execution[]) || []);
+
+      const userIds = Array.from(new Set(rules.map((r) => r.updated_by).filter(Boolean) as string[]));
+      if (userIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, username")
+          .in("user_id", userIds);
+        const map: Record<string, string> = {};
+        (profs || []).forEach((p: { user_id: string; full_name: string | null; username: string | null }) => {
+          map[p.user_id] = p.full_name || p.username || "User";
+        });
+        setUserNames(map);
+      } else {
+        setUserNames({});
+      }
+      setLoading(false);
+      return { ok: true };
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      console.error("[CrmWorkflows] load threw", e);
+      setLoading(false);
+      return {
+        ok: false,
+        error: {
+          title: "Failed to reload workflows",
+          description: /fetch|network/i.test(message)
+            ? "Network error — check your connection and try again."
+            : message,
+        },
+      };
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -419,8 +457,12 @@ const CrmWorkflows = () => {
             size="sm"
             variant="outline"
             onClick={async () => {
-              await load();
-              toast({ title: "Workflows reloaded" });
+              const res = await load();
+              if (res.ok === true) {
+                toast({ title: "Workflows reloaded" });
+              } else if (res.ok === false) {
+                toast({ variant: "destructive", title: res.error.title, description: res.error.description });
+              }
             }}
             disabled={loading}
           >
