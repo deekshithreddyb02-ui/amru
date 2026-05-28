@@ -80,9 +80,15 @@ export default function LeadSidePanel({
     ["Total BIZ COST", fmtMoney(lead.biz_cost)],
     ["Company", lead.company],
     ["GSTIN", lead.gstin],
-    ["Lead Source", lead.lead_source],
+    ["Lead Source", lead.lead_source ? (
+      <span className="inline-block bg-green-600 text-white text-[11px] font-semibold px-1.5 py-0.5 rounded">
+        {lead.lead_source}
+      </span>
+    ) : ""],
     ["Website", lead.website],
-    ["Assigned To", lead.assigned_to_name],
+    ["Assigned To", lead.assigned_to_name ? (
+      <span className="text-primary">{lead.assigned_to_name}</span>
+    ) : ""],
     ["Street", lead.street],
     ["City", lead.city],
     ["State", lead.state],
@@ -146,7 +152,7 @@ export default function LeadSidePanel({
                 <div key={k} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2 text-[12.5px]">
                   <div className="text-muted-foreground">{k}</div>
                   <div className="text-foreground break-words whitespace-pre-wrap">
-                    {v == null || v === "" ? "" : String(v)}
+                    {v == null || v === "" ? "" : (typeof v === "object" ? v : String(v))}
                   </div>
                 </div>
               ))}
