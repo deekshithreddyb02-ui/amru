@@ -114,6 +114,9 @@ const CrmWorkflows = () => {
 
   const load = async (): Promise<{ ok: true } | { ok: false; error: { title: string; description: string } }> => {
     setLoading(true);
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData?.user?.id ?? null;
+    const workspaceId = workspace?.id ?? null;
     try {
       const [rulesRes, execRes] = await Promise.all([
         supabase
