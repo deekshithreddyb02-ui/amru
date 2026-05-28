@@ -458,9 +458,9 @@ const CrmWorkflows = () => {
             variant="outline"
             onClick={async () => {
               const res = await load();
-              if (res.ok) {
+              if (res.ok === true) {
                 toast({ title: "Workflows reloaded" });
-              } else {
+              } else if (res.ok === false) {
                 toast({ variant: "destructive", title: res.error.title, description: res.error.description });
               }
             }}
