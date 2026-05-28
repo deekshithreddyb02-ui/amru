@@ -179,7 +179,7 @@ const CrmWorkflows = () => {
       return { ok: true };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
-      console.error("[CrmWorkflows] load threw", e);
+      console.error("[CrmWorkflows] load threw", { query: "load", workspaceId, userId, error: e });
       setLoading(false);
       const err = {
         title: "Failed to reload workflows",
