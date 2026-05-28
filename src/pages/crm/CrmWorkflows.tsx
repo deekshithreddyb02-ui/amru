@@ -146,7 +146,9 @@ const CrmWorkflows = () => {
         }
         const suffix = [code ? `[${code}]` : "", hint ? `— ${hint}` : "", details ? `(${details})` : ""].filter(Boolean).join(" ");
         setLoading(false);
-        return { ok: false, error: { title, description: suffix ? `${description} ${suffix}` : description } };
+        const errOut = { title, description: suffix ? `${description} ${suffix}` : description };
+        setReloadError(errOut);
+        return { ok: false, error: errOut };
       }
 
       const rules = ((rulesRes.data || []) as unknown) as Rule[];
