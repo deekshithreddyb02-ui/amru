@@ -168,20 +168,20 @@ const CrmWorkflows = () => {
         setUserNames({});
       }
       setLoading(false);
+      setReloadError(null);
       return { ok: true };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       console.error("[CrmWorkflows] load threw", e);
       setLoading(false);
-      return {
-        ok: false,
-        error: {
-          title: "Failed to reload workflows",
-          description: /fetch|network/i.test(message)
-            ? "Network error — check your connection and try again."
-            : message,
-        },
+      const err = {
+        title: "Failed to reload workflows",
+        description: /fetch|network/i.test(message)
+          ? "Network error — check your connection and try again."
+          : message,
       };
+      setReloadError(err);
+      return { ok: false, error: err };
     }
   };
 
