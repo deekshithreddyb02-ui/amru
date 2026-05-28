@@ -619,6 +619,21 @@ const CrmWorkflows = () => {
         </div>
       </div>
 
+      {reloadError && (
+        <Alert variant="destructive" className="relative">
+          <AlertTitle className="pr-8">{reloadError.title}</AlertTitle>
+          <AlertDescription className="break-words">{reloadError.description}</AlertDescription>
+          <button
+            type="button"
+            onClick={() => setReloadError(null)}
+            className="absolute right-2 top-2 text-xs opacity-70 hover:opacity-100"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </Alert>
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
