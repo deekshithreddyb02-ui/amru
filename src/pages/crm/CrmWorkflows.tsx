@@ -133,12 +133,13 @@ const CrmWorkflows = () => {
       ]);
 
       if (rulesRes.error || execRes.error) {
+        const queryName = rulesRes.error ? "crm_workflow_rules" : "crm_workflow_executions";
         const which = rulesRes.error ? "workflow rules" : "execution history";
         const err = (rulesRes.error || execRes.error)!;
         const code = (err as { code?: string }).code;
         const hint = (err as { hint?: string }).hint;
         const details = (err as { details?: string }).details;
-        console.error("[CrmWorkflows] load failed", { which, code, message: err.message, details, hint });
+        console.error("[CrmWorkflows] load failed", { query: queryName, workspaceId, userId, which, code, message: err.message, details, hint });
         let title = `Failed to load ${which}`;
         let description = err.message || "Unknown error";
         if (code === "42501" || /row-level security|permission/i.test(err.message)) {
