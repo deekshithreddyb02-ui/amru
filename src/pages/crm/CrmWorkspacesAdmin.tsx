@@ -239,19 +239,20 @@ const CrmWorkspacesAdmin = () => {
   const wsPerms = perms.filter((p) => p.workspace_id === selected);
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/crm")}>
+    <div className="min-h-screen bg-background p-4 sm:p-6 overflow-x-hidden">
+      <div className="max-w-6xl mx-auto space-y-6 min-w-0">
+        <div className="flex items-center justify-between gap-4 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/crm")} className="shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
-              <h1 className="text-3xl font-serif">CRM Workspaces</h1>
-              <p className="text-muted-foreground text-sm">Super Admin · manage members</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-serif break-words">CRM Workspaces</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm">Super Admin · manage members</p>
             </div>
           </div>
         </div>
+
 
         <div className="grid md:grid-cols-[280px_1fr] gap-4">
           {/* Workspace list */}
