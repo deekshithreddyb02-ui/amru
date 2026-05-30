@@ -239,23 +239,24 @@ const CrmWorkspacesAdmin = () => {
   const wsPerms = perms.filter((p) => p.workspace_id === selected);
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/crm")}>
+    <div className="min-h-screen bg-background p-4 sm:p-6 overflow-x-hidden">
+      <div className="max-w-6xl mx-auto space-y-6 min-w-0">
+        <div className="flex items-center justify-between gap-4 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/crm")} className="shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <div>
-              <h1 className="text-3xl font-serif">CRM Workspaces</h1>
-              <p className="text-muted-foreground text-sm">Super Admin · manage members</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-serif break-words">CRM Workspaces</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm">Super Admin · manage members</p>
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-[280px_1fr] gap-4">
+
+        <div className="grid md:grid-cols-[280px_minmax(0,1fr)] gap-4 min-w-0">
           {/* Workspace list */}
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-sm">Workspaces</CardTitle>
             </CardHeader>
@@ -264,13 +265,13 @@ const CrmWorkspacesAdmin = () => {
                 <button
                   key={w.id}
                   onClick={() => setSelected(w.id)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors min-w-0 ${
                     selected === w.id ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                   }`}
                 >
-                  <div className="font-medium">{w.name}</div>
+                  <div className="font-medium break-words">{w.name}</div>
                   <div
-                    className={`text-xs ${
+                    className={`text-xs break-all ${
                       selected === w.id ? "text-primary-foreground/80" : "text-muted-foreground"
                     }`}
                   >
@@ -281,8 +282,10 @@ const CrmWorkspacesAdmin = () => {
             </CardContent>
           </Card>
 
+
           {/* Members */}
-          <Card>
+          <Card className="min-w-0">
+
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm">
                 Members{selectedWs ? ` · ${selectedWs.name}` : ""}
@@ -434,7 +437,7 @@ const CrmWorkspacesAdmin = () => {
 
         {/* Permissions matrix */}
         {selectedWs && (
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-sm">
                 Permissions matrix · {selectedWs.name}
