@@ -256,7 +256,7 @@ const CrmWorkspacesAdmin = () => {
 
         <div className="grid md:grid-cols-[280px_minmax(0,1fr)] gap-4 min-w-0">
           {/* Workspace list */}
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-sm">Workspaces</CardTitle>
             </CardHeader>
@@ -265,13 +265,13 @@ const CrmWorkspacesAdmin = () => {
                 <button
                   key={w.id}
                   onClick={() => setSelected(w.id)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors min-w-0 ${
                     selected === w.id ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                   }`}
                 >
-                  <div className="font-medium">{w.name}</div>
+                  <div className="font-medium break-words">{w.name}</div>
                   <div
-                    className={`text-xs ${
+                    className={`text-xs break-all ${
                       selected === w.id ? "text-primary-foreground/80" : "text-muted-foreground"
                     }`}
                   >
@@ -281,6 +281,7 @@ const CrmWorkspacesAdmin = () => {
               ))}
             </CardContent>
           </Card>
+
 
           {/* Members */}
           <Card>
