@@ -143,9 +143,11 @@ function FieldGrid({ rows, leadId, onUpdated }: { rows: Row[]; leadId: string; o
   return (
     <div className="grid grid-cols-1 md:grid-cols-2">
       {rows.map(([k, v, opt], i) => (
-        <div key={i} className="grid grid-cols-[180px_1fr] gap-3 px-4 py-2.5 text-[12.5px] border-b">
-          <div className="text-muted-foreground">{k}</div>
-          <EditableCell label={k} display={v} opt={opt} leadId={leadId} onUpdated={onUpdated} />
+        <div key={i} className="grid grid-cols-[110px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] md:grid-cols-[180px_minmax(0,1fr)] gap-3 px-3 sm:px-4 py-2.5 text-[12.5px] border-b min-w-0">
+          <div className="text-muted-foreground break-words">{k}</div>
+          <div className="min-w-0 break-words">
+            <EditableCell label={k} display={v} opt={opt} leadId={leadId} onUpdated={onUpdated} />
+          </div>
         </div>
       ))}
     </div>
@@ -291,41 +293,43 @@ export default function CrmLeadDetail() {
     ? `https://www.google.com/maps?q=${lead.latitude},${lead.longitude}` : null);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 max-w-full overflow-x-hidden">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-muted-foreground">
         <Link to={`/crm/${workspace.slug}/leads`} className="text-orange-600 font-semibold uppercase tracking-wide">Leads</Link>
         <ChevronRight className="h-3 w-3" />
         <Link to={`/crm/${workspace.slug}/leads`} className="hover:text-foreground">All</Link>
         <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground">{lead.full_name}</span>
-        <div className="ml-auto flex items-center gap-1.5">
+        <span className="text-foreground truncate max-w-[140px] sm:max-w-none">{lead.full_name}</span>
+        <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-1.5 flex-wrap">
           <Button size="sm" variant="outline" className="h-7 text-[12px]" onClick={() => navigate(`/crm/${workspace.slug}/leads`)}>+ Add Lead</Button>
           <Button size="sm" variant="outline" className="h-7 text-[12px]">Import</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[12px]">⚙ Customize</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[12px] hidden sm:inline-flex">⚙ Customize</Button>
         </div>
       </div>
 
       {/* Header card */}
       <div className="border rounded bg-card">
-        <div className="flex items-start gap-4 p-4">
-          <div className="h-16 w-16 rounded bg-orange-500 text-white flex items-center justify-center shrink-0">
-            <IdCard className="h-8 w-8" />
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4 p-4">
+          <div className="flex items-start gap-4 min-w-0 flex-1">
+            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded bg-orange-500 text-white flex items-center justify-center shrink-0">
+              <IdCard className="h-7 w-7 sm:h-8 sm:w-8" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[16px] font-semibold break-words">{lead.full_name || "—"}</div>
+              {lead.phone && (
+                <a href={`tel:${lead.phone}`} className="text-[12px] text-primary hover:underline block break-all">{lead.phone}</a>
+              )}
+              {mapsLink && (
+                <a href={mapsLink} target="_blank" rel="noreferrer" className="text-[12px] text-primary hover:underline inline-flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> Show Map
+                </a>
+              )}
+              <button className="mt-2 text-[11px] border rounded px-2 py-0.5 text-muted-foreground hover:bg-muted">+ Add Tag</button>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[16px] font-semibold">{lead.full_name || "—"}</div>
-            {lead.phone && (
-              <a href={`tel:${lead.phone}`} className="text-[12px] text-primary hover:underline block">{lead.phone}</a>
-            )}
-            {mapsLink && (
-              <a href={mapsLink} target="_blank" rel="noreferrer" className="text-[12px] text-primary hover:underline inline-flex items-center gap-1">
-                <MapPin className="h-3 w-3" /> Show Map
-              </a>
-            )}
-            <button className="mt-2 text-[11px] border rounded px-2 py-0.5 text-muted-foreground hover:bg-muted">+ Add Tag</button>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+          <div className="flex flex-col items-stretch sm:items-end gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5 flex-wrap sm:justify-end">
               <Button size="sm" variant="outline" className="h-7 text-[12px]">Follow</Button>
               <Button size="sm" variant="outline" className="h-7 text-[12px]">Edit</Button>
               {lead.email && (
@@ -361,16 +365,16 @@ export default function CrmLeadDetail() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-3 py-2 text-[12.5px] capitalize border-b-2 -mb-px ${
+              className={`px-3 py-2 text-[12.5px] capitalize border-b-2 -mb-px shrink-0 ${
                 tab === t ? "border-primary text-foreground font-medium" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {t}
             </button>
           ))}
-          <div className="ml-2 flex items-center gap-1 text-muted-foreground">
+          <div className="ml-2 flex items-center gap-1 text-muted-foreground shrink-0">
             {[Calendar, Mail, FileText, Inbox, Megaphone, Briefcase, Box, MessageSquare].map((Icon, i) => (
-              <button key={i} className="h-8 w-8 inline-flex items-center justify-center hover:text-foreground" type="button">
+              <button key={i} className="h-8 w-8 inline-flex items-center justify-center hover:text-foreground shrink-0" type="button">
                 <Icon className="h-4 w-4" />
               </button>
             ))}
