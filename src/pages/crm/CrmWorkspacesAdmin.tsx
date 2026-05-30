@@ -437,7 +437,7 @@ const CrmWorkspacesAdmin = () => {
 
         {/* Permissions matrix */}
         {selectedWs && (
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-sm">
                 Permissions matrix · {selectedWs.name}
