@@ -143,9 +143,11 @@ function FieldGrid({ rows, leadId, onUpdated }: { rows: Row[]; leadId: string; o
   return (
     <div className="grid grid-cols-1 md:grid-cols-2">
       {rows.map(([k, v, opt], i) => (
-        <div key={i} className="grid grid-cols-[180px_1fr] gap-3 px-4 py-2.5 text-[12.5px] border-b">
-          <div className="text-muted-foreground">{k}</div>
-          <EditableCell label={k} display={v} opt={opt} leadId={leadId} onUpdated={onUpdated} />
+        <div key={i} className="grid grid-cols-[110px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] md:grid-cols-[180px_minmax(0,1fr)] gap-3 px-3 sm:px-4 py-2.5 text-[12.5px] border-b min-w-0">
+          <div className="text-muted-foreground break-words">{k}</div>
+          <div className="min-w-0 break-words">
+            <EditableCell label={k} display={v} opt={opt} leadId={leadId} onUpdated={onUpdated} />
+          </div>
         </div>
       ))}
     </div>
