@@ -344,21 +344,21 @@ const CrmWorkspacesAdmin = () => {
                   No members yet. Click <strong>Add</strong> to invite someone.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted/50">
+                <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+                  <table className="text-sm min-w-[760px] w-full">
+                    <thead className="bg-muted sticky top-0 z-10 shadow-sm">
                       <tr className="text-left">
-                        <th className="px-3 py-2 font-medium">Email</th>
-                        <th className="px-3 py-2 font-medium">Role</th>
-                        <th className="px-3 py-2 font-medium">Reports to</th>
-                        <th className="px-3 py-2 font-medium">Department</th>
+                        <th className="px-3 py-2 font-medium min-w-[200px]">Email</th>
+                        <th className="px-3 py-2 font-medium min-w-[180px]">Role</th>
+                        <th className="px-3 py-2 font-medium min-w-[180px]">Reports to</th>
+                        <th className="px-3 py-2 font-medium min-w-[160px]">Department</th>
                         <th className="px-3 py-2 font-medium w-12"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {wsMembers.map((m) => (
                         <tr key={m.id} className="border-t">
-                          <td className="px-3 py-2">
+                          <td className="px-3 py-2 whitespace-nowrap">
                             {emails[m.user_id] || (
                               <Badge variant="outline">unknown user</Badge>
                             )}
@@ -430,6 +430,7 @@ const CrmWorkspacesAdmin = () => {
                     </tbody>
                   </table>
                 </div>
+
               )}
             </CardContent>
           </Card>
