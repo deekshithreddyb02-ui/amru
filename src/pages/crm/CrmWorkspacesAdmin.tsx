@@ -284,7 +284,8 @@ const CrmWorkspacesAdmin = () => {
 
 
           {/* Members */}
-          <Card>
+          <Card className="min-w-0">
+
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm">
                 Members{selectedWs ? ` · ${selectedWs.name}` : ""}
