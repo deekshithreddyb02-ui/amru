@@ -254,7 +254,7 @@ const CrmWorkspacesAdmin = () => {
         </div>
 
 
-        <div className="grid md:grid-cols-[280px_1fr] gap-4">
+        <div className="grid md:grid-cols-[280px_minmax(0,1fr)] gap-4 min-w-0">
           {/* Workspace list */}
           <Card>
             <CardHeader>
