@@ -484,8 +484,10 @@ const CrmWorkspacesAdmin = () => {
                     })
                   )}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </CardContent>
+
           </Card>
         )}
       </div>
