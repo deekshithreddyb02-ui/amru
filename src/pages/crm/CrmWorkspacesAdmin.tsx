@@ -344,21 +344,21 @@ const CrmWorkspacesAdmin = () => {
                   No members yet. Click <strong>Add</strong> to invite someone.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted/50">
+                <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+                  <table className="text-sm min-w-[760px] w-full">
+                    <thead className="bg-muted sticky top-0 z-10 shadow-sm">
                       <tr className="text-left">
-                        <th className="px-3 py-2 font-medium">Email</th>
-                        <th className="px-3 py-2 font-medium">Role</th>
-                        <th className="px-3 py-2 font-medium">Reports to</th>
-                        <th className="px-3 py-2 font-medium">Department</th>
+                        <th className="px-3 py-2 font-medium min-w-[200px]">Email</th>
+                        <th className="px-3 py-2 font-medium min-w-[180px]">Role</th>
+                        <th className="px-3 py-2 font-medium min-w-[180px]">Reports to</th>
+                        <th className="px-3 py-2 font-medium min-w-[160px]">Department</th>
                         <th className="px-3 py-2 font-medium w-12"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {wsMembers.map((m) => (
                         <tr key={m.id} className="border-t">
-                          <td className="px-3 py-2">
+                          <td className="px-3 py-2 whitespace-nowrap">
                             {emails[m.user_id] || (
                               <Badge variant="outline">unknown user</Badge>
                             )}
@@ -430,6 +430,7 @@ const CrmWorkspacesAdmin = () => {
                     </tbody>
                   </table>
                 </div>
+
               )}
             </CardContent>
           </Card>
@@ -446,17 +447,19 @@ const CrmWorkspacesAdmin = () => {
                 Toggle per-role × per-module access. Super Admin and CRM Admin always have full access.
               </p>
             </CardHeader>
-            <CardContent className="p-0 overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-muted/50 sticky top-0">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-medium">Role</th>
-                    <th className="px-3 py-2 text-left font-medium">Module</th>
-                    {PERMS.map((p) => (
-                      <th key={p} className="px-2 py-2 font-medium capitalize text-center w-16">{p}</th>
-                    ))}
-                  </tr>
-                </thead>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+                <table className="text-xs min-w-[640px] w-full">
+                  <thead className="bg-muted sticky top-0 z-10 shadow-sm">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-medium min-w-[160px]">Role</th>
+                      <th className="px-3 py-2 text-left font-medium min-w-[140px]">Module</th>
+                      {PERMS.map((p) => (
+                        <th key={p} className="px-2 py-2 font-medium capitalize text-center w-16 min-w-[64px]">{p}</th>
+                      ))}
+                    </tr>
+                  </thead>
+
                 <tbody>
                   {CRM_ROLES.filter((r) => r !== "crm_admin").map((roleKey) =>
                     PERM_MODULES.map((mod) => {
@@ -481,8 +484,10 @@ const CrmWorkspacesAdmin = () => {
                     })
                   )}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </CardContent>
+
           </Card>
         )}
       </div>
