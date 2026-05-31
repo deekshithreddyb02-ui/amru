@@ -1,5 +1,6 @@
-import { useParams, Navigate } from "react-router-dom";
-import {
+import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft,
   LayoutList, BarChart3, Sparkles, Info, HelpCircle, MessageSquareQuote,
   Wrench, Image as ImageIcon, Navigation, MapPin, PanelBottom, Scale, Phone,
   ExternalLink, Globe, Palette, Shield, Award, type LucideIcon,
