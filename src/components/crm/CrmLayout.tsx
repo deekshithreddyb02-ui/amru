@@ -227,6 +227,9 @@ const CrmLayout = () => {
             </div>
           </div>
         </div>
+
+        {/* Row 4: sibling submodules strip (with icons) */}
+        <CrmSubModuleNav slug={current.slug} />
       </header>
 
       <div className="flex-1 flex min-h-0">
