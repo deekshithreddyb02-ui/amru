@@ -1,5 +1,6 @@
-import { useParams, Navigate } from "react-router-dom";
-import {
+import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft,
   LayoutList, BarChart3, Sparkles, Info, HelpCircle, MessageSquareQuote,
   Wrench, Image as ImageIcon, Navigation, MapPin, PanelBottom, Scale, Phone,
   ExternalLink, Globe, Palette, Shield, Award, type LucideIcon,
@@ -61,6 +62,7 @@ export const WEBSITE_SETTING_SECTIONS: Section[] = [
 
 export default function CrmWebsiteSettings() {
   const { section, slug } = useParams<{ section?: string; slug: string }>();
+  const navigate = useNavigate();
 
   if (!section) {
     return <Navigate to={`/crm/${slug}/website-settings/branding`} replace />;
@@ -83,6 +85,15 @@ export default function CrmWebsiteSettings() {
     <div className="flex flex-col h-full">
       <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`/crm/${slug}/website-settings`)}
+            className="gap-1 -ml-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
           <Icon className="w-5 h-5 text-primary" />
           <div>
             <h2 className="text-lg font-semibold text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
