@@ -62,6 +62,7 @@ export const WEBSITE_SETTING_SECTIONS: Section[] = [
 
 export default function CrmWebsiteSettings() {
   const { section, slug } = useParams<{ section?: string; slug: string }>();
+  const navigate = useNavigate();
 
   if (!section) {
     return <Navigate to={`/crm/${slug}/website-settings/branding`} replace />;
