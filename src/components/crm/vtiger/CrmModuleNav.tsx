@@ -61,16 +61,32 @@ export default function CrmModuleNav({ slug, pinned, groups }: Props) {
               {g.label}
               <ChevronDown className="h-3 w-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-popover">
-              <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <DropdownMenuContent
+              align="start"
+              sideOffset={0}
+              className="w-[230px] p-0 rounded-none border-0 bg-[#34495e] text-white/90 shadow-xl"
+            >
+              <div className="px-4 py-2 text-[11px] uppercase tracking-wider text-white/60 font-semibold">
                 {g.label}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              </div>
               {g.items.map((m) => (
-                <DropdownMenuItem key={m.to} asChild className="cursor-pointer">
-                  <NavLink to={resolveTo(slug, m.to)} className="flex items-center gap-2">
-                    <m.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-sm">{m.label}</span>
+                <DropdownMenuItem
+                  key={`${g.label}-${m.to}-${m.label}`}
+                  asChild
+                  className="cursor-pointer rounded-none p-0 focus:bg-[#2c3e50] focus:text-white data-[highlighted]:bg-[#2c3e50] data-[highlighted]:text-white"
+                >
+                  <NavLink
+                    to={resolveTo(slug, m.to)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 h-10 px-4 w-full text-[13px] transition-colors ${
+                        isActive
+                          ? "bg-[#2c3e50] text-white border-l-[3px] border-[hsl(var(--vt-orange))]"
+                          : "hover:bg-[#2c3e50]"
+                      }`
+                    }
+                  >
+                    <m.icon className="h-4 w-4 shrink-0 opacity-80" />
+                    <span className="truncate">{m.label}</span>
                   </NavLink>
                 </DropdownMenuItem>
               ))}
