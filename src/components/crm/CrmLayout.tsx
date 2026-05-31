@@ -16,6 +16,7 @@ import CrmCopilotDrawer from "./CrmCopilotDrawer";
 import CrmQuickCreate from "./vtiger/CrmQuickCreate";
 import CrmGlobalSearch from "./vtiger/CrmGlobalSearch";
 import CrmSidebar from "./vtiger/CrmSidebar";
+import CrmSubModuleNav from "./vtiger/CrmSubModuleNav";
 import { ALL_MODULES } from "./vtiger/navConfig";
 import logoImg from "@/assets/logo-optimized.webp";
 
