@@ -24,7 +24,7 @@ export default function CrmSubModuleNav({ slug }: { slug: string }) {
   if (!moduleSeg) return null;
 
   const group = GROUPS.find((g) =>
-    g.items.some((i) => !i.to.startsWith("/") && i.to === moduleSeg)
+    g.items.some((i) => !i.to.startsWith("/") && i.to.split("/")[0] === moduleSeg)
   );
   if (!group) return null;
 
