@@ -36,6 +36,18 @@ export default function CrmSubModuleNav({ slug }: { slug: string }) {
     return true;
   });
 
+  const currentPath = loc.pathname.replace(/\/+$/, "");
+  let activeKey: string | null = null;
+  let activeLen = -1;
+  for (const i of items) {
+    const resolved = resolveTo(slug, i.to).replace(/\/+$/, "");
+    const matches = currentPath === resolved || currentPath.startsWith(resolved + "/");
+    if (matches && resolved.length > activeLen) {
+      activeLen = resolved.length;
+      activeKey = `${i.to}|${i.label}`;
+    }
+  }
+
   return (
     <TooltipProvider delayDuration={150}>
       <aside
@@ -46,20 +58,19 @@ export default function CrmSubModuleNav({ slug }: { slug: string }) {
       >
         <nav className="flex-1 flex flex-col py-1 overflow-y-auto">
           {items.map((m) => {
+            const isActive = activeKey === `${m.to}|${m.label}`;
             const link = (
               <NavLink
                 key={`${m.to}-${m.label}`}
                 to={resolveTo(slug, m.to)}
                 end={false}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 h-11 ${
-                    collapsed ? "justify-center px-0" : "px-4"
-                  } text-[13px] border-l-2 transition-colors ${
-                    isActive
-                      ? "border-[hsl(var(--vt-orange))] text-[hsl(var(--vt-orange))] font-medium bg-[hsl(var(--vt-orange)/0.06)]"
-                      : "border-transparent text-[hsl(var(--vt-text))]/80 hover:text-[hsl(var(--vt-orange))] hover:bg-[hsl(var(--vt-row-hover))]"
-                  }`
-                }
+                className={`flex items-center gap-3 h-11 ${
+                  collapsed ? "justify-center px-0" : "px-4"
+                } text-[13px] border-l-2 transition-colors ${
+                  isActive
+                    ? "border-[hsl(var(--vt-orange))] text-[hsl(var(--vt-orange))] font-medium bg-[hsl(var(--vt-orange)/0.06)]"
+                    : "border-transparent text-[hsl(var(--vt-text))]/80 hover:text-[hsl(var(--vt-orange))] hover:bg-[hsl(var(--vt-row-hover))]"
+                }`}
               >
                 <m.icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 {!collapsed && <span className="truncate">{m.label}</span>}
