@@ -239,7 +239,7 @@ const CrmLayout = () => {
       </div>
 
       {/* Vtiger-style footer */}
-      <footer className="bg-white border-t border-[hsl(var(--vt-bar-border))] py-2 text-center text-[11px] text-[hsl(var(--vt-muted))]">
+      <footer className="sticky bottom-0 z-20 bg-white border-t border-[hsl(var(--vt-bar-border))] py-2 text-center text-[11px] text-[hsl(var(--vt-muted))]">
         Powered by <span className="font-semibold text-[hsl(var(--vt-text))]">Amruta CRM</span>
         {" "}— © {new Date().getFullYear()} Amruta Hydro Geo Services
         {" | "}
