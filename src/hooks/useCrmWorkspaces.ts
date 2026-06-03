@@ -27,9 +27,9 @@ let crmWorkspacePromise: Promise<CrmWorkspaceSnapshot> | null = null;
  * along with their membership rows. Super admins see all 4 by default.
  */
 export const useCrmWorkspaces = () => {
-  const [workspaces, setWorkspaces] = useState<CrmWorkspace[]>([]);
-  const [memberships, setMemberships] = useState<CrmMembership[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [workspaces, setWorkspaces] = useState<CrmWorkspace[]>(() => crmWorkspaceCache?.workspaces ?? []);
+  const [memberships, setMemberships] = useState<CrmMembership[]>(() => crmWorkspaceCache?.memberships ?? []);
+  const [loading, setLoading] = useState(() => !crmWorkspaceCache);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
