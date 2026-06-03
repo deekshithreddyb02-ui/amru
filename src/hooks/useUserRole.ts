@@ -13,10 +13,10 @@ let userRoleCache: UserRoleSnapshot | null = null;
 let userRolePromise: Promise<UserRoleSnapshot> | null = null;
 
 export const useUserRole = () => {
-  const [role, setRole] = useState<AppRole | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [role, setRole] = useState<AppRole | null>(() => userRoleCache?.role ?? null);
+  const [loading, setLoading] = useState(() => !userRoleCache);
+  const [userId, setUserId] = useState<string | null>(() => userRoleCache?.userId ?? null);
+  const [mustChangePassword, setMustChangePassword] = useState(() => userRoleCache?.mustChangePassword ?? false);
 
   useEffect(() => {
     let cancelled = false;
