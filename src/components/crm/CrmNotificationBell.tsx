@@ -26,6 +26,7 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const hasLoadedRef = useRef(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const navigate = useNavigate();
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -45,12 +46,11 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
   useEffect(() => {
     if (!open || hasLoadedRef.current) return;
     hasLoadedRef.current = true;
-    load();
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    void load();
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      channel = supabase
+      channelRef.current = supabase
         .channel(`crm_notifications_user_${session.user.id}`)
         .on(
           "postgres_changes",
@@ -66,10 +66,13 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
         )
         .subscribe();
     })();
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
   }, [open]);
+
+  useEffect(() => {
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
+    };
+  }, []);
 
   const markRead = async (id: string) => {
     await supabase
