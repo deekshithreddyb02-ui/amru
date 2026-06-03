@@ -32,7 +32,8 @@ const CrmLayout = () => {
     [workspaces, slug]
   );
 
-  const loading = roleLoading || wsLoading;
+  const authPending = roleLoading && !userId;
+  const loading = authPending || wsLoading;
 
   useEffect(() => {
     if (!roleLoading && !userId) navigate("/auth", { replace: true });
@@ -87,7 +88,8 @@ const CrmLayout = () => {
 
   if (!current) return null;
 
-  const myRole = roleInWorkspace(current.id) || (role === "super_admin" ? "crm_admin" : "—");
+  const myRole = roleInWorkspace(current.id)
+    || (role === "super_admin" ? "crm_admin" : roleLoading ? "Loading…" : "—");
 
   const ActiveIcon = activeModule.icon;
 
