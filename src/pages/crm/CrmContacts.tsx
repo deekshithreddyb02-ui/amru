@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -49,25 +49,35 @@ const CrmContacts = () => {
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
-    const [c, o] = await Promise.all([
-      supabase
-        .from("crm_contacts")
-        .select("id,full_name,title,email,phone,city,organization_id,created_at,organization:crm_organizations(name)")
-        .eq("workspace_id", workspace.id)
-        .order("full_name"),
-      supabase.from("crm_organizations").select("id,name").eq("workspace_id", workspace.id).order("name"),
-    ]);
-    setRows((c.data as unknown as Contact[]) || []);
-    setOrgs((o.data as OrgRef[]) || []);
+    const { data } = await supabase
+      .from("crm_contacts")
+      .select("id,full_name,title,email,phone,city,organization_id,created_at,organization:crm_organizations(name)")
+      .eq("workspace_id", workspace.id)
+      .order("full_name");
+    setRows((data as unknown as Contact[]) || []);
     setLoading(false);
-  };
+  }, [workspace.id]);
+
+  const loadOrgs = useCallback(async () => {
+    if (orgs.length > 0) return;
+    const { data } = await supabase
+      .from("crm_organizations")
+      .select("id,name")
+      .eq("workspace_id", workspace.id)
+      .order("name");
+    setOrgs((data as OrgRef[]) || []);
+  }, [orgs.length, workspace.id]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace.id]);
+  }, [load]);
+
+  useEffect(() => {
+    if (!open) return;
+    void loadOrgs();
+  }, [open, loadOrgs]);
 
   const save = async () => {
     if (!form.full_name.trim()) return;
@@ -97,14 +107,14 @@ const CrmContacts = () => {
     }
   };
 
-  const savedViews: SavedView[] = [
+  const savedViews: SavedView[] = useMemo(() => [
     { id: "all", label: "All Contacts" },
     { id: "with_org", label: "With Organization", filter: (c: Contact) => !!c.organization_id },
     { id: "no_org", label: "Unassigned", filter: (c: Contact) => !c.organization_id },
     { id: "recent", label: "Recently Added", filter: (c: Contact) => Date.now() - new Date(c.created_at).getTime() < 30 * 86400000 },
-  ];
+  ], []);
 
-  const columns: Column<Contact>[] = [
+  const columns: Column<Contact>[] = useMemo(() => [
     {
       key: "full_name",
       label: "Name",
@@ -123,7 +133,7 @@ const CrmContacts = () => {
     { key: "email", label: "Email", render: (c) => c.email || "—" },
     { key: "phone", label: "Phone", render: (c) => c.phone || "—" },
     { key: "city", label: "City", render: (c) => c.city || "—", defaultVisible: false },
-  ];
+  ], [navigate, workspace.slug]);
 
   return (
     <>

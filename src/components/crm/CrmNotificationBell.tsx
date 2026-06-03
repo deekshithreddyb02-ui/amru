@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,8 @@ type Notification = {
 const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const hasLoadedRef = useRef(false);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const navigate = useNavigate();
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -42,12 +44,13 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
   };
 
   useEffect(() => {
-    load();
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    if (!open || hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
+    void load();
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      channel = supabase
+      channelRef.current = supabase
         .channel(`crm_notifications_user_${session.user.id}`)
         .on(
           "postgres_changes",
@@ -63,8 +66,11 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
         )
         .subscribe();
     })();
+  }, [open]);
+
+  useEffect(() => {
     return () => {
-      if (channel) supabase.removeChannel(channel);
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
     };
   }, []);
 

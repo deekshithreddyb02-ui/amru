@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard, Menu } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -10,15 +10,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { supabase } from "@/integrations/supabase/client";
-import CrmNotificationBell from "./CrmNotificationBell";
 import CrmMobileBottomNav from "./CrmMobileBottomNav";
-import CrmCopilotDrawer from "./CrmCopilotDrawer";
-import CrmQuickCreate from "./vtiger/CrmQuickCreate";
-import CrmGlobalSearch from "./vtiger/CrmGlobalSearch";
 import CrmSidebar from "./vtiger/CrmSidebar";
 import CrmSubModuleNav from "./vtiger/CrmSubModuleNav";
 import { ALL_MODULES } from "./vtiger/navConfig";
 import logoImg from "@/assets/logo-optimized.webp";
+
+const CrmNotificationBell = lazy(() => import("./CrmNotificationBell"));
+const CrmCopilotDrawer = lazy(() => import("./CrmCopilotDrawer"));
+const CrmQuickCreate = lazy(() => import("./vtiger/CrmQuickCreate"));
+const CrmGlobalSearch = lazy(() => import("./vtiger/CrmGlobalSearch"));
 
 const CrmLayout = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -32,7 +33,8 @@ const CrmLayout = () => {
     [workspaces, slug]
   );
 
-  const loading = roleLoading || wsLoading;
+  const authPending = roleLoading && !userId;
+  const loading = authPending || wsLoading;
 
   useEffect(() => {
     if (!roleLoading && !userId) navigate("/auth", { replace: true });
@@ -87,7 +89,8 @@ const CrmLayout = () => {
 
   if (!current) return null;
 
-  const myRole = roleInWorkspace(current.id) || (role === "super_admin" ? "crm_admin" : "—");
+  const myRole = roleInWorkspace(current.id)
+    || (role === "super_admin" ? "crm_admin" : roleLoading ? "Loading…" : "—");
 
   const ActiveIcon = activeModule.icon;
 
@@ -128,12 +131,16 @@ const CrmLayout = () => {
 
             {/* Search */}
             <div className="flex-1 max-w-[520px] mx-3 hidden sm:block">
-              <CrmGlobalSearch workspaceId={current.id} slug={current.slug} />
+              <Suspense fallback={<div className="h-8" />}>
+                <CrmGlobalSearch workspaceId={current.id} slug={current.slug} />
+              </Suspense>
             </div>
 
             {/* Right utility icons */}
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-              <CrmQuickCreate slug={current.slug} />
+              <Suspense fallback={<div className="h-8 w-8 shrink-0" />}>
+                <CrmQuickCreate slug={current.slug} />
+              </Suspense>
               <button
                 onClick={() => navigate(`/crm/${current.slug}/calendar`)}
                 className="hidden sm:flex h-8 w-8 items-center justify-center rounded text-[hsl(var(--vt-muted))] hover:text-[hsl(var(--vt-orange))] hover:bg-[hsl(var(--vt-row-hover))]"
@@ -156,8 +163,12 @@ const CrmLayout = () => {
                 <CheckSquare className="h-[18px] w-[18px]" strokeWidth={1.75} />
               </button>
 
-              <CrmCopilotDrawer workspaceId={current.id} />
-              <CrmNotificationBell workspaceSlug={current.slug} />
+              <Suspense fallback={<div className="h-8 w-[94px] shrink-0" />}>
+                <CrmCopilotDrawer workspaceId={current.id} />
+              </Suspense>
+              <Suspense fallback={<div className="h-8 w-8 shrink-0" />}>
+                <CrmNotificationBell workspaceSlug={current.slug} />
+              </Suspense>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
