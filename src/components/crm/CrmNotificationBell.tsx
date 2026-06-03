@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ type Notification = {
 const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const hasLoadedRef = useRef(false);
   const navigate = useNavigate();
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -42,6 +43,8 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
   };
 
   useEffect(() => {
+    if (!open || hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
     load();
     let channel: ReturnType<typeof supabase.channel> | null = null;
     (async () => {
@@ -66,7 +69,7 @@ const CrmNotificationBell = ({ workspaceSlug }: { workspaceSlug: string }) => {
     return () => {
       if (channel) supabase.removeChannel(channel);
     };
-  }, []);
+  }, [open]);
 
   const markRead = async (id: string) => {
     await supabase
