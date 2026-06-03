@@ -49,12 +49,12 @@ export default function CrmSubModuleNav({ slug }: { slug: string }) {
   }
 
   return (
-    <TooltipProvider delayDuration={150}>
+    <TooltipProvider delayDuration={0}>
       <aside
         aria-label={`${group.label} submodules`}
         className={`hidden md:flex shrink-0 flex-col bg-white border-r border-[hsl(var(--vt-bar-border))] sticky top-[96px] self-start h-[calc(100vh-96px-32px)] z-20 ${
           collapsed ? "w-12" : "w-48"
-        } transition-[width] duration-150`}
+        }`}
       >
         <nav className="flex-1 flex flex-col py-1 overflow-y-auto">
           {items.map((m) => {
