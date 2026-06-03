@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState, useCallback } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, type LucideIcon } from "lucide-react";
 import { GROUPS } from "./navConfig";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -9,7 +9,7 @@ const resolveTo = (slug: string, to: string) =>
 
 const STORAGE_KEY = "crm.submodulenav.collapsed";
 
-type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> };
+type Item = { to: string; label: string; icon: LucideIcon };
 
 const SidebarRow = memo(function SidebarRow({
   to, label, Icon, isActive, collapsed,
