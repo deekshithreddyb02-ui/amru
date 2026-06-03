@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard, Menu } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -10,15 +10,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { supabase } from "@/integrations/supabase/client";
-import CrmNotificationBell from "./CrmNotificationBell";
 import CrmMobileBottomNav from "./CrmMobileBottomNav";
-import CrmCopilotDrawer from "./CrmCopilotDrawer";
-import CrmQuickCreate from "./vtiger/CrmQuickCreate";
-import CrmGlobalSearch from "./vtiger/CrmGlobalSearch";
 import CrmSidebar from "./vtiger/CrmSidebar";
 import CrmSubModuleNav from "./vtiger/CrmSubModuleNav";
 import { ALL_MODULES } from "./vtiger/navConfig";
 import logoImg from "@/assets/logo-optimized.webp";
+
+const CrmNotificationBell = lazy(() => import("./CrmNotificationBell"));
+const CrmCopilotDrawer = lazy(() => import("./CrmCopilotDrawer"));
+const CrmQuickCreate = lazy(() => import("./vtiger/CrmQuickCreate"));
+const CrmGlobalSearch = lazy(() => import("./vtiger/CrmGlobalSearch"));
 
 const CrmLayout = () => {
   const { slug } = useParams<{ slug: string }>();
