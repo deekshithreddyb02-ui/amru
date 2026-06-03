@@ -131,12 +131,16 @@ const CrmLayout = () => {
 
             {/* Search */}
             <div className="flex-1 max-w-[520px] mx-3 hidden sm:block">
-              <CrmGlobalSearch workspaceId={current.id} slug={current.slug} />
+              <Suspense fallback={<div className="h-8" />}>
+                <CrmGlobalSearch workspaceId={current.id} slug={current.slug} />
+              </Suspense>
             </div>
 
             {/* Right utility icons */}
             <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-              <CrmQuickCreate slug={current.slug} />
+              <Suspense fallback={<div className="h-8 w-8 shrink-0" />}>
+                <CrmQuickCreate slug={current.slug} />
+              </Suspense>
               <button
                 onClick={() => navigate(`/crm/${current.slug}/calendar`)}
                 className="hidden sm:flex h-8 w-8 items-center justify-center rounded text-[hsl(var(--vt-muted))] hover:text-[hsl(var(--vt-orange))] hover:bg-[hsl(var(--vt-row-hover))]"
@@ -159,8 +163,12 @@ const CrmLayout = () => {
                 <CheckSquare className="h-[18px] w-[18px]" strokeWidth={1.75} />
               </button>
 
-              <CrmCopilotDrawer workspaceId={current.id} />
-              <CrmNotificationBell workspaceSlug={current.slug} />
+              <Suspense fallback={<div className="h-8 w-[94px] shrink-0" />}>
+                <CrmCopilotDrawer workspaceId={current.id} />
+              </Suspense>
+              <Suspense fallback={<div className="h-8 w-8 shrink-0" />}>
+                <CrmNotificationBell workspaceSlug={current.slug} />
+              </Suspense>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
