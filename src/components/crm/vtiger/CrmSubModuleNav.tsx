@@ -13,7 +13,7 @@ type Item = { to: string; label: string; icon: LucideIcon };
 
 const SidebarRow = memo(function SidebarRow({
   to, label, Icon, isActive, collapsed,
-}: { to: string; label: string; Icon: Item["icon"]; isActive: boolean; collapsed: boolean }) {
+}: { to: string; label: string; Icon: LucideIcon; isActive: boolean; collapsed: boolean }) {
   const link = (
     <NavLink
       to={to}
