@@ -20,6 +20,8 @@ export default function CrmPerfMonitor() {
   useRouteTiming();
   useRenderTiming("CrmPerfMonitor");
   const snap = usePerfSnapshot();
+  const bottlenecks = useMemo(() => detectBottlenecks(snap), [snap]);
+  const summary = useMemo(() => summarizeLikelyCause(bottlenecks), [bottlenecks]);
 
   const stats = useMemo(() => {
     const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
@@ -72,7 +74,10 @@ export default function CrmPerfMonitor() {
         ))}
       </div>
 
+      <BottlenecksPanel items={bottlenecks} summary={summary} />
+
       <div className="grid lg:grid-cols-3 gap-4">
+
         <SamplesCard title="Route load times" empty="Navigate around the CRM to record samples.">
           {snap.routes.map((r, i) => (
             <Row key={i} left={r.path} right={<span className={tone(r.ms)}>{fmt(r.ms)}</span>} at={r.at} />
