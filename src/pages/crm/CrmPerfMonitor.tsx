@@ -3,9 +3,10 @@ import { useOutletContext } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Activity, Database, Gauge, RotateCcw } from "lucide-react";
+import { Activity, AlertTriangle, Database, Gauge, Info, RotateCcw, Zap } from "lucide-react";
 import { perfMonitor } from "@/lib/perfMonitor";
 import { usePerfSnapshot, useRenderTiming, useRouteTiming } from "@/hooks/usePerfMonitor";
+import { detectBottlenecks, summarizeLikelyCause, type Bottleneck } from "@/lib/perfBottlenecks";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
