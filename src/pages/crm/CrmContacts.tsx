@@ -17,6 +17,8 @@ import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
 import { exportCsv } from "@/lib/csv";
 import { Download } from "lucide-react";
+import { perfMonitor, timeQuery } from "@/lib/perfMonitor";
+import { useRenderTiming } from "@/hooks/usePerfMonitor";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -41,6 +43,7 @@ const empty = {
 
 const CrmContacts = () => {
   const { workspace } = useOutletContext<Ctx>();
+  useRenderTiming("CrmContacts");
   const navigate = useNavigate();
   const [rows, setRows] = useState<Contact[]>([]);
   const [orgs, setOrgs] = useState<OrgRef[]>([]);
@@ -51,22 +54,30 @@ const CrmContacts = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("crm_contacts")
-      .select("id,full_name,title,email,phone,city,organization_id,created_at,organization:crm_organizations(name)")
-      .eq("workspace_id", workspace.id)
-      .order("full_name");
+    const t = performance.now();
+    const { data } = await timeQuery(
+      "crm_contacts:list",
+      supabase
+        .from("crm_contacts")
+        .select("id,full_name,title,email,phone,city,organization_id,created_at,organization:crm_organizations(name)")
+        .eq("workspace_id", workspace.id)
+        .order("full_name"),
+    );
     setRows((data as unknown as Contact[]) || []);
     setLoading(false);
+    perfMonitor.recordRender("CrmContacts:load", performance.now() - t);
   }, [workspace.id]);
 
   const loadOrgs = useCallback(async () => {
     if (orgs.length > 0) return;
-    const { data } = await supabase
-      .from("crm_organizations")
-      .select("id,name")
-      .eq("workspace_id", workspace.id)
-      .order("name");
+    const { data } = await timeQuery(
+      "crm_organizations:list",
+      supabase
+        .from("crm_organizations")
+        .select("id,name")
+        .eq("workspace_id", workspace.id)
+        .order("name"),
+    );
     setOrgs((data as OrgRef[]) || []);
   }, [orgs.length, workspace.id]);
 
