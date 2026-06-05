@@ -8,7 +8,10 @@ export function usePerfSnapshot() {
   // useSyncExternalStore returns the cached snapshot, but our snapshot returns
   // fresh arrays. We wrap in useState to refresh on listener events.
   const [, force] = useState(0);
-  useEffect(() => perfMonitor.subscribe(() => force((n) => n + 1)), []);
+  useEffect(() => {
+    const unsub = perfMonitor.subscribe(() => force((n) => n + 1));
+    return () => { unsub(); };
+  }, []);
   return getSnap();
 }
 
