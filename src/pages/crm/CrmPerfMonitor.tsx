@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
+
 import { useOutletContext } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +79,21 @@ export default function CrmPerfMonitor() {
   const snap = usePerfSnapshot();
   const bottlenecks = useMemo(() => detectBottlenecks(snap), [snap]);
   const summary = useMemo(() => summarizeLikelyCause(bottlenecks), [bottlenecks]);
+
+  // Notify on newly-detected warn/critical bottlenecks (dedupe by id+severity).
+  const notifiedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const b of bottlenecks) {
+      if (b.severity === "info") continue;
+      const key = `${b.id}:${b.severity}`;
+      if (notifiedRef.current.has(key)) continue;
+      notifiedRef.current.add(key);
+      const opts = { description: `${b.detail}${b.suggestion ? ` — ${b.suggestion}` : ""}` };
+      if (b.severity === "critical") toast.error(b.title, opts);
+      else toast.warning(b.title, opts);
+    }
+  }, [bottlenecks]);
+
 
   const stats = useMemo(() => {
     const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
