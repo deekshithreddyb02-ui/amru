@@ -80,6 +80,21 @@ export default function CrmPerfMonitor() {
   const bottlenecks = useMemo(() => detectBottlenecks(snap), [snap]);
   const summary = useMemo(() => summarizeLikelyCause(bottlenecks), [bottlenecks]);
 
+  // Notify on newly-detected warn/critical bottlenecks (dedupe by id+severity).
+  const notifiedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const b of bottlenecks) {
+      if (b.severity === "info") continue;
+      const key = `${b.id}:${b.severity}`;
+      if (notifiedRef.current.has(key)) continue;
+      notifiedRef.current.add(key);
+      const opts = { description: `${b.detail}${b.suggestion ? ` — ${b.suggestion}` : ""}` };
+      if (b.severity === "critical") toast.error(b.title, opts);
+      else toast.warning(b.title, opts);
+    }
+  }, [bottlenecks]);
+
+
   const stats = useMemo(() => {
     const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
     const contactQ = snap.queries.filter((q) => q.label.startsWith("crm_contacts"));
