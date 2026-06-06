@@ -15,6 +15,16 @@ import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
+type AlertEntry = {
+  key: string;
+  id: string;
+  severity: "warn" | "critical";
+  title: string;
+  detail: string;
+  suggestion: string;
+  at: number;
+};
+
 const fmt = (ms: number) => `${ms.toFixed(0)}ms`;
 const tone = (ms: number) =>
   ms < 100 ? "text-emerald-600" : ms < 500 ? "text-amber-600" : "text-red-600";
