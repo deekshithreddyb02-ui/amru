@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { BellRing } from "lucide-react";
+
 
 import { useOutletContext } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +14,16 @@ import { detectBottlenecks, summarizeLikelyCause, type Bottleneck } from "@/lib/
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
+
+type AlertEntry = {
+  key: string;
+  id: string;
+  severity: "warn" | "critical";
+  title: string;
+  detail: string;
+  suggestion: string;
+  at: number;
+};
 
 const fmt = (ms: number) => `${ms.toFixed(0)}ms`;
 const tone = (ms: number) =>
@@ -82,7 +94,9 @@ export default function CrmPerfMonitor() {
 
   // Notify on newly-detected warn/critical bottlenecks (dedupe by id+severity).
   const notifiedRef = useRef<Set<string>>(new Set());
+  const [alerts, setAlerts] = useState<AlertEntry[]>([]);
   useEffect(() => {
+    const fresh: AlertEntry[] = [];
     for (const b of bottlenecks) {
       if (b.severity === "info") continue;
       const key = `${b.id}:${b.severity}`;
@@ -91,8 +105,22 @@ export default function CrmPerfMonitor() {
       const opts = { description: `${b.detail}${b.suggestion ? ` — ${b.suggestion}` : ""}` };
       if (b.severity === "critical") toast.error(b.title, opts);
       else toast.warning(b.title, opts);
+      fresh.push({
+        key,
+        id: b.id,
+        severity: b.severity,
+        title: b.title,
+        detail: b.detail,
+        suggestion: b.suggestion,
+        at: Date.now(),
+      });
     }
+    if (fresh.length) setAlerts((prev) => [...fresh.reverse(), ...prev].slice(0, 100));
   }, [bottlenecks]);
+
+  const activeIds = useMemo(() => new Set(bottlenecks.map((b) => b.id)), [bottlenecks]);
+
+
 
 
   const stats = useMemo(() => {
@@ -147,6 +175,16 @@ export default function CrmPerfMonitor() {
       </div>
 
       <BottlenecksPanel items={bottlenecks} summary={summary} />
+
+      <NotificationHistoryPanel
+        alerts={alerts}
+        activeIds={activeIds}
+        onClear={() => {
+          setAlerts([]);
+          notifiedRef.current.clear();
+        }}
+      />
+
 
       <div className="grid lg:grid-cols-3 gap-4">
 
@@ -209,3 +247,74 @@ function Row({ left, right, at }: { left: React.ReactNode; right: React.ReactNod
     </div>
   );
 }
+
+function NotificationHistoryPanel({
+  alerts,
+  activeIds,
+  onClear,
+}: {
+  alerts: AlertEntry[];
+  activeIds: Set<string>;
+  onClear: () => void;
+}) {
+  const activeCount = alerts.filter((a) => activeIds.has(a.id)).length;
+  return (
+    <Card>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <BellRing className="h-4 w-4 text-amber-600" />
+          Notification history
+          <span className="text-xs text-muted-foreground font-normal">
+            {alerts.length} total · {activeCount} active
+          </span>
+        </CardTitle>
+        <Button variant="ghost" size="sm" onClick={onClear} disabled={!alerts.length}>
+          Clear history
+        </Button>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="max-h-[360px] overflow-y-auto divide-y">
+          {alerts.length === 0 ? (
+            <div className="p-6 text-center text-xs text-muted-foreground">
+              No notifications yet. Warn/critical alerts will appear here.
+            </div>
+          ) : (
+            alerts.map((a) => {
+              const active = activeIds.has(a.id);
+              const sev = sevStyles(a.severity);
+              const SIcon = sev.Icon;
+              return (
+                <div key={a.key + a.at} className="flex items-start gap-2 px-3 py-2 text-xs">
+                  <SIcon className="h-4 w-4 mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium truncate">{a.title}</span>
+                      <Badge className={`h-5 text-[10px] ${sev.badge}`} variant="secondary">
+                        {a.severity}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className={`h-5 text-[10px] ${
+                          active
+                            ? "border-amber-400 text-amber-700 dark:text-amber-300"
+                            : "border-emerald-400 text-emerald-700 dark:text-emerald-300"
+                        }`}
+                      >
+                        {active ? "active" : "resolved"}
+                      </Badge>
+                    </div>
+                    <div className="text-muted-foreground mt-0.5">{a.detail}</div>
+                  </div>
+                  <div className="text-muted-foreground tabular-nums shrink-0">
+                    {new Date(a.at).toLocaleTimeString()}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
