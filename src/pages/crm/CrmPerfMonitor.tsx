@@ -15,6 +15,61 @@ const fmt = (ms: number) => `${ms.toFixed(0)}ms`;
 const tone = (ms: number) =>
   ms < 100 ? "text-emerald-600" : ms < 500 ? "text-amber-600" : "text-red-600";
 
+function sevStyles(sev: Bottleneck["severity"]) {
+  if (sev === "critical") return { badge: "bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-100", Icon: AlertTriangle, ring: "border-red-300/60" };
+  if (sev === "warn") return { badge: "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100", Icon: Zap, ring: "border-amber-300/60" };
+  return { badge: "bg-muted text-muted-foreground", Icon: Info, ring: "border-border" };
+}
+
+function BottlenecksPanel({ items, summary }: { items: Bottleneck[]; summary: string }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          Bottleneck detection
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="text-sm text-muted-foreground">{summary}</div>
+        {items.length === 0 ? null : (
+          <div className="space-y-2">
+            {items.slice(0, 8).map((b) => {
+              const s = sevStyles(b.severity);
+              const SIcon = s.Icon;
+              return (
+                <div key={b.id} className={`rounded-md border ${s.ring} p-3`}>
+                  <div className="flex items-start gap-2">
+                    <SIcon className="h-4 w-4 mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium truncate">{b.title}</span>
+                        <Badge className={`h-5 text-[10px] ${s.badge}`} variant="secondary">
+                          {b.severity}
+                        </Badge>
+                        <Badge variant="outline" className="h-5 text-[10px]">{b.category}</Badge>
+                        {b.metric && (
+                          <span className="text-xs text-muted-foreground tabular-nums">{b.metric}</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">{b.detail}</div>
+                      <div className="text-xs mt-1">
+                        <span className="font-medium">Suggestion: </span>
+                        <span className="text-muted-foreground">{b.suggestion}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+
 export default function CrmPerfMonitor() {
   useOutletContext<Ctx>();
   useRouteTiming();
@@ -135,58 +190,5 @@ function Row({ left, right, at }: { left: React.ReactNode; right: React.ReactNod
       <div className="text-muted-foreground tabular-nums">{new Date(at).toLocaleTimeString()}</div>
       <div className="font-semibold tabular-nums w-14 text-right">{right}</div>
     </div>
-  );
-}
-
-function sevStyles(sev: Bottleneck["severity"]) {
-  if (sev === "critical") return { badge: "bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-100", Icon: AlertTriangle, ring: "border-red-300/60" };
-  if (sev === "warn") return { badge: "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100", Icon: Zap, ring: "border-amber-300/60" };
-  return { badge: "bg-muted text-muted-foreground", Icon: Info, ring: "border-border" };
-}
-
-function BottlenecksPanel({ items, summary }: { items: Bottleneck[]; summary: string }) {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-600" />
-          Bottleneck detection
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="text-sm text-muted-foreground">{summary}</div>
-        {items.length === 0 ? null : (
-          <div className="space-y-2">
-            {items.slice(0, 8).map((b) => {
-              const s = sevStyles(b.severity);
-              return (
-                <div key={b.id} className={`rounded-md border ${s.ring} p-3`}>
-                  <div className="flex items-start gap-2">
-                    <s.Icon className="h-4 w-4 mt-0.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium truncate">{b.title}</span>
-                        <Badge className={`h-5 text-[10px] ${s.badge}`} variant="secondary">
-                          {b.severity}
-                        </Badge>
-                        <Badge variant="outline" className="h-5 text-[10px]">{b.category}</Badge>
-                        {b.metric && (
-                          <span className="text-xs text-muted-foreground tabular-nums">{b.metric}</span>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">{b.detail}</div>
-                      <div className="text-xs mt-1">
-                        <span className="font-medium">Suggestion: </span>
-                        <span className="text-muted-foreground">{b.suggestion}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 }
