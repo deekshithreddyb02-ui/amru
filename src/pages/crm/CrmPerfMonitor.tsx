@@ -93,8 +93,26 @@ export default function CrmPerfMonitor() {
   const summary = useMemo(() => summarizeLikelyCause(bottlenecks), [bottlenecks]);
 
   // Notify on newly-detected warn/critical bottlenecks (dedupe by id+severity).
-  const notifiedRef = useRef<Set<string>>(new Set());
-  const [alerts, setAlerts] = useState<AlertEntry[]>([]);
+  const STORAGE_KEY = "crm_perf_alerts_v1";
+  const [alerts, setAlerts] = useState<AlertEntry[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? (parsed as AlertEntry[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const notifiedRef = useRef<Set<string>>(new Set(alerts.map((a) => a.key)));
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(alerts));
+    } catch {
+      // ignore quota / serialization errors
+    }
+  }, [alerts]);
   useEffect(() => {
     const fresh: AlertEntry[] = [];
     for (const b of bottlenecks) {
