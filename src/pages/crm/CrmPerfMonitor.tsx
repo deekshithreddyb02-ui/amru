@@ -176,6 +176,16 @@ export default function CrmPerfMonitor() {
 
       <BottlenecksPanel items={bottlenecks} summary={summary} />
 
+      <NotificationHistoryPanel
+        alerts={alerts}
+        activeIds={activeIds}
+        onClear={() => {
+          setAlerts([]);
+          notifiedRef.current.clear();
+        }}
+      />
+
+
       <div className="grid lg:grid-cols-3 gap-4">
 
         <SamplesCard title="Route load times" empty="Navigate around the CRM to record samples.">
