@@ -84,7 +84,9 @@ export default function CrmPerfMonitor() {
 
   // Notify on newly-detected warn/critical bottlenecks (dedupe by id+severity).
   const notifiedRef = useRef<Set<string>>(new Set());
+  const [alerts, setAlerts] = useState<AlertEntry[]>([]);
   useEffect(() => {
+    const fresh: AlertEntry[] = [];
     for (const b of bottlenecks) {
       if (b.severity === "info") continue;
       const key = `${b.id}:${b.severity}`;
@@ -93,8 +95,22 @@ export default function CrmPerfMonitor() {
       const opts = { description: `${b.detail}${b.suggestion ? ` — ${b.suggestion}` : ""}` };
       if (b.severity === "critical") toast.error(b.title, opts);
       else toast.warning(b.title, opts);
+      fresh.push({
+        key,
+        id: b.id,
+        severity: b.severity,
+        title: b.title,
+        detail: b.detail,
+        suggestion: b.suggestion,
+        at: Date.now(),
+      });
     }
+    if (fresh.length) setAlerts((prev) => [...fresh.reverse(), ...prev].slice(0, 100));
   }, [bottlenecks]);
+
+  const activeIds = useMemo(() => new Set(bottlenecks.map((b) => b.id)), [bottlenecks]);
+
+
 
 
   const stats = useMemo(() => {
