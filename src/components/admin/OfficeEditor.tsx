@@ -49,6 +49,15 @@ const OfficeEditor = () => {
     setOffices(updated);
   };
 
+  const updateOfficeCoords = (index: number, lat: number, lng: number) => {
+    setOffices(prev => {
+      const base = prev ?? [...currentOffices];
+      const updated = [...base];
+      updated[index] = { ...updated[index], lat, lng };
+      return updated;
+    });
+  };
+
   const addOffice = () => {
     if (!offices) startEditing();
     setOffices(prev => [...(prev || currentOffices), { city: "", address: "" }]);
