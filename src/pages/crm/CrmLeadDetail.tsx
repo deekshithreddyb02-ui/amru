@@ -87,8 +87,19 @@ function EditableCell({
         ) : type === "select" ? (
           <Select value={String(val ?? "")} onValueChange={(v) => setVal(v)}>
             <SelectTrigger className="h-7 text-[12.5px] flex-1"><SelectValue placeholder="Select…" /></SelectTrigger>
-            <SelectContent>
-              {opt!.options?.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+            <SelectContent className="max-h-72">
+              {opt!.groupedOptions ? (
+                opt!.groupedOptions.map((g) => (
+                  <SelectGroup key={g.label}>
+                    <SelectLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">{g.label}</SelectLabel>
+                    {g.options.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))
+              ) : (
+                opt!.options?.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)
+              )}
             </SelectContent>
           </Select>
         ) : type === "boolean" ? (
