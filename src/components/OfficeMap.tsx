@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import { useRef, useEffect, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -27,6 +27,8 @@ interface OfficeMapProps {
   companyName?: string;
   popupBgColor?: string;
   popupTextColor?: string;
+  editable?: boolean;
+  onLocationChange?: (lat: number, lng: number) => void;
 }
 
 /** Disables single-finger drag on touch; enables two-finger drag */
@@ -37,27 +39,17 @@ const TouchGuard = ({ onShowHint }: { onShowHint: () => void }) => {
     const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     if (!isTouchDevice) return;
 
-    // Disable default touch drag
     map.dragging.disable();
-
     const container = map.getContainer();
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length >= 2) {
-        map.dragging.enable();
-      } else {
-        map.dragging.disable();
-        onShowHint();
-      }
+      if (e.touches.length >= 2) map.dragging.enable();
+      else { map.dragging.disable(); onShowHint(); }
     };
-
-    const handleTouchEnd = () => {
-      map.dragging.disable();
-    };
+    const handleTouchEnd = () => map.dragging.disable();
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
     container.addEventListener("touchend", handleTouchEnd, { passive: true });
-
     return () => {
       container.removeEventListener("touchstart", handleTouchStart);
       container.removeEventListener("touchend", handleTouchEnd);
@@ -67,31 +59,62 @@ const TouchGuard = ({ onShowHint }: { onShowHint: () => void }) => {
   return null;
 };
 
-const AutoOpenMarker = ({ position, office, companyName, popupBgColor, popupTextColor }: { position: [number, number]; office: Office; companyName: string; popupBgColor?: string; popupTextColor?: string }) => {
+const ClickToSet = ({ onPick }: { onPick: (lat: number, lng: number) => void }) => {
+  useMapEvents({
+    click(e) { onPick(e.latlng.lat, e.latlng.lng); },
+  });
+  return null;
+};
+
+const AutoOpenMarker = ({
+  position, office, companyName, popupBgColor, popupTextColor, editable, onLocationChange,
+}: {
+  position: [number, number];
+  office: Office;
+  companyName: string;
+  popupBgColor?: string;
+  popupTextColor?: string;
+  editable?: boolean;
+  onLocationChange?: (lat: number, lng: number) => void;
+}) => {
   const markerRef = useRef<L.Marker>(null);
 
   useEffect(() => {
-    if (markerRef.current) {
-      markerRef.current.openPopup();
-    }
-  }, []);
+    if (markerRef.current && !editable) markerRef.current.openPopup();
+  }, [editable]);
 
   return (
-    <Marker position={position} ref={markerRef}>
+    <Marker
+      position={position}
+      ref={markerRef}
+      draggable={!!editable}
+      eventHandlers={editable && onLocationChange ? {
+        dragend: (e) => {
+          const m = e.target as L.Marker;
+          const ll = m.getLatLng();
+          onLocationChange(ll.lat, ll.lng);
+        },
+      } : undefined}
+    >
       <Popup>
-        <div className="text-sm p-1 rounded" style={{ 
+        <div className="text-sm p-1 rounded" style={{
           ...(popupBgColor ? { backgroundColor: popupBgColor } : {}),
-          ...(popupTextColor ? { color: popupTextColor } : {})
+          ...(popupTextColor ? { color: popupTextColor } : {}),
         }}>
           <strong>{office.label || companyName}</strong>
           <p className="mt-1">{office.address}</p>
+          {editable && <p className="mt-1 text-xs opacity-70">Drag marker or click map to move</p>}
         </div>
       </Popup>
     </Marker>
   );
 };
 
-const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated Water Solutions Pvt. Ltd.", popupBgColor, popupTextColor }: OfficeMapProps) => {
+const OfficeMap = ({
+  office, height = "250px",
+  companyName = "Amruta Integrated Water Solutions Pvt. Ltd.",
+  popupBgColor, popupTextColor, editable, onLocationChange,
+}: OfficeMapProps) => {
   const [showHint, setShowHint] = useState(false);
 
   if (typeof office.lat !== "number" || typeof office.lng !== "number") return null;
@@ -113,7 +136,16 @@ const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated 
           attribution={`&copy; ${companyName} ${new Date().getFullYear()} | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`}
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <AutoOpenMarker position={[office.lat, office.lng]} office={office} companyName={companyName} popupBgColor={popupBgColor} popupTextColor={popupTextColor} />
+        <AutoOpenMarker
+          position={[office.lat, office.lng]}
+          office={office}
+          companyName={companyName}
+          popupBgColor={popupBgColor}
+          popupTextColor={popupTextColor}
+          editable={editable}
+          onLocationChange={onLocationChange}
+        />
+        {editable && onLocationChange && <ClickToSet onPick={onLocationChange} />}
         <TouchGuard onShowHint={handleShowHint} />
       </MapContainer>
       {showHint && (
@@ -121,6 +153,11 @@ const OfficeMap = ({ office, height = "250px", companyName = "Amruta Integrated 
           <span className="text-white text-sm font-medium bg-black/60 px-4 py-2 rounded-xl">
             Use two fingers to move the map
           </span>
+        </div>
+      )}
+      {editable && (
+        <div className="absolute top-2 right-2 z-[400] bg-background/90 border border-border text-foreground text-[11px] px-2 py-1 rounded-md shadow-sm pointer-events-none">
+          Click map or drag marker to set location
         </div>
       )}
     </div>

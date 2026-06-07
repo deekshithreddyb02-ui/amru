@@ -49,6 +49,15 @@ const OfficeEditor = () => {
     setOffices(updated);
   };
 
+  const updateOfficeCoords = (index: number, lat: number, lng: number) => {
+    setOffices(prev => {
+      const base = prev ?? [...currentOffices];
+      const updated = [...base];
+      updated[index] = { ...updated[index], lat, lng };
+      return updated;
+    });
+  };
+
   const addOffice = () => {
     if (!offices) startEditing();
     setOffices(prev => [...(prev || currentOffices), { city: "", address: "" }]);
@@ -220,7 +229,12 @@ const OfficeEditor = () => {
               
               {/* Map preview */}
               <Suspense fallback={<div className="h-[200px] bg-muted rounded-lg animate-pulse" />}>
-                <OfficeMap office={office} height="200px" />
+                <OfficeMap
+                  office={office}
+                  height="200px"
+                  editable={isEditing}
+                  onLocationChange={isEditing ? (lat, lng) => updateOfficeCoords(index, lat, lng) : undefined}
+                />
               </Suspense>
             </CardContent>
           </Card>
