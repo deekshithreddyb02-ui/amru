@@ -320,7 +320,24 @@ export default function CrmLeadDetail() {
     ["Lead Status", lead.status, { field: "status", type: "select", options: statusOpts }],
     ["Created Time", fmtDate(lead.created_at)],
     ["Rating", lead.rating, { field: "rating", type: "select", options: ratingOpts }],
-    ["Assigned To", assigneeName ? <span className="text-primary">{assigneeName}</span> : ""],
+    ["Assigned To",
+      assigneeName ? <span className="text-primary">{assigneeName}</span> : <span className="text-muted-foreground italic">Unassigned</span>,
+      {
+        type: "select",
+        groupedOptions: [{ label: "—", options: [{ label: "Unassigned", value: "__none__" }] }, ...assigneeGroups],
+        raw: lead.assigned_to || "",
+        onSave: async (v: any) => {
+          const next = v === "__none__" || !v ? null : v;
+          const { error } = await supabase.from("crm_leads").update({ assigned_to: next }).eq("id", lead.id);
+          if (error) throw error;
+          applyPatch({ assigned_to: next });
+          if (next) {
+            const { data: p } = await supabase
+              .from("profiles").select("full_name,username").eq("user_id", next).maybeSingle();
+            setAssigneeName(p?.full_name || p?.username || "");
+          } else setAssigneeName("");
+        },
+      }],
   ];
 
   const addrRows: Row[] = [
