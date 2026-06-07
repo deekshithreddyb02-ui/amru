@@ -25,6 +25,7 @@ type EditOpt = {
   field?: string;                 // db column to update on crm_leads
   type?: "text" | "number" | "date" | "textarea" | "select" | "boolean";
   options?: { label: string; value: string }[];
+  groupedOptions?: { label: string; options: { label: string; value: string }[] }[];
   raw?: any;                      // raw value to seed the editor (defaults to display value)
   onSave?: (next: any) => Promise<void> | void; // custom saver
 };
