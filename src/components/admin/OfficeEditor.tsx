@@ -233,10 +233,7 @@ const OfficeEditor = () => {
                   office={office}
                   height="200px"
                   editable={isEditing}
-                  onLocationChange={isEditing ? (lat, lng) => {
-                    updateOffice(index, "lat", String(lat));
-                    updateOffice(index, "lng", String(lng));
-                  } : undefined}
+                  onLocationChange={isEditing ? (lat, lng) => updateOfficeCoords(index, lat, lng) : undefined}
                 />
               </Suspense>
             </CardContent>
