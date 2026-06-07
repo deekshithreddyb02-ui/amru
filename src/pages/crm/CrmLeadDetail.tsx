@@ -459,6 +459,40 @@ export default function CrmLeadDetail() {
           <FieldGrid rows={leadRows} leadId={lead.id} onUpdated={applyPatch} />
           <SectionHeader title="Address Details" />
           <FieldGrid rows={addrRows} leadId={lead.id} onUpdated={applyPatch} />
+          <SectionHeader title="Location on Map" />
+          <div className="p-4 space-y-2">
+            <Suspense fallback={<div className="h-[260px] bg-muted rounded-lg animate-pulse" />}>
+              <OfficeMap
+                office={{
+                  city: lead.city || lead.full_name || "Lead",
+                  address: [lead.street, lead.city, lead.state, lead.pincode].filter(Boolean).join(", ") || "—",
+                  label: lead.full_name || "Lead location",
+                  lat: typeof lead.latitude === "number" ? lead.latitude : (lead.latitude ? Number(lead.latitude) : 20.5937),
+                  lng: typeof lead.longitude === "number" ? lead.longitude : (lead.longitude ? Number(lead.longitude) : 78.9629),
+                }}
+                height="280px"
+                editable
+                onLocationChange={async (lat, lng) => {
+                  const maps_location = `https://www.google.com/maps?q=${lat},${lng}`;
+                  const { error } = await supabase
+                    .from("crm_leads")
+                    .update({ latitude: lat, longitude: lng, maps_location })
+                    .eq("id", lead.id);
+                  if (error) {
+                    toast({ title: "Update failed", description: error.message, variant: "destructive" });
+                  } else {
+                    applyPatch({ latitude: lat, longitude: lng, maps_location });
+                    toast({ title: "Saved", description: "Location updated." });
+                  }
+                }}
+              />
+            </Suspense>
+            <div className="text-[11px] text-muted-foreground">
+              {lead.latitude && lead.longitude
+                ? <>📍 {Number(lead.latitude).toFixed(5)}, {Number(lead.longitude).toFixed(5)}</>
+                : <>No coordinates yet — click on the map to set the lead's location.</>}
+            </div>
+          </div>
           <SectionHeader title="Description Details" />
           <FieldGrid rows={descRows} leadId={lead.id} onUpdated={applyPatch} />
         </div>
