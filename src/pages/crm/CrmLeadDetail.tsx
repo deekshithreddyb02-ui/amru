@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import ConvertLeadDialog from "@/components/crm/ConvertLeadDialog";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
@@ -25,6 +25,7 @@ type EditOpt = {
   field?: string;                 // db column to update on crm_leads
   type?: "text" | "number" | "date" | "textarea" | "select" | "boolean";
   options?: { label: string; value: string }[];
+  groupedOptions?: { label: string; options: { label: string; value: string }[] }[];
   raw?: any;                      // raw value to seed the editor (defaults to display value)
   onSave?: (next: any) => Promise<void> | void; // custom saver
 };
@@ -86,8 +87,19 @@ function EditableCell({
         ) : type === "select" ? (
           <Select value={String(val ?? "")} onValueChange={(v) => setVal(v)}>
             <SelectTrigger className="h-7 text-[12.5px] flex-1"><SelectValue placeholder="Select…" /></SelectTrigger>
-            <SelectContent>
-              {opt!.options?.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+            <SelectContent className="max-h-72">
+              {opt!.groupedOptions ? (
+                opt!.groupedOptions.map((g) => (
+                  <SelectGroup key={g.label}>
+                    <SelectLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">{g.label}</SelectLabel>
+                    {g.options.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))
+              ) : (
+                opt!.options?.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)
+              )}
             </SelectContent>
           </Select>
         ) : type === "boolean" ? (
@@ -174,6 +186,9 @@ export default function CrmLeadDetail() {
   const [loading, setLoading] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
   const [tab, setTab] = useState<"summary" | "details" | "updates">("details");
+  const [assigneeGroups, setAssigneeGroups] = useState<
+    { label: string; options: { label: string; value: string }[] }[]
+  >([]);
 
   const load = async () => {
     if (!id) return;
@@ -195,7 +210,44 @@ export default function CrmLeadDetail() {
     setLoading(false);
   };
 
+  const loadAssignees = async () => {
+    const [{ data: ws }, { data: members }] = await Promise.all([
+      supabase.from("crm_workspaces").select("id,name,slug").order("name"),
+      supabase.from("crm_workspace_members").select("workspace_id,user_id,crm_role,department"),
+    ]);
+    const userIds = Array.from(new Set((members || []).map((m: any) => m.user_id)));
+    let profileMap: Record<string, { full_name?: string; username?: string }> = {};
+    if (userIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles").select("user_id,full_name,username").in("user_id", userIds);
+      (profs || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+    }
+    const wsMap: Record<string, string> = {};
+    (ws || []).forEach((w: any) => { wsMap[w.id] = w.name; });
+    const groupsObj: Record<string, { label: string; options: { label: string; value: string }[] }> = {};
+    (members || []).forEach((m: any) => {
+      const wsName = wsMap[m.workspace_id] || "Other";
+      if (!groupsObj[wsName]) groupsObj[wsName] = { label: wsName, options: [] };
+      const p = profileMap[m.user_id] || {};
+      const name = p.full_name || p.username || m.user_id.slice(0, 8);
+      const roleTag = m.crm_role ? ` · ${String(m.crm_role).replace(/^crm_/, "")}` : "";
+      if (!groupsObj[wsName].options.some((o) => o.value === m.user_id)) {
+        groupsObj[wsName].options.push({ label: `${name}${roleTag}`, value: m.user_id });
+      }
+    });
+    // Sort workspaces with current first
+    const currentWsName = wsMap[workspace.id];
+    const ordered = Object.values(groupsObj).sort((a, b) => {
+      if (a.label === currentWsName) return -1;
+      if (b.label === currentWsName) return 1;
+      return a.label.localeCompare(b.label);
+    });
+    ordered.forEach((g) => g.options.sort((a, b) => a.label.localeCompare(b.label)));
+    setAssigneeGroups(ordered);
+  };
+
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
+  useEffect(() => { loadAssignees(); /* eslint-disable-next-line */ }, [workspace.id]);
 
   const applyPatch = (patch: Record<string, any>) =>
     setLead((prev: any) => (prev ? { ...prev, ...patch } : prev));
@@ -268,7 +320,24 @@ export default function CrmLeadDetail() {
     ["Lead Status", lead.status, { field: "status", type: "select", options: statusOpts }],
     ["Created Time", fmtDate(lead.created_at)],
     ["Rating", lead.rating, { field: "rating", type: "select", options: ratingOpts }],
-    ["Assigned To", assigneeName ? <span className="text-primary">{assigneeName}</span> : ""],
+    ["Assigned To",
+      assigneeName ? <span className="text-primary">{assigneeName}</span> : <span className="text-muted-foreground italic">Unassigned</span>,
+      {
+        type: "select",
+        groupedOptions: [{ label: "—", options: [{ label: "Unassigned", value: "__none__" }] }, ...assigneeGroups],
+        raw: lead.assigned_to || "",
+        onSave: async (v: any) => {
+          const next = v === "__none__" || !v ? null : v;
+          const { error } = await supabase.from("crm_leads").update({ assigned_to: next }).eq("id", lead.id);
+          if (error) throw error;
+          applyPatch({ assigned_to: next });
+          if (next) {
+            const { data: p } = await supabase
+              .from("profiles").select("full_name,username").eq("user_id", next).maybeSingle();
+            setAssigneeName(p?.full_name || p?.username || "");
+          } else setAssigneeName("");
+        },
+      }],
   ];
 
   const addrRows: Row[] = [
