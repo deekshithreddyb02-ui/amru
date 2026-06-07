@@ -220,7 +220,15 @@ const OfficeEditor = () => {
               
               {/* Map preview */}
               <Suspense fallback={<div className="h-[200px] bg-muted rounded-lg animate-pulse" />}>
-                <OfficeMap office={office} height="200px" />
+                <OfficeMap
+                  office={office}
+                  height="200px"
+                  editable={isEditing}
+                  onLocationChange={isEditing ? (lat, lng) => {
+                    updateOffice(index, "lat", String(lat));
+                    updateOffice(index, "lng", String(lng));
+                  } : undefined}
+                />
               </Suspense>
             </CardContent>
           </Card>
