@@ -421,7 +421,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       if (error) throw error;
 
       if (data?.success) {
-        toast.success("Enquiry submitted successfully! We'll contact you soon.");
+        toast.success(cfg.thank_you || "Enquiry submitted successfully! We'll contact you soon.");
         onSuccess();
       } else {
         toast.error(data?.message || "Submission failed. Please try again after sometime.");
