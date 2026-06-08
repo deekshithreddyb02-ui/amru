@@ -133,7 +133,11 @@ function loadTurnstileScript(): Promise<void> {
   });
 }
 
+import { useEnquiryFormConfig } from "@/hooks/useEnquiryFormConfig";
+
 const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
+  const cfg = useEnquiryFormConfig();
+  const f = cfg.fields;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
