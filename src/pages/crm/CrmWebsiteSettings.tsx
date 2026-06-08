@@ -17,6 +17,7 @@ import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
+import EnquiryFormEditor from "@/components/admin/EnquiryFormEditor";
 import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 
