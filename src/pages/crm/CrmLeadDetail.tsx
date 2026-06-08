@@ -349,9 +349,22 @@ export default function CrmLeadDetail() {
     ["Country", lead.country, { field: "country" }],
     ["State", lead.state, { field: "state" }],
     ["Maps Location",
-      lead.maps_location && (
-        <a href={lead.maps_location} target="_blank" rel="noreferrer" className="text-primary hover:underline">{lead.maps_location}</a>
-      ),
+      (() => {
+        const url = lead.maps_location || (lead.latitude && lead.longitude
+          ? `https://www.google.com/maps?q=${lead.latitude},${lead.longitude}` : null);
+        return url ? (
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary hover:underline break-all inline-flex items-center gap-1"
+            title="Open in Google Maps"
+          >
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span className="break-all">{url}</span>
+          </a>
+        ) : null;
+      })(),
       { field: "maps_location", raw: lead.maps_location || "" }],
   ];
 
