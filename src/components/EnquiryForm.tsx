@@ -457,14 +457,16 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
 
 
         {/* First Name & Last Name */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> First Name</Label>
-            <div className="relative">
-              <User className={fieldIcon} />
-              <Input name="firstname" maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className={inputCls} />
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className={f.firstName.visible ? "grid grid-cols-2 gap-3" : ""}>
+          {f.firstName.visible && (
+            <div className="space-y-1.5">
+              <Label className={labelCls}><User className="h-3 w-3 text-primary" /> First Name {f.firstName.required && <span className="text-destructive">*</span>}</Label>
+              <div className="relative">
+                <User className={fieldIcon} />
+                <Input name="firstname" required={f.firstName.required} maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className={inputCls} />
+              </div>
             </div>
-          </div>
+          )}
           <div className="space-y-1.5">
             <Label className={labelCls}><User className="h-3 w-3 text-primary" /> Last Name <span className="text-destructive">*</span></Label>
             <div className="relative">
@@ -475,13 +477,15 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
         </motion.div>
 
         {/* Expected Close Date */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Calendar className="h-3.5 w-3.5 text-primary" /> Expected Close Date <span className="text-destructive">*</span></Label>
-          <div className="relative">
-            <Calendar className={fieldIcon} />
-            <Input name="expected_close" type="date" required value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
-          </div>
-        </motion.div>
+        {f.expectedClose.visible && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+            <Label className={labelCls}><Calendar className="h-3.5 w-3.5 text-primary" /> Expected Close Date {f.expectedClose.required && <span className="text-destructive">*</span>}</Label>
+            <div className="relative">
+              <Calendar className={fieldIcon} />
+              <Input name="expected_close" type="date" required={f.expectedClose.required} value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
+            </div>
+          </motion.div>
+        )}
 
         {/* WhatsApp */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
