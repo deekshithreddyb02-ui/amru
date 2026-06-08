@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft,
   LayoutList, BarChart3, Sparkles, Info, HelpCircle, MessageSquareQuote,
   Wrench, Image as ImageIcon, Navigation, MapPin, PanelBottom, Scale, Phone,
-  ExternalLink, Globe, Palette, Shield, Award, type LucideIcon,
+  ExternalLink, Globe, Palette, Shield, Award, FormInput, type LucideIcon,
 } from "lucide-react";
 
 import ServiceEditor from "@/components/admin/ServiceEditor";
@@ -17,6 +17,7 @@ import WhyUsEditor from "@/components/admin/WhyUsEditor";
 import TestimonialsEditor from "@/components/admin/TestimonialsEditor";
 import LegalNoticeEditor from "@/components/admin/LegalNoticeEditor";
 import ContactEditor from "@/components/admin/ContactEditor";
+import EnquiryFormEditor from "@/components/admin/EnquiryFormEditor";
 import FeedbackEditor from "@/components/admin/FeedbackEditor";
 import CrmSettingsEditor from "@/components/admin/CrmSettingsEditor";
 
@@ -53,6 +54,7 @@ export const WEBSITE_SETTING_SECTIONS: Section[] = [
   { key: "certifications", label: "Certifications", description: "Edit certification cards & icons", icon: Award, render: () => <CertificationsEditor /> },
   { key: "offices", label: "Office Locations", description: "Map coordinates & office details", icon: MapPin, render: () => <OfficeEditor /> },
   { key: "contacts", label: "Contact Info", description: "Phone, email & WhatsApp", icon: Phone, render: () => <ContactEditor /> },
+  { key: "enquiry-form", label: "Enquiry Form", description: "Form fields & state \u2192 CRM routing", icon: FormInput, render: () => <EnquiryFormEditor /> },
   { key: "crm-config", label: "CRM Settings", description: "CRM routing & status", icon: ExternalLink, render: () => (
     <div className="space-y-6"><CrmSettingsEditor /></div>
   )},
