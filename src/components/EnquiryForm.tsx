@@ -451,7 +451,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
       <form
         className="space-y-3 mt-2 max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin mx-0 px-[11px] py-[11px]"
         onSubmit={(e) => {e.preventDefault();handleSubmit();}}>
-        
+        {cfg.intro && (
+          <p className="text-xs text-muted-foreground px-1">{cfg.intro}</p>
+        )}
+
 
         {/* First Name & Last Name */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
