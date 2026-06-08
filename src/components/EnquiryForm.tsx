@@ -496,56 +496,59 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
           </div>
         </motion.div>
 
-        {/* Primary Phone & Mobile Phone */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Phone Number</Label>
-            <div className="relative">
-              <Phone className={fieldIcon} />
-              <Input name="phone_number" maxLength={15} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className={inputCls} />
+        {/* Primary Phone */}
+        {f.phoneNumber.visible && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Phone Number {f.phoneNumber.required && <span className="text-destructive">*</span>}</Label>
+              <div className="relative">
+                <Phone className={fieldIcon} />
+                <Input name="phone_number" required={f.phoneNumber.required} maxLength={15} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className={inputCls} />
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Get Location Button */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGetLocation}
-            disabled={locating}
-            className="w-full gap-2 h-10 text-xs font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200">
-            
-            {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
-            {locating ? "Detecting Location…" : coords ? "📍 Location Captured — Re-detect" : "📍 Get My Location"}
-          </Button>
-          {coords &&
-          <div className="mt-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30 space-y-1.5">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[11px] text-foreground/80 font-mono">
-                  <span className="text-muted-foreground">Lat:</span> {coords.lat} &nbsp; <span className="text-muted-foreground">Lon:</span> {coords.lng}
-                </p>
-                <button type="button" onClick={() => handleCopy(`${coords.lat}, ${coords.lng}`, "Coordinates")} className="p-1 rounded hover:bg-primary/10 transition-colors" title="Copy coordinates">
-                  <Copy className="w-3.5 h-3.5 text-primary/70" />
-                </button>
+        {f.getLocation.visible && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGetLocation}
+              disabled={locating}
+              className="w-full gap-2 h-10 text-xs font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200">
+              {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
+              {locating ? "Detecting Location…" : coords ? "📍 Location Captured — Re-detect" : "📍 Get My Location"}
+            </Button>
+            {coords &&
+              <div className="mt-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] text-foreground/80 font-mono">
+                    <span className="text-muted-foreground">Lat:</span> {coords.lat} &nbsp; <span className="text-muted-foreground">Lon:</span> {coords.lng}
+                  </p>
+                  <button type="button" onClick={() => handleCopy(`${coords.lat}, ${coords.lng}`, "Coordinates")} className="p-1 rounded hover:bg-primary/10 transition-colors" title="Copy coordinates">
+                    <Copy className="w-3.5 h-3.5 text-primary/70" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline underline-offset-2 truncate flex-1 hover:text-primary/80 transition-colors">
+                    {googleMapsUrl}
+                  </a>
+                  <button type="button" onClick={() => handleCopy(googleMapsUrl, "Google Maps URL")} className="p-1 rounded hover:bg-primary/10 transition-colors" title="Copy Maps URL">
+                    <Copy className="w-3.5 h-3.5 text-primary/70" />
+                  </button>
+                  <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-primary/10 transition-colors" title="Open in Maps">
+                    <ExternalLink className="w-3.5 h-3.5 text-primary/70" />
+                  </a>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline underline-offset-2 truncate flex-1 hover:text-primary/80 transition-colors">
-                  {googleMapsUrl}
-                </a>
-                <button type="button" onClick={() => handleCopy(googleMapsUrl, "Google Maps URL")} className="p-1 rounded hover:bg-primary/10 transition-colors" title="Copy Maps URL">
-                  <Copy className="w-3.5 h-3.5 text-primary/70" />
-                </button>
-                <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-primary/10 transition-colors" title="Open in Maps">
-                  <ExternalLink className="w-3.5 h-3.5 text-primary/70" />
-                </a>
-              </div>
-            </div>
-          }
-        </motion.div>
+            }
+          </motion.div>
+        )}
 
         {/* BIZ Area & Distance */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className={f.distance.visible ? "grid grid-cols-2 gap-3" : ""}>
           <div className="space-y-1.5">
             <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> BIZ Area <span className="text-destructive">*</span></Label>
             <Select value={bizArea} onValueChange={setBizArea}>
@@ -555,19 +558,21 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label className={labelCls}><Navigation className="h-3 w-3 text-primary" /> Distance <span className="text-destructive">*</span></Label>
-            <Select value={distance} onValueChange={setDistance}>
-              <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
-              <SelectContent className="border-border/50 backdrop-blur-md bg-background/95 max-h-48">
-                {DISTANCES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {f.distance.visible && (
+            <div className="space-y-1.5">
+              <Label className={labelCls}><Navigation className="h-3 w-3 text-primary" /> Distance {f.distance.required && <span className="text-destructive">*</span>}</Label>
+              <Select value={distance} onValueChange={setDistance}>
+                <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
+                <SelectContent className="border-border/50 backdrop-blur-md bg-background/95 max-h-48">
+                  {DISTANCES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </motion.div>
 
         {/* Service & Scans */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
+        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className={f.scans.visible ? "grid grid-cols-2 gap-3" : ""}>
           <div className="space-y-1.5">
             <Label className={labelCls}><Wrench className="h-3 w-3 text-primary" /> Service <span className="text-destructive">*</span></Label>
             <Select value={serviceNeeded} onValueChange={setServiceNeeded}>
@@ -577,27 +582,31 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label className={labelCls}><ScanLine className="h-3 w-3 text-primary" /> Scans <span className="text-destructive">*</span></Label>
-            <Select value={numScans} onValueChange={setNumScans}>
-              <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
-              <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
-                {SCANS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {f.scans.visible && (
+            <div className="space-y-1.5">
+              <Label className={labelCls}><ScanLine className="h-3 w-3 text-primary" /> Scans {f.scans.required && <span className="text-destructive">*</span>}</Label>
+              <Select value={numScans} onValueChange={setNumScans}>
+                <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
+                <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
+                  {SCANS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </motion.div>
 
         {/* Area Type */}
-        <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><LandPlot className="h-3.5 w-3.5 text-primary" /> Area Type <span className="text-destructive">*</span></Label>
-          <Select value={areaType} onValueChange={setAreaType}>
-            <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
-            <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
-              {AREA_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </motion.div>
+        {f.areaType.visible && (
+          <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
+            <Label className={labelCls}><LandPlot className="h-3.5 w-3.5 text-primary" /> Area Type {f.areaType.required && <span className="text-destructive">*</span>}</Label>
+            <Select value={areaType} onValueChange={setAreaType}>
+              <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
+              <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
+                {AREA_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </motion.div>
+        )}
 
         {/* Total Area — Unit selector + input + conversions */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
