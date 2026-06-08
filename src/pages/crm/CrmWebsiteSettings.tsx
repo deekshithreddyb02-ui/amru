@@ -54,6 +54,7 @@ export const WEBSITE_SETTING_SECTIONS: Section[] = [
   { key: "certifications", label: "Certifications", description: "Edit certification cards & icons", icon: Award, render: () => <CertificationsEditor /> },
   { key: "offices", label: "Office Locations", description: "Map coordinates & office details", icon: MapPin, render: () => <OfficeEditor /> },
   { key: "contacts", label: "Contact Info", description: "Phone, email & WhatsApp", icon: Phone, render: () => <ContactEditor /> },
+  { key: "enquiry-form", label: "Enquiry Form", description: "Form fields & state \u2192 CRM routing", icon: FormInput, render: () => <EnquiryFormEditor /> },
   { key: "crm-config", label: "CRM Settings", description: "CRM routing & status", icon: ExternalLink, render: () => (
     <div className="space-y-6"><CrmSettingsEditor /></div>
   )},
