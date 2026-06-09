@@ -6,13 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Save, Eye } from "lucide-react";
+import { Loader2, Save, Eye, Users, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import EnquiryForm from "@/components/EnquiryForm";
-import type { EnquiryFormConfig } from "@/hooks/useEnquiryFormConfig";
+import {
+  DEFAULT_LABELS,
+  type EnquiryFormConfig,
+  type EnquiryLabelKey,
+} from "@/hooks/useEnquiryFormConfig";
 
 type FieldKey =
   | "firstName"
@@ -37,7 +44,9 @@ type EnquiryFormCfg = {
   intro: string;
   thank_you: string;
   fields: Record<FieldKey, FieldCfg>;
+  labels: Record<EnquiryLabelKey, string>;
   routing: Record<RoutingKey, string>;
+  routing_assignees: Record<RoutingKey, string[]>;
 };
 
 const DEFAULT_CFG: EnquiryFormCfg = {
@@ -52,6 +61,7 @@ const DEFAULT_CFG: EnquiryFormCfg = {
     areaType:      { visible: true, required: true },
     getLocation:   { visible: true, required: false },
   },
+  labels: DEFAULT_LABELS,
   routing: {
     Maharashtra:   "mh",
     Telangana:     "hyd",
@@ -59,6 +69,14 @@ const DEFAULT_CFG: EnquiryFormCfg = {
     Karnataka:     "blr",
     OtherIndia:    "mh",
     OtherCountry:  "others",
+  },
+  routing_assignees: {
+    Maharashtra: [],
+    Telangana: [],
+    AndhraPradesh: [],
+    Karnataka: [],
+    OtherIndia: [],
+    OtherCountry: [],
   },
 };
 
@@ -81,22 +99,80 @@ const ROUTING_LABELS: Record<RoutingKey, string> = {
   OtherCountry: "Outside India",
 };
 
+const LABEL_SECTIONS: { key: EnquiryLabelKey; hint?: string }[] = [
+  { key: "firstName" },
+  { key: "lastName" },
+  { key: "expectedClose" },
+  { key: "whatsapp" },
+  { key: "phoneNumber" },
+  { key: "getLocation", hint: "Button text" },
+  { key: "bizArea" },
+  { key: "distance" },
+  { key: "service" },
+  { key: "scans" },
+  { key: "areaType" },
+  { key: "totalArea" },
+  { key: "description" },
+  { key: "mailingStreet" },
+  { key: "mailingCity" },
+  { key: "mailingState" },
+  { key: "pinCode" },
+  { key: "submit", hint: "Button text" },
+];
+
 type Workspace = { id: string; slug: string; name: string };
+type StaffUser = {
+  user_id: string;
+  full_name: string | null;
+  username: string | null;
+  role: string;
+};
 
 const EnquiryFormEditor = () => {
   const [cfg, setCfg] = useState<EnquiryFormCfg>(DEFAULT_CFG);
   const [rowId, setRowId] = useState<string | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [staff, setStaff] = useState<StaffUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const [{ data: row }, { data: ws }] = await Promise.all([
+      const [{ data: row }, { data: ws }, { data: roles }] = await Promise.all([
         supabase.from("site_content").select("id, metadata").eq("section_key", "enquiry_form").maybeSingle(),
         supabase.from("crm_workspaces").select("id, slug, name").eq("is_active", true).order("name"),
+        supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("role", ["super_admin", "admin", "employee", "crm_admin"] as any),
       ]);
+
+      const userIds = Array.from(new Set((roles || []).map((r: any) => r.user_id)));
+      let profiles: any[] = [];
+      if (userIds.length) {
+        const { data: pr } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, username")
+          .in("user_id", userIds);
+        profiles = pr || [];
+      }
+      const profByUser = new Map(profiles.map((p) => [p.user_id, p]));
+      const staffList: StaffUser[] = (roles || []).map((r: any) => ({
+        user_id: r.user_id,
+        role: r.role,
+        full_name: profByUser.get(r.user_id)?.full_name ?? null,
+        username: profByUser.get(r.user_id)?.username ?? null,
+      }));
+      // De-dup users keeping highest priority role
+      const order = ["super_admin", "admin", "crm_admin", "employee"];
+      const byUser = new Map<string, StaffUser>();
+      for (const s of staffList) {
+        const ex = byUser.get(s.user_id);
+        if (!ex || order.indexOf(s.role) < order.indexOf(ex.role)) byUser.set(s.user_id, s);
+      }
+      setStaff(Array.from(byUser.values()).sort((a, b) => (a.full_name || a.username || "").localeCompare(b.full_name || b.username || "")));
+
       if (row) {
         setRowId(row.id);
         const meta = (row.metadata as Partial<EnquiryFormCfg>) || {};
@@ -104,7 +180,9 @@ const EnquiryFormEditor = () => {
           intro: meta.intro ?? DEFAULT_CFG.intro,
           thank_you: meta.thank_you ?? DEFAULT_CFG.thank_you,
           fields: { ...DEFAULT_CFG.fields, ...(meta.fields || {}) } as Record<FieldKey, FieldCfg>,
+          labels: { ...DEFAULT_LABELS, ...(meta.labels || {}) } as Record<EnquiryLabelKey, string>,
           routing: { ...DEFAULT_CFG.routing, ...(meta.routing || {}) } as Record<RoutingKey, string>,
+          routing_assignees: { ...DEFAULT_CFG.routing_assignees, ...(meta.routing_assignees || {}) } as Record<RoutingKey, string[]>,
         });
       }
       setWorkspaces((ws as Workspace[]) || []);
@@ -133,8 +211,8 @@ const EnquiryFormEditor = () => {
   };
 
   const previewCfg: EnquiryFormConfig = useMemo(
-    () => ({ intro: cfg.intro, thank_you: cfg.thank_you, fields: cfg.fields }),
-    [cfg.intro, cfg.thank_you, cfg.fields]
+    () => ({ intro: cfg.intro, thank_you: cfg.thank_you, fields: cfg.fields, labels: cfg.labels }),
+    [cfg.intro, cfg.thank_you, cfg.fields, cfg.labels]
   );
 
   if (loading) {
@@ -151,6 +229,18 @@ const EnquiryFormEditor = () => {
   const setRouting = (key: RoutingKey, slug: string) =>
     setCfg((c) => ({ ...c, routing: { ...c.routing, [key]: slug } }));
 
+  const setLabel = (key: EnquiryLabelKey, value: string) =>
+    setCfg((c) => ({ ...c, labels: { ...c.labels, [key]: value } }));
+
+  const toggleAssignee = (key: RoutingKey, userId: string) =>
+    setCfg((c) => {
+      const cur = c.routing_assignees[key] || [];
+      const next = cur.includes(userId) ? cur.filter((u) => u !== userId) : [...cur, userId];
+      return { ...c, routing_assignees: { ...c.routing_assignees, [key]: next } };
+    });
+
+  const staffLabel = (s: StaffUser) =>
+    `${s.full_name || s.username || s.user_id.slice(0, 8)} · ${s.role.replace("_", " ")}`;
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,420px)] gap-6">
@@ -164,6 +254,27 @@ const EnquiryFormEditor = () => {
           <div className="space-y-2">
             <Label>Thank-you message (shown after submission)</Label>
             <Textarea rows={2} value={cfg.thank_you} onChange={(e) => setCfg({ ...cfg, thank_you: e.target.value })} />
+          </div>
+        </Card>
+
+        <Card className="p-5 space-y-4">
+          <div>
+            <h3 className="font-semibold">Field labels</h3>
+            <p className="text-xs text-muted-foreground">Rename any label shown on the public enquiry form.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {LABEL_SECTIONS.map(({ key, hint }) => (
+              <div key={key} className="space-y-1">
+                <Label className="text-xs capitalize">
+                  {key} {hint && <span className="text-muted-foreground normal-case">({hint})</span>}
+                </Label>
+                <Input
+                  value={cfg.labels[key] ?? ""}
+                  onChange={(e) => setLabel(key, e.target.value)}
+                  placeholder={DEFAULT_LABELS[key]}
+                />
+              </div>
+            ))}
           </div>
         </Card>
 
@@ -199,23 +310,74 @@ const EnquiryFormEditor = () => {
           <div>
             <h3 className="font-semibold">CRM routing by state</h3>
             <p className="text-xs text-muted-foreground">
-              Pick which CRM workspace receives leads from each region. Used when an enquiry comes in.
+              Pick which CRM workspace receives leads from each region, and which staff (employees + super admins) get notified.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {(Object.keys(ROUTING_LABELS) as RoutingKey[]).map((k) => (
-              <div key={k} className="space-y-1.5">
-                <Label>{ROUTING_LABELS[k]}</Label>
-                <Select value={cfg.routing[k]} onValueChange={(v) => setRouting(k, v)}>
-                  <SelectTrigger><SelectValue placeholder="Select CRM workspace" /></SelectTrigger>
-                  <SelectContent>
-                    {workspaces.map((w) => (
-                      <SelectItem key={w.slug} value={w.slug}>{w.name} ({w.slug})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
+          <div className="space-y-4">
+            {(Object.keys(ROUTING_LABELS) as RoutingKey[]).map((k) => {
+              const assignees = cfg.routing_assignees[k] || [];
+              return (
+                <div key={k} className="rounded-lg border border-border/60 p-3 space-y-3">
+                  <div className="font-medium text-sm">{ROUTING_LABELS[k]}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">CRM workspace</Label>
+                      <Select value={cfg.routing[k]} onValueChange={(v) => setRouting(k, v)}>
+                        <SelectTrigger><SelectValue placeholder="Select CRM workspace" /></SelectTrigger>
+                        <SelectContent>
+                          {workspaces.map((w) => (
+                            <SelectItem key={w.slug} value={w.slug}>{w.name} ({w.slug})</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Assignees (employees & super admins)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between font-normal">
+                            <span className="flex items-center gap-2 truncate">
+                              <Users className="h-3.5 w-3.5" />
+                              {assignees.length ? `${assignees.length} selected` : "Select staff"}
+                            </span>
+                            <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0" align="start">
+                          <ScrollArea className="h-64 p-2">
+                            {staff.length === 0 ? (
+                              <div className="text-xs text-muted-foreground p-3">No staff found.</div>
+                            ) : staff.map((s) => {
+                              const checked = assignees.includes(s.user_id);
+                              return (
+                                <label
+                                  key={s.user_id}
+                                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer text-xs"
+                                >
+                                  <Checkbox
+                                    checked={checked}
+                                    onCheckedChange={() => toggleAssignee(k, s.user_id)}
+                                  />
+                                  <span className="truncate">{staffLabel(s)}</span>
+                                </label>
+                              );
+                            })}
+                          </ScrollArea>
+                        </PopoverContent>
+                      </Popover>
+                      {assignees.length > 0 && (
+                        <div className="text-[10px] text-muted-foreground truncate">
+                          {assignees.map((id) => {
+                            const s = staff.find((x) => x.user_id === id);
+                            return s ? (s.full_name || s.username || id.slice(0, 6)) : id.slice(0, 6);
+                          }).join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
