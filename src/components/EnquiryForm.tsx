@@ -84,6 +84,8 @@ function convertArea(value: number, from: AreaUnit): Record<AreaUnit, string> {
 interface EnquiryFormProps {
   serviceTitle: string;
   onSuccess: () => void;
+  configOverride?: import("@/hooks/useEnquiryFormConfig").EnquiryFormConfig;
+  previewMode?: boolean;
 }
 
 const stagger = {
@@ -135,8 +137,9 @@ function loadTurnstileScript(): Promise<void> {
 
 import { useEnquiryFormConfig } from "@/hooks/useEnquiryFormConfig";
 
-const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
-  const cfg = useEnquiryFormConfig();
+const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: EnquiryFormProps) => {
+  const hookCfg = useEnquiryFormConfig();
+  const cfg = configOverride ?? hookCfg;
   const f = cfg.fields;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [firstName, setFirstName] = useState("");
@@ -342,6 +345,10 @@ const EnquiryForm = ({ serviceTitle, onSuccess }: EnquiryFormProps) => {
   };
 
   const handleSubmit = async () => {
+    if (previewMode) {
+      toast.info("Preview mode — submission is disabled.");
+      return;
+    }
     if (!lastName.trim() || !whatsapp.trim() || !description.trim() || !mailingStreet.trim() || !mailingCity.trim() || !mailingPoBox.trim() || !areaValue.trim()) {
       toast.error("Please fill in all required fields.");
       return;
