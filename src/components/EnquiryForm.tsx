@@ -141,6 +141,8 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
   const hookCfg = useEnquiryFormConfig();
   const cfg = configOverride ?? hookCfg;
   const f = cfg.fields;
+  const L = (cfg.labels || {}) as Record<string, string>;
+  const lbl = (k: string, fallback: string) => (L[k] && L[k].trim() ? L[k] : fallback);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
