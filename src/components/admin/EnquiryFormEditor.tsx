@@ -132,6 +132,11 @@ const EnquiryFormEditor = () => {
     toast({ title: "Saved", description: "Enquiry form settings updated." });
   };
 
+  const previewCfg: EnquiryFormConfig = useMemo(
+    () => ({ intro: cfg.intro, thank_you: cfg.thank_you, fields: cfg.fields }),
+    [cfg.intro, cfg.thank_you, cfg.fields]
+  );
+
   if (loading) {
     return (
       <div className="p-8 text-center text-muted-foreground">
@@ -146,10 +151,6 @@ const EnquiryFormEditor = () => {
   const setRouting = (key: RoutingKey, slug: string) =>
     setCfg((c) => ({ ...c, routing: { ...c.routing, [key]: slug } }));
 
-  const previewCfg: EnquiryFormConfig = useMemo(
-    () => ({ intro: cfg.intro, thank_you: cfg.thank_you, fields: cfg.fields }),
-    [cfg.intro, cfg.thank_you, cfg.fields]
-  );
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,420px)] gap-6">
