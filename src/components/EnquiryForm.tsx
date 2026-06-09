@@ -140,6 +140,7 @@ import { useEnquiryFormConfig } from "@/hooks/useEnquiryFormConfig";
 const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: EnquiryFormProps) => {
   const hookCfg = useEnquiryFormConfig();
   const cfg = configOverride ?? hookCfg;
+  const f = cfg.fields;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
