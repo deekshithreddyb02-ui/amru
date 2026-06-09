@@ -469,7 +469,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className={f.firstName.visible ? "grid grid-cols-2 gap-3" : ""}>
           {f.firstName.visible && (
             <div className="space-y-1.5">
-              <Label className={labelCls}><User className="h-3 w-3 text-primary" /> First Name {f.firstName.required && <span className="text-destructive">*</span>}</Label>
+              <Label className={labelCls}><User className="h-3 w-3 text-primary" /> {lbl("firstName", "First Name")} {f.firstName.required && <span className="text-destructive">*</span>}</Label>
               <div className="relative">
                 <User className={fieldIcon} />
                 <Input name="firstname" required={f.firstName.required} maxLength={100} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className={inputCls} />
@@ -477,7 +477,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
             </div>
           )}
           <div className="space-y-1.5">
-            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> Last Name <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><User className="h-3 w-3 text-primary" /> {lbl("lastName", "Last Name")} <span className="text-destructive">*</span></Label>
             <div className="relative">
               <User className={fieldIcon} />
               <Input name="lastname" required maxLength={100} value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" className={inputCls} />
@@ -488,7 +488,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         {/* Expected Close Date */}
         {f.expectedClose.visible && (
           <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-            <Label className={labelCls}><Calendar className="h-3.5 w-3.5 text-primary" /> Expected Close Date {f.expectedClose.required && <span className="text-destructive">*</span>}</Label>
+            <Label className={labelCls}><Calendar className="h-3.5 w-3.5 text-primary" /> {lbl("expectedClose", "Expected Close Date")} {f.expectedClose.required && <span className="text-destructive">*</span>}</Label>
             <div className="relative">
               <Calendar className={fieldIcon} />
               <Input name="expected_close" type="date" required={f.expectedClose.required} value={expectedClose} onChange={(e) => setExpectedClose(e.target.value)} className={inputCls} />
@@ -498,7 +498,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
 
         {/* WhatsApp */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Phone className="h-3.5 w-3.5 text-primary" /> WhatsApp Number <span className="text-destructive">*</span></Label>
+          <Label className={labelCls}><Phone className="h-3.5 w-3.5 text-primary" /> {lbl("whatsapp", "WhatsApp Number")} <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Phone className={fieldIcon} />
             <Input name="whatsapp" required maxLength={15} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+91 XXXXX XXXXX" className={inputCls} />
@@ -509,7 +509,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         {f.phoneNumber.visible && (
           <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> Phone Number {f.phoneNumber.required && <span className="text-destructive">*</span>}</Label>
+              <Label className={labelCls}><Phone className="h-3 w-3 text-primary" /> {lbl("phoneNumber", "Phone Number")} {f.phoneNumber.required && <span className="text-destructive">*</span>}</Label>
               <div className="relative">
                 <Phone className={fieldIcon} />
                 <Input name="phone_number" required={f.phoneNumber.required} maxLength={15} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone number" className={inputCls} />
@@ -528,7 +528,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
               disabled={locating}
               className="w-full gap-2 h-10 text-xs font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-200">
               {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
-              {locating ? "Detecting Location…" : coords ? "📍 Location Captured — Re-detect" : "📍 Get My Location"}
+              {locating ? "Detecting Location…" : coords ? `📍 ${lbl("getLocation", "Get My Location")} — Re-detect` : `📍 ${lbl("getLocation", "Get My Location")}`}
             </Button>
             {coords &&
               <div className="mt-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30 space-y-1.5">
@@ -559,7 +559,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         {/* BIZ Area & Distance */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className={f.distance.visible ? "grid grid-cols-2 gap-3" : ""}>
           <div className="space-y-1.5">
-            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> BIZ Area <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> {lbl("bizArea", "BIZ Area")} <span className="text-destructive">*</span></Label>
             <Select value={bizArea} onValueChange={setBizArea}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -569,7 +569,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
           </div>
           {f.distance.visible && (
             <div className="space-y-1.5">
-              <Label className={labelCls}><Navigation className="h-3 w-3 text-primary" /> Distance {f.distance.required && <span className="text-destructive">*</span>}</Label>
+              <Label className={labelCls}><Navigation className="h-3 w-3 text-primary" /> {lbl("distance", "Distance")} {f.distance.required && <span className="text-destructive">*</span>}</Label>
               <Select value={distance} onValueChange={setDistance}>
                 <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
                 <SelectContent className="border-border/50 backdrop-blur-md bg-background/95 max-h-48">
@@ -583,7 +583,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         {/* Service & Scans */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className={f.scans.visible ? "grid grid-cols-2 gap-3" : ""}>
           <div className="space-y-1.5">
-            <Label className={labelCls}><Wrench className="h-3 w-3 text-primary" /> Service <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><Wrench className="h-3 w-3 text-primary" /> {lbl("service", "Service")} <span className="text-destructive">*</span></Label>
             <Select value={serviceNeeded} onValueChange={setServiceNeeded}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -593,7 +593,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
           </div>
           {f.scans.visible && (
             <div className="space-y-1.5">
-              <Label className={labelCls}><ScanLine className="h-3 w-3 text-primary" /> Scans {f.scans.required && <span className="text-destructive">*</span>}</Label>
+              <Label className={labelCls}><ScanLine className="h-3 w-3 text-primary" /> {lbl("scans", "Scans")} {f.scans.required && <span className="text-destructive">*</span>}</Label>
               <Select value={numScans} onValueChange={setNumScans}>
                 <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
                 <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -607,7 +607,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         {/* Area Type */}
         {f.areaType.visible && (
           <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-            <Label className={labelCls}><LandPlot className="h-3.5 w-3.5 text-primary" /> Area Type {f.areaType.required && <span className="text-destructive">*</span>}</Label>
+            <Label className={labelCls}><LandPlot className="h-3.5 w-3.5 text-primary" /> {lbl("areaType", "Area Type")} {f.areaType.required && <span className="text-destructive">*</span>}</Label>
             <Select value={areaType} onValueChange={setAreaType}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className="border-border/50 backdrop-blur-md bg-background/95">
@@ -619,7 +619,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
 
         {/* Total Area — Unit selector + input + conversions */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Ruler className="h-3.5 w-3.5 text-primary" /> Total Area <span className="text-destructive">*</span></Label>
+          <Label className={labelCls}><Ruler className="h-3.5 w-3.5 text-primary" /> {lbl("totalArea", "Total Area")} <span className="text-destructive">*</span></Label>
           <div className="flex gap-2">
             <Select value={areaUnit} onValueChange={(v) => setAreaUnit(v as AreaUnit)}>
               <SelectTrigger className={`${selectCls} w-[100px] shrink-0`}><SelectValue /></SelectTrigger>
@@ -652,7 +652,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
 
         {/* Description (auto-filled) */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><MessageSquare className="h-3.5 w-3.5 text-primary" /> Description <span className="text-destructive">*</span></Label>
+          <Label className={labelCls}><MessageSquare className="h-3.5 w-3.5 text-primary" /> {lbl("description", "Description")} <span className="text-destructive">*</span></Label>
           <Textarea
             name="description"
             required
@@ -667,20 +667,20 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
 
         {/* Mailing Address */}
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><Home className="h-3.5 w-3.5 text-primary" /> Mailing Street <span className="text-destructive">*</span></Label>
+          <Label className={labelCls}><Home className="h-3.5 w-3.5 text-primary" /> {lbl("mailingStreet", "Mailing Street")} <span className="text-destructive">*</span></Label>
           <Textarea name="mailingstreet" required value={mailingStreet} onChange={(e) => setMailingStreet(e.target.value)} placeholder="Street address (auto-filled from location)" rows={2} className="bg-background/60 border-border/50 backdrop-blur-sm transition-all duration-200 focus:bg-background focus:border-primary/40 hover:border-primary/30 text-sm resize-none" />
         </motion.div>
 
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className={labelCls}><Building2 className="h-3 w-3 text-primary" /> Mailing City <span className="text-destructive">*</span></Label>
+            <Label className={labelCls}><Building2 className="h-3 w-3 text-primary" /> {lbl("mailingCity", "Mailing City")} <span className="text-destructive">*</span></Label>
             <div className="relative">
               <Building2 className={fieldIcon} />
               <Input name="mailingcity" required value={mailingCity} onChange={(e) => setMailingCity(e.target.value)} placeholder="City" className={inputCls} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> State</Label>
+            <Label className={labelCls}><MapPin className="h-3 w-3 text-primary" /> {lbl("mailingState", "State")}</Label>
             <div className="relative">
               <MapPin className={fieldIcon} />
               <Input name="mailingstate" value={mailingState} onChange={(e) => setMailingState(e.target.value)} placeholder="State" className={inputCls} />
@@ -689,7 +689,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
         </motion.div>
 
         <motion.div custom={idx++} variants={stagger} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label className={labelCls}><MailIcon className="h-3.5 w-3.5 text-primary" /> PIN Code <span className="text-destructive">*</span></Label>
+          <Label className={labelCls}><MailIcon className="h-3.5 w-3.5 text-primary" /> {lbl("pinCode", "PIN Code")} <span className="text-destructive">*</span></Label>
           <div className="relative">
             <MailIcon className={fieldIcon} />
             <Input name="mailingpobox" required value={mailingPoBox} onChange={(e) => setMailingPoBox(e.target.value)} placeholder="PIN Code" className={inputCls} />
@@ -715,7 +715,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
             className="w-full gap-2.5 h-12 font-bold text-sm relative overflow-hidden bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-[0_4px_20px_-6px_hsl(var(--primary)/0.4)] hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 rounded-xl"
             disabled={isSubmitting || (!!turnstileSiteKey && !captchaToken)}>
             
-            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Send className="w-4 h-4" /> Submit Enquiry</>}
+            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : <><Send className="w-4 h-4" /> {lbl("submit", "Submit Enquiry")}</>}
           </Button>
         </motion.div>
       </form>
