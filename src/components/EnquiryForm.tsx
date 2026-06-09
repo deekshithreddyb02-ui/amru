@@ -84,6 +84,8 @@ function convertArea(value: number, from: AreaUnit): Record<AreaUnit, string> {
 interface EnquiryFormProps {
   serviceTitle: string;
   onSuccess: () => void;
+  configOverride?: import("@/hooks/useEnquiryFormConfig").EnquiryFormConfig;
+  previewMode?: boolean;
 }
 
 const stagger = {
