@@ -349,6 +349,7 @@ const EnquiryForm = ({ serviceTitle, onSuccess, configOverride, previewMode }: E
       toast.info("Preview mode — submission is disabled.");
       return;
     }
+    if (!lastName.trim() || !whatsapp.trim() || !description.trim() || !mailingStreet.trim() || !mailingCity.trim() || !mailingPoBox.trim() || !areaValue.trim()) {
       toast.error("Please fill in all required fields.");
       return;
     }
