@@ -100,6 +100,7 @@ export const GROUPS: ModuleGroup[] = [
       { to: "website-settings/certifications", label: "Certifications",     icon: Award },
       { to: "website-settings/offices",        label: "Office Locations",   icon: MapPin },
       { to: "website-settings/contacts",       label: "Contact Info",       icon: Phone },
+      { to: "website-settings/enquiry-form",   label: "Enquiry Form",       icon: FormInput },
       { to: "website-settings/crm-config",     label: "CRM Config",         icon: ExternalLink },
       { to: "website-settings/login-security", label: "Login Security",     icon: Shield },
       { to: "website-settings/legal",          label: "Legal Notice",       icon: Scale },
