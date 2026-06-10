@@ -78,6 +78,8 @@ const splitName = (n: string) => {
 const PAGE_SIZE = 20;
 
 const CrmLeads = () => {
+  const enquiryCfg = useEnquiryFormConfig();
+  const elbl = (k: keyof typeof DEFAULT_LABELS, fb: string) => enquiryCfg.labels?.[k]?.trim() || fb;
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
