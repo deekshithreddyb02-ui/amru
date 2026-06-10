@@ -80,6 +80,10 @@ const PAGE_SIZE = 20;
 const CrmLeads = () => {
   const enquiryCfg = useEnquiryFormConfig();
   const elbl = (k: keyof typeof DEFAULT_LABELS, fb: string) => enquiryCfg.labels?.[k]?.trim() || fb;
+  const eph = (k: keyof typeof DEFAULT_LABELS, fb = "") => enquiryCfg.placeholders?.[k]?.trim() || fb;
+  const lf = enquiryCfg.leadFields || ({} as any);
+  const lfv = (k: "email" | "phone" | "city" | "state" | "serviceNeeded" | "notes") => lf?.[k]?.visible !== false;
+  const lfr = (k: "email" | "phone" | "city" | "state" | "serviceNeeded" | "notes") => !!lf?.[k]?.required;
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
