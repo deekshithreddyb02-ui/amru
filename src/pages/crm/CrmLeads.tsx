@@ -38,6 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { exportCsv } from "@/lib/csv";
+import { useEnquiryFormConfig, DEFAULT_LABELS } from "@/hooks/useEnquiryFormConfig";
 import LeadSidePanel from "@/components/crm/LeadSidePanel";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
@@ -77,6 +78,8 @@ const splitName = (n: string) => {
 const PAGE_SIZE = 20;
 
 const CrmLeads = () => {
+  const enquiryCfg = useEnquiryFormConfig();
+  const elbl = (k: keyof typeof DEFAULT_LABELS, fb: string) => enquiryCfg.labels?.[k]?.trim() || fb;
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -717,7 +720,7 @@ const CrmLeads = () => {
           </DialogHeader>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
             <div className="space-y-1.5 sm:col-span-2">
-              <Label>Full Name *</Label>
+              <Label>{elbl("firstName", "Full Name")} *</Label>
               <Input value={newLead.full_name} onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })} autoFocus />
             </div>
             <div className="space-y-1.5">
@@ -725,23 +728,23 @@ const CrmLeads = () => {
               <Input type="email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label>Phone</Label>
+              <Label>{elbl("phoneNumber", "Phone")}</Label>
               <Input value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label>City</Label>
+              <Label>{elbl("mailingCity", "City")}</Label>
               <Input value={newLead.city} onChange={(e) => setNewLead({ ...newLead, city: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label>State</Label>
+              <Label>{elbl("mailingState", "State")}</Label>
               <Input value={newLead.state} onChange={(e) => setNewLead({ ...newLead, state: e.target.value })} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label>Service Needed</Label>
+              <Label>{elbl("service", "Service Needed")}</Label>
               <Input value={newLead.service_needed} onChange={(e) => setNewLead({ ...newLead, service_needed: e.target.value })} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label>Notes</Label>
+              <Label>{elbl("description", "Notes")}</Label>
               <Input value={newLead.notes} onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })} />
             </div>
           </div>
@@ -777,7 +780,7 @@ const CrmLeads = () => {
                 load();
               }}
             >
-              {adding ? "Saving…" : "Create Lead"}
+              {adding ? "Saving…" : elbl("submit", "Create Lead")}
             </Button>
           </DialogFooter>
         </DialogContent>
