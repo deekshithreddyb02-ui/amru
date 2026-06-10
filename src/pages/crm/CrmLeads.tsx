@@ -80,6 +80,10 @@ const PAGE_SIZE = 20;
 const CrmLeads = () => {
   const enquiryCfg = useEnquiryFormConfig();
   const elbl = (k: keyof typeof DEFAULT_LABELS, fb: string) => enquiryCfg.labels?.[k]?.trim() || fb;
+  const eph = (k: keyof typeof DEFAULT_LABELS, fb = "") => enquiryCfg.placeholders?.[k]?.trim() || fb;
+  const lf = enquiryCfg.leadFields || ({} as any);
+  const lfv = (k: "email" | "phone" | "city" | "state" | "serviceNeeded" | "notes") => lf?.[k]?.visible !== false;
+  const lfr = (k: "email" | "phone" | "city" | "state" | "serviceNeeded" | "notes") => !!lf?.[k]?.required;
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -720,38 +724,89 @@ const CrmLeads = () => {
           </DialogHeader>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
             <div className="space-y-1.5 sm:col-span-2">
-              <Label>{elbl("firstName", "Full Name")} *</Label>
-              <Input value={newLead.full_name} onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })} autoFocus />
+              <Label>{elbl("fullName", "Full Name")} *</Label>
+              <Input
+                value={newLead.full_name}
+                onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })}
+                placeholder={eph("fullName", "Enter full name")}
+                autoFocus
+              />
             </div>
-            <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input type="email" value={newLead.email} onChange={(e) => setNewLead({ ...newLead, email: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{elbl("phoneNumber", "Phone")}</Label>
-              <Input value={newLead.phone} onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{elbl("mailingCity", "City")}</Label>
-              <Input value={newLead.city} onChange={(e) => setNewLead({ ...newLead, city: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{elbl("mailingState", "State")}</Label>
-              <Input value={newLead.state} onChange={(e) => setNewLead({ ...newLead, state: e.target.value })} />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label>{elbl("service", "Service Needed")}</Label>
-              <Input value={newLead.service_needed} onChange={(e) => setNewLead({ ...newLead, service_needed: e.target.value })} />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label>{elbl("description", "Notes")}</Label>
-              <Input value={newLead.notes} onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })} />
-            </div>
+            {lfv("email") && (
+              <div className="space-y-1.5">
+                <Label>{elbl("email", "Email")}{lfr("email") && " *"}</Label>
+                <Input
+                  type="email"
+                  value={newLead.email}
+                  onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
+                  placeholder={eph("email", "name@example.com")}
+                />
+              </div>
+            )}
+            {lfv("phone") && (
+              <div className="space-y-1.5">
+                <Label>{elbl("phoneNumber", "Phone")}{lfr("phone") && " *"}</Label>
+                <Input
+                  value={newLead.phone}
+                  onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
+                  placeholder={eph("phoneNumber", "Phone")}
+                />
+              </div>
+            )}
+            {lfv("city") && (
+              <div className="space-y-1.5">
+                <Label>{elbl("mailingCity", "City")}{lfr("city") && " *"}</Label>
+                <Input
+                  value={newLead.city}
+                  onChange={(e) => setNewLead({ ...newLead, city: e.target.value })}
+                  placeholder={eph("mailingCity", "City")}
+                />
+              </div>
+            )}
+            {lfv("state") && (
+              <div className="space-y-1.5">
+                <Label>{elbl("mailingState", "State")}{lfr("state") && " *"}</Label>
+                <Input
+                  value={newLead.state}
+                  onChange={(e) => setNewLead({ ...newLead, state: e.target.value })}
+                  placeholder={eph("mailingState", "State")}
+                />
+              </div>
+            )}
+            {lfv("serviceNeeded") && (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{elbl("service", "Service Needed")}{lfr("serviceNeeded") && " *"}</Label>
+                <Input
+                  value={newLead.service_needed}
+                  onChange={(e) => setNewLead({ ...newLead, service_needed: e.target.value })}
+                  placeholder={eph("service", "e.g. Groundwater Survey")}
+                />
+              </div>
+            )}
+            {lfv("notes") && (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{elbl("description", "Notes")}{lfr("notes") && " *"}</Label>
+                <Input
+                  value={newLead.notes}
+                  onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })}
+                  placeholder={eph("description", "Additional notes")}
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAddOpen(false)} disabled={adding}>Cancel</Button>
             <Button
-              disabled={adding || !newLead.full_name.trim()}
+              disabled={
+                adding ||
+                !newLead.full_name.trim() ||
+                (lfv("email") && lfr("email") && !newLead.email.trim()) ||
+                (lfv("phone") && lfr("phone") && !newLead.phone.trim()) ||
+                (lfv("city") && lfr("city") && !newLead.city.trim()) ||
+                (lfv("state") && lfr("state") && !newLead.state.trim()) ||
+                (lfv("serviceNeeded") && lfr("serviceNeeded") && !newLead.service_needed.trim()) ||
+                (lfv("notes") && lfr("notes") && !newLead.notes.trim())
+              }
               onClick={async () => {
                 setAdding(true);
                 const { data: { session } } = await supabase.auth.getSession();

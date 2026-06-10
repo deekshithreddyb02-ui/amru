@@ -14,6 +14,8 @@ export type EnquiryLabelKey =
   | "intro"
   | "firstName"
   | "lastName"
+  | "fullName"
+  | "email"
   | "expectedClose"
   | "whatsapp"
   | "phoneNumber"
@@ -35,6 +37,8 @@ export const DEFAULT_LABELS: Record<EnquiryLabelKey, string> = {
   intro: "",
   firstName: "First Name",
   lastName: "Last Name",
+  fullName: "Full Name",
+  email: "Email",
   expectedClose: "Expected Close Date",
   whatsapp: "WhatsApp Number",
   phoneNumber: "Phone Number",
@@ -53,6 +57,33 @@ export const DEFAULT_LABELS: Record<EnquiryLabelKey, string> = {
   submit: "Submit Enquiry",
 };
 
+export const DEFAULT_PLACEHOLDERS: Partial<Record<EnquiryLabelKey, string>> = {
+  fullName: "Enter customer's full name",
+  email: "name@example.com",
+  phoneNumber: "+91 98765 43210",
+  mailingCity: "City",
+  mailingState: "State",
+  service: "e.g. Groundwater Survey",
+  description: "Additional notes…",
+};
+
+export type LeadDialogFieldKey =
+  | "email"
+  | "phone"
+  | "city"
+  | "state"
+  | "serviceNeeded"
+  | "notes";
+
+export const DEFAULT_LEAD_FIELDS: Record<LeadDialogFieldKey, { visible: boolean; required: boolean }> = {
+  email:         { visible: true, required: false },
+  phone:         { visible: true, required: false },
+  city:          { visible: true, required: false },
+  state:         { visible: true, required: false },
+  serviceNeeded: { visible: true, required: false },
+  notes:         { visible: true, required: false },
+};
+
 export type EnquiryRoutingKey =
   | "Maharashtra"
   | "Telangana"
@@ -66,6 +97,8 @@ export type EnquiryFormConfig = {
   thank_you: string;
   fields: Record<EnquiryFieldKey, { visible: boolean; required: boolean }>;
   labels: Record<EnquiryLabelKey, string>;
+  placeholders: Partial<Record<EnquiryLabelKey, string>>;
+  leadFields: Record<LeadDialogFieldKey, { visible: boolean; required: boolean }>;
   routing?: Record<EnquiryRoutingKey, string>;
   routing_assignees?: Record<EnquiryRoutingKey, string[]>;
 };
@@ -83,6 +116,8 @@ const DEFAULTS: EnquiryFormConfig = {
     getLocation:   { visible: true, required: false },
   },
   labels: DEFAULT_LABELS,
+  placeholders: DEFAULT_PLACEHOLDERS,
+  leadFields: DEFAULT_LEAD_FIELDS,
 };
 
 let cache: EnquiryFormConfig | null = null;
@@ -104,6 +139,8 @@ export const useEnquiryFormConfig = () => {
           thank_you: meta.thank_you ?? DEFAULTS.thank_you,
           fields: { ...DEFAULTS.fields, ...(meta.fields || {}) } as EnquiryFormConfig["fields"],
           labels: { ...DEFAULT_LABELS, ...(meta.labels || {}) } as EnquiryFormConfig["labels"],
+          placeholders: { ...DEFAULT_PLACEHOLDERS, ...(meta.placeholders || {}) },
+          leadFields: { ...DEFAULT_LEAD_FIELDS, ...(meta.leadFields || {}) } as EnquiryFormConfig["leadFields"],
           routing: meta.routing,
           routing_assignees: meta.routing_assignees,
         };

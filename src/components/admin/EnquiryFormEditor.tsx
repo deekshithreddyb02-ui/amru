@@ -17,8 +17,11 @@ import { toast } from "@/hooks/use-toast";
 import EnquiryForm from "@/components/EnquiryForm";
 import {
   DEFAULT_LABELS,
+  DEFAULT_PLACEHOLDERS,
+  DEFAULT_LEAD_FIELDS,
   type EnquiryFormConfig,
   type EnquiryLabelKey,
+  type LeadDialogFieldKey,
 } from "@/hooks/useEnquiryFormConfig";
 
 type FieldKey =
@@ -45,6 +48,8 @@ type EnquiryFormCfg = {
   thank_you: string;
   fields: Record<FieldKey, FieldCfg>;
   labels: Record<EnquiryLabelKey, string>;
+  placeholders: Partial<Record<EnquiryLabelKey, string>>;
+  leadFields: Record<LeadDialogFieldKey, FieldCfg>;
   routing: Record<RoutingKey, string>;
   routing_assignees: Record<RoutingKey, string[]>;
 };
@@ -62,6 +67,8 @@ const DEFAULT_CFG: EnquiryFormCfg = {
     getLocation:   { visible: true, required: false },
   },
   labels: DEFAULT_LABELS,
+  placeholders: DEFAULT_PLACEHOLDERS,
+  leadFields: DEFAULT_LEAD_FIELDS,
   routing: {
     Maharashtra:   "mh",
     Telangana:     "hyd",
@@ -90,6 +97,15 @@ const FIELD_LABELS: Record<FieldKey, string> = {
   getLocation: "Get My Location button",
 };
 
+const LEAD_FIELD_LABELS: Record<LeadDialogFieldKey, string> = {
+  email: "Email",
+  phone: "Phone",
+  city: "City",
+  state: "State",
+  serviceNeeded: "Service Needed",
+  notes: "Notes",
+};
+
 const ROUTING_LABELS: Record<RoutingKey, string> = {
   Maharashtra: "Maharashtra",
   Telangana: "Telangana",
@@ -100,8 +116,10 @@ const ROUTING_LABELS: Record<RoutingKey, string> = {
 };
 
 const LABEL_SECTIONS: { key: EnquiryLabelKey; hint?: string }[] = [
+  { key: "fullName", hint: "Add Lead dialog" },
   { key: "firstName" },
   { key: "lastName" },
+  { key: "email" },
   { key: "expectedClose" },
   { key: "whatsapp" },
   { key: "phoneNumber" },
@@ -164,7 +182,6 @@ const EnquiryFormEditor = () => {
         full_name: profByUser.get(r.user_id)?.full_name ?? null,
         username: profByUser.get(r.user_id)?.username ?? null,
       }));
-      // De-dup users keeping highest priority role
       const order = ["super_admin", "admin", "crm_admin", "employee"];
       const byUser = new Map<string, StaffUser>();
       for (const s of staffList) {
@@ -181,6 +198,8 @@ const EnquiryFormEditor = () => {
           thank_you: meta.thank_you ?? DEFAULT_CFG.thank_you,
           fields: { ...DEFAULT_CFG.fields, ...(meta.fields || {}) } as Record<FieldKey, FieldCfg>,
           labels: { ...DEFAULT_LABELS, ...(meta.labels || {}) } as Record<EnquiryLabelKey, string>,
+          placeholders: { ...DEFAULT_PLACEHOLDERS, ...(meta.placeholders || {}) },
+          leadFields: { ...DEFAULT_LEAD_FIELDS, ...(meta.leadFields || {}) } as Record<LeadDialogFieldKey, FieldCfg>,
           routing: { ...DEFAULT_CFG.routing, ...(meta.routing || {}) } as Record<RoutingKey, string>,
           routing_assignees: { ...DEFAULT_CFG.routing_assignees, ...(meta.routing_assignees || {}) } as Record<RoutingKey, string[]>,
         });
@@ -211,8 +230,15 @@ const EnquiryFormEditor = () => {
   };
 
   const previewCfg: EnquiryFormConfig = useMemo(
-    () => ({ intro: cfg.intro, thank_you: cfg.thank_you, fields: cfg.fields, labels: cfg.labels }),
-    [cfg.intro, cfg.thank_you, cfg.fields, cfg.labels]
+    () => ({
+      intro: cfg.intro,
+      thank_you: cfg.thank_you,
+      fields: cfg.fields,
+      labels: cfg.labels,
+      placeholders: cfg.placeholders,
+      leadFields: cfg.leadFields,
+    }),
+    [cfg.intro, cfg.thank_you, cfg.fields, cfg.labels, cfg.placeholders, cfg.leadFields]
   );
 
   if (loading) {
@@ -226,11 +252,17 @@ const EnquiryFormEditor = () => {
   const setField = (key: FieldKey, patch: Partial<FieldCfg>) =>
     setCfg((c) => ({ ...c, fields: { ...c.fields, [key]: { ...c.fields[key], ...patch } } }));
 
+  const setLeadField = (key: LeadDialogFieldKey, patch: Partial<FieldCfg>) =>
+    setCfg((c) => ({ ...c, leadFields: { ...c.leadFields, [key]: { ...c.leadFields[key], ...patch } } }));
+
   const setRouting = (key: RoutingKey, slug: string) =>
     setCfg((c) => ({ ...c, routing: { ...c.routing, [key]: slug } }));
 
   const setLabel = (key: EnquiryLabelKey, value: string) =>
     setCfg((c) => ({ ...c, labels: { ...c.labels, [key]: value } }));
+
+  const setPlaceholder = (key: EnquiryLabelKey, value: string) =>
+    setCfg((c) => ({ ...c, placeholders: { ...c.placeholders, [key]: value } }));
 
   const toggleAssignee = (key: RoutingKey, userId: string) =>
     setCfg((c) => {
@@ -259,20 +291,31 @@ const EnquiryFormEditor = () => {
 
         <Card className="p-5 space-y-4">
           <div>
-            <h3 className="font-semibold">Field labels</h3>
-            <p className="text-xs text-muted-foreground">Rename any label shown on the public enquiry form.</p>
+            <h3 className="font-semibold">Field labels &amp; placeholders</h3>
+            <p className="text-xs text-muted-foreground">Rename labels and customize input placeholders. Used by the public enquiry form and the CRM Add Lead dialog.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {LABEL_SECTIONS.map(({ key, hint }) => (
-              <div key={key} className="space-y-1">
-                <Label className="text-xs capitalize">
-                  {key} {hint && <span className="text-muted-foreground normal-case">({hint})</span>}
-                </Label>
-                <Input
-                  value={cfg.labels[key] ?? ""}
-                  onChange={(e) => setLabel(key, e.target.value)}
-                  placeholder={DEFAULT_LABELS[key]}
-                />
+              <div key={key} className="space-y-2 rounded-md border border-border/50 p-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {key} {hint && <span className="normal-case font-normal">({hint})</span>}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Label</Label>
+                  <Input
+                    value={cfg.labels[key] ?? ""}
+                    onChange={(e) => setLabel(key, e.target.value)}
+                    placeholder={DEFAULT_LABELS[key]}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Placeholder</Label>
+                  <Input
+                    value={cfg.placeholders[key] ?? ""}
+                    onChange={(e) => setPlaceholder(key, e.target.value)}
+                    placeholder={DEFAULT_PLACEHOLDERS[key] ?? "Input placeholder…"}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -280,7 +323,7 @@ const EnquiryFormEditor = () => {
 
         <Card className="p-5 space-y-4">
           <div>
-            <h3 className="font-semibold">Optional fields</h3>
+            <h3 className="font-semibold">Optional fields — Public enquiry form</h3>
             <p className="text-xs text-muted-foreground">Toggle which optional fields appear on the public form.</p>
           </div>
           <div className="divide-y">
@@ -297,6 +340,34 @@ const EnquiryFormEditor = () => {
                       checked={cfg.fields[k].required}
                       onCheckedChange={(v) => setField(k, { required: v })}
                       disabled={!cfg.fields[k].visible}
+                    />
+                    Required
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-5 space-y-4">
+          <div>
+            <h3 className="font-semibold">Optional fields — CRM Add Lead dialog</h3>
+            <p className="text-xs text-muted-foreground">Choose which fields appear in the in-CRM "Add Lead" dialog. Full Name is always required.</p>
+          </div>
+          <div className="divide-y">
+            {(Object.keys(LEAD_FIELD_LABELS) as LeadDialogFieldKey[]).map((k) => (
+              <div key={k} className="flex items-center justify-between py-3 gap-4">
+                <div className="text-sm font-medium">{LEAD_FIELD_LABELS[k]}</div>
+                <div className="flex items-center gap-6">
+                  <label className="flex items-center gap-2 text-xs">
+                    <Switch checked={cfg.leadFields[k].visible} onCheckedChange={(v) => setLeadField(k, { visible: v })} />
+                    Visible
+                  </label>
+                  <label className="flex items-center gap-2 text-xs">
+                    <Switch
+                      checked={cfg.leadFields[k].required}
+                      onCheckedChange={(v) => setLeadField(k, { required: v })}
+                      disabled={!cfg.leadFields[k].visible}
                     />
                     Required
                   </label>
