@@ -103,7 +103,29 @@ const CrmLeads = () => {
   const [saveShared, setSaveShared] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [newLead, setNewLead] = useState({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
+  const emptyLead = {
+    // Lead Details
+    biz_area: "", service_needed: "",
+    first_name_salutation: "None", first_name: "", last_name: "",
+    whatsapp: "", primary_phone: "", mobile_phone: "", primary_email: "",
+    area_type: "OPEN PLOT", total_area: "Gunta:\nAcres:\nSq.Yrds:\nSq.Ft:",
+    expected_close: "", distance_km: "0 - 30 KM",
+    shape: "Serial", num_scans: "1",
+    biz_cost: "", company: "", gstin: "", industry: "",
+    designation: "Rep.", annual_revenue: "",
+    lead_source: "", num_employees: "",
+    secondary_email: "", fax: "",
+    website: "", email_opt_out: false,
+    lead_status: "Contacted", rating: "",
+    assigned_to: "",
+    // Address Details
+    street: "", po_box: "", postal_code: "", city: "PUNE",
+    country: "INDIA", state: "Maharashtra", maps_location: "",
+    // Description
+    description: "GWS-",
+  };
+  const [newLead, setNewLead] = useState(emptyLead);
+  const updLead = (patch: Partial<typeof emptyLead>) => setNewLead((p) => ({ ...p, ...patch }));
   const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
 
@@ -716,110 +738,298 @@ const CrmLeads = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add new lead */}
+      {/* Add new lead - Vtiger-style layout */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Add Lead</DialogTitle>
+        <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-6 pt-5 pb-3 border-b">
+            <DialogTitle className="text-base">Add Lead</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label>{elbl("fullName", "Full Name")} *</Label>
-              <Input
-                value={newLead.full_name}
-                onChange={(e) => setNewLead({ ...newLead, full_name: e.target.value })}
-                placeholder={eph("fullName", "Enter full name")}
-                autoFocus
-              />
-            </div>
-            {lfv("email") && (
-              <div className="space-y-1.5">
-                <Label>{elbl("email", "Email")}{lfr("email") && " *"}</Label>
-                <Input
-                  type="email"
-                  value={newLead.email}
-                  onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
-                  placeholder={eph("email", "name@example.com")}
-                />
+
+          {(() => {
+            const L = newLead;
+            const u = updLead;
+            const inputCls = "h-9 w-full rounded-sm border border-input bg-background px-2 text-[13px] focus:outline-none focus:ring-1 focus:ring-ring";
+            const Row = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
+              <div className="grid grid-cols-[140px_1fr] items-start gap-3 py-1.5">
+                <div className="text-[13px] text-foreground pt-2">
+                  {label} {required && <span className="text-red-500">*</span>}
+                </div>
+                <div>{children}</div>
               </div>
-            )}
-            {lfv("phone") && (
-              <div className="space-y-1.5">
-                <Label>{elbl("phoneNumber", "Phone")}{lfr("phone") && " *"}</Label>
-                <Input
-                  value={newLead.phone}
-                  onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
-                  placeholder={eph("phoneNumber", "Phone")}
-                />
+            );
+            const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+              <div>
+                <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">{title}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 px-6 py-3 bg-white">
+                  {children}
+                </div>
               </div>
-            )}
-            {lfv("city") && (
-              <div className="space-y-1.5">
-                <Label>{elbl("mailingCity", "City")}{lfr("city") && " *"}</Label>
-                <Input
-                  value={newLead.city}
-                  onChange={(e) => setNewLead({ ...newLead, city: e.target.value })}
-                  placeholder={eph("mailingCity", "City")}
-                />
-              </div>
-            )}
-            {lfv("state") && (
-              <div className="space-y-1.5">
-                <Label>{elbl("mailingState", "State")}{lfr("state") && " *"}</Label>
-                <Input
-                  value={newLead.state}
-                  onChange={(e) => setNewLead({ ...newLead, state: e.target.value })}
-                  placeholder={eph("mailingState", "State")}
-                />
-              </div>
-            )}
-            {lfv("serviceNeeded") && (
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label>{elbl("service", "Service Needed")}{lfr("serviceNeeded") && " *"}</Label>
-                <Input
-                  value={newLead.service_needed}
-                  onChange={(e) => setNewLead({ ...newLead, service_needed: e.target.value })}
-                  placeholder={eph("service", "e.g. Groundwater Survey")}
-                />
-              </div>
-            )}
-            {lfv("notes") && (
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label>{elbl("description", "Notes")}{lfr("notes") && " *"}</Label>
-                <Input
-                  value={newLead.notes}
-                  onChange={(e) => setNewLead({ ...newLead, notes: e.target.value })}
-                  placeholder={eph("description", "Additional notes")}
-                />
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setAddOpen(false)} disabled={adding}>Cancel</Button>
+            );
+
+            return (
+              <>
+                <Section title="Lead Details">
+                  <Row label={elbl("bizArea", "BIZ Area")} required>
+                    <select className={inputCls} value={L.biz_area} onChange={(e) => u({ biz_area: e.target.value })}>
+                      <option value="">Select</option>
+                      <option>Maharashtra</option><option>Telangana</option>
+                      <option>Andhra Pradesh</option><option>Karnataka</option>
+                      <option>Other India</option><option>Other Country</option>
+                    </select>
+                  </Row>
+                  <Row label={elbl("service", "Service Needed")} required>
+                    <select className={inputCls} value={L.service_needed} onChange={(e) => u({ service_needed: e.target.value })}>
+                      <option value="">Select</option>
+                      <option>GWS</option><option>Geological Survey</option>
+                      <option>Soil Testing</option><option>Other</option>
+                    </select>
+                  </Row>
+
+                  <Row label={elbl("firstName", "First Name")} required>
+                    <div className="grid grid-cols-[90px_1fr] gap-2">
+                      <select className={inputCls} value={L.first_name_salutation} onChange={(e) => u({ first_name_salutation: e.target.value })}>
+                        <option>None</option><option>Mr.</option><option>Mrs.</option>
+                        <option>Ms.</option><option>Dr.</option>
+                      </select>
+                      <input className={inputCls} value={L.first_name} onChange={(e) => u({ first_name: e.target.value })} />
+                    </div>
+                  </Row>
+                  <Row label={elbl("lastName", "Last Name")} required>
+                    <input className={inputCls} value={L.last_name} onChange={(e) => u({ last_name: e.target.value })} />
+                  </Row>
+
+                  <Row label="WhatsApp Num" required>
+                    <input className={inputCls} value={L.whatsapp} onChange={(e) => u({ whatsapp: e.target.value })} />
+                  </Row>
+                  <Row label="Primary Phone" required>
+                    <input className={inputCls} value={L.primary_phone} onChange={(e) => u({ primary_phone: e.target.value })} />
+                  </Row>
+
+                  <Row label="Mobile Phone" required>
+                    <input className={inputCls} value={L.mobile_phone} onChange={(e) => u({ mobile_phone: e.target.value })} />
+                  </Row>
+                  <Row label="Primary Email">
+                    <input type="email" className={inputCls} value={L.primary_email} onChange={(e) => u({ primary_email: e.target.value })} />
+                  </Row>
+
+                  <Row label={elbl("areaType", "Area Type")} required>
+                    <select className={inputCls} value={L.area_type} onChange={(e) => u({ area_type: e.target.value })}>
+                      <option>OPEN PLOT</option><option>FARM LAND</option>
+                      <option>INDUSTRIAL</option><option>RESIDENTIAL</option>
+                    </select>
+                  </Row>
+                  <Row label={elbl("totalArea", "Total Area")} required>
+                    <textarea
+                      className={inputCls + " h-[88px] py-2 resize-y"}
+                      value={L.total_area}
+                      onChange={(e) => u({ total_area: e.target.value })}
+                    />
+                  </Row>
+
+                  <Row label={elbl("expectedClose", "Expected Close Date")} required>
+                    <input type="date" className={inputCls} value={L.expected_close} onChange={(e) => u({ expected_close: e.target.value })} />
+                  </Row>
+                  <Row label={elbl("distance", "Distance in KM")} required>
+                    <select className={inputCls} value={L.distance_km} onChange={(e) => u({ distance_km: e.target.value })}>
+                      <option>0 - 30 KM</option><option>30 - 60 KM</option>
+                      <option>60 - 100 KM</option><option>100+ KM</option>
+                    </select>
+                  </Row>
+
+                  <Row label="Shape">
+                    <select className={inputCls} value={L.shape} onChange={(e) => u({ shape: e.target.value })}>
+                      <option>Serial</option><option>Parallel</option><option>Mixed</option>
+                    </select>
+                  </Row>
+                  <Row label={elbl("scans", "Number of Scans")} required>
+                    <select className={inputCls} value={L.num_scans} onChange={(e) => u({ num_scans: e.target.value })}>
+                      {["1","2","3","4","5","6","7","8","9","10"].map((n) => <option key={n}>{n}</option>)}
+                    </select>
+                  </Row>
+
+                  <Row label="Total BIZ COST" required>
+                    <div className="grid grid-cols-[36px_1fr]">
+                      <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
+                      <input className={inputCls + " rounded-l-none"} value={L.biz_cost} onChange={(e) => u({ biz_cost: e.target.value })} placeholder="0.00" />
+                    </div>
+                  </Row>
+                  <Row label="Company">
+                    <input className={inputCls} value={L.company} onChange={(e) => u({ company: e.target.value })} />
+                  </Row>
+
+                  <Row label="GSTIN">
+                    <input className={inputCls} value={L.gstin} onChange={(e) => u({ gstin: e.target.value })} />
+                  </Row>
+                  <Row label="Industry">
+                    <select className={inputCls} value={L.industry} onChange={(e) => u({ industry: e.target.value })}>
+                      <option value="">Select an Option</option>
+                      <option>Agriculture</option><option>Construction</option>
+                      <option>Government</option><option>Real Estate</option><option>Other</option>
+                    </select>
+                  </Row>
+
+                  <Row label="Designation">
+                    <input className={inputCls} value={L.designation} onChange={(e) => u({ designation: e.target.value })} />
+                  </Row>
+                  <Row label="Annual Revenue">
+                    <div className="grid grid-cols-[36px_1fr]">
+                      <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
+                      <input className={inputCls + " rounded-l-none"} value={L.annual_revenue} onChange={(e) => u({ annual_revenue: e.target.value })} />
+                    </div>
+                  </Row>
+
+                  <Row label="Lead Source">
+                    <select className={inputCls} value={L.lead_source} onChange={(e) => u({ lead_source: e.target.value })}>
+                      <option value="">Select</option>
+                      <option>JDH</option><option>Website</option><option>Referral</option>
+                      <option>Walk-in</option><option>Campaign</option>
+                    </select>
+                  </Row>
+                  <Row label="Number of Employees">
+                    <input className={inputCls} value={L.num_employees} onChange={(e) => u({ num_employees: e.target.value })} />
+                  </Row>
+
+                  <Row label="Secondary Email">
+                    <input type="email" className={inputCls} value={L.secondary_email} onChange={(e) => u({ secondary_email: e.target.value })} />
+                  </Row>
+                  <Row label="Fax">
+                    <input className={inputCls} value={L.fax} onChange={(e) => u({ fax: e.target.value })} />
+                  </Row>
+
+                  <Row label="Website">
+                    <input className={inputCls} value={L.website} onChange={(e) => u({ website: e.target.value })} />
+                  </Row>
+                  <Row label="Email Opt Out">
+                    <input type="checkbox" checked={L.email_opt_out} onChange={(e) => u({ email_opt_out: e.target.checked })} className="h-4 w-4 mt-2.5" />
+                  </Row>
+
+                  <Row label="Lead Status">
+                    <select className={inputCls} value={L.lead_status} onChange={(e) => u({ lead_status: e.target.value })}>
+                      <option>Contacted</option><option>Attempted Contact</option>
+                      <option>Cold</option><option>Hot</option><option>Junk</option>
+                      <option>Qualified</option><option>Lost</option>
+                    </select>
+                  </Row>
+                  <Row label="Rating">
+                    <select className={inputCls} value={L.rating} onChange={(e) => u({ rating: e.target.value })}>
+                      <option value="">Select an Option</option>
+                      <option>Acquired</option><option>Active</option>
+                      <option>Market Failed</option><option>Project Cancelled</option>
+                      <option>Shutdown</option>
+                    </select>
+                  </Row>
+
+                  <Row label="Assigned To" required>
+                    <input className={inputCls} value={L.assigned_to} onChange={(e) => u({ assigned_to: e.target.value })} placeholder="Type a name…" />
+                  </Row>
+                </Section>
+
+                <Section title="Address Details">
+                  <Row label={elbl("mailingStreet", "Street")} required>
+                    <textarea className={inputCls + " h-[88px] py-2 resize-y"} value={L.street} onChange={(e) => u({ street: e.target.value })} />
+                  </Row>
+                  <Row label="PO Box">
+                    <input className={inputCls} value={L.po_box} onChange={(e) => u({ po_box: e.target.value })} />
+                  </Row>
+
+                  <Row label="Postal Code">
+                    <input className={inputCls} value={L.postal_code} onChange={(e) => u({ postal_code: e.target.value })} />
+                  </Row>
+                  <Row label={elbl("mailingCity", "City")} required>
+                    <input className={inputCls} value={L.city} onChange={(e) => u({ city: e.target.value })} />
+                  </Row>
+
+                  <Row label="Country">
+                    <input className={inputCls} value={L.country} onChange={(e) => u({ country: e.target.value })} />
+                  </Row>
+                  <Row label={elbl("mailingState", "State")} required>
+                    <input className={inputCls} value={L.state} onChange={(e) => u({ state: e.target.value })} />
+                  </Row>
+
+                  <Row label="Maps Location">
+                    <input className={inputCls} value={L.maps_location} onChange={(e) => u({ maps_location: e.target.value })} />
+                  </Row>
+                </Section>
+
+                <div className="bg-white">
+                  <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">Description Details</div>
+                  <div className="px-6 py-3">
+                    <Row label={elbl("description", "Description")} required>
+                      <textarea
+                        className={inputCls + " h-[88px] py-2 resize-y"}
+                        value={L.description}
+                        onChange={(e) => u({ description: e.target.value })}
+                      />
+                    </Row>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+
+          <DialogFooter className="px-6 py-3 border-t bg-muted/30 sm:justify-center gap-4">
             <Button
+              className="bg-green-600 hover:bg-green-700 text-white px-8"
               disabled={
                 adding ||
-                !newLead.full_name.trim() ||
-                (lfv("email") && lfr("email") && !newLead.email.trim()) ||
-                (lfv("phone") && lfr("phone") && !newLead.phone.trim()) ||
-                (lfv("city") && lfr("city") && !newLead.city.trim()) ||
-                (lfv("state") && lfr("state") && !newLead.state.trim()) ||
-                (lfv("serviceNeeded") && lfr("serviceNeeded") && !newLead.service_needed.trim()) ||
-                (lfv("notes") && lfr("notes") && !newLead.notes.trim())
+                !newLead.first_name.trim() ||
+                !newLead.last_name.trim() ||
+                !newLead.biz_area ||
+                !newLead.service_needed ||
+                !newLead.assigned_to.trim()
               }
               onClick={async () => {
                 setAdding(true);
                 const { data: { session } } = await supabase.auth.getSession();
+                const L = newLead;
+                const fullName = [L.first_name_salutation !== "None" ? L.first_name_salutation : "", L.first_name, L.last_name]
+                  .filter(Boolean).join(" ").trim();
+                const extras: [string, string][] = ([
+                  ["Mobile Phone", L.mobile_phone],
+                  ["Secondary Email", L.secondary_email],
+                  ["Area Type", L.area_type],
+                  ["Total Area", L.total_area],
+                  ["Distance", L.distance_km],
+                  ["Shape", L.shape],
+                  ["Number of Scans", L.num_scans],
+                  ["Company", L.company],
+                  ["GSTIN", L.gstin],
+                  ["Industry", L.industry],
+                  ["Designation", L.designation],
+                  ["Annual Revenue", L.annual_revenue],
+                  ["Number of Employees", L.num_employees],
+                  ["Fax", L.fax],
+                  ["Website", L.website],
+                  ["Email Opt Out", L.email_opt_out ? "Yes" : ""],
+                  ["Lead Status", L.lead_status],
+                  ["Rating", L.rating],
+                  ["Assigned To", L.assigned_to],
+                  ["PO Box", L.po_box],
+                  ["Postal Code", L.postal_code],
+                  ["Maps Location", L.maps_location],
+                ] as [string, string][]).filter(([, v]) => v && String(v).trim());
+                const notes = [
+                  L.description?.trim(),
+                  extras.length ? "\n--- Extras ---\n" + extras.map(([k, v]) => `${k}: ${v}`).join("\n") : "",
+                ].filter(Boolean).join("\n");
+
                 const { error } = await supabase.from("crm_leads").insert({
                   workspace_id: workspace.id,
-                  full_name: newLead.full_name.trim(),
-                  email: newLead.email.trim() || null,
-                  phone: newLead.phone.trim() || null,
-                  city: newLead.city.trim() || null,
-                  state: newLead.state.trim() || null,
-                  country: "India",
-                  service_needed: newLead.service_needed.trim() || null,
-                  notes: newLead.notes.trim() || null,
+                  full_name: fullName || L.first_name || L.last_name,
+                  email: L.primary_email.trim() || null,
+                  phone: L.primary_phone.trim() || null,
+                  whatsapp: L.whatsapp.trim() || null,
+                  street: L.street.trim() || null,
+                  city: L.city.trim() || null,
+                  state: L.state.trim() || null,
+                  pincode: L.postal_code.trim() || null,
+                  country: L.country.trim() || "India",
+                  service_needed: L.service_needed || null,
+                  biz_area: L.biz_area || null,
+                  biz_cost: L.biz_cost ? Number(String(L.biz_cost).replace(/[, ]/g, "")) || null : null,
+                  expected_close: L.expected_close || null,
+                  lead_source: L.lead_source || null,
+                  notes: notes || null,
                   stage: "new",
                   status: "open",
                   created_by: session?.user?.id || null,
@@ -830,13 +1040,20 @@ const CrmLeads = () => {
                   return;
                 }
                 toast.success("Lead created");
-                setNewLead({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
+                setNewLead(emptyLead);
                 setAddOpen(false);
                 load();
               }}
             >
-              {adding ? "Saving…" : elbl("submit", "Create Lead")}
+              {adding ? "Saving…" : "Save"}
             </Button>
+            <button
+              onClick={() => setAddOpen(false)}
+              disabled={adding}
+              className="text-red-500 hover:underline text-[13px] disabled:opacity-50"
+            >
+              Cancel
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
