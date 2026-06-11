@@ -103,7 +103,29 @@ const CrmLeads = () => {
   const [saveShared, setSaveShared] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [newLead, setNewLead] = useState({ full_name: "", email: "", phone: "", city: "", state: "", service_needed: "", notes: "" });
+  const emptyLead = {
+    // Lead Details
+    biz_area: "", service_needed: "",
+    first_name_salutation: "None", first_name: "", last_name: "",
+    whatsapp: "", primary_phone: "", mobile_phone: "", primary_email: "",
+    area_type: "OPEN PLOT", total_area: "Gunta:\nAcres:\nSq.Yrds:\nSq.Ft:",
+    expected_close: "", distance_km: "0 - 30 KM",
+    shape: "Serial", num_scans: "1",
+    biz_cost: "", company: "", gstin: "", industry: "",
+    designation: "Rep.", annual_revenue: "",
+    lead_source: "", num_employees: "",
+    secondary_email: "", fax: "",
+    website: "", email_opt_out: false,
+    lead_status: "Contacted", rating: "",
+    assigned_to: "",
+    // Address Details
+    street: "", po_box: "", postal_code: "", city: "PUNE",
+    country: "INDIA", state: "Maharashtra", maps_location: "",
+    // Description
+    description: "GWS-",
+  };
+  const [newLead, setNewLead] = useState(emptyLead);
+  const updLead = (patch: Partial<typeof emptyLead>) => setNewLead((p) => ({ ...p, ...patch }));
   const { views: savedViews, create: createView, remove: removeView } = useSavedViews(workspace.id, "leads");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
 
