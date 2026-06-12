@@ -19,9 +19,16 @@ import {
   DEFAULT_LABELS,
   DEFAULT_PLACEHOLDERS,
   DEFAULT_LEAD_FIELDS,
+  DEFAULT_ADD_LEAD_DIALOG,
+  DEFAULT_ADD_LEAD_SECTIONS,
+  DEFAULT_ADD_LEAD_FIELDS,
+  ADD_LEAD_FIELDS_BY_SECTION,
   type EnquiryFormConfig,
   type EnquiryLabelKey,
   type LeadDialogFieldKey,
+  type AddLeadDialogConfig,
+  type AddLeadSectionKey,
+  type AddLeadFieldKey,
 } from "@/hooks/useEnquiryFormConfig";
 
 type FieldKey =
