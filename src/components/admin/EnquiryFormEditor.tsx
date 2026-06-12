@@ -412,6 +412,58 @@ const EnquiryFormEditor = () => {
 
         <Card className="p-5 space-y-4">
           <div>
+            <h3 className="font-semibold">Add Lead dialog — layout &amp; fields</h3>
+            <p className="text-xs text-muted-foreground">
+              Configure the in-CRM "Add Lead" dialog. Rename or hide entire sections, and toggle which fields appear in each section.
+            </p>
+          </div>
+          <div className="space-y-5">
+            {(Object.keys(ADD_LEAD_FIELDS_BY_SECTION) as AddLeadSectionKey[]).map((sk) => {
+              const sec = cfg.addLeadDialog.sections[sk];
+              const fields = ADD_LEAD_FIELDS_BY_SECTION[sk];
+              return (
+                <div key={sk} className="rounded-lg border border-border/60 p-4 space-y-3">
+                  <div className="flex flex-wrap items-center gap-3 justify-between">
+                    <div className="flex items-center gap-3 flex-1 min-w-[260px]">
+                      <Label className="text-xs uppercase tracking-wide text-muted-foreground w-24 shrink-0">
+                        Section title
+                      </Label>
+                      <Input
+                        value={sec.title}
+                        onChange={(e) => setAddLeadSection(sk, { title: e.target.value })}
+                        placeholder={DEFAULT_ADD_LEAD_SECTIONS[sk].title}
+                        className="max-w-sm"
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 text-xs">
+                      <Switch
+                        checked={sec.visible}
+                        onCheckedChange={(v) => setAddLeadSection(sk, { visible: v })}
+                      />
+                      Show section
+                    </label>
+                  </div>
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1.5 ${!sec.visible ? "opacity-50 pointer-events-none" : ""}`}>
+                    {fields.map(({ key, label }) => (
+                      <label key={key} className="flex items-center justify-between gap-3 py-1.5 border-b border-border/30">
+                        <span className="text-sm truncate">{label}</span>
+                        <Switch
+                          checked={cfg.addLeadDialog.fields[key]?.visible !== false}
+                          onCheckedChange={(v) => setAddLeadField(key, v)}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+
+
+        <Card className="p-5 space-y-4">
+          <div>
             <h3 className="font-semibold">CRM routing by state</h3>
             <p className="text-xs text-muted-foreground">
               Pick which CRM workspace receives leads from each region, and which staff (employees + super admins) get notified.
