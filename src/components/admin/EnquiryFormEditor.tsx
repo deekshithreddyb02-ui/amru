@@ -77,6 +77,7 @@ const DEFAULT_CFG: EnquiryFormCfg = {
   labels: DEFAULT_LABELS,
   placeholders: DEFAULT_PLACEHOLDERS,
   leadFields: DEFAULT_LEAD_FIELDS,
+  addLeadDialog: DEFAULT_ADD_LEAD_DIALOG,
   routing: {
     Maharashtra:   "mh",
     Telangana:     "hyd",
