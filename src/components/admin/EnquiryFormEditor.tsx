@@ -57,6 +57,7 @@ type EnquiryFormCfg = {
   labels: Record<EnquiryLabelKey, string>;
   placeholders: Partial<Record<EnquiryLabelKey, string>>;
   leadFields: Record<LeadDialogFieldKey, FieldCfg>;
+  addLeadDialog: AddLeadDialogConfig;
   routing: Record<RoutingKey, string>;
   routing_assignees: Record<RoutingKey, string[]>;
 };
