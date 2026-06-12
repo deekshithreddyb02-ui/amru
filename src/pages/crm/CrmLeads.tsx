@@ -84,6 +84,12 @@ const CrmLeads = () => {
   const lf = enquiryCfg.leadFields || ({} as any);
   const lfv = (k: "email" | "phone" | "city" | "state" | "serviceNeeded" | "notes") => lf?.[k]?.visible !== false;
   const lfr = (k: "email" | "phone" | "city" | "state" | "serviceNeeded" | "notes") => !!lf?.[k]?.required;
+  const ald = enquiryCfg.addLeadDialog;
+  const alf = (k: AddLeadFieldKey) => ald?.fields?.[k]?.visible !== false;
+  const als = (k: AddLeadSectionKey) => ({
+    visible: ald?.sections?.[k]?.visible !== false,
+    title: ald?.sections?.[k]?.title || DEFAULT_ADD_LEAD_SECTIONS[k].title,
+  });
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
