@@ -763,212 +763,293 @@ const CrmLeads = () => {
                 <div>{children}</div>
               </div>
             );
-            const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-              <div>
-                <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">{title}</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 px-6 py-3 bg-white">
-                  {children}
+            const Section = ({ title, hidden, children }: { title: string; hidden?: boolean; children: React.ReactNode }) => {
+              if (hidden) return null;
+              return (
+                <div>
+                  <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">{title}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 px-6 py-3 bg-white">
+                    {children}
+                  </div>
                 </div>
-              </div>
-            );
+              );
+            };
+            const F = (key: AddLeadFieldKey, node: React.ReactNode) => (alf(key) ? node : null);
+            const leadSec = als("leadDetails");
+            const addrSec = als("addressDetails");
+            const descSec = als("descriptionDetails");
 
             return (
               <>
-                <Section title="Lead Details">
-                  <Row label={elbl("bizArea", "BIZ Area")} required>
-                    <select className={inputCls} value={L.biz_area} onChange={(e) => u({ biz_area: e.target.value })}>
-                      <option value="">Select</option>
-                      <option>Maharashtra</option><option>Telangana</option>
-                      <option>Andhra Pradesh</option><option>Karnataka</option>
-                      <option>Other India</option><option>Other Country</option>
-                    </select>
-                  </Row>
-                  <Row label={elbl("service", "Service Needed")} required>
-                    <select className={inputCls} value={L.service_needed} onChange={(e) => u({ service_needed: e.target.value })}>
-                      <option value="">Select</option>
-                      <option>GWS</option><option>Geological Survey</option>
-                      <option>Soil Testing</option><option>Other</option>
-                    </select>
-                  </Row>
-
-                  <Row label={elbl("firstName", "First Name")} required>
-                    <div className="grid grid-cols-[90px_1fr] gap-2">
-                      <select className={inputCls} value={L.first_name_salutation} onChange={(e) => u({ first_name_salutation: e.target.value })}>
-                        <option>None</option><option>Mr.</option><option>Mrs.</option>
-                        <option>Ms.</option><option>Dr.</option>
+                <Section title={leadSec.title} hidden={!leadSec.visible}>
+                  {F("bizArea",
+                    <Row label={elbl("bizArea", "BIZ Area")} required>
+                      <select className={inputCls} value={L.biz_area} onChange={(e) => u({ biz_area: e.target.value })}>
+                        <option value="">Select</option>
+                        <option>Maharashtra</option><option>Telangana</option>
+                        <option>Andhra Pradesh</option><option>Karnataka</option>
+                        <option>Other India</option><option>Other Country</option>
                       </select>
-                      <input className={inputCls} value={L.first_name} onChange={(e) => u({ first_name: e.target.value })} />
-                    </div>
-                  </Row>
-                  <Row label={elbl("lastName", "Last Name")} required>
-                    <input className={inputCls} value={L.last_name} onChange={(e) => u({ last_name: e.target.value })} />
-                  </Row>
+                    </Row>
+                  )}
+                  {F("serviceNeeded",
+                    <Row label={elbl("service", "Service Needed")} required>
+                      <select className={inputCls} value={L.service_needed} onChange={(e) => u({ service_needed: e.target.value })}>
+                        <option value="">Select</option>
+                        <option>GWS</option><option>Geological Survey</option>
+                        <option>Soil Testing</option><option>Other</option>
+                      </select>
+                    </Row>
+                  )}
 
-                  <Row label="WhatsApp Num" required>
-                    <input className={inputCls} value={L.whatsapp} onChange={(e) => u({ whatsapp: e.target.value })} />
-                  </Row>
-                  <Row label="Primary Phone" required>
-                    <input className={inputCls} value={L.primary_phone} onChange={(e) => u({ primary_phone: e.target.value })} />
-                  </Row>
+                  {F("firstName",
+                    <Row label={elbl("firstName", "First Name")} required>
+                      <div className="grid grid-cols-[90px_1fr] gap-2">
+                        <select className={inputCls} value={L.first_name_salutation} onChange={(e) => u({ first_name_salutation: e.target.value })}>
+                          <option>None</option><option>Mr.</option><option>Mrs.</option>
+                          <option>Ms.</option><option>Dr.</option>
+                        </select>
+                        <input className={inputCls} value={L.first_name} onChange={(e) => u({ first_name: e.target.value })} />
+                      </div>
+                    </Row>
+                  )}
+                  {F("lastName",
+                    <Row label={elbl("lastName", "Last Name")} required>
+                      <input className={inputCls} value={L.last_name} onChange={(e) => u({ last_name: e.target.value })} />
+                    </Row>
+                  )}
 
-                  <Row label="Mobile Phone" required>
-                    <input className={inputCls} value={L.mobile_phone} onChange={(e) => u({ mobile_phone: e.target.value })} />
-                  </Row>
-                  <Row label="Primary Email">
-                    <input type="email" className={inputCls} value={L.primary_email} onChange={(e) => u({ primary_email: e.target.value })} />
-                  </Row>
+                  {F("whatsapp",
+                    <Row label="WhatsApp Num" required>
+                      <input className={inputCls} value={L.whatsapp} onChange={(e) => u({ whatsapp: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("primaryPhone",
+                    <Row label="Primary Phone" required>
+                      <input className={inputCls} value={L.primary_phone} onChange={(e) => u({ primary_phone: e.target.value })} />
+                    </Row>
+                  )}
 
-                  <Row label={elbl("areaType", "Area Type")} required>
-                    <select className={inputCls} value={L.area_type} onChange={(e) => u({ area_type: e.target.value })}>
-                      <option>OPEN PLOT</option><option>FARM LAND</option>
-                      <option>INDUSTRIAL</option><option>RESIDENTIAL</option>
-                    </select>
-                  </Row>
-                  <Row label={elbl("totalArea", "Total Area")} required>
-                    <textarea
-                      className={inputCls + " h-[88px] py-2 resize-y"}
-                      value={L.total_area}
-                      onChange={(e) => u({ total_area: e.target.value })}
-                    />
-                  </Row>
+                  {F("mobilePhone",
+                    <Row label="Mobile Phone" required>
+                      <input className={inputCls} value={L.mobile_phone} onChange={(e) => u({ mobile_phone: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("primaryEmail",
+                    <Row label="Primary Email">
+                      <input type="email" className={inputCls} value={L.primary_email} onChange={(e) => u({ primary_email: e.target.value })} />
+                    </Row>
+                  )}
 
-                  <Row label={elbl("expectedClose", "Expected Close Date")} required>
-                    <input type="date" className={inputCls} value={L.expected_close} onChange={(e) => u({ expected_close: e.target.value })} />
-                  </Row>
-                  <Row label={elbl("distance", "Distance in KM")} required>
-                    <select className={inputCls} value={L.distance_km} onChange={(e) => u({ distance_km: e.target.value })}>
-                      <option>0 - 30 KM</option><option>30 - 60 KM</option>
-                      <option>60 - 100 KM</option><option>100+ KM</option>
-                    </select>
-                  </Row>
-
-                  <Row label="Shape">
-                    <select className={inputCls} value={L.shape} onChange={(e) => u({ shape: e.target.value })}>
-                      <option>Serial</option><option>Parallel</option><option>Mixed</option>
-                    </select>
-                  </Row>
-                  <Row label={elbl("scans", "Number of Scans")} required>
-                    <select className={inputCls} value={L.num_scans} onChange={(e) => u({ num_scans: e.target.value })}>
-                      {["1","2","3","4","5","6","7","8","9","10"].map((n) => <option key={n}>{n}</option>)}
-                    </select>
-                  </Row>
-
-                  <Row label="Total BIZ COST" required>
-                    <div className="grid grid-cols-[36px_1fr]">
-                      <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
-                      <input className={inputCls + " rounded-l-none"} value={L.biz_cost} onChange={(e) => u({ biz_cost: e.target.value })} placeholder="0.00" />
-                    </div>
-                  </Row>
-                  <Row label="Company">
-                    <input className={inputCls} value={L.company} onChange={(e) => u({ company: e.target.value })} />
-                  </Row>
-
-                  <Row label="GSTIN">
-                    <input className={inputCls} value={L.gstin} onChange={(e) => u({ gstin: e.target.value })} />
-                  </Row>
-                  <Row label="Industry">
-                    <select className={inputCls} value={L.industry} onChange={(e) => u({ industry: e.target.value })}>
-                      <option value="">Select an Option</option>
-                      <option>Agriculture</option><option>Construction</option>
-                      <option>Government</option><option>Real Estate</option><option>Other</option>
-                    </select>
-                  </Row>
-
-                  <Row label="Designation">
-                    <input className={inputCls} value={L.designation} onChange={(e) => u({ designation: e.target.value })} />
-                  </Row>
-                  <Row label="Annual Revenue">
-                    <div className="grid grid-cols-[36px_1fr]">
-                      <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
-                      <input className={inputCls + " rounded-l-none"} value={L.annual_revenue} onChange={(e) => u({ annual_revenue: e.target.value })} />
-                    </div>
-                  </Row>
-
-                  <Row label="Lead Source">
-                    <select className={inputCls} value={L.lead_source} onChange={(e) => u({ lead_source: e.target.value })}>
-                      <option value="">Select</option>
-                      <option>JDH</option><option>Website</option><option>Referral</option>
-                      <option>Walk-in</option><option>Campaign</option>
-                    </select>
-                  </Row>
-                  <Row label="Number of Employees">
-                    <input className={inputCls} value={L.num_employees} onChange={(e) => u({ num_employees: e.target.value })} />
-                  </Row>
-
-                  <Row label="Secondary Email">
-                    <input type="email" className={inputCls} value={L.secondary_email} onChange={(e) => u({ secondary_email: e.target.value })} />
-                  </Row>
-                  <Row label="Fax">
-                    <input className={inputCls} value={L.fax} onChange={(e) => u({ fax: e.target.value })} />
-                  </Row>
-
-                  <Row label="Website">
-                    <input className={inputCls} value={L.website} onChange={(e) => u({ website: e.target.value })} />
-                  </Row>
-                  <Row label="Email Opt Out">
-                    <input type="checkbox" checked={L.email_opt_out} onChange={(e) => u({ email_opt_out: e.target.checked })} className="h-4 w-4 mt-2.5" />
-                  </Row>
-
-                  <Row label="Lead Status">
-                    <select className={inputCls} value={L.lead_status} onChange={(e) => u({ lead_status: e.target.value })}>
-                      <option>Contacted</option><option>Attempted Contact</option>
-                      <option>Cold</option><option>Hot</option><option>Junk</option>
-                      <option>Qualified</option><option>Lost</option>
-                    </select>
-                  </Row>
-                  <Row label="Rating">
-                    <select className={inputCls} value={L.rating} onChange={(e) => u({ rating: e.target.value })}>
-                      <option value="">Select an Option</option>
-                      <option>Acquired</option><option>Active</option>
-                      <option>Market Failed</option><option>Project Cancelled</option>
-                      <option>Shutdown</option>
-                    </select>
-                  </Row>
-
-                  <Row label="Assigned To" required>
-                    <input className={inputCls} value={L.assigned_to} onChange={(e) => u({ assigned_to: e.target.value })} placeholder="Type a name…" />
-                  </Row>
-                </Section>
-
-                <Section title="Address Details">
-                  <Row label={elbl("mailingStreet", "Street")} required>
-                    <textarea className={inputCls + " h-[88px] py-2 resize-y"} value={L.street} onChange={(e) => u({ street: e.target.value })} />
-                  </Row>
-                  <Row label="PO Box">
-                    <input className={inputCls} value={L.po_box} onChange={(e) => u({ po_box: e.target.value })} />
-                  </Row>
-
-                  <Row label="Postal Code">
-                    <input className={inputCls} value={L.postal_code} onChange={(e) => u({ postal_code: e.target.value })} />
-                  </Row>
-                  <Row label={elbl("mailingCity", "City")} required>
-                    <input className={inputCls} value={L.city} onChange={(e) => u({ city: e.target.value })} />
-                  </Row>
-
-                  <Row label="Country">
-                    <input className={inputCls} value={L.country} onChange={(e) => u({ country: e.target.value })} />
-                  </Row>
-                  <Row label={elbl("mailingState", "State")} required>
-                    <input className={inputCls} value={L.state} onChange={(e) => u({ state: e.target.value })} />
-                  </Row>
-
-                  <Row label="Maps Location">
-                    <input className={inputCls} value={L.maps_location} onChange={(e) => u({ maps_location: e.target.value })} />
-                  </Row>
-                </Section>
-
-                <div className="bg-white">
-                  <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">Description Details</div>
-                  <div className="px-6 py-3">
-                    <Row label={elbl("description", "Description")} required>
+                  {F("areaType",
+                    <Row label={elbl("areaType", "Area Type")} required>
+                      <select className={inputCls} value={L.area_type} onChange={(e) => u({ area_type: e.target.value })}>
+                        <option>OPEN PLOT</option><option>FARM LAND</option>
+                        <option>INDUSTRIAL</option><option>RESIDENTIAL</option>
+                      </select>
+                    </Row>
+                  )}
+                  {F("totalArea",
+                    <Row label={elbl("totalArea", "Total Area")} required>
                       <textarea
                         className={inputCls + " h-[88px] py-2 resize-y"}
-                        value={L.description}
-                        onChange={(e) => u({ description: e.target.value })}
+                        value={L.total_area}
+                        onChange={(e) => u({ total_area: e.target.value })}
                       />
                     </Row>
+                  )}
+
+                  {F("expectedClose",
+                    <Row label={elbl("expectedClose", "Expected Close Date")} required>
+                      <input type="date" className={inputCls} value={L.expected_close} onChange={(e) => u({ expected_close: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("distanceKm",
+                    <Row label={elbl("distance", "Distance in KM")} required>
+                      <select className={inputCls} value={L.distance_km} onChange={(e) => u({ distance_km: e.target.value })}>
+                        <option>0 - 30 KM</option><option>30 - 60 KM</option>
+                        <option>60 - 100 KM</option><option>100+ KM</option>
+                      </select>
+                    </Row>
+                  )}
+
+                  {F("shape",
+                    <Row label="Shape">
+                      <select className={inputCls} value={L.shape} onChange={(e) => u({ shape: e.target.value })}>
+                        <option>Serial</option><option>Parallel</option><option>Mixed</option>
+                      </select>
+                    </Row>
+                  )}
+                  {F("numScans",
+                    <Row label={elbl("scans", "Number of Scans")} required>
+                      <select className={inputCls} value={L.num_scans} onChange={(e) => u({ num_scans: e.target.value })}>
+                        {["1","2","3","4","5","6","7","8","9","10"].map((n) => <option key={n}>{n}</option>)}
+                      </select>
+                    </Row>
+                  )}
+
+                  {F("bizCost",
+                    <Row label="Total BIZ COST" required>
+                      <div className="grid grid-cols-[36px_1fr]">
+                        <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
+                        <input className={inputCls + " rounded-l-none"} value={L.biz_cost} onChange={(e) => u({ biz_cost: e.target.value })} placeholder="0.00" />
+                      </div>
+                    </Row>
+                  )}
+                  {F("company",
+                    <Row label="Company">
+                      <input className={inputCls} value={L.company} onChange={(e) => u({ company: e.target.value })} />
+                    </Row>
+                  )}
+
+                  {F("gstin",
+                    <Row label="GSTIN">
+                      <input className={inputCls} value={L.gstin} onChange={(e) => u({ gstin: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("industry",
+                    <Row label="Industry">
+                      <select className={inputCls} value={L.industry} onChange={(e) => u({ industry: e.target.value })}>
+                        <option value="">Select an Option</option>
+                        <option>Agriculture</option><option>Construction</option>
+                        <option>Government</option><option>Real Estate</option><option>Other</option>
+                      </select>
+                    </Row>
+                  )}
+
+                  {F("designation",
+                    <Row label="Designation">
+                      <input className={inputCls} value={L.designation} onChange={(e) => u({ designation: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("annualRevenue",
+                    <Row label="Annual Revenue">
+                      <div className="grid grid-cols-[36px_1fr]">
+                        <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
+                        <input className={inputCls + " rounded-l-none"} value={L.annual_revenue} onChange={(e) => u({ annual_revenue: e.target.value })} />
+                      </div>
+                    </Row>
+                  )}
+
+                  {F("leadSource",
+                    <Row label="Lead Source">
+                      <select className={inputCls} value={L.lead_source} onChange={(e) => u({ lead_source: e.target.value })}>
+                        <option value="">Select</option>
+                        <option>JDH</option><option>Website</option><option>Referral</option>
+                        <option>Walk-in</option><option>Campaign</option>
+                      </select>
+                    </Row>
+                  )}
+                  {F("numEmployees",
+                    <Row label="Number of Employees">
+                      <input className={inputCls} value={L.num_employees} onChange={(e) => u({ num_employees: e.target.value })} />
+                    </Row>
+                  )}
+
+                  {F("secondaryEmail",
+                    <Row label="Secondary Email">
+                      <input type="email" className={inputCls} value={L.secondary_email} onChange={(e) => u({ secondary_email: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("fax",
+                    <Row label="Fax">
+                      <input className={inputCls} value={L.fax} onChange={(e) => u({ fax: e.target.value })} />
+                    </Row>
+                  )}
+
+                  {F("website",
+                    <Row label="Website">
+                      <input className={inputCls} value={L.website} onChange={(e) => u({ website: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("emailOptOut",
+                    <Row label="Email Opt Out">
+                      <input type="checkbox" checked={L.email_opt_out} onChange={(e) => u({ email_opt_out: e.target.checked })} className="h-4 w-4 mt-2.5" />
+                    </Row>
+                  )}
+
+                  {F("leadStatus",
+                    <Row label="Lead Status">
+                      <select className={inputCls} value={L.lead_status} onChange={(e) => u({ lead_status: e.target.value })}>
+                        <option>Contacted</option><option>Attempted Contact</option>
+                        <option>Cold</option><option>Hot</option><option>Junk</option>
+                        <option>Qualified</option><option>Lost</option>
+                      </select>
+                    </Row>
+                  )}
+                  {F("rating",
+                    <Row label="Rating">
+                      <select className={inputCls} value={L.rating} onChange={(e) => u({ rating: e.target.value })}>
+                        <option value="">Select an Option</option>
+                        <option>Acquired</option><option>Active</option>
+                        <option>Market Failed</option><option>Project Cancelled</option>
+                        <option>Shutdown</option>
+                      </select>
+                    </Row>
+                  )}
+
+                  {F("assignedTo",
+                    <Row label="Assigned To" required>
+                      <input className={inputCls} value={L.assigned_to} onChange={(e) => u({ assigned_to: e.target.value })} placeholder="Type a name…" />
+                    </Row>
+                  )}
+                </Section>
+
+                <Section title={addrSec.title} hidden={!addrSec.visible}>
+                  {F("street",
+                    <Row label={elbl("mailingStreet", "Street")} required>
+                      <textarea className={inputCls + " h-[88px] py-2 resize-y"} value={L.street} onChange={(e) => u({ street: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("poBox",
+                    <Row label="PO Box">
+                      <input className={inputCls} value={L.po_box} onChange={(e) => u({ po_box: e.target.value })} />
+                    </Row>
+                  )}
+
+                  {F("postalCode",
+                    <Row label="Postal Code">
+                      <input className={inputCls} value={L.postal_code} onChange={(e) => u({ postal_code: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("city",
+                    <Row label={elbl("mailingCity", "City")} required>
+                      <input className={inputCls} value={L.city} onChange={(e) => u({ city: e.target.value })} />
+                    </Row>
+                  )}
+
+                  {F("country",
+                    <Row label="Country">
+                      <input className={inputCls} value={L.country} onChange={(e) => u({ country: e.target.value })} />
+                    </Row>
+                  )}
+                  {F("state",
+                    <Row label={elbl("mailingState", "State")} required>
+                      <input className={inputCls} value={L.state} onChange={(e) => u({ state: e.target.value })} />
+                    </Row>
+                  )}
+
+                  {F("mapsLocation",
+                    <Row label="Maps Location">
+                      <input className={inputCls} value={L.maps_location} onChange={(e) => u({ maps_location: e.target.value })} />
+                    </Row>
+                  )}
+                </Section>
+
+                {descSec.visible && alf("description") && (
+                  <div className="bg-white">
+                    <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">{descSec.title}</div>
+                    <div className="px-6 py-3">
+                      <Row label={elbl("description", "Description")} required>
+                        <textarea
+                          className={inputCls + " h-[88px] py-2 resize-y"}
+                          value={L.description}
+                          onChange={(e) => u({ description: e.target.value })}
+                        />
+                      </Row>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             );
           })()}
