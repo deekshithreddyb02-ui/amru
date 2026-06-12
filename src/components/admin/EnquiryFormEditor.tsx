@@ -278,6 +278,25 @@ const EnquiryFormEditor = () => {
   const setPlaceholder = (key: EnquiryLabelKey, value: string) =>
     setCfg((c) => ({ ...c, placeholders: { ...c.placeholders, [key]: value } }));
 
+  const setAddLeadSection = (k: AddLeadSectionKey, patch: Partial<{ visible: boolean; title: string }>) =>
+    setCfg((c) => ({
+      ...c,
+      addLeadDialog: {
+        ...c.addLeadDialog,
+        sections: { ...c.addLeadDialog.sections, [k]: { ...c.addLeadDialog.sections[k], ...patch } },
+      },
+    }));
+
+  const setAddLeadField = (k: AddLeadFieldKey, visible: boolean) =>
+    setCfg((c) => ({
+      ...c,
+      addLeadDialog: {
+        ...c.addLeadDialog,
+        fields: { ...c.addLeadDialog.fields, [k]: { visible } },
+      },
+    }));
+
+
   const toggleAssignee = (key: RoutingKey, userId: string) =>
     setCfg((c) => {
       const cur = c.routing_assignees[key] || [];
