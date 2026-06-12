@@ -84,6 +84,101 @@ export const DEFAULT_LEAD_FIELDS: Record<LeadDialogFieldKey, { visible: boolean;
   notes:         { visible: true, required: false },
 };
 
+/* ─────────────────────────────────────────────────────────────
+ * Add Lead dialog (in-CRM) — full layout configuration
+ * ───────────────────────────────────────────────────────────── */
+
+export type AddLeadSectionKey = "leadDetails" | "addressDetails" | "descriptionDetails";
+
+export type AddLeadFieldKey =
+  // Lead Details
+  | "bizArea" | "serviceNeeded" | "firstName" | "lastName"
+  | "whatsapp" | "primaryPhone" | "mobilePhone" | "primaryEmail"
+  | "areaType" | "totalArea" | "expectedClose" | "distanceKm"
+  | "shape" | "numScans" | "bizCost" | "company"
+  | "gstin" | "industry" | "designation" | "annualRevenue"
+  | "leadSource" | "numEmployees" | "secondaryEmail" | "fax"
+  | "website" | "emailOptOut" | "leadStatus" | "rating" | "assignedTo"
+  // Address Details
+  | "street" | "poBox" | "postalCode" | "city"
+  | "country" | "state" | "mapsLocation"
+  // Description
+  | "description";
+
+export const DEFAULT_ADD_LEAD_SECTIONS: Record<AddLeadSectionKey, { visible: boolean; title: string }> = {
+  leadDetails:        { visible: true, title: "Lead Details" },
+  addressDetails:     { visible: true, title: "Address Details" },
+  descriptionDetails: { visible: true, title: "Description Details" },
+};
+
+export const ADD_LEAD_FIELDS_BY_SECTION: Record<AddLeadSectionKey, { key: AddLeadFieldKey; label: string }[]> = {
+  leadDetails: [
+    { key: "bizArea",        label: "BIZ Area" },
+    { key: "serviceNeeded",  label: "Service Needed" },
+    { key: "firstName",      label: "First Name" },
+    { key: "lastName",       label: "Last Name" },
+    { key: "whatsapp",       label: "WhatsApp Number" },
+    { key: "primaryPhone",   label: "Primary Phone" },
+    { key: "mobilePhone",    label: "Mobile Phone" },
+    { key: "primaryEmail",   label: "Primary Email" },
+    { key: "areaType",       label: "Area Type" },
+    { key: "totalArea",      label: "Total Area" },
+    { key: "expectedClose",  label: "Expected Close Date" },
+    { key: "distanceKm",     label: "Distance in KM" },
+    { key: "shape",          label: "Shape" },
+    { key: "numScans",       label: "Number of Scans" },
+    { key: "bizCost",        label: "Total BIZ Cost" },
+    { key: "company",        label: "Company" },
+    { key: "gstin",          label: "GSTIN" },
+    { key: "industry",       label: "Industry" },
+    { key: "designation",    label: "Designation" },
+    { key: "annualRevenue",  label: "Annual Revenue" },
+    { key: "leadSource",     label: "Lead Source" },
+    { key: "numEmployees",   label: "Number of Employees" },
+    { key: "secondaryEmail", label: "Secondary Email" },
+    { key: "fax",            label: "Fax" },
+    { key: "website",        label: "Website" },
+    { key: "emailOptOut",    label: "Email Opt Out" },
+    { key: "leadStatus",     label: "Lead Status" },
+    { key: "rating",         label: "Rating" },
+    { key: "assignedTo",     label: "Assigned To" },
+  ],
+  addressDetails: [
+    { key: "street",        label: "Street" },
+    { key: "poBox",         label: "PO Box" },
+    { key: "postalCode",    label: "Postal Code" },
+    { key: "city",          label: "City" },
+    { key: "country",       label: "Country" },
+    { key: "state",         label: "State" },
+    { key: "mapsLocation",  label: "Maps Location" },
+  ],
+  descriptionDetails: [
+    { key: "description",   label: "Description" },
+  ],
+};
+
+const buildDefaultAddLeadFields = (): Record<AddLeadFieldKey, { visible: boolean }> => {
+  const out = {} as Record<AddLeadFieldKey, { visible: boolean }>;
+  (Object.keys(ADD_LEAD_FIELDS_BY_SECTION) as AddLeadSectionKey[]).forEach((s) => {
+    ADD_LEAD_FIELDS_BY_SECTION[s].forEach(({ key }) => {
+      out[key] = { visible: true };
+    });
+  });
+  return out;
+};
+
+export const DEFAULT_ADD_LEAD_FIELDS = buildDefaultAddLeadFields();
+
+export type AddLeadDialogConfig = {
+  sections: Record<AddLeadSectionKey, { visible: boolean; title: string }>;
+  fields: Record<AddLeadFieldKey, { visible: boolean }>;
+};
+
+export const DEFAULT_ADD_LEAD_DIALOG: AddLeadDialogConfig = {
+  sections: DEFAULT_ADD_LEAD_SECTIONS,
+  fields: DEFAULT_ADD_LEAD_FIELDS,
+};
+
 export type EnquiryRoutingKey =
   | "Maharashtra"
   | "Telangana"
@@ -99,6 +194,7 @@ export type EnquiryFormConfig = {
   labels: Record<EnquiryLabelKey, string>;
   placeholders: Partial<Record<EnquiryLabelKey, string>>;
   leadFields: Record<LeadDialogFieldKey, { visible: boolean; required: boolean }>;
+  addLeadDialog: AddLeadDialogConfig;
   routing?: Record<EnquiryRoutingKey, string>;
   routing_assignees?: Record<EnquiryRoutingKey, string[]>;
 };
@@ -118,9 +214,21 @@ const DEFAULTS: EnquiryFormConfig = {
   labels: DEFAULT_LABELS,
   placeholders: DEFAULT_PLACEHOLDERS,
   leadFields: DEFAULT_LEAD_FIELDS,
+  addLeadDialog: DEFAULT_ADD_LEAD_DIALOG,
 };
 
 let cache: EnquiryFormConfig | null = null;
+
+const mergeAddLeadDialog = (m?: Partial<AddLeadDialogConfig>): AddLeadDialogConfig => ({
+  sections: {
+    ...DEFAULT_ADD_LEAD_SECTIONS,
+    ...((m?.sections || {}) as any),
+  } as AddLeadDialogConfig["sections"],
+  fields: {
+    ...DEFAULT_ADD_LEAD_FIELDS,
+    ...((m?.fields || {}) as any),
+  } as AddLeadDialogConfig["fields"],
+});
 
 export const useEnquiryFormConfig = () => {
   const [cfg, setCfg] = useState<EnquiryFormConfig>(cache ?? DEFAULTS);
@@ -141,6 +249,7 @@ export const useEnquiryFormConfig = () => {
           labels: { ...DEFAULT_LABELS, ...(meta.labels || {}) } as EnquiryFormConfig["labels"],
           placeholders: { ...DEFAULT_PLACEHOLDERS, ...(meta.placeholders || {}) },
           leadFields: { ...DEFAULT_LEAD_FIELDS, ...(meta.leadFields || {}) } as EnquiryFormConfig["leadFields"],
+          addLeadDialog: mergeAddLeadDialog(meta.addLeadDialog),
           routing: meta.routing,
           routing_assignees: meta.routing_assignees,
         };
