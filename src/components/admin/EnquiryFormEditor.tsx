@@ -209,6 +209,10 @@ const EnquiryFormEditor = () => {
           labels: { ...DEFAULT_LABELS, ...(meta.labels || {}) } as Record<EnquiryLabelKey, string>,
           placeholders: { ...DEFAULT_PLACEHOLDERS, ...(meta.placeholders || {}) },
           leadFields: { ...DEFAULT_LEAD_FIELDS, ...(meta.leadFields || {}) } as Record<LeadDialogFieldKey, FieldCfg>,
+          addLeadDialog: {
+            sections: { ...DEFAULT_ADD_LEAD_SECTIONS, ...(((meta as any).addLeadDialog?.sections) || {}) },
+            fields: { ...DEFAULT_ADD_LEAD_FIELDS, ...(((meta as any).addLeadDialog?.fields) || {}) },
+          },
           routing: { ...DEFAULT_CFG.routing, ...(meta.routing || {}) } as Record<RoutingKey, string>,
           routing_assignees: { ...DEFAULT_CFG.routing_assignees, ...(meta.routing_assignees || {}) } as Record<RoutingKey, string[]>,
         });
