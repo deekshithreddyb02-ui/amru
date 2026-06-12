@@ -250,8 +250,9 @@ const EnquiryFormEditor = () => {
       labels: cfg.labels,
       placeholders: cfg.placeholders,
       leadFields: cfg.leadFields,
+      addLeadDialog: cfg.addLeadDialog,
     }),
-    [cfg.intro, cfg.thank_you, cfg.fields, cfg.labels, cfg.placeholders, cfg.leadFields]
+    [cfg.intro, cfg.thank_you, cfg.fields, cfg.labels, cfg.placeholders, cfg.leadFields, cfg.addLeadDialog]
   );
 
   if (loading) {
