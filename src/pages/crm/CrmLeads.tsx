@@ -77,6 +77,46 @@ const splitName = (n: string) => {
 
 const PAGE_SIZE = 20;
 
+const ADD_INPUT_CLS =
+  "h-9 w-full rounded-sm border border-input bg-background px-2 text-[13px] focus:outline-none focus:ring-1 focus:ring-ring";
+
+const AddRow = ({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) => (
+  <div className="grid grid-cols-[140px_1fr] items-start gap-3 py-1.5">
+    <div className="text-[13px] text-foreground pt-2">
+      {label} {required && <span className="text-red-500">*</span>}
+    </div>
+    <div>{children}</div>
+  </div>
+);
+
+const AddSection = ({
+  title,
+  hidden,
+  children,
+}: {
+  title: string;
+  hidden?: boolean;
+  children: React.ReactNode;
+}) => {
+  if (hidden) return null;
+  return (
+    <div>
+      <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">{title}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 px-6 py-3 bg-white">
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const CrmLeads = () => {
   const enquiryCfg = useEnquiryFormConfig();
   const elbl = (k: keyof typeof DEFAULT_LABELS, fb: string) => enquiryCfg.labels?.[k]?.trim() || fb;
