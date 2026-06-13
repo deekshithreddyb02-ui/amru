@@ -23,6 +23,8 @@ import {
   DEFAULT_ADD_LEAD_SECTIONS,
   DEFAULT_ADD_LEAD_FIELDS,
   ADD_LEAD_FIELDS_BY_SECTION,
+  ADD_LEAD_DROPDOWN_OPTIONS,
+  DEFAULT_SALUTATIONS,
   type EnquiryFormConfig,
   type EnquiryLabelKey,
   type LeadDialogFieldKey,
