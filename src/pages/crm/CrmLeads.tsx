@@ -130,6 +130,21 @@ const CrmLeads = () => {
     visible: ald?.sections?.[k]?.visible !== false,
     title: ald?.sections?.[k]?.title || DEFAULT_ADD_LEAD_SECTIONS[k].title,
   });
+  // Default label fallbacks per AddLeadFieldKey, sourced from ADD_LEAD_FIELDS_BY_SECTION
+  const ADD_LEAD_DEFAULT_LABELS: Record<AddLeadFieldKey, string> = (() => {
+    const out = {} as Record<AddLeadFieldKey, string>;
+    (Object.keys(ADD_LEAD_FIELDS_BY_SECTION) as AddLeadSectionKey[]).forEach((s) => {
+      ADD_LEAD_FIELDS_BY_SECTION[s].forEach(({ key, label }) => { out[key] = label; });
+    });
+    return out;
+  })();
+  const alLabel = (k: AddLeadFieldKey) => ald?.fields?.[k]?.label?.trim() || ADD_LEAD_DEFAULT_LABELS[k];
+  const alOpts = (k: AddLeadFieldKey): string[] => {
+    const custom = ald?.fields?.[k]?.options;
+    if (custom && custom.length) return custom;
+    return ADD_LEAD_DROPDOWN_OPTIONS[k] || [];
+  };
+  const alSalutations = ald?.salutations && ald.salutations.length ? ald.salutations : DEFAULT_SALUTATIONS;
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
