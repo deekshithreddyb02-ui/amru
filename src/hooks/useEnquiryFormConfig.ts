@@ -239,16 +239,21 @@ const DEFAULTS: EnquiryFormConfig = {
 
 let cache: EnquiryFormConfig | null = null;
 
-const mergeAddLeadDialog = (m?: Partial<AddLeadDialogConfig>): AddLeadDialogConfig => ({
-  sections: {
-    ...DEFAULT_ADD_LEAD_SECTIONS,
-    ...((m?.sections || {}) as any),
-  } as AddLeadDialogConfig["sections"],
-  fields: {
-    ...DEFAULT_ADD_LEAD_FIELDS,
-    ...((m?.fields || {}) as any),
-  } as AddLeadDialogConfig["fields"],
-});
+const mergeAddLeadDialog = (m?: Partial<AddLeadDialogConfig>): AddLeadDialogConfig => {
+  const inFields = (m?.fields || {}) as Record<string, Partial<AddLeadFieldConfig>>;
+  const mergedFields = { ...DEFAULT_ADD_LEAD_FIELDS } as Record<AddLeadFieldKey, AddLeadFieldConfig>;
+  (Object.keys(mergedFields) as AddLeadFieldKey[]).forEach((k) => {
+    mergedFields[k] = { ...mergedFields[k], ...(inFields[k] || {}) };
+  });
+  return {
+    sections: {
+      ...DEFAULT_ADD_LEAD_SECTIONS,
+      ...((m?.sections || {}) as any),
+    } as AddLeadDialogConfig["sections"],
+    fields: mergedFields,
+    salutations: Array.isArray(m?.salutations) && m!.salutations!.length ? m!.salutations : DEFAULT_SALUTATIONS,
+  };
+};
 
 export const useEnquiryFormConfig = () => {
   const [cfg, setCfg] = useState<EnquiryFormConfig>(cache ?? DEFAULTS);
