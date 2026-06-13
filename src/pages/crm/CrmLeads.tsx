@@ -38,7 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { exportCsv } from "@/lib/csv";
-import { useEnquiryFormConfig, DEFAULT_LABELS, DEFAULT_ADD_LEAD_SECTIONS, type AddLeadFieldKey, type AddLeadSectionKey } from "@/hooks/useEnquiryFormConfig";
+import { useEnquiryFormConfig, DEFAULT_LABELS, DEFAULT_ADD_LEAD_SECTIONS, ADD_LEAD_DROPDOWN_OPTIONS, DEFAULT_SALUTATIONS, ADD_LEAD_FIELDS_BY_SECTION, type AddLeadFieldKey, type AddLeadSectionKey } from "@/hooks/useEnquiryFormConfig";
 import LeadSidePanel from "@/components/crm/LeadSidePanel";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
@@ -130,6 +130,21 @@ const CrmLeads = () => {
     visible: ald?.sections?.[k]?.visible !== false,
     title: ald?.sections?.[k]?.title || DEFAULT_ADD_LEAD_SECTIONS[k].title,
   });
+  // Default label fallbacks per AddLeadFieldKey, sourced from ADD_LEAD_FIELDS_BY_SECTION
+  const ADD_LEAD_DEFAULT_LABELS: Record<AddLeadFieldKey, string> = (() => {
+    const out = {} as Record<AddLeadFieldKey, string>;
+    (Object.keys(ADD_LEAD_FIELDS_BY_SECTION) as AddLeadSectionKey[]).forEach((s) => {
+      ADD_LEAD_FIELDS_BY_SECTION[s].forEach(({ key, label }) => { out[key] = label; });
+    });
+    return out;
+  })();
+  const alLabel = (k: AddLeadFieldKey) => ald?.fields?.[k]?.label?.trim() || ADD_LEAD_DEFAULT_LABELS[k];
+  const alOpts = (k: AddLeadFieldKey): string[] => {
+    const custom = ald?.fields?.[k]?.options;
+    if (custom && custom.length) return custom;
+    return ADD_LEAD_DROPDOWN_OPTIONS[k] || [];
+  };
+  const alSalutations = ald?.salutations && ald.salutations.length ? ald.salutations : DEFAULT_SALUTATIONS;
   const { workspace } = useOutletContext<Ctx>();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -806,74 +821,69 @@ const CrmLeads = () => {
               <>
                 <Section title={leadSec.title} hidden={!leadSec.visible}>
                   {F("bizArea",
-                    <Row label={elbl("bizArea", "BIZ Area")} required>
+                    <Row label={alLabel("bizArea")} required>
                       <select className={inputCls} value={L.biz_area} onChange={(e) => u({ biz_area: e.target.value })}>
                         <option value="">Select</option>
-                        <option>Maharashtra</option><option>Telangana</option>
-                        <option>Andhra Pradesh</option><option>Karnataka</option>
-                        <option>Other India</option><option>Other Country</option>
+                        {alOpts("bizArea").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
                   {F("serviceNeeded",
-                    <Row label={elbl("service", "Service Needed")} required>
+                    <Row label={alLabel("serviceNeeded")} required>
                       <select className={inputCls} value={L.service_needed} onChange={(e) => u({ service_needed: e.target.value })}>
                         <option value="">Select</option>
-                        <option>GWS</option><option>Geological Survey</option>
-                        <option>Soil Testing</option><option>Other</option>
+                        {alOpts("serviceNeeded").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
 
                   {F("firstName",
-                    <Row label={elbl("firstName", "First Name")} required>
+                    <Row label={alLabel("firstName")} required>
                       <div className="grid grid-cols-[90px_1fr] gap-2">
                         <select className={inputCls} value={L.first_name_salutation} onChange={(e) => u({ first_name_salutation: e.target.value })}>
-                          <option>None</option><option>Mr.</option><option>Mrs.</option>
-                          <option>Ms.</option><option>Dr.</option>
+                          {alSalutations.map((s) => <option key={s}>{s}</option>)}
                         </select>
                         <input className={inputCls} value={L.first_name} onChange={(e) => u({ first_name: e.target.value })} />
                       </div>
                     </Row>
                   )}
                   {F("lastName",
-                    <Row label={elbl("lastName", "Last Name")} required>
+                    <Row label={alLabel("lastName")} required>
                       <input className={inputCls} value={L.last_name} onChange={(e) => u({ last_name: e.target.value })} />
                     </Row>
                   )}
 
                   {F("whatsapp",
-                    <Row label="WhatsApp Num" required>
+                    <Row label={alLabel("whatsapp")} required>
                       <input className={inputCls} value={L.whatsapp} onChange={(e) => u({ whatsapp: e.target.value })} />
                     </Row>
                   )}
                   {F("primaryPhone",
-                    <Row label="Primary Phone" required>
+                    <Row label={alLabel("primaryPhone")} required>
                       <input className={inputCls} value={L.primary_phone} onChange={(e) => u({ primary_phone: e.target.value })} />
                     </Row>
                   )}
 
                   {F("mobilePhone",
-                    <Row label="Mobile Phone" required>
+                    <Row label={alLabel("mobilePhone")} required>
                       <input className={inputCls} value={L.mobile_phone} onChange={(e) => u({ mobile_phone: e.target.value })} />
                     </Row>
                   )}
                   {F("primaryEmail",
-                    <Row label="Primary Email">
+                    <Row label={alLabel("primaryEmail")}>
                       <input type="email" className={inputCls} value={L.primary_email} onChange={(e) => u({ primary_email: e.target.value })} />
                     </Row>
                   )}
 
                   {F("areaType",
-                    <Row label={elbl("areaType", "Area Type")} required>
+                    <Row label={alLabel("areaType")} required>
                       <select className={inputCls} value={L.area_type} onChange={(e) => u({ area_type: e.target.value })}>
-                        <option>OPEN PLOT</option><option>FARM LAND</option>
-                        <option>INDUSTRIAL</option><option>RESIDENTIAL</option>
+                        {alOpts("areaType").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
                   {F("totalArea",
-                    <Row label={elbl("totalArea", "Total Area")} required>
+                    <Row label={alLabel("totalArea")} required>
                       <textarea
                         className={inputCls + " h-[88px] py-2 resize-y"}
                         value={L.total_area}
@@ -883,36 +893,35 @@ const CrmLeads = () => {
                   )}
 
                   {F("expectedClose",
-                    <Row label={elbl("expectedClose", "Expected Close Date")} required>
+                    <Row label={alLabel("expectedClose")} required>
                       <input type="date" className={inputCls} value={L.expected_close} onChange={(e) => u({ expected_close: e.target.value })} />
                     </Row>
                   )}
                   {F("distanceKm",
-                    <Row label={elbl("distance", "Distance in KM")} required>
+                    <Row label={alLabel("distanceKm")} required>
                       <select className={inputCls} value={L.distance_km} onChange={(e) => u({ distance_km: e.target.value })}>
-                        <option>0 - 30 KM</option><option>30 - 60 KM</option>
-                        <option>60 - 100 KM</option><option>100+ KM</option>
+                        {alOpts("distanceKm").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
 
                   {F("shape",
-                    <Row label="Shape">
+                    <Row label={alLabel("shape")}>
                       <select className={inputCls} value={L.shape} onChange={(e) => u({ shape: e.target.value })}>
-                        <option>Serial</option><option>Parallel</option><option>Mixed</option>
+                        {alOpts("shape").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
                   {F("numScans",
-                    <Row label={elbl("scans", "Number of Scans")} required>
+                    <Row label={alLabel("numScans")} required>
                       <select className={inputCls} value={L.num_scans} onChange={(e) => u({ num_scans: e.target.value })}>
-                        {["1","2","3","4","5","6","7","8","9","10"].map((n) => <option key={n}>{n}</option>)}
+                        {alOpts("numScans").map((n) => <option key={n}>{n}</option>)}
                       </select>
                     </Row>
                   )}
 
                   {F("bizCost",
-                    <Row label="Total BIZ COST" required>
+                    <Row label={alLabel("bizCost")} required>
                       <div className="grid grid-cols-[36px_1fr]">
                         <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
                         <input className={inputCls + " rounded-l-none"} value={L.biz_cost} onChange={(e) => u({ biz_cost: e.target.value })} placeholder="0.00" />
@@ -920,33 +929,32 @@ const CrmLeads = () => {
                     </Row>
                   )}
                   {F("company",
-                    <Row label="Company">
+                    <Row label={alLabel("company")}>
                       <input className={inputCls} value={L.company} onChange={(e) => u({ company: e.target.value })} />
                     </Row>
                   )}
 
                   {F("gstin",
-                    <Row label="GSTIN">
+                    <Row label={alLabel("gstin")}>
                       <input className={inputCls} value={L.gstin} onChange={(e) => u({ gstin: e.target.value })} />
                     </Row>
                   )}
                   {F("industry",
-                    <Row label="Industry">
+                    <Row label={alLabel("industry")}>
                       <select className={inputCls} value={L.industry} onChange={(e) => u({ industry: e.target.value })}>
                         <option value="">Select an Option</option>
-                        <option>Agriculture</option><option>Construction</option>
-                        <option>Government</option><option>Real Estate</option><option>Other</option>
+                        {alOpts("industry").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
 
                   {F("designation",
-                    <Row label="Designation">
+                    <Row label={alLabel("designation")}>
                       <input className={inputCls} value={L.designation} onChange={(e) => u({ designation: e.target.value })} />
                     </Row>
                   )}
                   {F("annualRevenue",
-                    <Row label="Annual Revenue">
+                    <Row label={alLabel("annualRevenue")}>
                       <div className="grid grid-cols-[36px_1fr]">
                         <div className="h-9 inline-flex items-center justify-center border border-r-0 bg-muted/30 text-[13px]">₹</div>
                         <input className={inputCls + " rounded-l-none"} value={L.annual_revenue} onChange={(e) => u({ annual_revenue: e.target.value })} />
@@ -955,64 +963,59 @@ const CrmLeads = () => {
                   )}
 
                   {F("leadSource",
-                    <Row label="Lead Source">
+                    <Row label={alLabel("leadSource")}>
                       <select className={inputCls} value={L.lead_source} onChange={(e) => u({ lead_source: e.target.value })}>
                         <option value="">Select</option>
-                        <option>JDH</option><option>Website</option><option>Referral</option>
-                        <option>Walk-in</option><option>Campaign</option>
+                        {alOpts("leadSource").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
                   {F("numEmployees",
-                    <Row label="Number of Employees">
+                    <Row label={alLabel("numEmployees")}>
                       <input className={inputCls} value={L.num_employees} onChange={(e) => u({ num_employees: e.target.value })} />
                     </Row>
                   )}
 
                   {F("secondaryEmail",
-                    <Row label="Secondary Email">
+                    <Row label={alLabel("secondaryEmail")}>
                       <input type="email" className={inputCls} value={L.secondary_email} onChange={(e) => u({ secondary_email: e.target.value })} />
                     </Row>
                   )}
                   {F("fax",
-                    <Row label="Fax">
+                    <Row label={alLabel("fax")}>
                       <input className={inputCls} value={L.fax} onChange={(e) => u({ fax: e.target.value })} />
                     </Row>
                   )}
 
                   {F("website",
-                    <Row label="Website">
+                    <Row label={alLabel("website")}>
                       <input className={inputCls} value={L.website} onChange={(e) => u({ website: e.target.value })} />
                     </Row>
                   )}
                   {F("emailOptOut",
-                    <Row label="Email Opt Out">
+                    <Row label={alLabel("emailOptOut")}>
                       <input type="checkbox" checked={L.email_opt_out} onChange={(e) => u({ email_opt_out: e.target.checked })} className="h-4 w-4 mt-2.5" />
                     </Row>
                   )}
 
                   {F("leadStatus",
-                    <Row label="Lead Status">
+                    <Row label={alLabel("leadStatus")}>
                       <select className={inputCls} value={L.lead_status} onChange={(e) => u({ lead_status: e.target.value })}>
-                        <option>Contacted</option><option>Attempted Contact</option>
-                        <option>Cold</option><option>Hot</option><option>Junk</option>
-                        <option>Qualified</option><option>Lost</option>
+                        {alOpts("leadStatus").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
                   {F("rating",
-                    <Row label="Rating">
+                    <Row label={alLabel("rating")}>
                       <select className={inputCls} value={L.rating} onChange={(e) => u({ rating: e.target.value })}>
                         <option value="">Select an Option</option>
-                        <option>Acquired</option><option>Active</option>
-                        <option>Market Failed</option><option>Project Cancelled</option>
-                        <option>Shutdown</option>
+                        {alOpts("rating").map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </Row>
                   )}
 
                   {F("assignedTo",
-                    <Row label="Assigned To" required>
+                    <Row label={alLabel("assignedTo")} required>
                       <input className={inputCls} value={L.assigned_to} onChange={(e) => u({ assigned_to: e.target.value })} placeholder="Type a name…" />
                     </Row>
                   )}
@@ -1020,40 +1023,40 @@ const CrmLeads = () => {
 
                 <Section title={addrSec.title} hidden={!addrSec.visible}>
                   {F("street",
-                    <Row label={elbl("mailingStreet", "Street")} required>
+                    <Row label={alLabel("street")} required>
                       <textarea className={inputCls + " h-[88px] py-2 resize-y"} value={L.street} onChange={(e) => u({ street: e.target.value })} />
                     </Row>
                   )}
                   {F("poBox",
-                    <Row label="PO Box">
+                    <Row label={alLabel("poBox")}>
                       <input className={inputCls} value={L.po_box} onChange={(e) => u({ po_box: e.target.value })} />
                     </Row>
                   )}
 
                   {F("postalCode",
-                    <Row label="Postal Code">
+                    <Row label={alLabel("postalCode")}>
                       <input className={inputCls} value={L.postal_code} onChange={(e) => u({ postal_code: e.target.value })} />
                     </Row>
                   )}
                   {F("city",
-                    <Row label={elbl("mailingCity", "City")} required>
+                    <Row label={alLabel("city")} required>
                       <input className={inputCls} value={L.city} onChange={(e) => u({ city: e.target.value })} />
                     </Row>
                   )}
 
                   {F("country",
-                    <Row label="Country">
+                    <Row label={alLabel("country")}>
                       <input className={inputCls} value={L.country} onChange={(e) => u({ country: e.target.value })} />
                     </Row>
                   )}
                   {F("state",
-                    <Row label={elbl("mailingState", "State")} required>
+                    <Row label={alLabel("state")} required>
                       <input className={inputCls} value={L.state} onChange={(e) => u({ state: e.target.value })} />
                     </Row>
                   )}
 
                   {F("mapsLocation",
-                    <Row label="Maps Location">
+                    <Row label={alLabel("mapsLocation")}>
                       <input className={inputCls} value={L.maps_location} onChange={(e) => u({ maps_location: e.target.value })} />
                     </Row>
                   )}
@@ -1063,7 +1066,7 @@ const CrmLeads = () => {
                   <div className="bg-white">
                     <div className="px-6 py-2 text-[14px] text-foreground/80 border-b bg-muted/20">{descSec.title}</div>
                     <div className="px-6 py-3">
-                      <Row label={elbl("description", "Description")} required>
+                      <Row label={alLabel("description")} required>
                         <textarea
                           className={inputCls + " h-[88px] py-2 resize-y"}
                           value={L.description}
