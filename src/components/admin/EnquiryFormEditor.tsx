@@ -459,16 +459,60 @@ const EnquiryFormEditor = () => {
                       Show section
                     </label>
                   </div>
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1.5 ${!sec.visible ? "opacity-50 pointer-events-none" : ""}`}>
-                    {fields.map(({ key, label }) => (
-                      <label key={key} className="flex items-center justify-between gap-3 py-1.5 border-b border-border/30">
-                        <span className="text-sm truncate">{label}</span>
-                        <Switch
-                          checked={cfg.addLeadDialog.fields[key]?.visible !== false}
-                          onCheckedChange={(v) => setAddLeadField(key, v)}
-                        />
-                      </label>
-                    ))}
+                  <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!sec.visible ? "opacity-50 pointer-events-none" : ""}`}>
+                    {fields.map(({ key, label }) => {
+                      const fcfg = cfg.addLeadDialog.fields[key] || { visible: true };
+                      const defOpts = ADD_LEAD_DROPDOWN_OPTIONS[key];
+                      const optsText = (fcfg.options && fcfg.options.length ? fcfg.options : (defOpts || [])).join("\n");
+                      return (
+                        <div key={key} className="rounded-md border border-border/40 p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground truncate">{label}</span>
+                            <label className="flex items-center gap-2 text-[11px]">
+                              <Switch
+                                checked={fcfg.visible !== false}
+                                onCheckedChange={(v) => setAddLeadField(key, v)}
+                              />
+                              Visible
+                            </label>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Label</Label>
+                            <Input
+                              value={fcfg.label ?? ""}
+                              onChange={(e) => patchAddLeadField(key, { label: e.target.value })}
+                              placeholder={label}
+                            />
+                          </div>
+                          {defOpts && (
+                            <div className="space-y-1">
+                              <Label className="text-xs">Dropdown options (one per line)</Label>
+                              <Textarea
+                                rows={Math.min(6, Math.max(3, (defOpts.length || 3)))}
+                                value={optsText}
+                                onChange={(e) =>
+                                  patchAddLeadField(key, {
+                                    options: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean),
+                                  })
+                                }
+                                placeholder={defOpts.join("\n")}
+                              />
+                            </div>
+                          )}
+                          {key === "firstName" && (
+                            <div className="space-y-1">
+                              <Label className="text-xs">Salutation options (one per line)</Label>
+                              <Textarea
+                                rows={5}
+                                value={(cfg.addLeadDialog.salutations || DEFAULT_SALUTATIONS).join("\n")}
+                                onChange={(e) => setSalutations(e.target.value)}
+                                placeholder={DEFAULT_SALUTATIONS.join("\n")}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
