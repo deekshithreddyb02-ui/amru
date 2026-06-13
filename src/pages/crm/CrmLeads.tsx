@@ -38,7 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { exportCsv } from "@/lib/csv";
-import { useEnquiryFormConfig, DEFAULT_LABELS, DEFAULT_ADD_LEAD_SECTIONS, type AddLeadFieldKey, type AddLeadSectionKey } from "@/hooks/useEnquiryFormConfig";
+import { useEnquiryFormConfig, DEFAULT_LABELS, DEFAULT_ADD_LEAD_SECTIONS, ADD_LEAD_DROPDOWN_OPTIONS, DEFAULT_SALUTATIONS, ADD_LEAD_FIELDS_BY_SECTION, type AddLeadFieldKey, type AddLeadSectionKey } from "@/hooks/useEnquiryFormConfig";
 import LeadSidePanel from "@/components/crm/LeadSidePanel";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
