@@ -157,8 +157,10 @@ export const ADD_LEAD_FIELDS_BY_SECTION: Record<AddLeadSectionKey, { key: AddLea
   ],
 };
 
-const buildDefaultAddLeadFields = (): Record<AddLeadFieldKey, { visible: boolean }> => {
-  const out = {} as Record<AddLeadFieldKey, { visible: boolean }>;
+export type AddLeadFieldConfig = { visible: boolean; label?: string; options?: string[] };
+
+const buildDefaultAddLeadFields = (): Record<AddLeadFieldKey, AddLeadFieldConfig> => {
+  const out = {} as Record<AddLeadFieldKey, AddLeadFieldConfig>;
   (Object.keys(ADD_LEAD_FIELDS_BY_SECTION) as AddLeadSectionKey[]).forEach((s) => {
     ADD_LEAD_FIELDS_BY_SECTION[s].forEach(({ key }) => {
       out[key] = { visible: true };
@@ -169,14 +171,32 @@ const buildDefaultAddLeadFields = (): Record<AddLeadFieldKey, { visible: boolean
 
 export const DEFAULT_ADD_LEAD_FIELDS = buildDefaultAddLeadFields();
 
+/** Default dropdown options for select-type Add Lead fields. Used when no custom list is configured. */
+export const ADD_LEAD_DROPDOWN_OPTIONS: Partial<Record<AddLeadFieldKey, string[]>> = {
+  bizArea:      ["Maharashtra", "Telangana", "Andhra Pradesh", "Karnataka", "Other India", "Other Country"],
+  serviceNeeded:["GWS", "Geological Survey", "Soil Testing", "Other"],
+  areaType:     ["OPEN PLOT", "FARM LAND", "INDUSTRIAL", "RESIDENTIAL"],
+  distanceKm:   ["0 - 30 KM", "30 - 60 KM", "60 - 100 KM", "100+ KM"],
+  shape:        ["Serial", "Parallel", "Mixed"],
+  numScans:     ["1","2","3","4","5","6","7","8","9","10"],
+  industry:     ["Agriculture", "Construction", "Government", "Real Estate", "Other"],
+  leadSource:   ["JDH", "Website", "Referral", "Walk-in", "Campaign"],
+  leadStatus:   ["Contacted", "Attempted Contact", "Cold", "Hot", "Junk", "Qualified", "Lost"],
+  rating:       ["Acquired", "Active", "Market Failed", "Project Cancelled", "Shutdown"],
+};
+
+export const DEFAULT_SALUTATIONS = ["None", "Mr.", "Mrs.", "Ms.", "Dr."];
+
 export type AddLeadDialogConfig = {
   sections: Record<AddLeadSectionKey, { visible: boolean; title: string }>;
-  fields: Record<AddLeadFieldKey, { visible: boolean }>;
+  fields: Record<AddLeadFieldKey, AddLeadFieldConfig>;
+  salutations?: string[];
 };
 
 export const DEFAULT_ADD_LEAD_DIALOG: AddLeadDialogConfig = {
   sections: DEFAULT_ADD_LEAD_SECTIONS,
   fields: DEFAULT_ADD_LEAD_FIELDS,
+  salutations: DEFAULT_SALUTATIONS,
 };
 
 export type EnquiryRoutingKey =
