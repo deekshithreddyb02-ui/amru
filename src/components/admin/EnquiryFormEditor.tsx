@@ -289,12 +289,26 @@ const EnquiryFormEditor = () => {
       },
     }));
 
-  const setAddLeadField = (k: AddLeadFieldKey, visible: boolean) =>
+  const patchAddLeadField = (k: AddLeadFieldKey, patch: Partial<{ visible: boolean; label: string; options: string[] }>) =>
     setCfg((c) => ({
       ...c,
       addLeadDialog: {
         ...c.addLeadDialog,
-        fields: { ...c.addLeadDialog.fields, [k]: { visible } },
+        fields: {
+          ...c.addLeadDialog.fields,
+          [k]: { ...(c.addLeadDialog.fields[k] || { visible: true }), ...patch },
+        },
+      },
+    }));
+
+  const setAddLeadField = (k: AddLeadFieldKey, visible: boolean) => patchAddLeadField(k, { visible });
+
+  const setSalutations = (text: string) =>
+    setCfg((c) => ({
+      ...c,
+      addLeadDialog: {
+        ...c.addLeadDialog,
+        salutations: text.split("\n").map((s) => s.trim()).filter(Boolean),
       },
     }));
 
