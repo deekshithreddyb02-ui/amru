@@ -260,21 +260,51 @@ export default function CrmDealDetail() {
   );
 }
 
-function Section({ title, rows }: { title: string; rows: [string, ReactNode][] }) {
+function Section({
+  sectionKey, title, rows, fieldLabels, sectionLabels,
+}: {
+  sectionKey: string;
+  title: string;
+  rows: [string, ReactNode][];
+  fieldLabels: ReturnType<typeof useCrmLabels>;
+  sectionLabels: ReturnType<typeof useCrmLabels>;
+}) {
   return (
     <div className="bg-white border rounded">
       <div className="flex items-center gap-1 px-3 py-2 border-b">
         <ChevronDown className="h-3.5 w-3.5 text-primary" />
-        <h3 className="text-[13px] font-semibold text-primary">{title}</h3>
+        <h3 className="text-[13px] font-semibold text-primary">
+          <EditableLabel
+            labelKey={sectionKey}
+            value={sectionLabels.labels[sectionKey]?.label}
+            fallback={title}
+            canEdit={sectionLabels.canEdit}
+            onSave={sectionLabels.setLabel}
+          />
+        </h3>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2">
-        {rows.map(([k, v], i) => (
-          <div key={`${k}-${i}`} className="grid grid-cols-[180px_1fr] gap-3 px-4 py-2 text-[12.5px] border-b last:border-b-0 odd:md:border-r">
-            <div className="text-muted-foreground">{k}</div>
-            <div className="text-foreground whitespace-pre-wrap break-words">{v || ""}</div>
-          </div>
-        ))}
+        {rows.map(([k, v], i) => {
+          const fk = `${sectionKey}.${k}`;
+          return (
+            <div key={`${k}-${i}`} className="grid grid-cols-[180px_1fr] gap-3 px-4 py-2 text-[12.5px] border-b last:border-b-0 odd:md:border-r">
+              <div className="text-muted-foreground">
+                {k.trim() ? (
+                  <EditableLabel
+                    labelKey={fk}
+                    value={fieldLabels.labels[fk]?.label}
+                    fallback={k}
+                    canEdit={fieldLabels.canEdit}
+                    onSave={fieldLabels.setLabel}
+                  />
+                ) : k}
+              </div>
+              <div className="text-foreground whitespace-pre-wrap break-words">{v || ""}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
