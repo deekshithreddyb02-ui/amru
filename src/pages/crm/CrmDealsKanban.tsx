@@ -372,36 +372,43 @@ const CrmDeals = () => {
 
   return (
     <div className="space-y-4">
-      {!loading && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {!loading && (() => {
+        const sumCard = (key: string, fallback: string, valueNode: ReactNode, subFallback: string, subKey: string, valueClass = "") => (
           <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Open Pipeline</div>
-            <div className="text-lg font-semibold mt-1">{fmtINR(totalPipeline)}</div>
-            <div className="text-[10px] text-muted-foreground">{openPipeline.length} opportunities</div>
-          </Card>
-          <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Weighted Forecast</div>
-            <div className="text-lg font-semibold mt-1 text-primary">{fmtINR(weightedForecast)}</div>
-            <div className="text-[10px] text-muted-foreground">amount × probability</div>
-          </Card>
-          <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Won</div>
-            <div className="text-lg font-semibold mt-1 text-green-600">{fmtINR(wonTotal)}</div>
-            <div className="text-[10px] text-muted-foreground">{deals.filter((d) => d.stage === "won").length} opportunities</div>
-          </Card>
-          <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Win Rate</div>
-            <div className="text-lg font-semibold mt-1">
-              {(() => {
-                const closed = deals.filter((d) => d.stage === "won" || d.stage === "lost").length;
-                const won = deals.filter((d) => d.stage === "won").length;
-                return closed === 0 ? "—" : `${Math.round((won / closed) * 100)}%`;
-              })()}
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              <EditableLabel
+                labelKey={key}
+                value={sumLabels.labels[key]?.label}
+                fallback={fallback}
+                canEdit={sumLabels.canEdit}
+                onSave={sumLabels.setLabel}
+              />
             </div>
-            <div className="text-[10px] text-muted-foreground">won / closed</div>
+            <div className={`text-lg font-semibold mt-1 ${valueClass}`}>{valueNode}</div>
+            <div className="text-[10px] text-muted-foreground">
+              <EditableLabel
+                labelKey={subKey}
+                value={sumLabels.labels[subKey]?.label}
+                fallback={subFallback}
+                canEdit={sumLabels.canEdit}
+                onSave={sumLabels.setLabel}
+              />
+            </div>
           </Card>
-        </div>
-      )}
+        );
+        const closed = deals.filter((d) => d.stage === "won" || d.stage === "lost").length;
+        const won = deals.filter((d) => d.stage === "won").length;
+        const winRate = closed === 0 ? "—" : `${Math.round((won / closed) * 100)}%`;
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {sumCard("open_title", "Open Pipeline", fmtINR(totalPipeline), `${openPipeline.length} opportunities`, "open_sub")}
+            {sumCard("weighted_title", "Weighted Forecast", fmtINR(weightedForecast), "amount × probability", "weighted_sub", "text-primary")}
+            {sumCard("won_title", "Won", fmtINR(wonTotal), `${won} opportunities`, "won_sub", "text-green-600")}
+            {sumCard("winrate_title", "Win Rate", winRate, "won / closed", "winrate_sub")}
+          </div>
+        );
+      })()}
+
 
       {view === "list" ? (
         <CrmListView<Deal>
