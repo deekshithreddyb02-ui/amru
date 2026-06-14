@@ -144,6 +144,7 @@ const CrmDeals = () => {
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "kanban">("list");
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
