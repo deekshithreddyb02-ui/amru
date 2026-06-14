@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent,
   PointerSensor, useSensor, useSensors,
@@ -11,15 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, IndianRupee } from "lucide-react";
+import { Loader2, Plus, IndianRupee, Download, LayoutGrid, List as ListIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
+import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
+import { exportCsv } from "@/lib/csv";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -32,21 +35,25 @@ type Deal = {
   expected_close: string | null;
   organization_id: string | null;
   contact_id: string | null;
+  owner_id: string | null;
   position: number;
   organization?: { name: string } | null;
   contact?: { full_name: string } | null;
+  owner_name?: string;
 };
 
 type Ref = { id: string; name: string };
 
-const STAGES: { key: string; label: string; tint: string }[] = [
-  { key: "new",         label: "New",         tint: "border-t-primary" },
-  { key: "qualified",   label: "Qualified",   tint: "border-t-[hsl(var(--teal))]" },
-  { key: "proposal",    label: "Proposal",    tint: "border-t-secondary" },
-  { key: "negotiation", label: "Negotiation", tint: "border-t-[hsl(var(--gold))]" },
-  { key: "won",         label: "Won",         tint: "border-t-green-500" },
-  { key: "lost",        label: "Lost",        tint: "border-t-destructive" },
+const STAGES: { key: string; label: string; tint: string; tone: string }[] = [
+  { key: "new",         label: "Prospecting", tint: "border-t-primary",                  tone: "bg-amber-100 text-amber-800" },
+  { key: "qualified",   label: "Qualified",   tint: "border-t-[hsl(var(--teal))]",        tone: "bg-blue-100 text-blue-800" },
+  { key: "proposal",    label: "Proposal",    tint: "border-t-secondary",                 tone: "bg-indigo-100 text-indigo-800" },
+  { key: "negotiation", label: "Negotiation", tint: "border-t-[hsl(var(--gold))]",        tone: "bg-yellow-100 text-yellow-800" },
+  { key: "won",         label: "Won",         tint: "border-t-green-500",                 tone: "bg-green-100 text-green-800" },
+  { key: "lost",        label: "Lost",        tint: "border-t-destructive",               tone: "bg-red-100 text-red-700" },
 ];
+
+const stageMeta = (k: string) => STAGES.find((s) => s.key === k) ?? { label: k, tone: "bg-muted text-foreground" };
 
 const fmtINR = (n: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
@@ -126,6 +133,7 @@ const Column = ({
 
 const CrmDeals = () => {
   const { workspace } = useOutletContext<Ctx>();
+  const navigate = useNavigate();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [orgs, setOrgs] = useState<Ref[]>([]);
   const [contacts, setContacts] = useState<Ref[]>([]);
@@ -134,6 +142,7 @@ const CrmDeals = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "kanban">("list");
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -142,7 +151,7 @@ const CrmDeals = () => {
     const [d, o, c] = await Promise.all([
       supabase
         .from("crm_deals")
-        .select("id,title,amount,stage,probability,expected_close,organization_id,contact_id,position,organization:crm_organizations(name),contact:crm_contacts(full_name)")
+        .select("id,title,amount,stage,probability,expected_close,organization_id,contact_id,owner_id,position,organization:crm_organizations(name),contact:crm_contacts(full_name)")
         .eq("workspace_id", workspace.id)
         .order("position"),
       supabase.from("crm_organizations").select("id,name").eq("workspace_id", workspace.id).order("name"),
@@ -152,7 +161,16 @@ const CrmDeals = () => {
         .eq("workspace_id", workspace.id)
         .order("full_name"),
     ]);
-    setDeals((d.data as unknown as Deal[]) || []);
+    const list = (d.data as unknown as Deal[]) || [];
+    // Resolve owner names
+    const ownerIds = Array.from(new Set(list.map((x) => x.owner_id).filter(Boolean) as string[]));
+    let nameMap: Record<string, string> = {};
+    if (ownerIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles").select("user_id,full_name,username").in("user_id", ownerIds);
+      (profs || []).forEach((p: any) => { nameMap[p.user_id] = p.full_name || p.username || ""; });
+    }
+    setDeals(list.map((x) => ({ ...x, owner_name: x.owner_id ? nameMap[x.owner_id] || "—" : "—" })));
     setOrgs((o.data as Ref[]) || []);
     setContacts(((c.data || []) as { id: string; full_name: string }[]).map((r) => ({ id: r.id, name: r.full_name })));
     setLoading(false);
@@ -183,7 +201,6 @@ const CrmDeals = () => {
     const deal = deals.find((d) => d.id === dealId);
     if (!deal || deal.stage === newStage) return;
 
-    // optimistic
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage: newStage } : d)));
     const { error } = await supabase.from("crm_deals").update({ stage: newStage }).eq("id", dealId);
     if (error) {
@@ -213,7 +230,7 @@ const CrmDeals = () => {
     if (error) {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Deal created" });
+      toast({ title: "Opportunity created" });
       setForm(emptyForm);
       setOpen(false);
       load();
@@ -221,7 +238,6 @@ const CrmDeals = () => {
   };
 
   const activeDeal = deals.find((d) => d.id === activeId) || null;
-
   const openPipeline = deals.filter((d) => d.stage !== "won" && d.stage !== "lost");
   const totalPipeline = openPipeline.reduce((s, d) => s + Number(d.amount || 0), 0);
   const weightedForecast = openPipeline.reduce(
@@ -229,93 +245,102 @@ const CrmDeals = () => {
   );
   const wonTotal = deals.filter((d) => d.stage === "won").reduce((s, d) => s + Number(d.amount || 0), 0);
 
+  const savedViews: SavedView[] = [
+    { id: "all", label: "All Opportunities" },
+    { id: "open", label: "Open Pipeline", filter: (d: Deal) => d.stage !== "won" && d.stage !== "lost" },
+    { id: "prospecting", label: "Prospecting", filter: (d: Deal) => d.stage === "new" },
+    { id: "won", label: "Won", filter: (d: Deal) => d.stage === "won" },
+    { id: "lost", label: "Lost", filter: (d: Deal) => d.stage === "lost" },
+  ];
+
+  const columns: Column<Deal>[] = [
+    {
+      key: "title", label: "Opportunity Name",
+      render: (d) => (
+        <button
+          className="font-medium text-primary hover:underline text-left"
+          onClick={(e) => { e.stopPropagation(); /* detail route TBD */ }}
+          data-no-row-click
+        >
+          {d.title}
+        </button>
+      ),
+    },
+    {
+      key: "organization", label: "Organization Name",
+      render: (d) => d.organization?.name
+        ? <span className="text-primary">{d.organization.name}</span>
+        : <span className="text-muted-foreground">—</span>,
+    },
+    {
+      key: "stage", label: "Sales Stage",
+      render: (d) => {
+        const m = stageMeta(d.stage);
+        return <Badge variant="secondary" className={m.tone}>{m.label}</Badge>;
+      },
+    },
+    {
+      key: "expected_close", label: "Expected Close Date",
+      render: (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—",
+    },
+    {
+      key: "amount", label: "Amount",
+      className: "text-right",
+      render: (d) => <span className="tabular-nums">{fmtINR(Number(d.amount || 0))}</span>,
+    },
+    { key: "owner_name", label: "Assigned To", render: (d) => d.owner_name || "—" },
+    {
+      key: "contact", label: "Contact Name",
+      render: (d) => d.contact?.full_name
+        ? <span className="text-primary">{d.contact.full_name}</span>
+        : <span className="text-muted-foreground">—</span>,
+    },
+    { key: "probability", label: "Probability", defaultVisible: false, render: (d) => `${d.probability}%` },
+  ];
+
+  const rightActions = (
+    <>
+      <div className="inline-flex rounded-md border bg-card overflow-hidden h-8">
+        <button
+          onClick={() => setView("list")}
+          className={`px-2 inline-flex items-center gap-1 text-xs ${view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+          aria-label="List view"
+        >
+          <ListIcon className="h-3.5 w-3.5" /><span className="hidden sm:inline">List</span>
+        </button>
+        <button
+          onClick={() => setView("kanban")}
+          className={`px-2 inline-flex items-center gap-1 text-xs border-l ${view === "kanban" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+          aria-label="Kanban view"
+        >
+          <LayoutGrid className="h-3.5 w-3.5" /><span className="hidden sm:inline">Kanban</span>
+        </button>
+      </div>
+      <Button
+        variant="outline" size="sm" className="h-8 gap-1"
+        onClick={() => exportCsv("opportunities", deals, [
+          { key: "title", label: "Opportunity Name" },
+          { key: "stage", label: "Sales Stage" },
+          { key: "amount", label: "Amount" },
+          { key: "probability", label: "Probability" },
+          { key: "expected_close", label: "Expected Close" },
+          { key: "owner_name", label: "Assigned To" },
+        ])}
+      >
+        <Download className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline text-xs">Export</span>
+      </Button>
+    </>
+  );
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-serif">Deals</h1>
-          <p className="text-muted-foreground text-sm">{workspace.name} · drag cards between stages</p>
-        </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 w-full sm:w-auto"><Plus className="h-4 w-4" /> New deal</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>New deal</DialogTitle></DialogHeader>
-            <div className="space-y-3 py-2">
-              <div>
-                <Label>Title *</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Amount (INR)</Label>
-                  <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Stage</Label>
-                  <Select value={form.stage} onValueChange={(v) => setForm({ ...form, stage: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {STAGES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Probability %</Label>
-                  <Input type="number" min={0} max={100} value={form.probability} onChange={(e) => setForm({ ...form, probability: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Expected close</Label>
-                  <Input type="date" value={form.expected_close} onChange={(e) => setForm({ ...form, expected_close: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Organization</Label>
-                  <Select
-                    value={form.organization_id || "none"}
-                    onValueChange={(v) => setForm({ ...form, organization_id: v === "none" ? "" : v })}
-                  >
-                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {orgs.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Contact</Label>
-                  <Select
-                    value={form.contact_id || "none"}
-                    onValueChange={(v) => setForm({ ...form, contact_id: v === "none" ? "" : v })}
-                  >
-                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {contacts.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <Label>Description</Label>
-                <Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={save} disabled={saving || !form.title.trim()}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
       {!loading && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card className="p-3">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Open Pipeline</div>
             <div className="text-lg font-semibold mt-1">{fmtINR(totalPipeline)}</div>
-            <div className="text-[10px] text-muted-foreground">{openPipeline.length} deals</div>
+            <div className="text-[10px] text-muted-foreground">{openPipeline.length} opportunities</div>
           </Card>
           <Card className="p-3">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Weighted Forecast</div>
@@ -325,7 +350,7 @@ const CrmDeals = () => {
           <Card className="p-3">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Won</div>
             <div className="text-lg font-semibold mt-1 text-green-600">{fmtINR(wonTotal)}</div>
-            <div className="text-[10px] text-muted-foreground">{deals.filter((d) => d.stage === "won").length} deals</div>
+            <div className="text-[10px] text-muted-foreground">{deals.filter((d) => d.stage === "won").length} opportunities</div>
           </Card>
           <Card className="p-3">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Win Rate</div>
@@ -341,26 +366,113 @@ const CrmDeals = () => {
         </div>
       )}
 
-      {loading ? (
-        <Card className="p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></Card>
+      {view === "list" ? (
+        <CrmListView<Deal>
+          title="Opportunities"
+          subtitle={workspace.name}
+          rows={deals}
+          loading={loading}
+          columns={columns}
+          savedViews={savedViews}
+          defaultViewId="all"
+          searchKeys={["title"]}
+          onRefresh={load}
+          onCreate={() => setOpen(true)}
+          rightActions={rightActions}
+        />
       ) : (
-        <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-          <div className="overflow-x-auto pb-4">
-            <div className="flex gap-3 min-w-max">
-              {STAGES.map((s) => (
-                <Column
-                  key={s.key}
-                  stage={s.key}
-                  label={s.label}
-                  tint={s.tint}
-                  deals={dealsByStage[s.key] || []}
-                />
-              ))}
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+            <div>
+              <h1 className="font-serif text-xl sm:text-2xl">Opportunities</h1>
+              <p className="text-muted-foreground text-xs">{workspace.name} · drag cards between stages</p>
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">{rightActions}
+              <Button size="sm" className="h-8 gap-1" onClick={() => setOpen(true)}>
+                <Plus className="h-3.5 w-3.5" /><span className="text-xs">New</span>
+              </Button>
             </div>
           </div>
-          <DragOverlay>{activeDeal ? <DealCard deal={activeDeal} dragging /> : null}</DragOverlay>
-        </DndContext>
+          {loading ? (
+            <Card className="p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></Card>
+          ) : (
+            <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+              <div className="overflow-x-auto pb-4">
+                <div className="flex gap-3 min-w-max">
+                  {STAGES.map((s) => (
+                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} />
+                  ))}
+                </div>
+              </div>
+              <DragOverlay>{activeDeal ? <DealCard deal={activeDeal} dragging /> : null}</DragOverlay>
+            </DndContext>
+          )}
+        </>
       )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>New opportunity</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label>Opportunity Name *</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Amount (INR)</Label>
+                <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+              </div>
+              <div>
+                <Label>Sales Stage</Label>
+                <Select value={form.stage} onValueChange={(v) => setForm({ ...form, stage: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {STAGES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Probability %</Label>
+                <Input type="number" min={0} max={100} value={form.probability} onChange={(e) => setForm({ ...form, probability: e.target.value })} />
+              </div>
+              <div>
+                <Label>Expected Close Date</Label>
+                <Input type="date" value={form.expected_close} onChange={(e) => setForm({ ...form, expected_close: e.target.value })} />
+              </div>
+              <div>
+                <Label>Organization</Label>
+                <Select value={form.organization_id || "none"} onValueChange={(v) => setForm({ ...form, organization_id: v === "none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {orgs.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Contact</Label>
+                <Select value={form.contact_id || "none"} onValueChange={(v) => setForm({ ...form, contact_id: v === "none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {contacts.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={save} disabled={saving || !form.title.trim()}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
