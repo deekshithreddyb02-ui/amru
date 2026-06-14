@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import { useCrmLabels } from "@/hooks/useCrmLabels";
 import EditableLabel from "@/components/crm/EditableLabel";
+import EditableValue, { type EditableValueConfig } from "@/components/crm/EditableValue";
+import { useCrmPermissions } from "@/hooks/useCrmPermissions";
+
 
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
