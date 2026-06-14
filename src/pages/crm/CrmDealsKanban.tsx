@@ -24,6 +24,9 @@ import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
 import { exportCsv } from "@/lib/csv";
 import DealSidePanel from "@/components/crm/DealSidePanel";
+import { useCrmLabels } from "@/hooks/useCrmLabels";
+import EditableLabel, { COLOR_TONE_MAP } from "@/components/crm/EditableLabel";
+
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
