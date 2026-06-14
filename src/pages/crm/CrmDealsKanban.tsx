@@ -65,7 +65,7 @@ const emptyForm = {
 };
 
 // --- Card ---
-const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
+const DealCard = ({ deal, dragging, onOpen }: { deal: Deal; dragging?: boolean; onOpen?: (id: string) => void }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: deal.id,
     data: { stage: deal.stage },
@@ -79,7 +79,8 @@ const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-card border rounded-md p-3 shadow-sm cursor-grab active:cursor-grabbing select-none touch-none ${
+      onClick={() => { if (!isDragging) onOpen?.(deal.id); }}
+      className={`bg-card border rounded-md p-3 shadow-sm cursor-pointer active:cursor-grabbing select-none touch-none ${
         isDragging || dragging ? "opacity-50" : ""
       }`}
     >
