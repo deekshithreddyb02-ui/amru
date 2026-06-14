@@ -276,13 +276,15 @@ export default function CrmDealDetail() {
 }
 
 function Section({
-  sectionKey, title, rows, fieldLabels, sectionLabels,
+  sectionKey, title, rows, fieldLabels, sectionLabels, canEditValues, onReload,
 }: {
   sectionKey: string;
   title: string;
-  rows: [string, ReactNode][];
+  rows: [string, ReactNode, EditableValueConfig?][];
   fieldLabels: ReturnType<typeof useCrmLabels>;
   sectionLabels: ReturnType<typeof useCrmLabels>;
+  canEditValues: boolean;
+  onReload: () => void;
 }) {
   return (
     <div className="bg-white border rounded">
@@ -299,7 +301,7 @@ function Section({
         </h3>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2">
-        {rows.map(([k, v], i) => {
+        {rows.map(([k, v, cfg], i) => {
           const fk = `${sectionKey}.${k}`;
           return (
             <div key={`${k}-${i}`} className="grid grid-cols-[180px_1fr] gap-3 px-4 py-2 text-[12.5px] border-b last:border-b-0 odd:md:border-r">
@@ -314,7 +316,9 @@ function Section({
                   />
                 ) : k}
               </div>
-              <div className="text-foreground whitespace-pre-wrap break-words">{v || ""}</div>
+              <div className="text-foreground whitespace-pre-wrap break-words">
+                <EditableValue display={v} canEdit={canEditValues} config={cfg} onSaved={onReload} />
+              </div>
             </div>
           );
         })}
@@ -322,4 +326,5 @@ function Section({
     </div>
   );
 }
+
 
