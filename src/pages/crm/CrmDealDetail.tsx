@@ -243,10 +243,31 @@ export default function CrmDealDetail() {
           </div>
         )}
         {tab === "summary" && (
-          <div className="space-y-4">
-            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
-
-          </div>
+          <SummaryView
+            keyFields={[
+              ["Opportunity Name", lead ? `GW: ${lead.full_name || ""}` : deal.title, D("title")],
+              ["Contact Name", contact?.id ? <Link to={`/crm/${workspace.slug}/contacts/${contact.id}`} className="text-primary hover:underline">{contactName}</Link> : contactName],
+              ["Expected Close Date", fmtDate(deal.expected_close), D("expected_close", "date")],
+              ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
+              ["BIZ Area", lead?.biz_area || "", L("biz_area")],
+              ["Service Needed", lead?.service_needed || "", L("service_needed")],
+              ["Distance in KM", lead?.distance_km || "", L("distance_km", "number")],
+              ["Total Area", lead ? `Gunta: ${lead.gunta || ""}\nAcres: ${lead.acres || ""}\nSq.Yrds: ${lead.sq_yards || ""}\nSq.Ft: ${lead.sq_ft || ""}` : ""],
+              ["Number of Scans", lead?.num_scans ?? "", L("num_scans", "number")],
+              ["Total BIZ COST (₹)", fmtMoney(lead?.biz_cost ?? deal.amount), L("biz_cost", "number")],
+              ["Maps Location", lead?.maps_location || "", L("maps_location")],
+              ["Street", lead?.street || org?.street || "", L("street") || O("street")],
+              ["City", (lead?.city || org?.city) ? <span className="text-primary">{lead?.city || org?.city}</span> : "", L("city") || O("city")],
+              ["State", (lead?.state || org?.state) ? <span className="text-primary">{lead?.state || org?.state}</span> : "", L("state") || O("state")],
+              ["Description", deal.description || lead?.notes || "", D("description", "textarea")],
+            ]}
+            activities={activities}
+            contactName={contactName}
+            canEditValues={canEditValues}
+            onReload={reload}
+            fieldLabels={fieldLabels}
+            sectionLabels={sectionLabels}
+          />
         )}
 
         {tab === "updates" && (
@@ -327,4 +348,138 @@ function Section({
   );
 }
 
+function SummaryView({
+  keyFields, activities, contactName, canEditValues, onReload, fieldLabels, sectionLabels,
+}: {
+  keyFields: [string, ReactNode, EditableValueConfig?][];
+  activities: any[];
+  contactName: string;
+  canEditValues: boolean;
+  onReload: () => void;
+  fieldLabels: ReturnType<typeof useCrmLabels>;
+  sectionLabels: ReturnType<typeof useCrmLabels>;
+}) {
+  const Panel = ({ title, sectionKey, actions, children }: { title: string; sectionKey: string; actions?: ReactNode; children: ReactNode }) => (
+    <div className="bg-white border rounded">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <div className="flex items-center gap-1">
+          <ChevronDown className="h-3.5 w-3.5 text-primary" />
+          <h3 className="text-[13px] font-semibold text-primary">
+            <EditableLabel
+              labelKey={sectionKey}
+              value={sectionLabels.labels[sectionKey]?.label}
+              fallback={title}
+              canEdit={sectionLabels.canEdit}
+              onSave={sectionLabels.setLabel}
+            />
+          </h3>
+        </div>
+        {actions}
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="lg:col-span-5 space-y-4">
+        <Panel title="Key Fields" sectionKey="summary_key_fields">
+          <div className="divide-y">
+            {keyFields.map(([k, v, cfg], i) => {
+              const fk = `summary_key_fields.${k}`;
+              return (
+                <div key={`${k}-${i}`} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2 text-[12.5px]">
+                  <div className="text-muted-foreground">
+                    <EditableLabel
+                      labelKey={fk}
+                      value={fieldLabels.labels[fk]?.label}
+                      fallback={k}
+                      canEdit={fieldLabels.canEdit}
+                      onSave={fieldLabels.setLabel}
+                    />
+                  </div>
+                  <div className="text-foreground whitespace-pre-wrap break-words">
+                    <EditableValue display={v} canEdit={canEditValues} config={cfg} onSaved={onReload} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+        <Panel
+          title="Documents"
+          sectionKey="summary_documents"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />New Document</Button>}
+        >
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Documents</div>
+        </Panel>
+      </div>
+
+      <div className="lg:col-span-4 space-y-4">
+        <Panel
+          title="Activities"
+          sectionKey="summary_activities"
+          actions={
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add Task</Button>
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add Event</Button>
+            </div>
+          }
+        >
+          {activities.length === 0 ? (
+            <div className="p-6 text-center text-[12px] text-muted-foreground">No pending activities</div>
+          ) : (
+            <ul className="divide-y">
+              {activities.slice(0, 5).map((a) => (
+                <li key={a.id} className="px-4 py-2 text-[12.5px]">
+                  <div className="font-medium">{a.subject || a.activity_type}</div>
+                  <div className="text-muted-foreground text-[11.5px]">{fmtDateTime(a.created_at)}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title="Comments" sectionKey="summary_comments">
+          <div className="p-3 space-y-2">
+            <textarea
+              placeholder="Post your comment here"
+              className="w-full text-[12.5px] border rounded p-2 min-h-[70px] focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <div className="flex items-center justify-between">
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Paperclip className="h-3 w-3" />Attach Files</Button>
+              <Button size="sm" className="h-7 text-[12px] bg-green-600 hover:bg-green-700">Post</Button>
+            </div>
+          </div>
+          <div className="px-3 py-2 border-t flex items-center justify-between">
+            <div className="text-[13px] font-semibold text-foreground">Recent Comments</div>
+            <div className="text-[11.5px] text-muted-foreground">Roll up</div>
+          </div>
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No comments</div>
+        </Panel>
+      </div>
+
+      <div className="lg:col-span-3 space-y-4">
+        <Panel
+          title="Related Products"
+          sectionKey="summary_related_products"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add</Button>}
+        >
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Products</div>
+        </Panel>
+        <Panel
+          title="Related Contacts"
+          sectionKey="summary_related_contacts"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add</Button>}
+        >
+          {contactName ? (
+            <div className="px-4 py-2 text-[12.5px] text-primary">{contactName}</div>
+          ) : (
+            <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Contacts</div>
+          )}
+        </Panel>
+      </div>
+    </div>
+  );
+}
 
