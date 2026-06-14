@@ -381,15 +381,7 @@ function SummaryView({
               const fk = `summary_key_fields.${k}`;
               return (
                 <div key={`${k}-${i}`} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2 text-[12.5px]">
-                  <div className="text-muted-foreground">
-                    <EditableLabel
-                      labelKey={fk}
-                      value={fieldLabels.labels[fk]?.label}
-                      fallback={k}
-                      canEdit={fieldLabels.canEdit}
-                      onSave={fieldLabels.setLabel}
-                    />
-                  </div>
+                  <div className="text-muted-foreground">{k}</div>
                   <div className="text-foreground whitespace-pre-wrap break-words">
                     <EditableValue display={v} canEdit={canEditValues} config={cfg} onSaved={onReload} />
                   </div>
