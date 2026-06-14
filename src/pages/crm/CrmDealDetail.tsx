@@ -57,12 +57,17 @@ export default function CrmDealDetail() {
   const { workspace } = useOutletContext<Ctx>();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isSuperAdmin, myRole } = useCrmPermissions(workspace?.id);
+  const canEditValues = isSuperAdmin || myRole === "crm_admin";
   const tabLabels = useCrmLabels(workspace?.id, "deals_detail_tabs");
   const fieldLabels = useCrmLabels(workspace?.id, "deals_detail_fields");
   const sectionLabels = useCrmLabels(workspace?.id, "deals_detail_sections");
   const [tab, setTab] = useState("details");
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = () => setReloadKey((k) => k + 1);
 
   const [deal, setDeal] = useState<any>(null);
+
   const [lead, setLead] = useState<any>(null);
   const [org, setOrg] = useState<any>(null);
   const [contact, setContact] = useState<any>(null);
