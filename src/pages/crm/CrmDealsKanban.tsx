@@ -150,7 +150,23 @@ const CrmDeals = () => {
   const [view, setView] = useState<"list" | "kanban">("list");
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
 
+  const colLabels = useCrmLabels(workspace.id, "deals_columns");
+  const sumLabels = useCrmLabels(workspace.id, "deals_summary");
+  const stageLabels = useCrmLabels(workspace.id, "deals_stages");
+
+  const stageInfo = (k: string) => {
+    const base = STAGES.find((s) => s.key === k);
+    const ov = stageLabels.labels[k];
+    const colorKey = ov?.extra?.color as string | undefined;
+    return {
+      label: ov?.label || base?.label || k,
+      tone: colorKey && COLOR_TONE_MAP[colorKey] ? COLOR_TONE_MAP[colorKey] : (base?.tone || "bg-muted text-foreground"),
+      tint: base?.tint || "border-t-primary",
+    };
+  };
+
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
 
   const load = async () => {
     setLoading(true);
