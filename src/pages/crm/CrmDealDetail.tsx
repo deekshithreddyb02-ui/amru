@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import { useCrmLabels } from "@/hooks/useCrmLabels";
 import EditableLabel from "@/components/crm/EditableLabel";
+import EditableValue, { type EditableValueConfig } from "@/components/crm/EditableValue";
+import { useCrmPermissions } from "@/hooks/useCrmPermissions";
+
 
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
@@ -54,12 +57,17 @@ export default function CrmDealDetail() {
   const { workspace } = useOutletContext<Ctx>();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isSuperAdmin, myRole } = useCrmPermissions(workspace?.id);
+  const canEditValues = isSuperAdmin || myRole === "crm_admin";
   const tabLabels = useCrmLabels(workspace?.id, "deals_detail_tabs");
   const fieldLabels = useCrmLabels(workspace?.id, "deals_detail_fields");
   const sectionLabels = useCrmLabels(workspace?.id, "deals_detail_sections");
   const [tab, setTab] = useState("details");
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = () => setReloadKey((k) => k + 1);
 
   const [deal, setDeal] = useState<any>(null);
+
   const [lead, setLead] = useState<any>(null);
   const [org, setOrg] = useState<any>(null);
   const [contact, setContact] = useState<any>(null);
@@ -87,7 +95,7 @@ export default function CrmDealDetail() {
       setList((((ids as any).data) || []).map((r: any) => r.id));
       setLoading(false);
     })();
-  }, [id, workspace?.id]);
+  }, [id, workspace?.id, reloadKey]);
 
   if (loading) return <div className="p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
   if (!deal) return <div className="p-12 text-center text-sm text-muted-foreground">Opportunity not found.</div>;
@@ -102,50 +110,61 @@ export default function CrmDealDetail() {
 
   const oppNumber = `OPT${(deal.position || 0).toString().padStart(3, "0") || "—"}`;
 
-  const oppDetails: [string, ReactNode][] = [
-    ["Opportunity Name", deal.title],
+  const D = (column: string, type: EditableValueConfig["type"] = "text", options?: any[]): EditableValueConfig => ({
+    table: "crm_deals", id: deal.id, column, type, current: deal[column], options,
+  });
+  const L = (column: string, type: EditableValueConfig["type"] = "text"): EditableValueConfig | undefined =>
+    lead ? { table: "crm_leads", id: lead.id, column, type, current: lead[column] } : undefined;
+  const O = (column: string, type: EditableValueConfig["type"] = "text"): EditableValueConfig | undefined =>
+    org ? { table: "crm_organizations", id: org.id, column, type, current: org[column] } : undefined;
+
+  const stageOptions = Object.entries(STAGE_LABEL).map(([value, label]) => ({ value, label }));
+
+  const oppDetails: [string, ReactNode, EditableValueConfig?][] = [
+    ["Opportunity Name", deal.title, D("title")],
     ["Opportunity Number", oppNumber],
-    ["Organization Name", org?.name ? <Link to={`/crm/${workspace.slug}/organizations/${org.id}`} className="text-primary hover:underline">{org.name}</Link> : ""],
+    ["Organization Name", org?.name ? <Link to={`/crm/${workspace.slug}/organizations/${org.id}`} className="text-primary hover:underline">{org.name}</Link> : "", O("name")],
     ["Contact Name", contact?.id ? <Link to={`/crm/${workspace.slug}/contacts/${contact.id}`} className="text-primary hover:underline">{contactName}</Link> : contactName],
-    ["Amount", fmtMoney(deal.amount)],
+    ["Amount", fmtMoney(deal.amount), D("amount", "number")],
     ["Type", "New Business"],
-    ["Expected Close Date", fmtDate(deal.expected_close)],
-    ["Lead Source", lead?.lead_source || ""],
+    ["Expected Close Date", fmtDate(deal.expected_close), D("expected_close", "date")],
+    ["Lead Source", lead?.lead_source || "", L("lead_source")],
     ["Next Step", ""],
     ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
-    ["Sales Stage", <span className={`inline-block px-1.5 py-0.5 text-[11px] font-semibold rounded ${STAGE_TONE[stageKey] || "bg-muted"}`}>{STAGE_LABEL[stageKey] || stageKey}</span>],
+    ["Sales Stage", <span className={`inline-block px-1.5 py-0.5 text-[11px] font-semibold rounded ${STAGE_TONE[stageKey] || "bg-muted"}`}>{STAGE_LABEL[stageKey] || stageKey}</span>, D("stage", "select", stageOptions)],
     ["Campaign Source", ""],
-    ["Probability", deal.probability != null ? Number(deal.probability).toFixed(2) : ""],
+    ["Probability", deal.probability != null ? Number(deal.probability).toFixed(2) : "", D("probability", "number")],
     ["Modified Time", fmtDateTime(deal.updated_at)],
     ["Created Time", fmtDateTime(deal.created_at)],
     ["Weighted Revenue", fmtMoney(deal.amount && deal.probability != null ? (Number(deal.amount) * Number(deal.probability)) / 100 : 0)],
     ["Is Converted From Lead", deal.lead_id ? "Yes" : "No"],
     ["Source", "CRM"],
-    ["BIZ Area", lead?.biz_area || ""],
-    ["Service Needed", lead?.service_needed || ""],
-    ["Distance in KM", lead?.distance_km || ""],
-    ["Area Type", lead?.area_type || ""],
+    ["BIZ Area", lead?.biz_area || "", L("biz_area")],
+    ["Service Needed", lead?.service_needed || "", L("service_needed")],
+    ["Distance in KM", lead?.distance_km || "", L("distance_km", "number")],
+    ["Area Type", lead?.area_type || "", L("area_type")],
     ["Total Area", lead ? `Gunta: ${lead.gunta || ""}\nAcres: ${lead.acres || ""}\nSq.Yrds: ${lead.sq_yards || ""}\nSq.Ft: ${lead.sq_ft || ""}` : ""],
-    ["Shape", lead?.shape || ""],
-    ["Number of Scans", lead?.num_scans ?? ""],
-    ["Total BIZ COST", fmtMoney(lead?.biz_cost ?? deal.amount)],
-    ["Maps Location", lead?.maps_location || ""],
+    ["Shape", lead?.shape || "", L("shape")],
+    ["Number of Scans", lead?.num_scans ?? "", L("num_scans", "number")],
+    ["Total BIZ COST", fmtMoney(lead?.biz_cost ?? deal.amount), L("biz_cost", "number")],
+    ["Maps Location", lead?.maps_location || "", L("maps_location")],
     [" ", ""],
   ];
 
-  const address: [string, ReactNode][] = [
-    ["Street", lead?.street || org?.street || ""],
-    ["PO Box", lead?.po_box || ""],
-    ["Postal Code", lead?.postal_code || org?.postal_code || ""],
-    ["City", (lead?.city || org?.city) ? <span className="text-primary">{lead?.city || org?.city}</span> : ""],
-    ["Country", (lead?.country || org?.country) ? <span className="text-primary">{lead?.country || org?.country || "INDIA"}</span> : "INDIA"],
-    ["State", (lead?.state || org?.state) ? <span className="text-primary">{lead?.state || org?.state}</span> : ""],
-    ["Maps URL", lead?.maps_url || ""],
+  const address: [string, ReactNode, EditableValueConfig?][] = [
+    ["Street", lead?.street || org?.street || "", L("street") || O("street")],
+    ["PO Box", lead?.po_box || "", L("po_box")],
+    ["Postal Code", lead?.postal_code || org?.postal_code || "", L("postal_code") || O("postal_code")],
+    ["City", (lead?.city || org?.city) ? <span className="text-primary">{lead?.city || org?.city}</span> : "", L("city") || O("city")],
+    ["Country", (lead?.country || org?.country) ? <span className="text-primary">{lead?.country || org?.country || "INDIA"}</span> : "INDIA", L("country") || O("country")],
+    ["State", (lead?.state || org?.state) ? <span className="text-primary">{lead?.state || org?.state}</span> : "", L("state") || O("state")],
+    ["Maps URL", lead?.maps_url || "", L("maps_url")],
   ];
 
-  const description: [string, ReactNode][] = [
-    ["Description", deal.description || lead?.notes || ""],
+  const description: [string, ReactNode, EditableValueConfig?][] = [
+    ["Description", deal.description || lead?.notes || "", D("description", "textarea")],
   ];
+
 
   return (
     <div className="bg-muted/30 -m-4 md:-m-6 min-h-[calc(100vh-4rem)]">
@@ -218,14 +237,15 @@ export default function CrmDealDetail() {
       <div className="p-4">
         {tab === "details" && (
           <div className="space-y-4">
-            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
-            <Section sectionKey="address_details" title="Address Details" rows={address} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
-            <Section sectionKey="description_details" title="Description Details" rows={description} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
+            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
+            <Section sectionKey="address_details" title="Address Details" rows={address} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
+            <Section sectionKey="description_details" title="Description Details" rows={description} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
           </div>
         )}
         {tab === "summary" && (
           <div className="space-y-4">
-            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
+            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
+
           </div>
         )}
 
@@ -256,13 +276,15 @@ export default function CrmDealDetail() {
 }
 
 function Section({
-  sectionKey, title, rows, fieldLabels, sectionLabels,
+  sectionKey, title, rows, fieldLabels, sectionLabels, canEditValues, onReload,
 }: {
   sectionKey: string;
   title: string;
-  rows: [string, ReactNode][];
+  rows: [string, ReactNode, EditableValueConfig?][];
   fieldLabels: ReturnType<typeof useCrmLabels>;
   sectionLabels: ReturnType<typeof useCrmLabels>;
+  canEditValues: boolean;
+  onReload: () => void;
 }) {
   return (
     <div className="bg-white border rounded">
@@ -279,7 +301,7 @@ function Section({
         </h3>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2">
-        {rows.map(([k, v], i) => {
+        {rows.map(([k, v, cfg], i) => {
           const fk = `${sectionKey}.${k}`;
           return (
             <div key={`${k}-${i}`} className="grid grid-cols-[180px_1fr] gap-3 px-4 py-2 text-[12.5px] border-b last:border-b-0 odd:md:border-r">
@@ -294,7 +316,9 @@ function Section({
                   />
                 ) : k}
               </div>
-              <div className="text-foreground whitespace-pre-wrap break-words">{v || ""}</div>
+              <div className="text-foreground whitespace-pre-wrap break-words">
+                <EditableValue display={v} canEdit={canEditValues} config={cfg} onSaved={onReload} />
+              </div>
             </div>
           );
         })}
@@ -302,4 +326,5 @@ function Section({
     </div>
   );
 }
+
 
