@@ -444,9 +444,31 @@ const CrmDeals = () => {
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
               <div className="overflow-x-auto pb-4">
                 <div className="flex gap-3 min-w-max">
-                  {STAGES.map((s) => (
-                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} onOpen={setSelectedDealId} />
-                  ))}
+                  {STAGES.map((s) => {
+                    const info = stageInfo(s.key);
+                    return (
+                      <Column
+                        key={s.key}
+                        stage={s.key}
+                        label={info.label}
+                        tint={info.tint}
+                        deals={dealsByStage[s.key] || []}
+                        onOpen={setSelectedDealId}
+                        headerNode={
+                          <EditableLabel
+                            labelKey={s.key}
+                            value={stageLabels.labels[s.key]?.label}
+                            fallback={s.label}
+                            canEdit={stageLabels.canEdit}
+                            onSave={stageLabels.setLabel}
+                            extra={stageLabels.labels[s.key]?.extra}
+                            extraFields={["color"]}
+                          />
+                        }
+                      />
+                    );
+                  })}
+
                 </div>
               </div>
               <DragOverlay>{activeDeal ? <DealCard deal={activeDeal} dragging /> : null}</DragOverlay>
