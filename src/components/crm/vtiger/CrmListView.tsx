@@ -16,11 +16,13 @@ import { Search, Columns3, RefreshCw, Loader2, ChevronDown, Plus } from "lucide-
 export type Column<T> = {
   key: string;
   label: string;
+  headerNode?: ReactNode;
   render?: (row: T) => ReactNode;
   className?: string;
   sortable?: boolean;
   defaultVisible?: boolean;
 };
+
 
 export type SavedView = {
   id: string;
@@ -232,9 +234,10 @@ export default function CrmListView<T extends { id: string }>({
                       key={c.key}
                       className={`px-3 py-2 font-medium text-[12px] uppercase tracking-wide text-muted-foreground ${c.className || ""}`}
                     >
-                      {c.label}
+                      {c.headerNode ?? c.label}
                     </th>
                   ))}
+
                 </tr>
               </thead>
               <tbody>
