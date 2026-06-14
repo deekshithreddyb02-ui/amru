@@ -122,7 +122,8 @@ const Column = ({
     >
       <div className="p-3 border-b bg-card/60">
         <div className="flex items-center justify-between">
-          <div className="font-medium text-sm">{label}</div>
+          <div className="font-medium text-sm">{headerNode ?? label}</div>
+
           <span className="text-xs text-muted-foreground">{deals.length}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">{fmtINR(total)}</div>
