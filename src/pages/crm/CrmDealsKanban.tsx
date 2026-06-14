@@ -381,6 +381,7 @@ const CrmDeals = () => {
           searchKeys={["title"]}
           onRefresh={load}
           onCreate={() => setOpen(true)}
+          onRowClick={(d) => setSelectedDealId(d.id)}
           rightActions={rightActions}
         />
       ) : (
@@ -403,7 +404,7 @@ const CrmDeals = () => {
               <div className="overflow-x-auto pb-4">
                 <div className="flex gap-3 min-w-max">
                   {STAGES.map((s) => (
-                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} />
+                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} onOpen={setSelectedDealId} />
                   ))}
                 </div>
               </div>
@@ -411,6 +412,29 @@ const CrmDeals = () => {
             </DndContext>
           )}
         </>
+      )}
+
+      {selectedDealId && (
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setSelectedDealId(null)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative h-full" onClick={(e) => e.stopPropagation()}>
+            <DealSidePanel
+              dealId={selectedDealId}
+              workspaceSlug={workspace.slug}
+              onClose={() => setSelectedDealId(null)}
+              onPrev={() => {
+                const i = deals.findIndex((d) => d.id === selectedDealId);
+                if (i > 0) setSelectedDealId(deals[i - 1].id);
+              }}
+              onNext={() => {
+                const i = deals.findIndex((d) => d.id === selectedDealId);
+                if (i >= 0 && i < deals.length - 1) setSelectedDealId(deals[i + 1].id);
+              }}
+              hasPrev={deals.findIndex((d) => d.id === selectedDealId) > 0}
+              hasNext={(() => { const i = deals.findIndex((d) => d.id === selectedDealId); return i >= 0 && i < deals.length - 1; })()}
+            />
+          </div>
+        </div>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
