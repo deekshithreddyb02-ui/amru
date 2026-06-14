@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent,
