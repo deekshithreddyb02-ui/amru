@@ -23,6 +23,7 @@ import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
 import { exportCsv } from "@/lib/csv";
+import DealSidePanel from "@/components/crm/DealSidePanel";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -64,7 +65,7 @@ const emptyForm = {
 };
 
 // --- Card ---
-const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
+const DealCard = ({ deal, dragging, onOpen }: { deal: Deal; dragging?: boolean; onOpen?: (id: string) => void }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: deal.id,
     data: { stage: deal.stage },
@@ -78,7 +79,8 @@ const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-card border rounded-md p-3 shadow-sm cursor-grab active:cursor-grabbing select-none touch-none ${
+      onClick={() => { if (!isDragging) onOpen?.(deal.id); }}
+      className={`bg-card border rounded-md p-3 shadow-sm cursor-pointer active:cursor-grabbing select-none touch-none ${
         isDragging || dragging ? "opacity-50" : ""
       }`}
     >
@@ -101,9 +103,9 @@ const DealCard = ({ deal, dragging }: { deal: Deal; dragging?: boolean }) => {
 
 // --- Column ---
 const Column = ({
-  stage, label, tint, deals,
+  stage, label, tint, deals, onOpen,
 }: {
-  stage: string; label: string; tint: string; deals: Deal[];
+  stage: string; label: string; tint: string; deals: Deal[]; onOpen?: (id: string) => void;
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: `col:${stage}`, data: { stage } });
   const total = deals.reduce((sum, d) => sum + Number(d.amount || 0), 0);
@@ -125,7 +127,7 @@ const Column = ({
         </div>
       </div>
       <div className="p-2 space-y-2 min-h-32 flex-1">
-        {deals.map((d) => <DealCard key={d.id} deal={d} />)}
+        {deals.map((d) => <DealCard key={d.id} deal={d} onOpen={onOpen} />)}
       </div>
     </div>
   );
@@ -143,6 +145,7 @@ const CrmDeals = () => {
   const [saving, setSaving] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "kanban">("list");
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -378,6 +381,7 @@ const CrmDeals = () => {
           searchKeys={["title"]}
           onRefresh={load}
           onCreate={() => setOpen(true)}
+          onRowClick={(d) => setSelectedDealId(d.id)}
           rightActions={rightActions}
         />
       ) : (
@@ -400,7 +404,7 @@ const CrmDeals = () => {
               <div className="overflow-x-auto pb-4">
                 <div className="flex gap-3 min-w-max">
                   {STAGES.map((s) => (
-                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} />
+                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} onOpen={setSelectedDealId} />
                   ))}
                 </div>
               </div>
@@ -408,6 +412,29 @@ const CrmDeals = () => {
             </DndContext>
           )}
         </>
+      )}
+
+      {selectedDealId && (
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setSelectedDealId(null)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative h-full" onClick={(e) => e.stopPropagation()}>
+            <DealSidePanel
+              dealId={selectedDealId}
+              workspaceSlug={workspace.slug}
+              onClose={() => setSelectedDealId(null)}
+              onPrev={() => {
+                const i = deals.findIndex((d) => d.id === selectedDealId);
+                if (i > 0) setSelectedDealId(deals[i - 1].id);
+              }}
+              onNext={() => {
+                const i = deals.findIndex((d) => d.id === selectedDealId);
+                if (i >= 0 && i < deals.length - 1) setSelectedDealId(deals[i + 1].id);
+              }}
+              hasPrev={deals.findIndex((d) => d.id === selectedDealId) > 0}
+              hasNext={(() => { const i = deals.findIndex((d) => d.id === selectedDealId); return i >= 0 && i < deals.length - 1; })()}
+            />
+          </div>
+        </div>
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
