@@ -53,7 +53,11 @@ export default function CrmDealDetail() {
   const { workspace } = useOutletContext<Ctx>();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const tabLabels = useCrmLabels(workspace?.id, "deals_detail_tabs");
+  const fieldLabels = useCrmLabels(workspace?.id, "deals_detail_fields");
+  const sectionLabels = useCrmLabels(workspace?.id, "deals_detail_sections");
   const [tab, setTab] = useState("details");
+
   const [deal, setDeal] = useState<any>(null);
   const [lead, setLead] = useState<any>(null);
   const [org, setOrg] = useState<any>(null);
