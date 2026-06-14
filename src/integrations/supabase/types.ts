@@ -2364,6 +2364,50 @@ export type Database = {
           },
         ]
       }
+      crm_label_overrides: {
+        Row: {
+          created_at: string
+          extra: Json
+          id: string
+          key: string
+          label: string | null
+          scope: string
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          extra?: Json
+          id?: string
+          key: string
+          label?: string | null
+          scope: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          extra?: Json
+          id?: string
+          key?: string
+          label?: string | null
+          scope?: string
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_label_overrides_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_lead_activities: {
         Row: {
           activity_type: string

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import {
   DndContext, DragEndEvent, DragOverlay, DragStartEvent,
@@ -24,6 +24,9 @@ import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import CrmListView, { type Column, type SavedView } from "@/components/crm/vtiger/CrmListView";
 import { exportCsv } from "@/lib/csv";
 import DealSidePanel from "@/components/crm/DealSidePanel";
+import { useCrmLabels } from "@/hooks/useCrmLabels";
+import EditableLabel, { COLOR_TONE_MAP } from "@/components/crm/EditableLabel";
+
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -103,10 +106,11 @@ const DealCard = ({ deal, dragging, onOpen }: { deal: Deal; dragging?: boolean; 
 
 // --- Column ---
 const Column = ({
-  stage, label, tint, deals, onOpen,
+  stage, label, tint, deals, onOpen, headerNode,
 }: {
-  stage: string; label: string; tint: string; deals: Deal[]; onOpen?: (id: string) => void;
+  stage: string; label: string; tint: string; deals: Deal[]; onOpen?: (id: string) => void; headerNode?: ReactNode;
 }) => {
+
   const { setNodeRef, isOver } = useDroppable({ id: `col:${stage}`, data: { stage } });
   const total = deals.reduce((sum, d) => sum + Number(d.amount || 0), 0);
   return (
@@ -118,7 +122,8 @@ const Column = ({
     >
       <div className="p-3 border-b bg-card/60">
         <div className="flex items-center justify-between">
-          <div className="font-medium text-sm">{label}</div>
+          <div className="font-medium text-sm">{headerNode ?? label}</div>
+
           <span className="text-xs text-muted-foreground">{deals.length}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">{fmtINR(total)}</div>
@@ -147,7 +152,23 @@ const CrmDeals = () => {
   const [view, setView] = useState<"list" | "kanban">("list");
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
 
+  const colLabels = useCrmLabels(workspace.id, "deals_columns");
+  const sumLabels = useCrmLabels(workspace.id, "deals_summary");
+  const stageLabels = useCrmLabels(workspace.id, "deals_stages");
+
+  const stageInfo = (k: string) => {
+    const base = STAGES.find((s) => s.key === k);
+    const ov = stageLabels.labels[k];
+    const colorKey = ov?.extra?.color as string | undefined;
+    return {
+      label: ov?.label || base?.label || k,
+      tone: colorKey && COLOR_TONE_MAP[colorKey] ? COLOR_TONE_MAP[colorKey] : (base?.tone || "bg-muted text-foreground"),
+      tint: base?.tint || "border-t-primary",
+    };
+  };
+
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
 
   const load = async () => {
     setLoading(true);
@@ -256,50 +277,63 @@ const CrmDeals = () => {
     { id: "lost", label: "Lost", filter: (d: Deal) => d.stage === "lost" },
   ];
 
+  const mkCol = (key: string, fallback: string, render: (d: Deal) => ReactNode, opts: Partial<Column<Deal>> = {}): Column<Deal> => ({
+    key,
+    label: colLabels.get(key, fallback),
+    headerNode: (
+      <EditableLabel
+        labelKey={key}
+        value={colLabels.labels[key]?.label}
+        fallback={fallback}
+        canEdit={colLabels.canEdit}
+        onSave={colLabels.setLabel}
+        className="text-[12px] uppercase tracking-wide"
+      />
+    ),
+    render,
+    ...opts,
+  });
+
   const columns: Column<Deal>[] = [
-    {
-      key: "title", label: "Opportunity Name",
-      render: (d) => (
-        <button
-          className="font-medium text-primary hover:underline text-left"
-          onClick={(e) => { e.stopPropagation(); /* detail route TBD */ }}
-          data-no-row-click
-        >
-          {d.title}
-        </button>
-      ),
-    },
-    {
-      key: "organization", label: "Organization Name",
-      render: (d) => d.organization?.name
-        ? <span className="text-primary">{d.organization.name}</span>
-        : <span className="text-muted-foreground">—</span>,
-    },
-    {
-      key: "stage", label: "Sales Stage",
-      render: (d) => {
-        const m = stageMeta(d.stage);
-        return <Badge variant="secondary" className={m.tone}>{m.label}</Badge>;
-      },
-    },
-    {
-      key: "expected_close", label: "Expected Close Date",
-      render: (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—",
-    },
-    {
-      key: "amount", label: "Amount",
-      className: "text-right",
-      render: (d) => <span className="tabular-nums">{fmtINR(Number(d.amount || 0))}</span>,
-    },
-    { key: "owner_name", label: "Assigned To", render: (d) => d.owner_name || "—" },
-    {
-      key: "contact", label: "Contact Name",
-      render: (d) => d.contact?.full_name
-        ? <span className="text-primary">{d.contact.full_name}</span>
-        : <span className="text-muted-foreground">—</span>,
-    },
-    { key: "probability", label: "Probability", defaultVisible: false, render: (d) => `${d.probability}%` },
+    mkCol("title", "Opportunity Name", (d) => (
+      <button
+        className="font-medium text-primary hover:underline text-left"
+        onClick={(e) => { e.stopPropagation(); navigate(`/crm/${workspace.slug}/deals/${d.id}`); }}
+        data-no-row-click
+      >
+        {d.title}
+      </button>
+    )),
+    mkCol("organization", "Organization Name", (d) => d.organization?.name
+      ? <span className="text-primary">{d.organization.name}</span>
+      : <span className="text-muted-foreground">—</span>),
+    mkCol("stage", "Sales Stage", (d) => {
+      const m = stageInfo(d.stage);
+      return (
+        <EditableLabel
+          labelKey={d.stage}
+          value={stageLabels.labels[d.stage]?.label}
+          fallback={STAGES.find((s) => s.key === d.stage)?.label || d.stage}
+          canEdit={stageLabels.canEdit}
+          onSave={stageLabels.setLabel}
+          extra={stageLabels.labels[d.stage]?.extra}
+          extraFields={["color"]}
+          render={(lbl) => <Badge variant="secondary" className={m.tone}>{lbl}</Badge>}
+        />
+      );
+    }),
+    mkCol("expected_close", "Expected Close Date",
+      (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—"),
+    mkCol("amount", "Amount",
+      (d) => <span className="tabular-nums">{fmtINR(Number(d.amount || 0))}</span>,
+      { className: "text-right" }),
+    mkCol("owner_name", "Assigned To", (d) => <>{d.owner_name || "—"}</>),
+    mkCol("contact", "Contact Name", (d) => d.contact?.full_name
+      ? <span className="text-primary">{d.contact.full_name}</span>
+      : <span className="text-muted-foreground">—</span>),
+    mkCol("probability", "Probability", (d) => <>{d.probability}%</>, { defaultVisible: false }),
   ];
+
 
   const rightActions = (
     <>
@@ -338,36 +372,43 @@ const CrmDeals = () => {
 
   return (
     <div className="space-y-4">
-      {!loading && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {!loading && (() => {
+        const sumCard = (key: string, fallback: string, valueNode: ReactNode, subFallback: string, subKey: string, valueClass = "") => (
           <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Open Pipeline</div>
-            <div className="text-lg font-semibold mt-1">{fmtINR(totalPipeline)}</div>
-            <div className="text-[10px] text-muted-foreground">{openPipeline.length} opportunities</div>
-          </Card>
-          <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Weighted Forecast</div>
-            <div className="text-lg font-semibold mt-1 text-primary">{fmtINR(weightedForecast)}</div>
-            <div className="text-[10px] text-muted-foreground">amount × probability</div>
-          </Card>
-          <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Won</div>
-            <div className="text-lg font-semibold mt-1 text-green-600">{fmtINR(wonTotal)}</div>
-            <div className="text-[10px] text-muted-foreground">{deals.filter((d) => d.stage === "won").length} opportunities</div>
-          </Card>
-          <Card className="p-3">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Win Rate</div>
-            <div className="text-lg font-semibold mt-1">
-              {(() => {
-                const closed = deals.filter((d) => d.stage === "won" || d.stage === "lost").length;
-                const won = deals.filter((d) => d.stage === "won").length;
-                return closed === 0 ? "—" : `${Math.round((won / closed) * 100)}%`;
-              })()}
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+              <EditableLabel
+                labelKey={key}
+                value={sumLabels.labels[key]?.label}
+                fallback={fallback}
+                canEdit={sumLabels.canEdit}
+                onSave={sumLabels.setLabel}
+              />
             </div>
-            <div className="text-[10px] text-muted-foreground">won / closed</div>
+            <div className={`text-lg font-semibold mt-1 ${valueClass}`}>{valueNode}</div>
+            <div className="text-[10px] text-muted-foreground">
+              <EditableLabel
+                labelKey={subKey}
+                value={sumLabels.labels[subKey]?.label}
+                fallback={subFallback}
+                canEdit={sumLabels.canEdit}
+                onSave={sumLabels.setLabel}
+              />
+            </div>
           </Card>
-        </div>
-      )}
+        );
+        const closed = deals.filter((d) => d.stage === "won" || d.stage === "lost").length;
+        const won = deals.filter((d) => d.stage === "won").length;
+        const winRate = closed === 0 ? "—" : `${Math.round((won / closed) * 100)}%`;
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {sumCard("open_title", "Open Pipeline", fmtINR(totalPipeline), `${openPipeline.length} opportunities`, "open_sub")}
+            {sumCard("weighted_title", "Weighted Forecast", fmtINR(weightedForecast), "amount × probability", "weighted_sub", "text-primary")}
+            {sumCard("won_title", "Won", fmtINR(wonTotal), `${won} opportunities`, "won_sub", "text-green-600")}
+            {sumCard("winrate_title", "Win Rate", winRate, "won / closed", "winrate_sub")}
+          </div>
+        );
+      })()}
+
 
       {view === "list" ? (
         <CrmListView<Deal>
@@ -403,9 +444,31 @@ const CrmDeals = () => {
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
               <div className="overflow-x-auto pb-4">
                 <div className="flex gap-3 min-w-max">
-                  {STAGES.map((s) => (
-                    <Column key={s.key} stage={s.key} label={s.label} tint={s.tint} deals={dealsByStage[s.key] || []} onOpen={setSelectedDealId} />
-                  ))}
+                  {STAGES.map((s) => {
+                    const info = stageInfo(s.key);
+                    return (
+                      <Column
+                        key={s.key}
+                        stage={s.key}
+                        label={info.label}
+                        tint={info.tint}
+                        deals={dealsByStage[s.key] || []}
+                        onOpen={setSelectedDealId}
+                        headerNode={
+                          <EditableLabel
+                            labelKey={s.key}
+                            value={stageLabels.labels[s.key]?.label}
+                            fallback={s.label}
+                            canEdit={stageLabels.canEdit}
+                            onSave={stageLabels.setLabel}
+                            extra={stageLabels.labels[s.key]?.extra}
+                            extraFields={["color"]}
+                          />
+                        }
+                      />
+                    );
+                  })}
+
                 </div>
               </div>
               <DragOverlay>{activeDeal ? <DealCard deal={activeDeal} dragging /> : null}</DragOverlay>
