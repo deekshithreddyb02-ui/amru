@@ -223,16 +223,17 @@ export default function CrmDealDetail() {
       <div className="p-4">
         {tab === "details" && (
           <div className="space-y-4">
-            <Section title="Opportunity Details" rows={oppDetails} />
-            <Section title="Address Details" rows={address} />
-            <Section title="Description Details" rows={description} />
+            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
+            <Section sectionKey="address_details" title="Address Details" rows={address} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
+            <Section sectionKey="description_details" title="Description Details" rows={description} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
           </div>
         )}
         {tab === "summary" && (
           <div className="space-y-4">
-            <Section title="Opportunity Details" rows={oppDetails.slice(0, 12)} />
+            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
           </div>
         )}
+
         {tab === "updates" && (
           <div className="bg-white border rounded">
             <div className="px-4 py-2 font-semibold text-[13px] border-b">Updates</div>
