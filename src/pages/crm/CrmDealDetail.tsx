@@ -237,14 +237,15 @@ export default function CrmDealDetail() {
       <div className="p-4">
         {tab === "details" && (
           <div className="space-y-4">
-            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
-            <Section sectionKey="address_details" title="Address Details" rows={address} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
-            <Section sectionKey="description_details" title="Description Details" rows={description} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
+            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
+            <Section sectionKey="address_details" title="Address Details" rows={address} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
+            <Section sectionKey="description_details" title="Description Details" rows={description} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
           </div>
         )}
         {tab === "summary" && (
           <div className="space-y-4">
-            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} />
+            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
+
           </div>
         )}
 
