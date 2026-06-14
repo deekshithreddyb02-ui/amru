@@ -364,15 +364,7 @@ function SummaryView({
       <div className="flex items-center justify-between px-3 py-2 border-b">
         <div className="flex items-center gap-1">
           <ChevronDown className="h-3.5 w-3.5 text-primary" />
-          <h3 className="text-[13px] font-semibold text-primary">
-            <EditableLabel
-              labelKey={sectionKey}
-              value={sectionLabels.labels[sectionKey]?.label}
-              fallback={title}
-              canEdit={sectionLabels.canEdit}
-              onSave={sectionLabels.setLabel}
-            />
-          </h3>
+          <h3 className="text-[13px] font-semibold text-primary">{title}</h3>
         </div>
         {actions}
       </div>
