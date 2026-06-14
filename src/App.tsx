@@ -132,6 +132,7 @@ const App = () => {
                 <Route path="organizations" element={<CrmOrganizations />} />
                 <Route path="organizations/:id" element={<CrmOrganizationDetail />} />
                 <Route path="deals" element={<CrmDeals />} />
+                <Route path="deals/:id" element={<CrmDealDetail />} />
                 <Route path="activities" element={<CrmActivities />} />
                 <Route path="calendar" element={<CrmCalendar />} />
                 <Route path="tickets" element={<CrmSupportTickets />} />
