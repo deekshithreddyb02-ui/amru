@@ -8,6 +8,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
+import { useCrmLabels } from "@/hooks/useCrmLabels";
+import EditableLabel from "@/components/crm/EditableLabel";
+
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
