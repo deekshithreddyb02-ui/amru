@@ -205,13 +205,8 @@ export default function CrmDealDetail() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className={`px-3 py-2.5 text-[12.5px] inline-flex items-center gap-1.5 border-b-2 ${active ? "border-primary text-primary font-semibold" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
               <Icon className="h-3.5 w-3.5" />
-              <EditableLabel
-                labelKey={t.id}
-                value={tabLabels.labels[t.id]?.label}
-                fallback={t.label}
-                canEdit={tabLabels.canEdit}
-                onSave={tabLabels.setLabel}
-              />
+              <span>{tabLabels.labels[t.id]?.label || t.label}</span>
+
             </button>
           );
         })}
