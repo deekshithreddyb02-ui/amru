@@ -243,10 +243,31 @@ export default function CrmDealDetail() {
           </div>
         )}
         {tab === "summary" && (
-          <div className="space-y-4">
-            <Section sectionKey="opp_details" title="Opportunity Details" rows={oppDetails.slice(0, 12)} fieldLabels={fieldLabels} sectionLabels={sectionLabels} canEditValues={canEditValues} onReload={reload} />
-
-          </div>
+          <SummaryView
+            keyFields={[
+              ["Opportunity Name", lead ? `GW: ${lead.full_name || ""}` : deal.title, D("title")],
+              ["Contact Name", contact?.id ? <Link to={`/crm/${workspace.slug}/contacts/${contact.id}`} className="text-primary hover:underline">{contactName}</Link> : contactName],
+              ["Expected Close Date", fmtDate(deal.expected_close), D("expected_close", "date")],
+              ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
+              ["BIZ Area", lead?.biz_area || "", L("biz_area")],
+              ["Service Needed", lead?.service_needed || "", L("service_needed")],
+              ["Distance in KM", lead?.distance_km || "", L("distance_km", "number")],
+              ["Total Area", lead ? `Gunta: ${lead.gunta || ""}\nAcres: ${lead.acres || ""}\nSq.Yrds: ${lead.sq_yards || ""}\nSq.Ft: ${lead.sq_ft || ""}` : ""],
+              ["Number of Scans", lead?.num_scans ?? "", L("num_scans", "number")],
+              ["Total BIZ COST (₹)", fmtMoney(lead?.biz_cost ?? deal.amount), L("biz_cost", "number")],
+              ["Maps Location", lead?.maps_location || "", L("maps_location")],
+              ["Street", lead?.street || org?.street || "", L("street") || O("street")],
+              ["City", (lead?.city || org?.city) ? <span className="text-primary">{lead?.city || org?.city}</span> : "", L("city") || O("city")],
+              ["State", (lead?.state || org?.state) ? <span className="text-primary">{lead?.state || org?.state}</span> : "", L("state") || O("state")],
+              ["Description", deal.description || lead?.notes || "", D("description", "textarea")],
+            ]}
+            activities={activities}
+            contactName={contactName}
+            canEditValues={canEditValues}
+            onReload={reload}
+            fieldLabels={fieldLabels}
+            sectionLabels={sectionLabels}
+          />
         )}
 
         {tab === "updates" && (
