@@ -103,9 +103,9 @@ const DealCard = ({ deal, dragging, onOpen }: { deal: Deal; dragging?: boolean; 
 
 // --- Column ---
 const Column = ({
-  stage, label, tint, deals,
+  stage, label, tint, deals, onOpen,
 }: {
-  stage: string; label: string; tint: string; deals: Deal[];
+  stage: string; label: string; tint: string; deals: Deal[]; onOpen?: (id: string) => void;
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: `col:${stage}`, data: { stage } });
   const total = deals.reduce((sum, d) => sum + Number(d.amount || 0), 0);
@@ -127,7 +127,7 @@ const Column = ({
         </div>
       </div>
       <div className="p-2 space-y-2 min-h-32 flex-1">
-        {deals.map((d) => <DealCard key={d.id} deal={d} />)}
+        {deals.map((d) => <DealCard key={d.id} deal={d} onOpen={onOpen} />)}
       </div>
     </div>
   );
