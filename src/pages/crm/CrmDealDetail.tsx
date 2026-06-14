@@ -348,4 +348,138 @@ function Section({
   );
 }
 
+function SummaryView({
+  keyFields, activities, contactName, canEditValues, onReload, fieldLabels, sectionLabels,
+}: {
+  keyFields: [string, ReactNode, EditableValueConfig?][];
+  activities: any[];
+  contactName: string;
+  canEditValues: boolean;
+  onReload: () => void;
+  fieldLabels: ReturnType<typeof useCrmLabels>;
+  sectionLabels: ReturnType<typeof useCrmLabels>;
+}) {
+  const Panel = ({ title, sectionKey, actions, children }: { title: string; sectionKey: string; actions?: ReactNode; children: ReactNode }) => (
+    <div className="bg-white border rounded">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <div className="flex items-center gap-1">
+          <ChevronDown className="h-3.5 w-3.5 text-primary" />
+          <h3 className="text-[13px] font-semibold text-primary">
+            <EditableLabel
+              labelKey={sectionKey}
+              value={sectionLabels.labels[sectionKey]?.label}
+              fallback={title}
+              canEdit={sectionLabels.canEdit}
+              onSave={sectionLabels.setLabel}
+            />
+          </h3>
+        </div>
+        {actions}
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="lg:col-span-5 space-y-4">
+        <Panel title="Key Fields" sectionKey="summary_key_fields">
+          <div className="divide-y">
+            {keyFields.map(([k, v, cfg], i) => {
+              const fk = `summary_key_fields.${k}`;
+              return (
+                <div key={`${k}-${i}`} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2 text-[12.5px]">
+                  <div className="text-muted-foreground">
+                    <EditableLabel
+                      labelKey={fk}
+                      value={fieldLabels.labels[fk]?.label}
+                      fallback={k}
+                      canEdit={fieldLabels.canEdit}
+                      onSave={fieldLabels.setLabel}
+                    />
+                  </div>
+                  <div className="text-foreground whitespace-pre-wrap break-words">
+                    <EditableValue display={v} canEdit={canEditValues} config={cfg} onSaved={onReload} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+        <Panel
+          title="Documents"
+          sectionKey="summary_documents"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />New Document</Button>}
+        >
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Documents</div>
+        </Panel>
+      </div>
+
+      <div className="lg:col-span-4 space-y-4">
+        <Panel
+          title="Activities"
+          sectionKey="summary_activities"
+          actions={
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add Task</Button>
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add Event</Button>
+            </div>
+          }
+        >
+          {activities.length === 0 ? (
+            <div className="p-6 text-center text-[12px] text-muted-foreground">No pending activities</div>
+          ) : (
+            <ul className="divide-y">
+              {activities.slice(0, 5).map((a) => (
+                <li key={a.id} className="px-4 py-2 text-[12.5px]">
+                  <div className="font-medium">{a.subject || a.activity_type}</div>
+                  <div className="text-muted-foreground text-[11.5px]">{fmtDateTime(a.created_at)}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title="Comments" sectionKey="summary_comments">
+          <div className="p-3 space-y-2">
+            <textarea
+              placeholder="Post your comment here"
+              className="w-full text-[12.5px] border rounded p-2 min-h-[70px] focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <div className="flex items-center justify-between">
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Paperclip className="h-3 w-3" />Attach Files</Button>
+              <Button size="sm" className="h-7 text-[12px] bg-green-600 hover:bg-green-700">Post</Button>
+            </div>
+          </div>
+          <div className="px-3 py-2 border-t flex items-center justify-between">
+            <div className="text-[13px] font-semibold text-foreground">Recent Comments</div>
+            <div className="text-[11.5px] text-muted-foreground">Roll up</div>
+          </div>
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No comments</div>
+        </Panel>
+      </div>
+
+      <div className="lg:col-span-3 space-y-4">
+        <Panel
+          title="Related Products"
+          sectionKey="summary_related_products"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add</Button>}
+        >
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Products</div>
+        </Panel>
+        <Panel
+          title="Related Contacts"
+          sectionKey="summary_related_contacts"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add</Button>}
+        >
+          {contactName ? (
+            <div className="px-4 py-2 text-[12.5px] text-primary">{contactName}</div>
+          ) : (
+            <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Contacts</div>
+          )}
+        </Panel>
+      </div>
+    </div>
+  );
+}
 
