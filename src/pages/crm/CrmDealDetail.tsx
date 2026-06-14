@@ -37,17 +37,18 @@ const TABS = [
   { id: "summary", label: "Summary", icon: FileText },
   { id: "details", label: "Details", icon: FileText },
   { id: "updates", label: "Updates", icon: ActivityIcon },
-  { id: "events", label: "", icon: Calendar },
-  { id: "contacts", label: "", icon: User },
-  { id: "products", label: "", icon: Building2 },
-  { id: "documents", label: "", icon: Paperclip },
-  { id: "quotes", label: "", icon: FileText },
-  { id: "salesorders", label: "", icon: FileText },
-  { id: "campaigns", label: "", icon: Tag },
-  { id: "comments", label: "", icon: MessageSquare },
-  { id: "invoices", label: "", icon: FileText },
-  { id: "emails", label: "", icon: Mail },
+  { id: "events", label: "Events", icon: Calendar },
+  { id: "contacts", label: "Contacts", icon: User },
+  { id: "products", label: "Products", icon: Building2 },
+  { id: "documents", label: "Documents", icon: Paperclip },
+  { id: "quotes", label: "Quotes", icon: FileText },
+  { id: "salesorders", label: "Sales Orders", icon: FileText },
+  { id: "campaigns", label: "Campaigns", icon: Tag },
+  { id: "comments", label: "Comments", icon: MessageSquare },
+  { id: "invoices", label: "Invoices", icon: FileText },
+  { id: "emails", label: "Emails", icon: Mail },
 ];
+
 
 export default function CrmDealDetail() {
   const { workspace } = useOutletContext<Ctx>();
