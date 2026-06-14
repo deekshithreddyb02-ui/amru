@@ -275,50 +275,63 @@ const CrmDeals = () => {
     { id: "lost", label: "Lost", filter: (d: Deal) => d.stage === "lost" },
   ];
 
+  const mkCol = (key: string, fallback: string, render: (d: Deal) => ReactNode, opts: Partial<Column<Deal>> = {}): Column<Deal> => ({
+    key,
+    label: colLabels.get(key, fallback),
+    headerNode: (
+      <EditableLabel
+        labelKey={key}
+        value={colLabels.labels[key]?.label}
+        fallback={fallback}
+        canEdit={colLabels.canEdit}
+        onSave={colLabels.setLabel}
+        className="text-[12px] uppercase tracking-wide"
+      />
+    ),
+    render,
+    ...opts,
+  });
+
   const columns: Column<Deal>[] = [
-    {
-      key: "title", label: "Opportunity Name",
-      render: (d) => (
-        <button
-          className="font-medium text-primary hover:underline text-left"
-          onClick={(e) => { e.stopPropagation(); /* detail route TBD */ }}
-          data-no-row-click
-        >
-          {d.title}
-        </button>
-      ),
-    },
-    {
-      key: "organization", label: "Organization Name",
-      render: (d) => d.organization?.name
-        ? <span className="text-primary">{d.organization.name}</span>
-        : <span className="text-muted-foreground">—</span>,
-    },
-    {
-      key: "stage", label: "Sales Stage",
-      render: (d) => {
-        const m = stageMeta(d.stage);
-        return <Badge variant="secondary" className={m.tone}>{m.label}</Badge>;
-      },
-    },
-    {
-      key: "expected_close", label: "Expected Close Date",
-      render: (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—",
-    },
-    {
-      key: "amount", label: "Amount",
-      className: "text-right",
-      render: (d) => <span className="tabular-nums">{fmtINR(Number(d.amount || 0))}</span>,
-    },
-    { key: "owner_name", label: "Assigned To", render: (d) => d.owner_name || "—" },
-    {
-      key: "contact", label: "Contact Name",
-      render: (d) => d.contact?.full_name
-        ? <span className="text-primary">{d.contact.full_name}</span>
-        : <span className="text-muted-foreground">—</span>,
-    },
-    { key: "probability", label: "Probability", defaultVisible: false, render: (d) => `${d.probability}%` },
+    mkCol("title", "Opportunity Name", (d) => (
+      <button
+        className="font-medium text-primary hover:underline text-left"
+        onClick={(e) => { e.stopPropagation(); navigate(`/crm/${workspace.slug}/deals/${d.id}`); }}
+        data-no-row-click
+      >
+        {d.title}
+      </button>
+    )),
+    mkCol("organization", "Organization Name", (d) => d.organization?.name
+      ? <span className="text-primary">{d.organization.name}</span>
+      : <span className="text-muted-foreground">—</span>),
+    mkCol("stage", "Sales Stage", (d) => {
+      const m = stageInfo(d.stage);
+      return (
+        <EditableLabel
+          labelKey={d.stage}
+          value={stageLabels.labels[d.stage]?.label}
+          fallback={STAGES.find((s) => s.key === d.stage)?.label || d.stage}
+          canEdit={stageLabels.canEdit}
+          onSave={stageLabels.setLabel}
+          extra={stageLabels.labels[d.stage]?.extra}
+          extraFields={["color"]}
+          render={(lbl) => <Badge variant="secondary" className={m.tone}>{lbl}</Badge>}
+        />
+      );
+    }),
+    mkCol("expected_close", "Expected Close Date",
+      (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—"),
+    mkCol("amount", "Amount",
+      (d) => <span className="tabular-nums">{fmtINR(Number(d.amount || 0))}</span>,
+      { className: "text-right" }),
+    mkCol("owner_name", "Assigned To", (d) => <>{d.owner_name || "—"}</>),
+    mkCol("contact", "Contact Name", (d) => d.contact?.full_name
+      ? <span className="text-primary">{d.contact.full_name}</span>
+      : <span className="text-muted-foreground">—</span>),
+    mkCol("probability", "Probability", (d) => <>{d.probability}%</>, { defaultVisible: false }),
   ];
+
 
   const rightActions = (
     <>
