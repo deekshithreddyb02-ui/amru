@@ -92,6 +92,10 @@ const CrmContacts = () => {
 
   const save = async () => {
     if (!form.full_name.trim()) return;
+    if (!form.organization_id) {
+      toast({ title: "Organization required", description: "Every contact must belong to an organization.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: { session } } = await supabase.auth.getSession();
     const { error } = await supabase.from("crm_contacts").insert({
@@ -196,14 +200,13 @@ const CrmContacts = () => {
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
               </div>
               <div>
-                <Label>Organization</Label>
+                <Label>Organization *</Label>
                 <Select
-                  value={form.organization_id || "none"}
-                  onValueChange={(v) => setForm({ ...form, organization_id: v === "none" ? "" : v })}
+                  value={form.organization_id || undefined}
+                  onValueChange={(v) => setForm({ ...form, organization_id: v })}
                 >
-                  <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select organization" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
                     {orgs.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -231,7 +234,7 @@ const CrmContacts = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={save} disabled={saving || !form.full_name.trim()}>
+            <Button onClick={save} disabled={saving || !form.full_name.trim() || !form.organization_id}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
             </Button>
           </DialogFooter>
