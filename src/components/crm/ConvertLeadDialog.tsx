@@ -395,7 +395,7 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
             amount: opp.amount ? Number(opp.amount) : 0,
             stage: opp.stage,
             probability: 30,
-            expected_close_date: opp.closeDate || null,
+            expected_close: opp.closeDate || null,
             contact_id,
             organization_id,
             lead_id: lead.id,
