@@ -21,21 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Loader2,
   ArrowRightLeft,
-  Building2,
-  User,
-  Wrench,
-  Target,
-  Users,
-  Link2,
-  CheckCircle2,
   AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -102,43 +92,19 @@ const STAGES = [
   { value: "lost", label: "Lost" },
 ];
 
-const GROUPS = [
-  "Sales Team",
-  "Marketing Team",
-  "Hyderabad Team",
-  "Bangalore Team",
-  "Maharashtra Team",
-  "Support Team",
-];
-
-const ORG_TYPES = ["Private Limited", "LLP", "Partnership", "Proprietorship", "Government", "NGO", "Individual"];
 const INDUSTRIES = ["Construction", "Real Estate", "Agriculture", "Manufacturing", "Hospitality", "Government", "Education", "Other"];
 
-const STEPS = [
-  { id: "org", label: "Organization", icon: Building2 },
-  { id: "contact", label: "Contact", icon: User },
-  { id: "service", label: "Service Request", icon: Wrench },
-  { id: "opp", label: "Opportunity", icon: Target },
-  { id: "assign", label: "Assignment", icon: Users },
-  { id: "review", label: "Review", icon: CheckCircle2 },
-] as const;
-
 const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Props) => {
-  const [step, setStep] = useState(0);
-
-  // Section toggles
+  // Section toggles (Vtiger-style)
   const [doOrg, setDoOrg] = useState(true);
   const [doContact, setDoContact] = useState(true);
-  const [doService, setDoService] = useState(true);
-  const [doOpp, setDoOpp] = useState(true);
+  const [doService, setDoService] = useState(false);
+  const [doOpp, setDoOpp] = useState(false);
 
   // Organization
   const [org, setOrg] = useState({
     name: "",
     industry: "",
-    orgType: "",
-    website: "",
-    gst: "",
     street: "",
     city: "",
     state: "",
@@ -177,8 +143,7 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
 
   // Assignment
   const [assignedTo, setAssignedTo] = useState<string>("");
-  const [group, setGroup] = useState<string>("Sales Team");
-  const [transferTo, setTransferTo] = useState<"organization" | "contact" | "service" | "opportunity">("contact");
+  const [transferTo, setTransferTo] = useState<"organization" | "contact">("contact");
 
   const [members, setMembers] = useState<Member[]>([]);
   const [saving, setSaving] = useState(false);
@@ -186,7 +151,6 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
   // Bootstrap form from the lead
   useEffect(() => {
     if (!open || !lead) return;
-    setStep(0);
     setUseExistingOrgId(null);
     setExistingOrg(null);
 
@@ -201,6 +165,7 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     setOrg((o) => ({
       ...o,
       name: "",
+      industry: "",
       street: lead.street || "",
       city: lead.city || "",
       state: lead.state || "",
@@ -221,8 +186,9 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     });
     setDoOrg(true);
     setDoContact(true);
-    setDoService(true);
-    setDoOpp(true);
+    setDoService(false);
+    setDoOpp(false);
+    setTransferTo("contact");
   }, [open, lead]);
 
   // Load workspace members for the assignee dropdown
@@ -266,25 +232,15 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     return () => clearTimeout(handle);
   }, [org.name, doOrg, workspaceId, useExistingOrgId]);
 
-  const orgComposedNotes = useMemo(() => {
-    const parts: string[] = [];
-    if (org.orgType) parts.push(`Type: ${org.orgType}`);
-    if (org.gst) parts.push(`GST: ${org.gst}`);
-    return parts.join(" | ");
-  }, [org.orgType, org.gst]);
-
-  const canNext = useMemo(() => {
-    if (step === 0 && doOrg && !useExistingOrgId && !org.name.trim()) return false;
-    if (step === 1 && doContact && !contact.firstName.trim()) return false;
-    if (step === 3 && doOpp && !opp.name.trim()) return false;
-    if (step === 4 && !assignedTo) return false;
+  const canSave = useMemo(() => {
+    if (doOrg && !useExistingOrgId && !org.name.trim()) return false;
+    if (doContact && !contact.firstName.trim()) return false;
+    if (doOpp && !opp.name.trim()) return false;
+    if (!assignedTo) return false;
     return true;
-  }, [step, doOrg, useExistingOrgId, org.name, doContact, contact.firstName, doOpp, opp.name, assignedTo]);
+  }, [doOrg, useExistingOrgId, org.name, doContact, contact.firstName, doOpp, opp.name, assignedTo]);
 
-  const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
-  const prev = () => setStep((s) => Math.max(s - 1, 0));
-
-  const handleConvert = async (openRecord = false) => {
+  const handleConvert = async () => {
     if (!lead) return;
     setSaving(true);
     try {
@@ -312,12 +268,10 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
               workspace_id: workspaceId,
               name: cleanName,
               industry: org.industry || null,
-              website: org.website || null,
               street: org.street || null,
               city: org.city || null,
               state: org.state || null,
               pincode: org.pincode || null,
-              notes: orgComposedNotes || null,
               created_by: uid,
             })
             .select("id")
@@ -352,17 +306,14 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
       }
 
       // 3) Service Request -> hydrogeo enquiry
-      let service_id: string | null = null;
       if (doService) {
         const composedNotes = [
           `Service: ${service.type}`,
           service.title ? `Title: ${service.title}` : "",
           `Priority: ${service.priority}`,
           service.notes ? `Notes: ${service.notes}` : "",
-        ]
-          .filter(Boolean)
-          .join("\n");
-        const { data: s, error: sErr } = await supabase
+        ].filter(Boolean).join("\n");
+        await supabase
           .from("crm_hydrogeo_enquiries")
           .insert({
             workspace_id: workspaceId,
@@ -377,11 +328,7 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
             notes: composedNotes,
             survey_status: "pending",
             created_by: uid,
-          })
-          .select("id")
-          .single();
-        if (sErr) throw sErr;
-        service_id = s.id;
+          });
       }
 
       // 4) Opportunity -> deal
@@ -401,7 +348,6 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
             lead_id: lead.id,
             owner_id: assignedTo || uid,
             created_by: uid,
-            description: `Group: ${group}\nService: ${service.type}`,
           })
           .select("id")
           .single();
@@ -409,24 +355,22 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
         deal_id = d.id;
       }
 
-      // 5) Timeline / activity entry on the chosen related record
+      // 5) Activity entry on the transferred record
       try {
         await supabase.from("crm_activities").insert({
           workspace_id: workspaceId,
           activity_type: "note",
           subject: `Lead converted: ${lead.full_name}`,
-          description: `Converted from lead. Transferred to: ${transferTo}. Group: ${group}.`,
+          description: `Converted from lead. Transferred to: ${transferTo}.`,
           status: "done",
           assigned_to: assignedTo || uid,
           lead_id: lead.id,
           contact_id: transferTo === "contact" ? contact_id : null,
           organization_id: transferTo === "organization" ? organization_id : null,
-          deal_id: transferTo === "opportunity" ? deal_id : null,
+          deal_id: null,
           created_by: uid,
         });
-      } catch {
-        // non-fatal
-      }
+      } catch { /* non-fatal */ }
 
       // 6) Mark lead converted
       await supabase
@@ -435,17 +379,6 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
         .eq("id", lead.id);
 
       toast.success("Lead converted successfully");
-
-      // Optionally open the chosen related record
-      if (openRecord) {
-        const slug = (window.location.pathname.match(/\/crm\/([^/]+)/) || [])[1];
-        if (slug) {
-          if (transferTo === "opportunity" && deal_id) window.location.href = `/crm/${slug}/deals/${deal_id}`;
-          else if (transferTo === "organization" && organization_id) window.location.href = `/crm/${slug}/organizations/${organization_id}`;
-          else if (transferTo === "contact" && contact_id) window.location.href = `/crm/${slug}/contacts/${contact_id}`;
-        }
-      }
-
       onOpenChange(false);
       onDone?.();
     } catch (e) {
@@ -455,347 +388,253 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     }
   };
 
-  const SectionCard = ({
-    icon: Icon,
+  const SectionShell = ({
     title,
     enabled,
     onToggle,
-    required,
     children,
   }: {
-    icon: any;
     title: string;
     enabled: boolean;
-    onToggle?: (v: boolean) => void;
-    required?: boolean;
-    children: React.ReactNode;
+    onToggle: (v: boolean) => void;
+    children?: React.ReactNode;
   }) => (
-    <div className={cn("rounded-lg border bg-card", enabled ? "border-primary/40" : "border-border opacity-90")}>
-      <div className="flex items-center gap-3 border-b px-4 py-3">
-        {onToggle ? (
-          <Checkbox checked={enabled} onCheckedChange={(v) => onToggle(!!v)} disabled={required} />
-        ) : (
-          <div className="h-4 w-4" />
-        )}
-        <Icon className="h-4 w-4 text-primary" />
-        <div className="font-medium text-sm">{title}</div>
-        {required && <Badge variant="secondary" className="ml-auto text-[10px]">Required</Badge>}
-      </div>
-      {enabled && <div className="p-4 space-y-3">{children}</div>}
+    <div className="rounded-md border bg-card">
+      <label className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none">
+        <Checkbox checked={enabled} onCheckedChange={(v) => onToggle(!!v)} />
+        <span className="text-sm font-semibold text-foreground">{title}</span>
+      </label>
+      {enabled && children && (
+        <div className="border-t px-4 py-4">{children}</div>
+      )}
+    </div>
+  );
+
+  // Vtiger-style label/field row
+  const Row = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
+    <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] items-center gap-2 sm:gap-4 py-1.5">
+      <Label className="text-sm text-muted-foreground sm:text-right">
+        {label} {required && <span className="text-destructive">*</span>}
+      </Label>
+      <div>{children}</div>
     </div>
   );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[92dvh] overflow-hidden flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b bg-muted/30">
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <ArrowRightLeft className="h-5 w-5 text-primary" />
+      <DialogContent className="max-w-2xl max-h-[92dvh] overflow-hidden flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 py-4 border-b bg-slate-600 text-white rounded-t-lg">
+          <DialogTitle className="flex items-center gap-2 text-base text-white">
+            <ArrowRightLeft className="h-5 w-5" />
             Convert Lead — {lead?.full_name || ""}
           </DialogTitle>
-          <DialogDescription className="text-xs">
-            Create Organization, Contact, Service Request and Opportunity from this qualified lead.
+          <DialogDescription className="sr-only">
+            Convert this lead into an Organization, Contact, Service Request and/or Opportunity.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Stepper */}
-        <div className="px-6 py-3 border-b overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              const active = i === step;
-              const done = i < step;
-              return (
-                <div key={s.id} className="flex items-center gap-2">
-                  <button
-                    onClick={() => setStep(i)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-full px-3 py-1.5 text-xs transition",
-                      active ? "bg-primary text-primary-foreground" :
-                      done ? "bg-primary/10 text-primary" :
-                      "bg-muted text-muted-foreground hover:bg-muted/80"
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{s.label}</span>
-                  </button>
-                  {i < STEPS.length - 1 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 bg-muted/20">
+          {/* Create Organization */}
+          <SectionShell title="Create Organization" enabled={doOrg} onToggle={setDoOrg}>
+            {useExistingOrgId ? (
+              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-sm">
+                <div className="flex items-center gap-2 font-medium text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="h-4 w-4" /> Using existing organization
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* STEP 0 — Organization */}
-          {step === 0 && (
-            <SectionCard icon={Building2} title="Create Organization" enabled={doOrg} onToggle={setDoOrg}>
-              {useExistingOrgId ? (
-                <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-sm">
-                  <div className="flex items-center gap-2 font-medium text-emerald-700 dark:text-emerald-400">
-                    <CheckCircle2 className="h-4 w-4" /> Using existing organization
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {existingOrg?.name || orgMatches.find((o) => o.id === useExistingOrgId)?.name}
-                  </div>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="h-auto p-0 mt-1"
-                    onClick={() => { setUseExistingOrgId(null); }}
-                  >
-                    Change
-                  </Button>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {existingOrg?.name || orgMatches.find((o) => o.id === useExistingOrgId)?.name}
                 </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="sm:col-span-2 relative">
-                      <Label>Organization Name *</Label>
-                      <Input
-                        value={org.name}
-                        onChange={(e) => setOrg({ ...org, name: e.target.value })}
-                        placeholder="e.g. Acme Constructions Pvt Ltd"
-                        autoComplete="off"
-                      />
-                      {orgMatches.length > 0 && !existingOrg && (
-                        <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
-                          {orgMatches.map((m) => (
-                            <button
-                              type="button"
-                              key={m.id}
-                              className="block w-full text-left px-3 py-2 text-sm hover:bg-accent"
-                              onClick={() => { setUseExistingOrgId(m.id); setExistingOrg(m); setOrgMatches([]); }}
-                            >
-                              <div className="font-medium">{m.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {[m.industry, m.city, m.state].filter(Boolean).join(" • ") || "—"}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {existingOrg && (
-                        <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-2.5 text-sm">
-                          <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-                          <div className="flex-1">
-                            <div className="font-medium text-amber-700 dark:text-amber-400">Existing organization found.</div>
-                            <div className="text-xs text-muted-foreground">
-                              {existingOrg.name} — {[existingOrg.industry, existingOrg.city, existingOrg.state].filter(Boolean).join(", ") || "no details"}
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              <Button size="sm" variant="default" onClick={() => setUseExistingOrgId(existingOrg.id)}>
-                                Use Existing Organization
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => { setUseExistingOrgId(existingOrg.id); setStep(1); }}>
-                                Create Contact under it
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label>Industry</Label>
-                      <Select value={org.industry} onValueChange={(v) => setOrg({ ...org, industry: v })}>
-                        <SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger>
-                        <SelectContent>{INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Organization Type</Label>
-                      <Select value={org.orgType} onValueChange={(v) => setOrg({ ...org, orgType: v })}>
-                        <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                        <SelectContent>{ORG_TYPES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Website</Label>
-                      <Input value={org.website} onChange={(e) => setOrg({ ...org, website: e.target.value })} placeholder="https://" />
-                    </div>
-                    <div>
-                      <Label>GST Number</Label>
-                      <Input value={org.gst} onChange={(e) => setOrg({ ...org, gst: e.target.value.toUpperCase() })} placeholder="22AAAAA0000A1Z5" />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Address</Label>
-                      <Input value={org.street} onChange={(e) => setOrg({ ...org, street: e.target.value })} placeholder="Street" />
-                    </div>
-                    <div><Label>City</Label><Input value={org.city} onChange={(e) => setOrg({ ...org, city: e.target.value })} /></div>
-                    <div><Label>State</Label><Input value={org.state} onChange={(e) => setOrg({ ...org, state: e.target.value })} /></div>
-                  </div>
-                </>
-              )}
-            </SectionCard>
-          )}
-
-          {/* STEP 1 — Contact */}
-          {step === 1 && (
-            <SectionCard icon={User} title="Create Contact" enabled={doContact} onToggle={setDoContact}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div><Label>First Name *</Label><Input value={contact.firstName} onChange={(e) => setContact({ ...contact, firstName: e.target.value })} /></div>
-                <div><Label>Last Name</Label><Input value={contact.lastName} onChange={(e) => setContact({ ...contact, lastName: e.target.value })} /></div>
-                <div><Label>Designation</Label><Input value={contact.designation} onChange={(e) => setContact({ ...contact, designation: e.target.value })} placeholder="e.g. Project Manager" /></div>
-                <div><Label>Mobile Number</Label><Input value={contact.mobile} onChange={(e) => setContact({ ...contact, mobile: e.target.value })} /></div>
-                <div className="sm:col-span-2"><Label>Email Address</Label><Input type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} /></div>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 mt-1"
+                  onClick={() => setUseExistingOrgId(null)}
+                >
+                  Change
+                </Button>
               </div>
-              {doOrg || useExistingOrgId ? null : (
-                <div className="text-xs text-amber-600 flex items-center gap-1.5">
-                  <AlertTriangle className="h-3 w-3" /> A contact should belong to an organization. Enable "Create Organization" or pick an existing one.
-                </div>
-              )}
-            </SectionCard>
-          )}
-
-          {/* STEP 2 — Service Request */}
-          {step === 2 && (
-            <SectionCard icon={Wrench} title="Create Service Request" enabled={doService} onToggle={setDoService}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="sm:col-span-2">
-                  <Label>Service Type</Label>
-                  <Select value={service.type} onValueChange={(v) => setService({ ...service, type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{SERVICE_TYPES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="sm:col-span-2"><Label>Project Title</Label><Input value={service.title} onChange={(e) => setService({ ...service, title: e.target.value })} /></div>
-                <div className="sm:col-span-2"><Label>Site Location</Label><Input value={service.location} onChange={(e) => setService({ ...service, location: e.target.value })} /></div>
-                <div>
-                  <Label>Priority</Label>
-                  <Select value={service.priority} onValueChange={(v) => setService({ ...service, priority: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Expected Start Date</Label><Input type="date" value={service.startDate} onChange={(e) => setService({ ...service, startDate: e.target.value })} /></div>
-                <div className="sm:col-span-2"><Label>Notes</Label><Textarea rows={2} value={service.notes} onChange={(e) => setService({ ...service, notes: e.target.value })} /></div>
-              </div>
-            </SectionCard>
-          )}
-
-          {/* STEP 3 — Opportunity */}
-          {step === 3 && (
-            <SectionCard icon={Target} title="Create Opportunity" enabled={doOpp} onToggle={setDoOpp}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="sm:col-span-2"><Label>Opportunity Name *</Label><Input value={opp.name} onChange={(e) => setOpp({ ...opp, name: e.target.value })} /></div>
-                <div><Label>Estimated Value (INR)</Label><Input type="number" value={opp.amount} onChange={(e) => setOpp({ ...opp, amount: e.target.value })} /></div>
-                <div><Label>Expected Close Date</Label><Input type="date" value={opp.closeDate} onChange={(e) => setOpp({ ...opp, closeDate: e.target.value })} /></div>
-                <div className="sm:col-span-2">
-                  <Label>Stage</Label>
-                  <Select value={opp.stage} onValueChange={(v) => setOpp({ ...opp, stage: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{STAGES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </SectionCard>
-          )}
-
-          {/* STEP 4 — Assignment */}
-          {step === 4 && (
-            <SectionCard icon={Users} title="Assignment & Related Records" enabled required>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label>Assigned To *</Label>
-                  <Select value={assignedTo} onValueChange={setAssignedTo}>
-                    <SelectTrigger><SelectValue placeholder="Select user" /></SelectTrigger>
-                    <SelectContent>
-                      {members.map((m) => (
-                        <SelectItem key={m.user_id} value={m.user_id}>
-                          {m.full_name || m.user_id.slice(0, 8)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Group</Label>
-                  <Select value={group} onValueChange={setGroup}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <Separator className="my-2" />
-
-              <div>
-                <div className="flex items-center gap-2 mb-2 text-sm font-medium">
-                  <Link2 className="h-4 w-4 text-primary" /> Transfer related record to
-                </div>
-                <RadioGroup value={transferTo} onValueChange={(v: any) => setTransferTo(v)} className="grid grid-cols-2 gap-2">
-                  {[
-                    { v: "organization", l: "Organization", disabled: !doOrg && !useExistingOrgId },
-                    { v: "contact", l: "Contact", disabled: !doContact },
-                    { v: "service", l: "Service Request", disabled: !doService },
-                    { v: "opportunity", l: "Opportunity", disabled: !doOpp },
-                  ].map((o) => (
-                    <label key={o.v} className={cn("flex items-center gap-2 rounded-md border p-2.5 cursor-pointer", o.disabled && "opacity-40 cursor-not-allowed")}>
-                      <RadioGroupItem value={o.v} disabled={o.disabled} />
-                      <span className="text-sm">{o.l}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
-            </SectionCard>
-          )}
-
-          {/* STEP 5 — Review */}
-          {step === 5 && (
-            <div className="space-y-3">
-              <div className="text-sm text-muted-foreground">Review the conversion summary before saving.</div>
-              <div className="rounded-lg border divide-y text-sm">
-                <SummaryRow label="Organization" value={useExistingOrgId ? `Existing • ${existingOrg?.name || ""}` : (doOrg ? org.name || "—" : "Skipped")} />
-                <SummaryRow label="Contact" value={doContact ? `${contact.firstName} ${contact.lastName}`.trim() : "Skipped"} />
-                <SummaryRow label="Service Request" value={doService ? `${service.type}${service.title ? " • " + service.title : ""}` : "Skipped"} />
-                <SummaryRow label="Opportunity" value={doOpp ? `${opp.name} • ${opp.amount ? "₹" + Number(opp.amount).toLocaleString("en-IN") : "—"} • ${STAGES.find(s => s.value === opp.stage)?.label}` : "Skipped"} />
-                <SummaryRow label="Assigned To" value={members.find(m => m.user_id === assignedTo)?.full_name || "—"} />
-                <SummaryRow label="Group" value={group} />
-                <SummaryRow label="Transfer activities to" value={transferTo} />
-              </div>
-              <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
-                <span className="font-medium text-primary">Service workflow:</span> Lead → Organization → Contact → Site Visit → Technical Review → Proposal → Quotation → Approval → Work Order → Execution → Completion → Invoice.
-              </div>
-            </div>
-          )}
-        </div>
-
-        <DialogFooter className="px-6 py-3 border-t bg-muted/30 flex-row justify-between gap-2">
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
-            {step > 0 && <Button variant="outline" onClick={prev} disabled={saving}><ChevronLeft className="h-4 w-4 mr-1" />Back</Button>}
-          </div>
-          <div className="flex gap-2">
-            {step < STEPS.length - 1 ? (
-              <Button onClick={next} disabled={!canNext}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
             ) : (
-              <>
-                <Button variant="outline" onClick={() => handleConvert(true)} disabled={saving}>
-                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Save & Open Record
-                </Button>
-                <Button onClick={() => handleConvert(false)} disabled={saving}>
-                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Convert Lead
-                </Button>
-              </>
+              <div className="space-y-1">
+                <Row label="Organization Name" required>
+                  <div className="relative">
+                    <Input
+                      value={org.name}
+                      onChange={(e) => setOrg({ ...org, name: e.target.value })}
+                      autoComplete="off"
+                    />
+                    {orgMatches.length > 0 && !existingOrg && (
+                      <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
+                        {orgMatches.map((m) => (
+                          <button
+                            type="button"
+                            key={m.id}
+                            className="block w-full text-left px-3 py-2 text-sm hover:bg-accent"
+                            onClick={() => { setUseExistingOrgId(m.id); setExistingOrg(m); setOrgMatches([]); }}
+                          >
+                            <div className="font-medium">{m.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {[m.industry, m.city, m.state].filter(Boolean).join(" • ") || "—"}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {existingOrg && (
+                    <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs">
+                      <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                      <div className="flex-1">
+                        <div className="font-medium text-amber-700 dark:text-amber-400">Existing organization found.</div>
+                        <div className="text-muted-foreground">
+                          {existingOrg.name} — {[existingOrg.industry, existingOrg.city, existingOrg.state].filter(Boolean).join(", ") || "no details"}
+                        </div>
+                        <Button size="sm" variant="default" className="mt-2 h-7" onClick={() => setUseExistingOrgId(existingOrg.id)}>
+                          Use Existing Organization
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Row>
+                <Row label="Industry">
+                  <Select value={org.industry} onValueChange={(v) => setOrg({ ...org, industry: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select an Option" /></SelectTrigger>
+                    <SelectContent>{INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
+                  </Select>
+                </Row>
+              </div>
             )}
+          </SectionShell>
+
+          {/* Create Contact */}
+          <SectionShell title="Create Contact" enabled={doContact} onToggle={setDoContact}>
+            <div className="space-y-1">
+              <Row label="First Name" required>
+                <Input value={contact.firstName} onChange={(e) => setContact({ ...contact, firstName: e.target.value })} />
+              </Row>
+              <Row label="Last Name">
+                <Input value={contact.lastName} onChange={(e) => setContact({ ...contact, lastName: e.target.value })} />
+              </Row>
+              <Row label="Designation">
+                <Input value={contact.designation} onChange={(e) => setContact({ ...contact, designation: e.target.value })} />
+              </Row>
+              <Row label="Mobile">
+                <Input value={contact.mobile} onChange={(e) => setContact({ ...contact, mobile: e.target.value })} />
+              </Row>
+              <Row label="Email">
+                <Input type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} />
+              </Row>
+            </div>
+          </SectionShell>
+
+          {/* Create Service Request */}
+          <SectionShell title="Create Service Request" enabled={doService} onToggle={setDoService}>
+            <div className="space-y-1">
+              <Row label="Service Type">
+                <Select value={service.type} onValueChange={(v) => setService({ ...service, type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{SERVICE_TYPES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </Row>
+              <Row label="Project Title">
+                <Input value={service.title} onChange={(e) => setService({ ...service, title: e.target.value })} />
+              </Row>
+              <Row label="Site Location">
+                <Input value={service.location} onChange={(e) => setService({ ...service, location: e.target.value })} />
+              </Row>
+              <Row label="Priority">
+                <Select value={service.priority} onValueChange={(v) => setService({ ...service, priority: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Row>
+              <Row label="Start Date">
+                <Input type="date" value={service.startDate} onChange={(e) => setService({ ...service, startDate: e.target.value })} />
+              </Row>
+              <Row label="Notes">
+                <Textarea rows={2} value={service.notes} onChange={(e) => setService({ ...service, notes: e.target.value })} />
+              </Row>
+            </div>
+          </SectionShell>
+
+          {/* Create Opportunity */}
+          <SectionShell title="Create Opportunity" enabled={doOpp} onToggle={setDoOpp}>
+            <div className="space-y-1">
+              <Row label="Opportunity Name" required>
+                <Input value={opp.name} onChange={(e) => setOpp({ ...opp, name: e.target.value })} />
+              </Row>
+              <Row label="Amount (INR)">
+                <Input type="number" value={opp.amount} onChange={(e) => setOpp({ ...opp, amount: e.target.value })} />
+              </Row>
+              <Row label="Close Date">
+                <Input type="date" value={opp.closeDate} onChange={(e) => setOpp({ ...opp, closeDate: e.target.value })} />
+              </Row>
+              <Row label="Stage">
+                <Select value={opp.stage} onValueChange={(v) => setOpp({ ...opp, stage: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{STAGES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </Row>
+            </div>
+          </SectionShell>
+
+          {/* Assignment + Transfer */}
+          <div className="rounded-md border bg-card px-4 py-4 space-y-1">
+            <Row label="Assigned To" required>
+              <Select value={assignedTo} onValueChange={setAssignedTo}>
+                <SelectTrigger><SelectValue placeholder="Select user" /></SelectTrigger>
+                <SelectContent>
+                  {members.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>
+                      {m.full_name || m.user_id.slice(0, 8)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Row>
+            <Row label="Transfer related record to">
+              <RadioGroup
+                value={transferTo}
+                onValueChange={(v: any) => setTransferTo(v)}
+                className="flex items-center gap-6 pt-2"
+              >
+                <label className={cn("flex items-center gap-2 cursor-pointer", !doOrg && !useExistingOrgId && "opacity-40 cursor-not-allowed")}>
+                  <RadioGroupItem value="organization" disabled={!doOrg && !useExistingOrgId} />
+                  <span className="text-sm">Organization</span>
+                </label>
+                <label className={cn("flex items-center gap-2 cursor-pointer", !doContact && "opacity-40 cursor-not-allowed")}>
+                  <RadioGroupItem value="contact" disabled={!doContact} />
+                  <span className="text-sm">Contact</span>
+                </label>
+              </RadioGroup>
+            </Row>
           </div>
+        </div>
+
+        <DialogFooter className="px-6 py-3 border-t bg-muted/40 sm:justify-center gap-3">
+          <Button
+            onClick={handleConvert}
+            disabled={!canSave || saving}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]"
+          >
+            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Save
+          </Button>
+          <Button
+            variant="link"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+            className="text-destructive"
+          >
+            Cancel
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
-
-const SummaryRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between gap-3 px-3 py-2">
-    <div className="text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-    <div className="text-sm font-medium text-right truncate">{value || "—"}</div>
-  </div>
-);
 
 export default ConvertLeadDialog;
