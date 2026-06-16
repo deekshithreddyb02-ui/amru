@@ -94,6 +94,41 @@ const STAGES = [
 
 const INDUSTRIES = ["Construction", "Real Estate", "Agriculture", "Manufacturing", "Hospitality", "Government", "Education", "Other"];
 
+// Defined OUTSIDE the main component so they are stable across renders
+// (defining them inside causes inputs to remount on every keystroke → lost focus).
+const SectionShell = ({
+  title,
+  enabled,
+  onToggle,
+  children,
+}: {
+  title: string;
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  children?: React.ReactNode;
+}) => (
+  <div className="rounded-md border bg-card">
+    <label className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none">
+      <Checkbox checked={enabled} onCheckedChange={(v) => onToggle(!!v)} />
+      <span className="text-sm font-semibold text-foreground">{title}</span>
+    </label>
+    {enabled && children && (
+      <div className="border-t px-4 py-4">{children}</div>
+    )}
+  </div>
+);
+
+const Row = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
+  <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] items-start gap-2 sm:gap-4 py-1.5">
+    <Label className="text-sm text-muted-foreground sm:text-right sm:pt-2.5">
+      {label} {required && <span className="text-destructive">*</span>}
+    </Label>
+    <div>{children}</div>
+  </div>
+);
+
+
+
 const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Props) => {
   // Section toggles (Vtiger-style)
   const [doOrg, setDoOrg] = useState(true);
@@ -388,37 +423,6 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     }
   };
 
-  const SectionShell = ({
-    title,
-    enabled,
-    onToggle,
-    children,
-  }: {
-    title: string;
-    enabled: boolean;
-    onToggle: (v: boolean) => void;
-    children?: React.ReactNode;
-  }) => (
-    <div className="rounded-md border bg-card">
-      <label className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none">
-        <Checkbox checked={enabled} onCheckedChange={(v) => onToggle(!!v)} />
-        <span className="text-sm font-semibold text-foreground">{title}</span>
-      </label>
-      {enabled && children && (
-        <div className="border-t px-4 py-4">{children}</div>
-      )}
-    </div>
-  );
-
-  // Vtiger-style label/field row
-  const Row = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
-    <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] items-center gap-2 sm:gap-4 py-1.5">
-      <Label className="text-sm text-muted-foreground sm:text-right">
-        {label} {required && <span className="text-destructive">*</span>}
-      </Label>
-      <div>{children}</div>
-    </div>
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
