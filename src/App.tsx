@@ -180,6 +180,7 @@ const App = () => {
                 <Route path="website-settings/:section" element={<CrmWebsiteSettings />} />
                 <Route path="admin-center" element={<CrmAdminCenter />} />
                 <Route path="crm-settings" element={<CrmSettings />} />
+                <Route path="settings/lead-conversion-mapping" element={<CrmLeadConversionMapping />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
