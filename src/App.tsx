@@ -76,6 +76,7 @@ const CrmForecast = lazy(() => import("./pages/crm/CrmForecast"));
 const CrmDataQuality = lazy(() => import("./pages/crm/CrmDataQuality"));
 const CrmWebsiteSettings = lazy(() => import("./pages/crm/CrmWebsiteSettings"));
 const CrmSettings = lazy(() => import("./pages/crm/CrmSettings"));
+const CrmLeadConversionMapping = lazy(() => import("./pages/crm/CrmLeadConversionMapping"));
 const QuotationSign = lazy(() => import("./pages/QuotationSign"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
