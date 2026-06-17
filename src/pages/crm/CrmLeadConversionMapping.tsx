@@ -206,6 +206,20 @@ export default function CrmLeadConversionMapping() {
   const [original, setOriginal] = useState<MappingRow[]>([]);
   const [search, setSearch] = useState("");
   const [history, setHistory] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [selectedLeadId, setSelectedLeadId] = useState<string>("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const loadLeads = async () => {
+    const { data } = await supabase
+      .from("crm_leads")
+      .select("*")
+      .eq("workspace_id", workspace.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setLeads(data || []);
+    if (data && data.length && !selectedLeadId) setSelectedLeadId(data[0].id);
+  };
 
   const load = async () => {
     setLoading(true);
