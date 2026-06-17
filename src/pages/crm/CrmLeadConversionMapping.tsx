@@ -172,6 +172,30 @@ const defaultMappings = (): MappingRow[] => [
   { id: crypto.randomUUID(), leadKey: "service_type", targets: { service_request: "service_type" } },
 ];
 
+/** Resolve a logical Lead field key against an actual crm_leads DB row, with aliases. */
+const resolveLeadValue = (lead: any, key: string): any => {
+  if (!lead) return undefined;
+  if (lead[key] !== undefined && lead[key] !== null && lead[key] !== "") return lead[key];
+  const fullName: string = lead.full_name || "";
+  const [firstName, ...rest] = fullName.split(/\s+/);
+  const lastName = rest.join(" ");
+  const aliases: Record<string, any> = {
+    company: lead.full_name,
+    first_name: firstName,
+    last_name: lastName,
+    mobile: lead.whatsapp || lead.phone,
+    address: lead.street,
+    budget: lead.biz_cost,
+    site_area: lead.biz_area,
+    service_type: lead.service_needed,
+    site_location: [lead.city, lead.state].filter(Boolean).join(", "),
+    project_type: lead.service_needed,
+    village: lead.city,
+    district: lead.city,
+  };
+  return aliases[key];
+};
+
 export default function CrmLeadConversionMapping() {
   const { workspace, myRole } = useOutletContext<Ctx>();
   const canEdit = myRole === "crm_admin" || myRole === "super_admin";
