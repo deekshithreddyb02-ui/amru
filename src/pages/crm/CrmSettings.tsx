@@ -56,6 +56,7 @@ const GROUPS: Group[] = [
       { label: "Email Templates", to: "email-templates", description: "Reusable email templates." },
       { label: "Campaigns", to: "campaigns", description: "Marketing campaign settings." },
       { label: "Lead Assignment", to: "territories", description: "Routing rules for new leads." },
+      { label: "Lead Conversion Data Mapping", to: "settings/lead-conversion-mapping", description: "Map Lead fields to Organization, Contact, Project, Opportunity, Service Request, Customer and Quotation modules." },
       { label: "Approval Process", to: "approvals", description: "Multi-step approval workflows." },
     ],
   },
