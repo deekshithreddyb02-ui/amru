@@ -395,6 +395,93 @@ export default function CrmLeadConversionMapping() {
                 </div>
               </SheetContent>
             </Sheet>
+            <Sheet open={previewOpen} onOpenChange={(o) => { setPreviewOpen(o); if (o) loadLeads(); }}>
+              <SheetTrigger asChild>
+                <Button size="sm" className="h-8 gap-1">
+                  <Eye className="h-3.5 w-3.5" /> Preview Conversion
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[560px] sm:max-w-2xl overflow-y-auto">
+                <SheetHeader><SheetTitle>Preview Conversion</SheetTitle></SheetHeader>
+                <div className="mt-4 space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Sample Lead</label>
+                    <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder={leads.length ? "Pick a lead…" : "No leads found"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {leads.map((l) => (
+                          <SelectItem key={l.id} value={l.id} className="text-xs">
+                            {l.full_name || l.email || l.phone || l.id.slice(0, 8)}
+                            {l.service_needed ? ` · ${l.service_needed}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[11px] text-muted-foreground">
+                      Showing how current (unsaved) mappings would populate each destination module.
+                    </p>
+                  </div>
+
+                  {(() => {
+                    const lead = leads.find((l) => l.id === selectedLeadId);
+                    if (!lead) return (
+                      <div className="text-xs text-muted-foreground text-center py-8 border rounded-md">
+                        Select a lead to preview conversion output.
+                      </div>
+                    );
+                    return (
+                      <div className="space-y-3">
+                        {MODULES.map((m) => {
+                          const entries = m.fields.map((f) => {
+                            const sourceRow = rows.find((r) => r.targets[m.key] === f.key);
+                            if (!sourceRow) return null;
+                            const lf = leadFieldByKey.get(sourceRow.leadKey);
+                            const value = resolveLeadValue(lead, sourceRow.leadKey);
+                            return { field: f, lf, sourceKey: sourceRow.leadKey, value };
+                          }).filter(Boolean) as { field: ModuleField; lf?: LeadField; sourceKey: string; value: any }[];
+
+                          return (
+                            <Card key={m.key} className="p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-semibold">{m.label}</div>
+                                <Badge variant="secondary" className="text-[10px]">{entries.length} field{entries.length === 1 ? "" : "s"}</Badge>
+                              </div>
+                              {entries.length === 0 ? (
+                                <div className="text-[11px] text-muted-foreground italic">No fields mapped to this module.</div>
+                              ) : (
+                                <div className="space-y-1">
+                                  {entries.map((e) => {
+                                    const filled = e.value !== undefined && e.value !== null && e.value !== "";
+                                    return (
+                                      <div key={e.field.key} className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs py-1 border-b last:border-0">
+                                        <div className="truncate">
+                                          <span className="text-muted-foreground">{e.lf?.label || e.sourceKey}</span>
+                                        </div>
+                                        <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                                        <div className="truncate">
+                                          <span className="font-medium">{e.field.label}: </span>
+                                          {filled ? (
+                                            <span className="text-foreground">{String(e.value)}</span>
+                                          ) : (
+                                            <span className="text-muted-foreground italic">empty</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
