@@ -15,7 +15,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  Loader2, Plus, Trash2, Save, X, Search, History, AlertTriangle, Info,
+  Loader2, Plus, Trash2, Save, X, Search, History, AlertTriangle, Info, Eye, ArrowRight,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
