@@ -130,11 +130,15 @@ const Row = ({ label, required, children }: { label: string; required?: boolean;
 
 
 const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Props) => {
-  // Section toggles (Vtiger-style)
+  // Section toggles (Vtiger-style: all three default ON)
   const [doOrg, setDoOrg] = useState(true);
   const [doContact, setDoContact] = useState(true);
   const [doService, setDoService] = useState(false);
-  const [doOpp, setDoOpp] = useState(false);
+  const [doOpp, setDoOpp] = useState(true);
+
+  // Existing contact match (by email) — Vtiger-style merge prompt
+  const [existingContactId, setExistingContactId] = useState<string | null>(null);
+  const [existingContactName, setExistingContactName] = useState<string | null>(null);
 
   // Organization
   const [org, setOrg] = useState({
@@ -222,9 +226,38 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     setDoOrg(true);
     setDoContact(true);
     setDoService(false);
-    setDoOpp(false);
+    setDoOpp(true);
+    setExistingContactId(null);
+    setExistingContactName(null);
     setTransferTo("contact");
   }, [open, lead]);
+
+  // Live search for existing contact by email (Vtiger-style merge)
+  useEffect(() => {
+    if (!open || !doContact || !contact.email.trim()) {
+      setExistingContactId(null);
+      setExistingContactName(null);
+      return;
+    }
+    const email = contact.email.trim().toLowerCase();
+    const handle = setTimeout(async () => {
+      const { data } = await supabase
+        .from("crm_contacts")
+        .select("id, full_name, email")
+        .eq("workspace_id", workspaceId)
+        .ilike("email", email)
+        .limit(1)
+        .maybeSingle();
+      if (data) {
+        setExistingContactId((data as any).id);
+        setExistingContactName((data as any).full_name);
+      } else {
+        setExistingContactId(null);
+        setExistingContactName(null);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [open, doContact, contact.email, workspaceId]);
 
   // Load workspace members for the assignee dropdown
   useEffect(() => {
@@ -269,11 +302,11 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
 
   const canSave = useMemo(() => {
     if (doOrg && !useExistingOrgId && !org.name.trim()) return false;
-    if (doContact && !contact.firstName.trim()) return false;
+    if (doContact && !contact.lastName.trim()) return false;
     if (doOpp && !opp.name.trim()) return false;
     if (!assignedTo) return false;
     return true;
-  }, [doOrg, useExistingOrgId, org.name, doContact, contact.firstName, doOpp, opp.name, assignedTo]);
+  }, [doOrg, useExistingOrgId, org.name, doContact, contact.lastName, doOpp, opp.name, assignedTo]);
 
   const handleConvert = async () => {
     if (!lead) return;
@@ -316,9 +349,9 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
         }
       }
 
-      // 2) Contact
-      let contact_id: string | null = null;
-      if (doContact) {
+      // 2) Contact (merge by email if existing; else create)
+      let contact_id: string | null = (doContact ? existingContactId : null);
+      if (doContact && !contact_id) {
         const fullName = `${contact.firstName} ${contact.lastName}`.trim() || lead.full_name;
         const { data: c, error: cErr } = await supabase
           .from("crm_contacts")
@@ -338,6 +371,11 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
           .single();
         if (cErr) throw cErr;
         contact_id = c.id;
+      } else if (doContact && contact_id && organization_id) {
+        await supabase
+          .from("crm_contacts")
+          .update({ organization_id })
+          .eq("id", contact_id);
       }
 
       // 3) Service Request -> hydrogeo enquiry
@@ -512,10 +550,10 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
           {/* Create Contact */}
           <SectionShell title="Create Contact" enabled={doContact} onToggle={setDoContact}>
             <div className="space-y-1">
-              <Row label="First Name" required>
+              <Row label="First Name">
                 <Input value={contact.firstName} onChange={(e) => setContact({ ...contact, firstName: e.target.value })} />
               </Row>
-              <Row label="Last Name">
+              <Row label="Last Name" required>
                 <Input value={contact.lastName} onChange={(e) => setContact({ ...contact, lastName: e.target.value })} />
               </Row>
               <Row label="Designation">
@@ -526,6 +564,17 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
               </Row>
               <Row label="Email">
                 <Input type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} />
+                {existingContactId && (
+                  <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-medium text-amber-700 dark:text-amber-400">Existing contact found.</div>
+                      <div className="text-muted-foreground">
+                        {existingContactName} ({contact.email}) — will be linked instead of creating a duplicate.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Row>
             </div>
           </SectionShell>
