@@ -226,9 +226,38 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
     setDoOrg(true);
     setDoContact(true);
     setDoService(false);
-    setDoOpp(false);
+    setDoOpp(true);
+    setExistingContactId(null);
+    setExistingContactName(null);
     setTransferTo("contact");
   }, [open, lead]);
+
+  // Live search for existing contact by email (Vtiger-style merge)
+  useEffect(() => {
+    if (!open || !doContact || !contact.email.trim()) {
+      setExistingContactId(null);
+      setExistingContactName(null);
+      return;
+    }
+    const email = contact.email.trim().toLowerCase();
+    const handle = setTimeout(async () => {
+      const { data } = await supabase
+        .from("crm_contacts")
+        .select("id, full_name, email")
+        .eq("workspace_id", workspaceId)
+        .ilike("email", email)
+        .limit(1)
+        .maybeSingle();
+      if (data) {
+        setExistingContactId((data as any).id);
+        setExistingContactName((data as any).full_name);
+      } else {
+        setExistingContactId(null);
+        setExistingContactName(null);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [open, doContact, contact.email, workspaceId]);
 
   // Load workspace members for the assignee dropdown
   useEffect(() => {
