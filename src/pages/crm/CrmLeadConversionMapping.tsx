@@ -411,23 +411,70 @@ export default function CrmLeadConversionMapping() {
                 <div className="mt-4 space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-muted-foreground">Sample Lead</label>
-                    <Select value={selectedLeadId} onValueChange={setSelectedLeadId}>
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder={leads.length ? "Pick a lead…" : "No leads found"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {leads.map((l) => (
-                          <SelectItem key={l.id} value={l.id} className="text-xs">
-                            {l.full_name || l.email || l.phone || l.id.slice(0, 8)}
-                            {l.service_needed ? ` · ${l.service_needed}` : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {(() => {
+                      const selected = leads.find((l) => l.id === selectedLeadId);
+                      const leadLabel = (l: any) =>
+                        `${l.full_name || "(no name)"}${l.email ? ` · ${l.email}` : ""}${l.phone || l.whatsapp ? ` · ${l.phone || l.whatsapp}` : ""}${l.service_needed ? ` · ${l.service_needed}` : ""}`;
+                      return (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className="w-full h-9 justify-between text-sm font-normal"
+                              disabled={!leads.length}
+                            >
+                              <span className="truncate text-left">
+                                {selected
+                                  ? leadLabel(selected)
+                                  : leads.length
+                                  ? "Search and pick a lead…"
+                                  : "No leads found"}
+                              </span>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                            <Command
+                              filter={(value, search) =>
+                                value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+                              }
+                            >
+                              <CommandInput placeholder="Search by name, email, phone…" className="h-9" />
+                              <CommandList>
+                                <CommandEmpty>No matching lead.</CommandEmpty>
+                                <CommandGroup>
+                                  {leads.map((l) => {
+                                    const value = `${l.full_name || ""} ${l.email || ""} ${l.phone || ""} ${l.whatsapp || ""} ${l.service_needed || ""} ${l.id}`;
+                                    return (
+                                      <CommandItem
+                                        key={l.id}
+                                        value={value}
+                                        onSelect={() => setSelectedLeadId(l.id)}
+                                        className="text-xs"
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-3.5 w-3.5",
+                                            selectedLeadId === l.id ? "opacity-100" : "opacity-0",
+                                          )}
+                                        />
+                                        <span className="truncate">{leadLabel(l)}</span>
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      );
+                    })()}
                     <p className="text-[11px] text-muted-foreground">
                       Showing how current (unsaved) mappings would populate each destination module.
                     </p>
                   </div>
+
 
                   {(() => {
                     const lead = leads.find((l) => l.id === selectedLeadId);
