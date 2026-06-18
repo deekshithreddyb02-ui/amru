@@ -530,40 +530,6 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
             </div>
           </SectionShell>
 
-          {/* Create Service Request */}
-          <SectionShell title="Create Service Request" enabled={doService} onToggle={setDoService}>
-            <div className="space-y-1">
-              <Row label="Service Type">
-                <Select value={service.type} onValueChange={(v) => setService({ ...service, type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{SERVICE_TYPES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                </Select>
-              </Row>
-              <Row label="Project Title">
-                <Input value={service.title} onChange={(e) => setService({ ...service, title: e.target.value })} />
-              </Row>
-              <Row label="Site Location">
-                <Input value={service.location} onChange={(e) => setService({ ...service, location: e.target.value })} />
-              </Row>
-              <Row label="Priority">
-                <Select value={service.priority} onValueChange={(v) => setService({ ...service, priority: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Row>
-              <Row label="Start Date">
-                <Input type="date" value={service.startDate} onChange={(e) => setService({ ...service, startDate: e.target.value })} />
-              </Row>
-              <Row label="Notes">
-                <Textarea rows={2} value={service.notes} onChange={(e) => setService({ ...service, notes: e.target.value })} />
-              </Row>
-            </div>
-          </SectionShell>
 
           {/* Create Opportunity */}
           <SectionShell title="Create Opportunity" enabled={doOpp} onToggle={setDoOpp}>
