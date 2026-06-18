@@ -302,11 +302,11 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
 
   const canSave = useMemo(() => {
     if (doOrg && !useExistingOrgId && !org.name.trim()) return false;
-    if (doContact && !contact.firstName.trim()) return false;
+    if (doContact && !contact.lastName.trim()) return false;
     if (doOpp && !opp.name.trim()) return false;
     if (!assignedTo) return false;
     return true;
-  }, [doOrg, useExistingOrgId, org.name, doContact, contact.firstName, doOpp, opp.name, assignedTo]);
+  }, [doOrg, useExistingOrgId, org.name, doContact, contact.lastName, doOpp, opp.name, assignedTo]);
 
   const handleConvert = async () => {
     if (!lead) return;
