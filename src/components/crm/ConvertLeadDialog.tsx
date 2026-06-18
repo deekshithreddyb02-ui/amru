@@ -349,9 +349,9 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
         }
       }
 
-      // 2) Contact
-      let contact_id: string | null = null;
-      if (doContact) {
+      // 2) Contact (merge by email if existing; else create)
+      let contact_id: string | null = (doContact ? existingContactId : null);
+      if (doContact && !contact_id) {
         const fullName = `${contact.firstName} ${contact.lastName}`.trim() || lead.full_name;
         const { data: c, error: cErr } = await supabase
           .from("crm_contacts")
@@ -371,6 +371,11 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
           .single();
         if (cErr) throw cErr;
         contact_id = c.id;
+      } else if (doContact && contact_id && organization_id) {
+        await supabase
+          .from("crm_contacts")
+          .update({ organization_id })
+          .eq("id", contact_id);
       }
 
       // 3) Service Request -> hydrogeo enquiry
