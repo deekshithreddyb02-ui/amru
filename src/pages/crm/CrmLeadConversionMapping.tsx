@@ -14,9 +14,14 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  Loader2, Plus, Trash2, Save, X, Search, History, AlertTriangle, Info, Eye, ArrowRight,
+  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+} from "@/components/ui/command";
+import {
+  Loader2, Plus, Trash2, Save, X, Search, History, AlertTriangle, Info, Eye, ArrowRight, Check, ChevronsUpDown,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
