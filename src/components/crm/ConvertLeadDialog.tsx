@@ -550,10 +550,10 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
           {/* Create Contact */}
           <SectionShell title="Create Contact" enabled={doContact} onToggle={setDoContact}>
             <div className="space-y-1">
-              <Row label="First Name" required>
+              <Row label="First Name">
                 <Input value={contact.firstName} onChange={(e) => setContact({ ...contact, firstName: e.target.value })} />
               </Row>
-              <Row label="Last Name">
+              <Row label="Last Name" required>
                 <Input value={contact.lastName} onChange={(e) => setContact({ ...contact, lastName: e.target.value })} />
               </Row>
               <Row label="Designation">
@@ -564,6 +564,17 @@ const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Pr
               </Row>
               <Row label="Email">
                 <Input type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} />
+                {existingContactId && (
+                  <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-medium text-amber-700 dark:text-amber-400">Existing contact found.</div>
+                      <div className="text-muted-foreground">
+                        {existingContactName} ({contact.email}) — will be linked instead of creating a duplicate.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Row>
             </div>
           </SectionShell>
