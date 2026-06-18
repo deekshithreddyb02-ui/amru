@@ -130,11 +130,15 @@ const Row = ({ label, required, children }: { label: string; required?: boolean;
 
 
 const ConvertLeadDialog = ({ workspaceId, lead, open, onOpenChange, onDone }: Props) => {
-  // Section toggles (Vtiger-style)
+  // Section toggles (Vtiger-style: all three default ON)
   const [doOrg, setDoOrg] = useState(true);
   const [doContact, setDoContact] = useState(true);
   const [doService, setDoService] = useState(false);
-  const [doOpp, setDoOpp] = useState(false);
+  const [doOpp, setDoOpp] = useState(true);
+
+  // Existing contact match (by email) — Vtiger-style merge prompt
+  const [existingContactId, setExistingContactId] = useState<string | null>(null);
+  const [existingContactName, setExistingContactName] = useState<string | null>(null);
 
   // Organization
   const [org, setOrg] = useState({
