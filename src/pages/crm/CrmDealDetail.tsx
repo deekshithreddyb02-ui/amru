@@ -466,7 +466,7 @@ function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: s
     if (!body || posting) return;
     setPosting(true);
     const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("crm_activities").insert({
+    const { data: inserted, error } = await supabase.from("crm_activities").insert({
       workspace_id: workspaceId,
       deal_id: dealId,
       activity_type: "note",
@@ -474,7 +474,7 @@ function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: s
       description: body,
       status: "completed",
       owner_id: u?.user?.id ?? null,
-    });
+    }).select("id,description,created_at,owner_id").single();
     setPosting(false);
     if (error) {
       const { toast } = await import("@/hooks/use-toast");
@@ -482,8 +482,10 @@ function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: s
       return;
     }
     setText("");
+    if (inserted) setItems((prev) => [inserted, ...prev]);
     load();
   };
+
 
   return (
     <div className="bg-card border rounded">
