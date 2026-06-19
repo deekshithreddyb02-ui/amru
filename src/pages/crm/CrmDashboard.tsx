@@ -69,15 +69,21 @@ const CrmDashboard = () => {
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Welcome to {workspace.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p>Phase 1 foundation is live. New website enquiries from this region now mirror here automatically.</p>
-          <p>Use the sidebar to view <strong>Leads</strong>. Deals, Reports and AI features arrive in Phase 2+.</p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Welcome to {workspace.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground space-y-2">
+              <p>Phase 1 foundation is live. New website enquiries from this region now mirror here automatically.</p>
+              <p>Use the sidebar to view <strong>Leads</strong>. Deals, Reports and AI features arrive in Phase 2+.</p>
+            </CardContent>
+          </Card>
+        </div>
+        <DashboardHistory workspaceId={workspace.id} />
+      </div>
+
     </div>
   );
 };
