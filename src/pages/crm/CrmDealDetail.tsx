@@ -267,7 +267,10 @@ export default function CrmDealDetail() {
             onReload={reload}
             fieldLabels={fieldLabels}
             sectionLabels={sectionLabels}
+            dealId={deal.id}
+            workspaceId={workspace.id}
           />
+
         )}
 
         {tab === "updates" && (
@@ -330,7 +333,7 @@ function Section({
 }
 
 function SummaryView({
-  keyFields, activities, contactName, canEditValues, onReload, fieldLabels, sectionLabels,
+  keyFields, activities, contactName, canEditValues, onReload, fieldLabels, sectionLabels, dealId, workspaceId,
 }: {
   keyFields: [string, ReactNode, EditableValueConfig?][];
   activities: any[];
@@ -339,7 +342,10 @@ function SummaryView({
   onReload: () => void;
   fieldLabels: ReturnType<typeof useCrmLabels>;
   sectionLabels: ReturnType<typeof useCrmLabels>;
+  dealId: string;
+  workspaceId: string;
 }) {
+
   const Panel = ({ title, sectionKey, actions, children }: { title: string; sectionKey: string; actions?: ReactNode; children: ReactNode }) => (
     <div className="bg-white border rounded">
       <div className="flex items-center justify-between px-3 py-2 border-b">
@@ -405,23 +411,8 @@ function SummaryView({
           )}
         </Panel>
 
-        <Panel title="Comments" sectionKey="summary_comments">
-          <div className="p-3 space-y-2">
-            <textarea
-              placeholder="Post your comment here"
-              className="w-full text-[12.5px] border rounded p-2 min-h-[70px] focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <div className="flex items-center justify-between">
-              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Paperclip className="h-3 w-3" />Attach Files</Button>
-              <Button size="sm" className="h-7 text-[12px] bg-green-600 hover:bg-green-700">Post</Button>
-            </div>
-          </div>
-          <div className="px-3 py-2 border-t flex items-center justify-between">
-            <div className="text-[13px] font-semibold text-foreground">Recent Comments</div>
-            <div className="text-[11.5px] text-muted-foreground">Roll up</div>
-          </div>
-          <div className="p-4 text-center text-[12px] text-muted-foreground">No comments</div>
-        </Panel>
+        <CommentsPanel dealId={dealId} workspaceId={workspaceId} />
+
       </div>
 
       <div className="lg:col-span-3 space-y-4">
@@ -447,4 +438,98 @@ function SummaryView({
     </div>
   );
 }
+
+function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: string }) {
+  const [text, setText] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("crm_activities")
+      .select("id,description,created_at,owner_id")
+      .eq("deal_id", dealId)
+      .eq("activity_type", "note")
+      .eq("subject", "Comment")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setItems(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [dealId]);
+
+  const post = async () => {
+    const body = text.trim();
+    if (!body || posting) return;
+    setPosting(true);
+    const { data: u } = await supabase.auth.getUser();
+    const { error } = await supabase.from("crm_activities").insert({
+      workspace_id: workspaceId,
+      deal_id: dealId,
+      activity_type: "note",
+      subject: "Comment",
+      description: body,
+      status: "completed",
+      owner_id: u?.user?.id ?? null,
+    });
+    setPosting(false);
+    if (error) {
+      const { toast } = await import("@/hooks/use-toast");
+      toast({ title: "Could not post comment", description: error.message, variant: "destructive" });
+      return;
+    }
+    setText("");
+    load();
+  };
+
+  return (
+    <div className="bg-card border rounded">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <div className="flex items-center gap-1.5 text-[13px] font-semibold text-primary">
+          <ChevronDown className="h-3.5 w-3.5" /> Comments
+        </div>
+      </div>
+      <div className="p-3 space-y-2">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Post your comment here"
+          className="w-full text-[12.5px] border rounded p-2 min-h-[70px] focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <div className="flex items-center justify-between">
+          <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1" disabled>
+            <Paperclip className="h-3 w-3" />Attach Files
+          </Button>
+          <Button
+            size="sm"
+            className="h-7 text-[12px] bg-green-600 hover:bg-green-700"
+            onClick={post}
+            disabled={posting || !text.trim()}
+          >
+            {posting ? "Posting…" : "Post"}
+          </Button>
+        </div>
+      </div>
+      <div className="px-3 py-2 border-t text-[13px] font-semibold text-foreground">Recent Comments</div>
+      {loading ? (
+        <div className="p-4 text-center"><Loader2 className="h-4 w-4 animate-spin inline text-primary" /></div>
+      ) : items.length === 0 ? (
+        <div className="p-4 text-center text-[12px] text-muted-foreground">No comments</div>
+      ) : (
+        <ul className="divide-y">
+          {items.map((c) => (
+            <li key={c.id} className="px-3 py-2 text-[12.5px]">
+              <div className="whitespace-pre-wrap">{c.description}</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">{fmtDateTime(c.created_at)}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 
