@@ -267,7 +267,10 @@ export default function CrmDealDetail() {
             onReload={reload}
             fieldLabels={fieldLabels}
             sectionLabels={sectionLabels}
+            dealId={deal.id}
+            workspaceId={workspace.id}
           />
+
         )}
 
         {tab === "updates" && (
