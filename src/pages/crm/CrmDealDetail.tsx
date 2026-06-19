@@ -405,23 +405,8 @@ function SummaryView({
           )}
         </Panel>
 
-        <Panel title="Comments" sectionKey="summary_comments">
-          <div className="p-3 space-y-2">
-            <textarea
-              placeholder="Post your comment here"
-              className="w-full text-[12.5px] border rounded p-2 min-h-[70px] focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <div className="flex items-center justify-between">
-              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Paperclip className="h-3 w-3" />Attach Files</Button>
-              <Button size="sm" className="h-7 text-[12px] bg-green-600 hover:bg-green-700">Post</Button>
-            </div>
-          </div>
-          <div className="px-3 py-2 border-t flex items-center justify-between">
-            <div className="text-[13px] font-semibold text-foreground">Recent Comments</div>
-            <div className="text-[11.5px] text-muted-foreground">Roll up</div>
-          </div>
-          <div className="p-4 text-center text-[12px] text-muted-foreground">No comments</div>
-        </Panel>
+        <CommentsPanel dealId={deal.id} workspaceId={workspace.id} />
+
       </div>
 
       <div className="lg:col-span-3 space-y-4">
