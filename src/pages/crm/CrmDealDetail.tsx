@@ -411,7 +411,7 @@ function SummaryView({
           )}
         </Panel>
 
-        <CommentsPanel dealId={deal.id} workspaceId={workspace.id} />
+        <CommentsPanel dealId={dealId} workspaceId={workspaceId} />
 
       </div>
 
