@@ -333,7 +333,7 @@ function Section({
 }
 
 function SummaryView({
-  keyFields, activities, contactName, canEditValues, onReload, fieldLabels, sectionLabels,
+  keyFields, activities, contactName, canEditValues, onReload, fieldLabels, sectionLabels, dealId, workspaceId,
 }: {
   keyFields: [string, ReactNode, EditableValueConfig?][];
   activities: any[];
@@ -342,7 +342,10 @@ function SummaryView({
   onReload: () => void;
   fieldLabels: ReturnType<typeof useCrmLabels>;
   sectionLabels: ReturnType<typeof useCrmLabels>;
+  dealId: string;
+  workspaceId: string;
 }) {
+
   const Panel = ({ title, sectionKey, actions, children }: { title: string; sectionKey: string; actions?: ReactNode; children: ReactNode }) => (
     <div className="bg-white border rounded">
       <div className="flex items-center justify-between px-3 py-2 border-b">
