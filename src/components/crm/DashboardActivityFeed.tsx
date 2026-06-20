@@ -72,19 +72,26 @@ function timeAgo(iso: string) {
 
 function describeAudit(r: AuditRow) {
   const ent = ENTITY_LABEL[r.entity_type] || r.entity_type.replace(/^crm_/, "");
-  const label = r.entity_label ? <strong className="text-foreground">{r.entity_label}</strong> : ent;
-  if (r.action === "created") return <>added {label}</>;
-  if (r.action === "deleted") return <>deleted {label}</>;
+  const name = r.entity_label ? <strong className="text-foreground">{r.entity_label}</strong> : null;
+  const target = name ? (
+    <>
+      {ent} {name}
+    </>
+  ) : (
+    <>{ent}</>
+  );
+  if (r.action === "created") return <>added {target}</>;
+  if (r.action === "deleted") return <>deleted {target}</>;
   const changedKeys =
     r.changes && typeof r.changes === "object" ? Object.keys(r.changes).slice(0, 4) : [];
   if (changedKeys.length) {
     return (
       <>
-        edited {label} <span className="text-muted-foreground">— {changedKeys.join(", ")}</span>
+        edited {target} <span className="text-muted-foreground">— {changedKeys.join(", ")}</span>
       </>
     );
   }
-  return <>edited {label}</>;
+  return <>edited {target}</>;
 }
 
 export default function DashboardActivityFeed({ workspaceId }: Props) {
