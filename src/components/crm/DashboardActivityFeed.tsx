@@ -233,8 +233,17 @@ export default function DashboardActivityFeed({ workspaceId }: Props) {
         ) : (
           <ul className="divide-y max-h-[520px] overflow-y-auto">
             {filtered.map((it) => {
-              const actorName =
-                (it.actorId && nameMap[it.actorId]) || it.actorFallback || "Someone";
+              const fromWebsite =
+                !it.actorId &&
+                it.kind === "audit" &&
+                (it.row.entity_type === "crm_leads" ||
+                  it.row.entity_type === "crm_support_tickets" ||
+                  it.row.entity_type === "crm_hydrogeo_enquiries") &&
+                (it.row.action === "created" ||
+                  !!(it.row.changes && typeof it.row.changes === "object" && it.row.changes.source_enquiry_id));
+              const actorName = fromWebsite
+                ? "Website"
+                : (it.actorId && nameMap[it.actorId]) || it.actorFallback || "Someone";
               if (it.kind === "audit") {
                 const Icon = iconForAudit(it.row.entity_type, it.row.action);
                 return (
