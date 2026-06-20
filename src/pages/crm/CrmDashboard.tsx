@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, CheckCircle2, Clock } from "lucide-react";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import DashboardHistory from "@/components/crm/DashboardHistory";
+import DashboardComments from "@/components/crm/DashboardComments";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
@@ -83,6 +84,8 @@ const CrmDashboard = () => {
         </div>
         <DashboardHistory workspaceId={workspace.id} />
       </div>
+
+      <DashboardComments workspaceId={workspace.id} />
 
     </div>
   );
