@@ -81,10 +81,10 @@ const CrmDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        <DashboardHistory workspaceId={workspace.id} />
+        <DashboardActivityFeed workspaceId={workspace.id} />
       </div>
 
-      <DashboardComments workspaceId={workspace.id} />
+
 
     </div>
   );
