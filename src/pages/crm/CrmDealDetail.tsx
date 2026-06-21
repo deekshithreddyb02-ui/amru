@@ -12,23 +12,17 @@ import { useCrmLabels } from "@/hooks/useCrmLabels";
 import EditableLabel from "@/components/crm/EditableLabel";
 import EditableValue, { type EditableValueConfig } from "@/components/crm/EditableValue";
 import { useCrmPermissions } from "@/hooks/useCrmPermissions";
+import StageSelect from "@/components/crm/StageSelect";
+import StageBadge from "@/components/crm/StageBadge";
+import DealStageHistory from "@/components/crm/DealStageHistory";
 
 
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
-const STAGE_LABEL: Record<string, string> = {
-  new: "Prospecting", qualified: "Qualified", proposal: "Proposal",
-  negotiation: "Negotiation", won: "Won", lost: "Lost",
-};
-const STAGE_TONE: Record<string, string> = {
-  new: "bg-amber-400 text-amber-950",
-  qualified: "bg-blue-400 text-blue-950",
-  proposal: "bg-indigo-400 text-indigo-950",
-  negotiation: "bg-yellow-400 text-yellow-950",
-  won: "bg-green-500 text-white",
-  lost: "bg-red-500 text-white",
-};
+// Sales stage labels/colors come from the workspace stage config (see useStageConfig).
+// StageBadge / StageSelect handle all rendering.
+
 
 const fmtMoney = (n: any) =>
   n == null || n === "" ? "—" : `₹ ${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -39,6 +33,7 @@ const fmtDateTime = (d: any) =>
 const TABS = [
   { id: "summary", label: "Summary", icon: FileText },
   { id: "details", label: "Details", icon: FileText },
+  { id: "history", label: "Stage History", icon: ActivityIcon },
   { id: "updates", label: "Updates", icon: ActivityIcon },
   { id: "events", label: "Events", icon: Calendar },
   { id: "contacts", label: "Contacts", icon: User },
@@ -97,6 +92,21 @@ export default function CrmDealDetail() {
     })();
   }, [id, workspace?.id, reloadKey]);
 
+  // Realtime: keep this detail page in sync if stage/amount/etc change anywhere else.
+  useEffect(() => {
+    if (!id) return;
+    const ch = supabase
+      .channel(`deal-detail-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "crm_deals", filter: `id=eq.${id}` },
+        (payload) => setDeal((d: any) => ({ ...(d || {}), ...(payload.new as any) }))
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [id]);
+
+
   if (loading) return <div className="p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
   if (!deal) return <div className="p-12 text-center text-sm text-muted-foreground">Opportunity not found.</div>;
 
@@ -118,7 +128,7 @@ export default function CrmDealDetail() {
   const O = (column: string, type: EditableValueConfig["type"] = "text"): EditableValueConfig | undefined =>
     org ? { table: "crm_organizations", id: org.id, column, type, current: org[column] } : undefined;
 
-  const stageOptions = Object.entries(STAGE_LABEL).map(([value, label]) => ({ value, label }));
+  const stageSelectNode = <StageSelect workspaceId={workspace.id} dealId={deal.id} value={stageKey} />;
 
   const oppDetails: [string, ReactNode, EditableValueConfig?][] = [
     ["Opportunity Name", deal.title, D("title")],
@@ -131,7 +141,7 @@ export default function CrmDealDetail() {
     ["Lead Source", lead?.lead_source || "", L("lead_source")],
     ["Next Step", ""],
     ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
-    ["Sales Stage", <span className={`inline-block px-1.5 py-0.5 text-[11px] font-semibold rounded ${STAGE_TONE[stageKey] || "bg-muted"}`}>{STAGE_LABEL[stageKey] || stageKey}</span>, D("stage", "select", stageOptions)],
+    ["Sales Stage", stageSelectNode],
     ["Campaign Source", ""],
     ["Probability", deal.probability != null ? Number(deal.probability).toFixed(2) : "", D("probability", "number")],
     ["Modified Time", fmtDateTime(deal.updated_at)],
@@ -194,9 +204,7 @@ export default function CrmDealDetail() {
           <div className="text-[12px] text-muted-foreground">{org?.name || ""}</div>
           <div className="text-[12px]">{fmtMoney(deal.amount)}</div>
           <div className="flex items-center gap-1.5 mt-1">
-            <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${STAGE_TONE[stageKey] || "bg-muted"}`}>
-              {STAGE_LABEL[stageKey] || stageKey}
-            </span>
+            <StageSelect workspaceId={workspace.id} dealId={deal.id} value={stageKey} />
             <button className="text-[11px] bg-muted-foreground/80 text-white px-1.5 py-0.5 rounded inline-flex items-center gap-1">
               <Plus className="h-2.5 w-2.5" />Add Tag
             </button>
@@ -291,7 +299,10 @@ export default function CrmDealDetail() {
             )}
           </div>
         )}
-        {!["details", "summary", "updates"].includes(tab) && (
+        {tab === "history" && (
+          <DealStageHistory dealId={deal.id} workspaceId={workspace.id} />
+        )}
+        {!["details", "summary", "updates", "history"].includes(tab) && (
           <div className="bg-white border rounded p-10 text-center text-[12px] text-muted-foreground">Nothing here yet.</div>
         )}
       </div>

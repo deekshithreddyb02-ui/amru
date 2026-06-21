@@ -3,10 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight, Loader2, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
+import StageSelect from "@/components/crm/StageSelect";
+import StageBadge from "@/components/crm/StageBadge";
 
 type Props = {
   dealId: string | null;
   workspaceSlug: string;
+  workspaceId?: string;
   onClose: () => void;
   onPrev?: () => void;
   onNext?: () => void;
@@ -23,18 +26,6 @@ type Activity = {
   created_at: string;
 };
 
-const STAGE_TONE: Record<string, string> = {
-  new: "bg-amber-500",
-  qualified: "bg-blue-500",
-  proposal: "bg-indigo-500",
-  negotiation: "bg-yellow-500",
-  won: "bg-green-600",
-  lost: "bg-red-600",
-};
-const STAGE_LABEL: Record<string, string> = {
-  new: "Prospecting", qualified: "Qualified", proposal: "Proposal",
-  negotiation: "Negotiation", won: "Won", lost: "Lost",
-};
 
 const timeAgo = (iso: string) => {
   const diff = Date.now() - new Date(iso).getTime();
@@ -51,7 +42,7 @@ const fmtMoney = (n: any) =>
   n == null || n === "" ? "" : `₹ ${Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
 export default function DealSidePanel({
-  dealId, workspaceSlug, onClose, onPrev, onNext, hasPrev, hasNext,
+  dealId, workspaceSlug, workspaceId, onClose, onPrev, onNext, hasPrev, hasNext,
 }: Props) {
   const [deal, setDeal] = useState<any | null>(null);
   const [lead, setLead] = useState<any | null>(null);
@@ -60,6 +51,8 @@ export default function DealSidePanel({
   const [ownerName, setOwnerName] = useState<string>("");
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
+  const wsId = workspaceId || deal?.workspace_id;
+
 
   useEffect(() => {
     if (!dealId) return;
@@ -101,10 +94,25 @@ export default function DealSidePanel({
     return () => { cancelled = true; };
   }, [dealId]);
 
+  // Live update if the deal row changes elsewhere (Kanban drag, list inline edit, detail page).
+  useEffect(() => {
+    if (!dealId) return;
+    const ch = supabase
+      .channel(`deal-side-${dealId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "crm_deals", filter: `id=eq.${dealId}` },
+        (payload) => setDeal((d: any) => ({ ...(d || {}), ...(payload.new as any) }))
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [dealId]);
+
+
   if (!dealId) return null;
 
   const contactName = contact?.full_name || lead?.full_name || "";
-  const stageKey = deal?.stage || "new";
+  const stageKey = deal?.stage || "prospecting";
   const totalAreaLines = lead
     ? `Gunta: ${lead.gunta || ""}\nAcres: ${lead.acres || ""}\nSq.Yrds: ${lead.sq_yards || ""}\nSq.Ft: ${lead.sq_ft || ""}`
     : "";
@@ -125,7 +133,7 @@ export default function DealSidePanel({
     ["City", lead?.city || org?.city],
     ["State", lead?.state || org?.state],
     ["Probability", deal.probability != null ? `${deal.probability}%` : ""],
-    ["Stage", STAGE_LABEL[stageKey] || stageKey],
+    ["Sales Stage", deal?.id && wsId ? <StageSelect workspaceId={wsId} dealId={deal.id} value={stageKey} /> : <StageBadge workspaceId={wsId} stageKey={stageKey} />],
     ["Description", deal.description || lead?.notes],
   ] : [];
 
@@ -141,9 +149,13 @@ export default function DealSidePanel({
           {org?.name && <div className="text-[12px] text-muted-foreground truncate">{org.name}</div>}
           <div className="text-[12px] mt-0.5">{fmtMoney(deal?.amount)}</div>
           {deal?.stage && (
-            <span className={`inline-block mt-1 text-white text-[11px] font-semibold px-1.5 py-0.5 rounded ${STAGE_TONE[stageKey] || "bg-muted-foreground"}`}>
-              {STAGE_LABEL[stageKey] || stageKey}
-            </span>
+            <div className="mt-1">
+              {deal?.id && wsId ? (
+                <StageSelect workspaceId={wsId} dealId={deal.id} value={stageKey} />
+              ) : (
+                <StageBadge workspaceId={wsId} stageKey={stageKey} />
+              )}
+            </div>
           )}
         </div>
         <div className="flex flex-col items-end gap-1">

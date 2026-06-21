@@ -25,7 +25,9 @@ import CrmListView, { type Column, type SavedView } from "@/components/crm/vtige
 import { exportCsv } from "@/lib/csv";
 import DealSidePanel from "@/components/crm/DealSidePanel";
 import { useCrmLabels } from "@/hooks/useCrmLabels";
-import EditableLabel, { COLOR_TONE_MAP } from "@/components/crm/EditableLabel";
+import EditableLabel from "@/components/crm/EditableLabel";
+import { useStageConfig, STAGE_COLOR_CLASSES, STAGE_BORDER_CLASSES } from "@/hooks/useStageConfig";
+import StageSelect from "@/components/crm/StageSelect";
 
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
@@ -48,22 +50,11 @@ type Deal = {
 
 type Ref = { id: string; name: string };
 
-const STAGES: { key: string; label: string; tint: string; tone: string }[] = [
-  { key: "new",         label: "Prospecting", tint: "border-t-primary",                  tone: "bg-amber-100 text-amber-800" },
-  { key: "qualified",   label: "Qualified",   tint: "border-t-[hsl(var(--teal))]",        tone: "bg-blue-100 text-blue-800" },
-  { key: "proposal",    label: "Proposal",    tint: "border-t-secondary",                 tone: "bg-indigo-100 text-indigo-800" },
-  { key: "negotiation", label: "Negotiation", tint: "border-t-[hsl(var(--gold))]",        tone: "bg-yellow-100 text-yellow-800" },
-  { key: "won",         label: "Won",         tint: "border-t-green-500",                 tone: "bg-green-100 text-green-800" },
-  { key: "lost",        label: "Lost",        tint: "border-t-destructive",               tone: "bg-red-100 text-red-700" },
-];
-
-const stageMeta = (k: string) => STAGES.find((s) => s.key === k) ?? { label: k, tone: "bg-muted text-foreground" };
-
 const fmtINR = (n: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
 
 const emptyForm = {
-  title: "", amount: "", stage: "new", probability: "10",
+  title: "", amount: "", stage: "prospecting", probability: "10",
   expected_close: "", organization_id: "", contact_id: "", description: "",
 };
 
@@ -154,18 +145,7 @@ const CrmDeals = () => {
 
   const colLabels = useCrmLabels(workspace.id, "deals_columns");
   const sumLabels = useCrmLabels(workspace.id, "deals_summary");
-  const stageLabels = useCrmLabels(workspace.id, "deals_stages");
-
-  const stageInfo = (k: string) => {
-    const base = STAGES.find((s) => s.key === k);
-    const ov = stageLabels.labels[k];
-    const colorKey = ov?.extra?.color as string | undefined;
-    return {
-      label: ov?.label || base?.label || k,
-      tone: colorKey && COLOR_TONE_MAP[colorKey] ? COLOR_TONE_MAP[colorKey] : (base?.tone || "bg-muted text-foreground"),
-      tint: base?.tint || "border-t-primary",
-    };
-  };
+  const { stages, get: getStage } = useStageConfig(workspace.id);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -205,12 +185,26 @@ const CrmDeals = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace.id]);
 
+  // Realtime: any change to crm_deals in this workspace re-fetches the board.
+  useEffect(() => {
+    const ch = supabase
+      .channel(`deals-board-${workspace.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "crm_deals", filter: `workspace_id=eq.${workspace.id}` },
+        () => load()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace.id]);
+
   const dealsByStage = useMemo(() => {
     const m: Record<string, Deal[]> = {};
-    STAGES.forEach((s) => (m[s.key] = []));
+    stages.forEach((s) => (m[s.key] = []));
     deals.forEach((d) => { (m[d.stage] ||= []).push(d); });
     return m;
-  }, [deals]);
+  }, [deals, stages]);
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
 
@@ -267,14 +261,17 @@ const CrmDeals = () => {
   const weightedForecast = openPipeline.reduce(
     (s, d) => s + (Number(d.amount || 0) * Number(d.probability || 0)) / 100, 0,
   );
-  const wonTotal = deals.filter((d) => d.stage === "won").reduce((s, d) => s + Number(d.amount || 0), 0);
+  const wonTotal = deals
+    .filter((d) => getStage(d.stage).is_won)
+    .reduce((s, d) => s + Number(d.amount || 0), 0);
 
   const savedViews: SavedView[] = [
     { id: "all", label: "All Opportunities" },
-    { id: "open", label: "Open Pipeline", filter: (d: Deal) => d.stage !== "won" && d.stage !== "lost" },
-    { id: "prospecting", label: "Prospecting", filter: (d: Deal) => d.stage === "new" },
-    { id: "won", label: "Won", filter: (d: Deal) => d.stage === "won" },
-    { id: "lost", label: "Lost", filter: (d: Deal) => d.stage === "lost" },
+    { id: "open", label: "Open Pipeline", filter: (d: Deal) => {
+      const s = getStage(d.stage); return !s.is_won && !s.is_lost;
+    } },
+    { id: "won", label: "Won", filter: (d: Deal) => getStage(d.stage).is_won },
+    { id: "lost", label: "Lost", filter: (d: Deal) => getStage(d.stage).is_lost },
   ];
 
   const mkCol = (key: string, fallback: string, render: (d: Deal) => ReactNode, opts: Partial<Column<Deal>> = {}): Column<Deal> => ({
@@ -307,21 +304,17 @@ const CrmDeals = () => {
     mkCol("organization", "Organization Name", (d) => d.organization?.name
       ? <span className="text-primary">{d.organization.name}</span>
       : <span className="text-muted-foreground">—</span>),
-    mkCol("stage", "Sales Stage", (d) => {
-      const m = stageInfo(d.stage);
-      return (
-        <EditableLabel
-          labelKey={d.stage}
-          value={stageLabels.labels[d.stage]?.label}
-          fallback={STAGES.find((s) => s.key === d.stage)?.label || d.stage}
-          canEdit={stageLabels.canEdit}
-          onSave={stageLabels.setLabel}
-          extra={stageLabels.labels[d.stage]?.extra}
-          extraFields={["color"]}
-          render={(lbl) => <Badge variant="secondary" className={m.tone}>{lbl}</Badge>}
-        />
-      );
-    }),
+    mkCol("stage", "Sales Stage", (d) => (
+      <StageSelect
+        workspaceId={workspace.id}
+        dealId={d.id}
+        value={d.stage}
+        onChanged={(next) => {
+          // optimistic local update
+          setDeals((prev) => prev.map((x) => x.id === d.id ? { ...x, stage: next } : x));
+        }}
+      />
+    )),
     mkCol("expected_close", "Expected Close Date",
       (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—"),
     mkCol("amount", "Amount",
@@ -444,27 +437,16 @@ const CrmDeals = () => {
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
               <div className="overflow-x-auto pb-4">
                 <div className="flex gap-3 min-w-max">
-                  {STAGES.map((s) => {
-                    const info = stageInfo(s.key);
+                  {stages.map((s) => {
+                    const tint = STAGE_BORDER_CLASSES[s.color] || "border-t-primary";
                     return (
                       <Column
                         key={s.key}
                         stage={s.key}
-                        label={info.label}
-                        tint={info.tint}
+                        label={s.label}
+                        tint={tint}
                         deals={dealsByStage[s.key] || []}
                         onOpen={setSelectedDealId}
-                        headerNode={
-                          <EditableLabel
-                            labelKey={s.key}
-                            value={stageLabels.labels[s.key]?.label}
-                            fallback={s.label}
-                            canEdit={stageLabels.canEdit}
-                            onSave={stageLabels.setLabel}
-                            extra={stageLabels.labels[s.key]?.extra}
-                            extraFields={["color"]}
-                          />
-                        }
                       />
                     );
                   })}
@@ -484,6 +466,7 @@ const CrmDeals = () => {
             <DealSidePanel
               dealId={selectedDealId}
               workspaceSlug={workspace.slug}
+              workspaceId={workspace.id}
               onClose={() => setSelectedDealId(null)}
               onPrev={() => {
                 const i = deals.findIndex((d) => d.id === selectedDealId);
@@ -518,7 +501,7 @@ const CrmDeals = () => {
                 <Select value={form.stage} onValueChange={(v) => setForm({ ...form, stage: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {STAGES.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+                    {stages.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
