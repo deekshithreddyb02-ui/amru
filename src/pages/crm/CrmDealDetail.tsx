@@ -12,6 +12,9 @@ import { useCrmLabels } from "@/hooks/useCrmLabels";
 import EditableLabel from "@/components/crm/EditableLabel";
 import EditableValue, { type EditableValueConfig } from "@/components/crm/EditableValue";
 import { useCrmPermissions } from "@/hooks/useCrmPermissions";
+import StageSelect from "@/components/crm/StageSelect";
+import StageBadge from "@/components/crm/StageBadge";
+import DealStageHistory from "@/components/crm/DealStageHistory";
 
 
 
@@ -39,6 +42,7 @@ const fmtDateTime = (d: any) =>
 const TABS = [
   { id: "summary", label: "Summary", icon: FileText },
   { id: "details", label: "Details", icon: FileText },
+  { id: "history", label: "Stage History", icon: ActivityIcon },
   { id: "updates", label: "Updates", icon: ActivityIcon },
   { id: "events", label: "Events", icon: Calendar },
   { id: "contacts", label: "Contacts", icon: User },
