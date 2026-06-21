@@ -137,7 +137,7 @@ export default function CrmDealDetail() {
   const O = (column: string, type: EditableValueConfig["type"] = "text"): EditableValueConfig | undefined =>
     org ? { table: "crm_organizations", id: org.id, column, type, current: org[column] } : undefined;
 
-  const stageOptions = Object.entries(STAGE_LABEL).map(([value, label]) => ({ value, label }));
+  const stageSelectNode = <StageSelect workspaceId={workspace.id} dealId={deal.id} value={stageKey} />;
 
   const oppDetails: [string, ReactNode, EditableValueConfig?][] = [
     ["Opportunity Name", deal.title, D("title")],
@@ -150,7 +150,7 @@ export default function CrmDealDetail() {
     ["Lead Source", lead?.lead_source || "", L("lead_source")],
     ["Next Step", ""],
     ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
-    ["Sales Stage", <span className={`inline-block px-1.5 py-0.5 text-[11px] font-semibold rounded ${STAGE_TONE[stageKey] || "bg-muted"}`}>{STAGE_LABEL[stageKey] || stageKey}</span>, D("stage", "select", stageOptions)],
+    ["Sales Stage", stageSelectNode],
     ["Campaign Source", ""],
     ["Probability", deal.probability != null ? Number(deal.probability).toFixed(2) : "", D("probability", "number")],
     ["Modified Time", fmtDateTime(deal.updated_at)],
@@ -213,9 +213,7 @@ export default function CrmDealDetail() {
           <div className="text-[12px] text-muted-foreground">{org?.name || ""}</div>
           <div className="text-[12px]">{fmtMoney(deal.amount)}</div>
           <div className="flex items-center gap-1.5 mt-1">
-            <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${STAGE_TONE[stageKey] || "bg-muted"}`}>
-              {STAGE_LABEL[stageKey] || stageKey}
-            </span>
+            <StageSelect workspaceId={workspace.id} dealId={deal.id} value={stageKey} />
             <button className="text-[11px] bg-muted-foreground/80 text-white px-1.5 py-0.5 rounded inline-flex items-center gap-1">
               <Plus className="h-2.5 w-2.5" />Add Tag
             </button>
