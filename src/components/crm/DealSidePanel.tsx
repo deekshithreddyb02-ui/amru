@@ -3,10 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight, Loader2, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
+import StageSelect from "@/components/crm/StageSelect";
+import StageBadge from "@/components/crm/StageBadge";
 
 type Props = {
   dealId: string | null;
   workspaceSlug: string;
+  workspaceId?: string;
   onClose: () => void;
   onPrev?: () => void;
   onNext?: () => void;
@@ -23,18 +26,6 @@ type Activity = {
   created_at: string;
 };
 
-const STAGE_TONE: Record<string, string> = {
-  new: "bg-amber-500",
-  qualified: "bg-blue-500",
-  proposal: "bg-indigo-500",
-  negotiation: "bg-yellow-500",
-  won: "bg-green-600",
-  lost: "bg-red-600",
-};
-const STAGE_LABEL: Record<string, string> = {
-  new: "Prospecting", qualified: "Qualified", proposal: "Proposal",
-  negotiation: "Negotiation", won: "Won", lost: "Lost",
-};
 
 const timeAgo = (iso: string) => {
   const diff = Date.now() - new Date(iso).getTime();
