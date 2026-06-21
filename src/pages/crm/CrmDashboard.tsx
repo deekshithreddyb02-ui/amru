@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, CheckCircle2, Clock } from "lucide-react";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import DashboardActivityFeed from "@/components/crm/DashboardActivityFeed";
+import DashboardPipelineByStage from "@/components/crm/DashboardPipelineByStage";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 

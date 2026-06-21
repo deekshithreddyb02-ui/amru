@@ -20,18 +20,9 @@ import DealStageHistory from "@/components/crm/DealStageHistory";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
 
-const STAGE_LABEL: Record<string, string> = {
-  new: "Prospecting", qualified: "Qualified", proposal: "Proposal",
-  negotiation: "Negotiation", won: "Won", lost: "Lost",
-};
-const STAGE_TONE: Record<string, string> = {
-  new: "bg-amber-400 text-amber-950",
-  qualified: "bg-blue-400 text-blue-950",
-  proposal: "bg-indigo-400 text-indigo-950",
-  negotiation: "bg-yellow-400 text-yellow-950",
-  won: "bg-green-500 text-white",
-  lost: "bg-red-500 text-white",
-};
+// Sales stage labels/colors come from the workspace stage config (see useStageConfig).
+// StageBadge / StageSelect handle all rendering.
+
 
 const fmtMoney = (n: any) =>
   n == null || n === "" ? "—" : `₹ ${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
