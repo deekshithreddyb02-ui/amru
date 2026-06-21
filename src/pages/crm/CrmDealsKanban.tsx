@@ -185,12 +185,26 @@ const CrmDeals = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace.id]);
 
+  // Realtime: any change to crm_deals in this workspace re-fetches the board.
+  useEffect(() => {
+    const ch = supabase
+      .channel(`deals-board-${workspace.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "crm_deals", filter: `workspace_id=eq.${workspace.id}` },
+        () => load()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace.id]);
+
   const dealsByStage = useMemo(() => {
     const m: Record<string, Deal[]> = {};
-    STAGES.forEach((s) => (m[s.key] = []));
+    stages.forEach((s) => (m[s.key] = []));
     deals.forEach((d) => { (m[d.stage] ||= []).push(d); });
     return m;
-  }, [deals]);
+  }, [deals, stages]);
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
 
@@ -247,14 +261,17 @@ const CrmDeals = () => {
   const weightedForecast = openPipeline.reduce(
     (s, d) => s + (Number(d.amount || 0) * Number(d.probability || 0)) / 100, 0,
   );
-  const wonTotal = deals.filter((d) => d.stage === "won").reduce((s, d) => s + Number(d.amount || 0), 0);
+  const wonTotal = deals
+    .filter((d) => getStage(d.stage).is_won)
+    .reduce((s, d) => s + Number(d.amount || 0), 0);
 
   const savedViews: SavedView[] = [
     { id: "all", label: "All Opportunities" },
-    { id: "open", label: "Open Pipeline", filter: (d: Deal) => d.stage !== "won" && d.stage !== "lost" },
-    { id: "prospecting", label: "Prospecting", filter: (d: Deal) => d.stage === "new" },
-    { id: "won", label: "Won", filter: (d: Deal) => d.stage === "won" },
-    { id: "lost", label: "Lost", filter: (d: Deal) => d.stage === "lost" },
+    { id: "open", label: "Open Pipeline", filter: (d: Deal) => {
+      const s = getStage(d.stage); return !s.is_won && !s.is_lost;
+    } },
+    { id: "won", label: "Won", filter: (d: Deal) => getStage(d.stage).is_won },
+    { id: "lost", label: "Lost", filter: (d: Deal) => getStage(d.stage).is_lost },
   ];
 
   const mkCol = (key: string, fallback: string, render: (d: Deal) => ReactNode, opts: Partial<Column<Deal>> = {}): Column<Deal> => ({
