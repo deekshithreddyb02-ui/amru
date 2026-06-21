@@ -101,6 +101,21 @@ export default function CrmDealDetail() {
     })();
   }, [id, workspace?.id, reloadKey]);
 
+  // Realtime: keep this detail page in sync if stage/amount/etc change anywhere else.
+  useEffect(() => {
+    if (!id) return;
+    const ch = supabase
+      .channel(`deal-detail-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "crm_deals", filter: `id=eq.${id}` },
+        (payload) => setDeal((d: any) => ({ ...(d || {}), ...(payload.new as any) }))
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [id]);
+
+
   if (loading) return <div className="p-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
   if (!deal) return <div className="p-12 text-center text-sm text-muted-foreground">Opportunity not found.</div>;
 
