@@ -308,7 +308,10 @@ export default function CrmDealDetail() {
             )}
           </div>
         )}
-        {!["details", "summary", "updates"].includes(tab) && (
+        {tab === "history" && (
+          <DealStageHistory dealId={deal.id} workspaceId={workspace.id} />
+        )}
+        {!["details", "summary", "updates", "history"].includes(tab) && (
           <div className="bg-white border rounded p-10 text-center text-[12px] text-muted-foreground">Nothing here yet.</div>
         )}
       </div>
