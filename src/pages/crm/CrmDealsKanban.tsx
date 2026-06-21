@@ -25,7 +25,9 @@ import CrmListView, { type Column, type SavedView } from "@/components/crm/vtige
 import { exportCsv } from "@/lib/csv";
 import DealSidePanel from "@/components/crm/DealSidePanel";
 import { useCrmLabels } from "@/hooks/useCrmLabels";
-import EditableLabel, { COLOR_TONE_MAP } from "@/components/crm/EditableLabel";
+import EditableLabel from "@/components/crm/EditableLabel";
+import { useStageConfig, STAGE_COLOR_CLASSES, STAGE_BORDER_CLASSES } from "@/hooks/useStageConfig";
+import StageSelect from "@/components/crm/StageSelect";
 
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
@@ -48,22 +50,11 @@ type Deal = {
 
 type Ref = { id: string; name: string };
 
-const STAGES: { key: string; label: string; tint: string; tone: string }[] = [
-  { key: "new",         label: "Prospecting", tint: "border-t-primary",                  tone: "bg-amber-100 text-amber-800" },
-  { key: "qualified",   label: "Qualified",   tint: "border-t-[hsl(var(--teal))]",        tone: "bg-blue-100 text-blue-800" },
-  { key: "proposal",    label: "Proposal",    tint: "border-t-secondary",                 tone: "bg-indigo-100 text-indigo-800" },
-  { key: "negotiation", label: "Negotiation", tint: "border-t-[hsl(var(--gold))]",        tone: "bg-yellow-100 text-yellow-800" },
-  { key: "won",         label: "Won",         tint: "border-t-green-500",                 tone: "bg-green-100 text-green-800" },
-  { key: "lost",        label: "Lost",        tint: "border-t-destructive",               tone: "bg-red-100 text-red-700" },
-];
-
-const stageMeta = (k: string) => STAGES.find((s) => s.key === k) ?? { label: k, tone: "bg-muted text-foreground" };
-
 const fmtINR = (n: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
 
 const emptyForm = {
-  title: "", amount: "", stage: "new", probability: "10",
+  title: "", amount: "", stage: "prospecting", probability: "10",
   expected_close: "", organization_id: "", contact_id: "", description: "",
 };
 
@@ -154,18 +145,7 @@ const CrmDeals = () => {
 
   const colLabels = useCrmLabels(workspace.id, "deals_columns");
   const sumLabels = useCrmLabels(workspace.id, "deals_summary");
-  const stageLabels = useCrmLabels(workspace.id, "deals_stages");
-
-  const stageInfo = (k: string) => {
-    const base = STAGES.find((s) => s.key === k);
-    const ov = stageLabels.labels[k];
-    const colorKey = ov?.extra?.color as string | undefined;
-    return {
-      label: ov?.label || base?.label || k,
-      tone: colorKey && COLOR_TONE_MAP[colorKey] ? COLOR_TONE_MAP[colorKey] : (base?.tone || "bg-muted text-foreground"),
-      tint: base?.tint || "border-t-primary",
-    };
-  };
+  const { stages, get: getStage } = useStageConfig(workspace.id);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
