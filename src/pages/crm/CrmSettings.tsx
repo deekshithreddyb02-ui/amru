@@ -53,6 +53,7 @@ const GROUPS: Group[] = [
   {
     key: "marketing-sales", label: "MARKETING & SALES", icon: Megaphone,
     items: [
+      { label: "Opportunity Stage Management", to: "settings/opportunity-stages", description: "Master list of sales stages used everywhere (List, Detail, Kanban, Dashboard, Reports)." },
       { label: "Email Templates", to: "email-templates", description: "Reusable email templates." },
       { label: "Campaigns", to: "campaigns", description: "Marketing campaign settings." },
       { label: "Lead Assignment", to: "territories", description: "Routing rules for new leads." },

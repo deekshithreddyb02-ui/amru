@@ -77,6 +77,7 @@ const CrmDataQuality = lazy(() => import("./pages/crm/CrmDataQuality"));
 const CrmWebsiteSettings = lazy(() => import("./pages/crm/CrmWebsiteSettings"));
 const CrmSettings = lazy(() => import("./pages/crm/CrmSettings"));
 const CrmLeadConversionMapping = lazy(() => import("./pages/crm/CrmLeadConversionMapping"));
+const CrmStageManagement = lazy(() => import("./pages/crm/CrmStageManagement"));
 const QuotationSign = lazy(() => import("./pages/QuotationSign"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
 
@@ -182,6 +183,7 @@ const App = () => {
                 <Route path="admin-center" element={<CrmAdminCenter />} />
                 <Route path="crm-settings" element={<CrmSettings />} />
                 <Route path="settings/lead-conversion-mapping" element={<CrmLeadConversionMapping />} />
+                <Route path="settings/opportunity-stages" element={<CrmStageManagement />} />
               </Route>
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
