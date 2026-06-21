@@ -304,21 +304,17 @@ const CrmDeals = () => {
     mkCol("organization", "Organization Name", (d) => d.organization?.name
       ? <span className="text-primary">{d.organization.name}</span>
       : <span className="text-muted-foreground">—</span>),
-    mkCol("stage", "Sales Stage", (d) => {
-      const m = stageInfo(d.stage);
-      return (
-        <EditableLabel
-          labelKey={d.stage}
-          value={stageLabels.labels[d.stage]?.label}
-          fallback={STAGES.find((s) => s.key === d.stage)?.label || d.stage}
-          canEdit={stageLabels.canEdit}
-          onSave={stageLabels.setLabel}
-          extra={stageLabels.labels[d.stage]?.extra}
-          extraFields={["color"]}
-          render={(lbl) => <Badge variant="secondary" className={m.tone}>{lbl}</Badge>}
-        />
-      );
-    }),
+    mkCol("stage", "Sales Stage", (d) => (
+      <StageSelect
+        workspaceId={workspace.id}
+        dealId={d.id}
+        value={d.stage}
+        onChanged={(next) => {
+          // optimistic local update
+          setDeals((prev) => prev.map((x) => x.id === d.id ? { ...x, stage: next } : x));
+        }}
+      />
+    )),
     mkCol("expected_close", "Expected Close Date",
       (d) => d.expected_close ? new Date(d.expected_close).toLocaleDateString("en-IN") : "—"),
     mkCol("amount", "Amount",
