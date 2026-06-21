@@ -466,6 +466,7 @@ const CrmDeals = () => {
             <DealSidePanel
               dealId={selectedDealId}
               workspaceSlug={workspace.slug}
+              workspaceId={workspace.id}
               onClose={() => setSelectedDealId(null)}
               onPrev={() => {
                 const i = deals.findIndex((d) => d.id === selectedDealId);
