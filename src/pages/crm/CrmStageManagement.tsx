@@ -43,7 +43,7 @@ export default function CrmStageManagement() {
 
   const openNew = () => setEditing({
     label: "", color: "gray", probability: 50,
-    position: (stages.at(-1)?.position ?? 0) + 1,
+    position: (stages.length ? stages[stages.length - 1].position : 0) + 1,
     is_won: false, is_lost: false, is_active: true,
   });
 
