@@ -159,7 +159,7 @@ export default function CrmDealDetail() {
     ["Expected Close Date", fmtDate(deal.expected_close), D("expected_close", "date")],
     ["Lead Source", lead?.lead_source || "", L("lead_source")],
     ["Next Step", ""],
-    ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
+    ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : "", { table: "crm_deals", id: deal.id, column: "owner_id", type: "select", current: deal.owner_id, options: members }],
     ["Sales Stage", stageSelectNode],
     ["Campaign Source", ""],
     ["Probability", deal.probability != null ? Number(deal.probability).toFixed(2) : "", D("probability", "number")],
