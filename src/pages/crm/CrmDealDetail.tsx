@@ -275,7 +275,7 @@ export default function CrmDealDetail() {
               ["Opportunity Name", lead ? `GW: ${lead.full_name || ""}` : deal.title, D("title")],
               ["Contact Name", contact?.id ? <Link to={`/crm/${workspace.slug}/contacts/${contact.id}`} className="text-primary hover:underline">{contactName}</Link> : contactName],
               ["Expected Close Date", fmtDate(deal.expected_close), D("expected_close", "date")],
-              ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : ""],
+              ["Assigned To", ownerName ? <span className="text-primary">{ownerName}</span> : "", { table: "crm_deals", id: deal.id, column: "owner_id", type: "select", current: deal.owner_id, options: members }],
               ["BIZ Area", lead?.biz_area || "", L("biz_area")],
               ["Service Needed", lead?.service_needed || "", L("service_needed")],
               ["Distance in KM", lead?.distance_km || "", L("distance_km", "number")],
