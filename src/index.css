@@ -281,22 +281,40 @@ html {
 /* Minimal thin horizontal scrollbar for tab strips */
 .thin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.28) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 .thin-scrollbar::-webkit-scrollbar,
 .thin-scrollbar::-webkit-scrollbar:horizontal {
-  height: 2px !important;
-  width: 2px !important;
+  height: 5px;
+  width: 5px;
+  background: transparent;
 }
 .thin-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+  margin: 0;
 }
 .thin-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.25);
-  border-radius: 2px;
+  background: hsl(var(--muted-foreground) / 0.28);
+  border-radius: 999px;
 }
-.thin-scrollbar::-webkit-scrollbar-button {
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.45);
+}
+.thin-scrollbar::-webkit-scrollbar-button,
+.thin-scrollbar::-webkit-scrollbar-corner {
   display: none;
   width: 0;
   height: 0;
+}
+/* Hide on touch devices — use native momentum scroll */
+@media (hover: none) and (pointer: coarse) {
+  .thin-scrollbar {
+    scrollbar-width: none;
+  }
+  .thin-scrollbar::-webkit-scrollbar {
+    display: none;
+    height: 0;
+    width: 0;
+  }
 }
