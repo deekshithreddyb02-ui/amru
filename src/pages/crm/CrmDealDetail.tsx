@@ -69,6 +69,7 @@ export default function CrmDealDetail() {
   const [owner, setOwner] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
   const [list, setList] = useState<string[]>([]);
+  const [members, setMembers] = useState<{ value: string; label: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,17 +78,35 @@ export default function CrmDealDetail() {
       setLoading(true);
       const { data: d } = await supabase.from("crm_deals").select("*").eq("id", id).maybeSingle();
       setDeal(d);
-      const [l, o, c, p, a, ids] = await Promise.all([
+      const [l, o, c, p, a, ids, mem, emails] = await Promise.all([
         d?.lead_id ? supabase.from("crm_leads").select("*").eq("id", d.lead_id).maybeSingle() : Promise.resolve({ data: null }),
         d?.organization_id ? supabase.from("crm_organizations").select("*").eq("id", d.organization_id).maybeSingle() : Promise.resolve({ data: null }),
         d?.contact_id ? supabase.from("crm_contacts").select("*").eq("id", d.contact_id).maybeSingle() : Promise.resolve({ data: null }),
         d?.owner_id ? supabase.from("profiles").select("full_name,username").eq("user_id", d.owner_id).maybeSingle() : Promise.resolve({ data: null }),
         supabase.from("crm_activities").select("id,activity_type,subject,description,status,created_at").eq("deal_id", id).order("created_at", { ascending: false }).limit(50),
         supabase.from("crm_deals").select("id,created_at").eq("workspace_id", workspace.id).order("created_at", { ascending: false }),
+        supabase.from("crm_workspace_members").select("user_id").eq("workspace_id", workspace.id),
+        supabase.rpc("get_users_with_emails"),
       ]);
       setLead((l as any).data); setOrg((o as any).data); setContact((c as any).data);
       setOwner((p as any).data); setActivities(((a as any).data) || []);
       setList((((ids as any).data) || []).map((r: any) => r.id));
+
+      const memberIds = (((mem as any).data) || []).map((m: any) => m.user_id);
+      const emailMap = new Map<string, string>();
+      (((emails as any).data) || []).forEach((r: any) => emailMap.set(r.user_id, r.email));
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id,full_name,username")
+        .in("user_id", memberIds.length ? memberIds : ["00000000-0000-0000-0000-000000000000"]);
+      const profMap = new Map<string, any>();
+      (profs || []).forEach((pr: any) => profMap.set(pr.user_id, pr));
+      setMembers(memberIds.map((uid: string) => {
+        const pr = profMap.get(uid);
+        const label = pr?.full_name || pr?.username || emailMap.get(uid) || uid.slice(0, 8);
+        return { value: uid, label };
+      }).sort((a: any, b: any) => a.label.localeCompare(b.label)));
+
       setLoading(false);
     })();
   }, [id, workspace?.id, reloadKey]);
