@@ -77,14 +77,14 @@ export default function CrmRecordView({
 
         <section className="border rounded-md bg-card">
           <Tabs defaultValue={defaultTab || tabs[0]?.id}>
-            <TabsList className="w-full justify-start rounded-none bg-muted/30 border-b h-auto p-0 overflow-x-auto">
+            <TabsList className="w-full justify-start rounded-none bg-muted/30 border-b h-auto p-0 overflow-x-auto thin-scrollbar">
               {tabs.map((t) => (
                 <TabsTrigger
                   key={t.id}
                   value={t.id}
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-[13px] gap-1.5"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2.5 py-1.5 text-[12px] gap-1"
                 >
-                  {t.icon && <t.icon className="h-3.5 w-3.5" />}
+                  {t.icon && <t.icon className="h-3 w-3" />}
                   {t.label}
                   {typeof t.count === "number" && (
                     <span className="text-[10px] text-muted-foreground">({t.count})</span>
