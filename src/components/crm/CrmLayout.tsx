@@ -40,11 +40,17 @@ const CrmLayout = () => {
     if (!roleLoading && !userId) navigate("/auth", { replace: true });
   }, [roleLoading, userId, navigate]);
 
+  // Maharashtra ("mh") is the primary workspace — always default to it when available.
+  const defaultWorkspace = useMemo(
+    () => workspaces.find((w) => w.slug === "mh") || workspaces[0],
+    [workspaces]
+  );
+
   useEffect(() => {
-    if (!loading && !slug && workspaces.length > 0) {
-      navigate(`/crm/${workspaces[0].slug}/dashboard`, { replace: true });
+    if (!loading && !slug && defaultWorkspace) {
+      navigate(`/crm/${defaultWorkspace.slug}/dashboard`, { replace: true });
     }
-  }, [loading, slug, workspaces, navigate]);
+  }, [loading, slug, defaultWorkspace, navigate]);
 
   // Derive current module label + icon from path for breadcrumb bar
   const moduleSeg = location.pathname.split("/")[3] || "dashboard";
@@ -79,8 +85,8 @@ const CrmLayout = () => {
         <div className="max-w-md text-center space-y-4">
           <h1 className="text-2xl font-serif">Workspace not found</h1>
           <p className="text-muted-foreground">You don't have access to "{slug}".</p>
-          <Button onClick={() => navigate(`/crm/${workspaces[0].slug}/dashboard`)}>
-            Go to {workspaces[0].name}
+          <Button onClick={() => navigate(`/crm/${defaultWorkspace.slug}/dashboard`)}>
+            Go to {defaultWorkspace.name}
           </Button>
         </div>
       </div>
