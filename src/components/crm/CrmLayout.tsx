@@ -40,11 +40,17 @@ const CrmLayout = () => {
     if (!roleLoading && !userId) navigate("/auth", { replace: true });
   }, [roleLoading, userId, navigate]);
 
+  // Maharashtra ("mh") is the primary workspace — always default to it when available.
+  const defaultWorkspace = useMemo(
+    () => workspaces.find((w) => w.slug === "mh") || workspaces[0],
+    [workspaces]
+  );
+
   useEffect(() => {
-    if (!loading && !slug && workspaces.length > 0) {
-      navigate(`/crm/${workspaces[0].slug}/dashboard`, { replace: true });
+    if (!loading && !slug && defaultWorkspace) {
+      navigate(`/crm/${defaultWorkspace.slug}/dashboard`, { replace: true });
     }
-  }, [loading, slug, workspaces, navigate]);
+  }, [loading, slug, defaultWorkspace, navigate]);
 
   // Derive current module label + icon from path for breadcrumb bar
   const moduleSeg = location.pathname.split("/")[3] || "dashboard";
