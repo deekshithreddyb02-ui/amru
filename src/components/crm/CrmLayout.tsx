@@ -245,7 +245,15 @@ const CrmLayout = () => {
         <CrmSidebar slug={current.slug} />
         <CrmSubModuleNav slug={current.slug} />
         <main className="flex-1 px-3 sm:px-5 py-4 pb-20 md:pb-6 max-w-full overflow-x-hidden">
-          <Outlet context={{ workspace: current, myRole }} />
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-5 w-5 animate-spin" style={{ color: "hsl(var(--vt-orange))" }} />
+              </div>
+            }
+          >
+            <Outlet context={{ workspace: current, myRole }} />
+          </Suspense>
         </main>
       </div>
 
