@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard, Menu } from "lucide-react";
+import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard, Menu, Lock, Mail } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
