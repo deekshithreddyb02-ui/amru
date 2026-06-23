@@ -85,8 +85,8 @@ const CrmLayout = () => {
         <div className="max-w-md text-center space-y-4">
           <h1 className="text-2xl font-serif">Workspace not found</h1>
           <p className="text-muted-foreground">You don't have access to "{slug}".</p>
-          <Button onClick={() => navigate(`/crm/${workspaces[0].slug}/dashboard`)}>
-            Go to {workspaces[0].name}
+          <Button onClick={() => navigate(`/crm/${defaultWorkspace.slug}/dashboard`)}>
+            Go to {defaultWorkspace.name}
           </Button>
         </div>
       </div>
