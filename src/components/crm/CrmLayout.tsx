@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard, Menu } from "lucide-react";
+import { Loader2, BarChart3, LogOut, User as UserIcon, CalendarDays, CheckSquare, LayoutDashboard, Menu, Lock, Mail } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCrmWorkspaces } from "@/hooks/useCrmWorkspaces";
 import { Button } from "@/components/ui/button";
@@ -80,14 +80,48 @@ const CrmLayout = () => {
   }
 
   if (slug && !current) {
+    const isMh = slug === "mh";
+    const wsLabel = isMh ? "Maharashtra CRM" : `the "${slug}" workspace`;
+    const subject = encodeURIComponent(`CRM Access Request — ${isMh ? "Maharashtra" : slug}`);
+    const body = encodeURIComponent(
+      `Hello Admin,\n\nI would like to request access to ${wsLabel}.\n\nMy account: ${userId || "(unknown)"}\n\nThank you.`
+    );
     return (
-      <div className="min-h-screen flex items-center justify-center px-6">
-        <div className="max-w-md text-center space-y-4">
-          <h1 className="text-2xl font-serif">Workspace not found</h1>
-          <p className="text-muted-foreground">You don't have access to "{slug}".</p>
-          <Button onClick={() => navigate(`/crm/${defaultWorkspace.slug}/dashboard`)}>
-            Go to {defaultWorkspace.name}
-          </Button>
+      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-background to-muted/30">
+        <div className="max-w-md w-full text-center space-y-5 p-8 rounded-2xl border bg-card shadow-lg">
+          <div className="mx-auto w-14 h-14 rounded-full flex items-center justify-center bg-[hsl(var(--vt-orange))]/10">
+            <Lock className="h-6 w-6" style={{ color: "hsl(var(--vt-orange))" }} />
+          </div>
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-serif">Access required</h1>
+            <p className="text-sm text-muted-foreground">
+              You don't have permission to view <strong className="text-foreground">{wsLabel}</strong>.
+              {isMh && " Maharashtra is the primary workspace and access is granted by a Super Admin."}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 pt-2">
+            <Button
+              className="w-full gap-2"
+              style={{ backgroundColor: "hsl(var(--vt-orange))", color: "white" }}
+              onClick={() =>
+                window.open(`mailto:amrutha.wd2014@gmail.com?subject=${subject}&body=${body}`, "_blank")
+              }
+            >
+              <Mail className="h-4 w-4" /> Request access
+            </Button>
+            {defaultWorkspace && defaultWorkspace.slug !== slug && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate(`/crm/${defaultWorkspace.slug}/dashboard`, { replace: true })}
+              >
+                Go to {defaultWorkspace.name}
+              </Button>
+            )}
+            <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => navigate("/")}>
+              Back to site
+            </Button>
+          </div>
         </div>
       </div>
     );
