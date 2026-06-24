@@ -186,6 +186,7 @@ export default function CrmLeadDetail() {
   const [loading, setLoading] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
   const [tab, setTab] = useState<"summary" | "details" | "updates">("details");
+  const [activities, setActivities] = useState<any[]>([]);
   const [assigneeGroups, setAssigneeGroups] = useState<
     { label: string; options: { label: string; value: string }[] }[]
   >([]);
@@ -201,12 +202,19 @@ export default function CrmLeadDetail() {
       setAssigneeName(p?.full_name || p?.username || "");
     } else setAssigneeName("");
 
-    const { data: sibs } = await supabase
-      .from("crm_leads").select("id")
-      .eq("workspace_id", workspace.id)
-      .order("created_at", { ascending: false })
-      .limit(200);
+    const [{ data: sibs }, { data: acts }] = await Promise.all([
+      supabase.from("crm_leads").select("id")
+        .eq("workspace_id", workspace.id)
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase.from("crm_activities")
+        .select("id,activity_type,subject,description,status,created_at")
+        .eq("lead_id", id)
+        .order("created_at", { ascending: false })
+        .limit(50),
+    ]);
     setSiblings((sibs || []).map((s: any) => s.id));
+    setActivities(acts || []);
     setLoading(false);
   };
 
