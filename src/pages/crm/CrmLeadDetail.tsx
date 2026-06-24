@@ -484,9 +484,12 @@ export default function CrmLeadDetail() {
         </div>
       )}
       {tab === "summary" && (
-        <div className="border rounded bg-card p-4 text-[13px] text-muted-foreground">
-          Stage: <span className="text-foreground capitalize">{lead.stage}</span> · Service: <span className="text-foreground">{lead.service_needed || "—"}</span>
-        </div>
+        <LeadSummaryView
+          lead={lead}
+          assigneeName={assigneeName}
+          activities={activities}
+          workspaceId={workspace.id}
+        />
       )}
       {tab === "updates" && (
         <div className="border rounded bg-card p-6 text-center text-[13px] text-muted-foreground">Activity stream coming soon.</div>
