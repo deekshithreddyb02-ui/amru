@@ -505,3 +505,202 @@ export default function CrmLeadDetail() {
     </div>
   );
 }
+
+function Panel({ title, actions, children }: { title: string; actions?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="bg-white border rounded">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <div className="flex items-center gap-1">
+          <ChevronDown className="h-3.5 w-3.5 text-primary" />
+          <h3 className="text-[13px] font-semibold text-primary">{title}</h3>
+        </div>
+        {actions}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function LeadSummaryView({
+  lead, assigneeName, activities, workspaceId,
+}: {
+  lead: any; assigneeName: string; activities: any[]; workspaceId: string;
+}) {
+  const mapsLink = lead.maps_location || (lead.latitude && lead.longitude
+    ? `https://www.google.com/maps?q=${lead.latitude},${lead.longitude}` : null);
+
+  const keyFields: [string, any][] = [
+    ["Lead Name", lead.full_name],
+    ["Contact Name", lead.full_name ? <span className="text-primary">{lead.full_name}</span> : ""],
+    ["Expected Close Date", lead.expected_close ? new Date(lead.expected_close).toLocaleDateString("en-IN").replace(/\//g, "-") : ""],
+    ["Assigned To", assigneeName ? <span className="text-primary">{assigneeName}</span> : ""],
+    ["BIZ Area", lead.biz_area],
+    ["Service Needed", lead.service_needed],
+    ["Distance in KM", lead.distance_km],
+    ["Total Area", `Gunta: ${lead.gunta || ""}\nAcres: ${lead.acres || ""}\nSq.Yrds: ${lead.sq_yards || ""}\nSq.Ft: ${lead.sq_ft || ""}`],
+    ["Number of Scans", lead.num_scans],
+    ["Total BIZ COST (₹)", fmtMoney(lead.biz_cost)],
+    ["Maps Location", mapsLink ? <a href={mapsLink} target="_blank" rel="noreferrer" className="text-primary hover:underline break-all">{mapsLink}</a> : ""],
+    ["Street", lead.street],
+    ["City", lead.city ? <span className="text-primary">{lead.city}</span> : ""],
+    ["State", lead.state ? <span className="text-primary">{lead.state}</span> : ""],
+    ["Description", lead.notes || lead.description],
+  ];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="lg:col-span-5 space-y-4">
+        <Panel title="Key Fields">
+          <div className="divide-y">
+            {keyFields.map(([k, v], i) => (
+              <div key={`${k}-${i}`} className="grid grid-cols-[140px_1fr] gap-3 px-4 py-2 text-[12.5px]">
+                <div className="text-muted-foreground">{k}</div>
+                <div className="text-foreground whitespace-pre-wrap break-words">
+                  {v == null || v === "" ? <span className="text-muted-foreground italic">empty</span> : (typeof v === "object" ? v : String(v))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <div className="lg:col-span-4 space-y-4">
+        <Panel
+          title="Activities"
+          actions={
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add Task</Button>
+              <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add Event</Button>
+            </div>
+          }
+        >
+          {activities.length === 0 ? (
+            <div className="p-6 text-center text-[12px] text-muted-foreground">No pending activities</div>
+          ) : (
+            <ul className="divide-y">
+              {activities.slice(0, 5).map((a) => (
+                <li key={a.id} className="px-4 py-2 text-[12.5px]">
+                  <div className="font-medium">{a.subject || a.activity_type}</div>
+                  <div className="text-muted-foreground text-[11.5px]">{fmtDate(a.created_at)}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <LeadCommentsPanel leadId={lead.id} workspaceId={workspaceId} />
+      </div>
+
+      <div className="lg:col-span-3 space-y-4">
+        <Panel
+          title="Related Products"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add</Button>}
+        >
+          <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Products</div>
+        </Panel>
+        <Panel
+          title="Related Contacts"
+          actions={<Button size="sm" variant="outline" className="h-7 text-[12px] gap-1"><Plus className="h-3 w-3" />Add</Button>}
+        >
+          {lead.full_name ? (
+            <div className="px-4 py-2 text-[12.5px] text-primary">{lead.full_name}</div>
+          ) : (
+            <div className="p-4 text-center text-[12px] text-muted-foreground">No Related Contacts</div>
+          )}
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function LeadCommentsPanel({ leadId, workspaceId }: { leadId: string; workspaceId: string }) {
+  const [text, setText] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("crm_activities")
+      .select("id,description,created_at,owner_id")
+      .eq("lead_id", leadId)
+      .eq("activity_type", "note")
+      .eq("subject", "Comment")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setItems(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [leadId]);
+
+  const post = async () => {
+    const body = text.trim();
+    if (!body || posting) return;
+    setPosting(true);
+    const { data: u } = await supabase.auth.getUser();
+    const { data: inserted, error } = await supabase.from("crm_activities").insert({
+      workspace_id: workspaceId,
+      lead_id: leadId,
+      activity_type: "note",
+      subject: "Comment",
+      description: body,
+      status: "completed",
+      owner_id: u?.user?.id ?? null,
+    }).select("id,description,created_at,owner_id").single();
+    setPosting(false);
+    if (error) {
+      toast({ title: "Could not post comment", description: error.message, variant: "destructive" });
+      return;
+    }
+    setText("");
+    if (inserted) setItems((prev) => [inserted, ...prev]);
+  };
+
+  return (
+    <div className="bg-card border rounded">
+      <div className="flex items-center justify-between px-3 py-2 border-b">
+        <div className="flex items-center gap-1.5 text-[13px] font-semibold text-primary">
+          <ChevronDown className="h-3.5 w-3.5" /> Comments
+        </div>
+      </div>
+      <div className="p-3 space-y-2">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Post your comment here"
+          className="w-full text-[12.5px] border rounded p-2 min-h-[70px] focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        <div className="flex items-center justify-between">
+          <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1" disabled>
+            <Paperclip className="h-3 w-3" />Attach Files
+          </Button>
+          <Button
+            size="sm"
+            className="h-7 text-[12px] bg-green-600 hover:bg-green-700"
+            onClick={post}
+            disabled={posting || !text.trim()}
+          >
+            {posting ? "Posting…" : "Post"}
+          </Button>
+        </div>
+      </div>
+      <div className="px-3 py-2 border-t text-[13px] font-semibold text-foreground">Recent Comments</div>
+      {loading ? (
+        <div className="p-4 text-center"><Loader2 className="h-4 w-4 animate-spin inline text-primary" /></div>
+      ) : items.length === 0 ? (
+        <div className="p-4 text-center text-[12px] text-muted-foreground">No comments</div>
+      ) : (
+        <ul className="divide-y">
+          {items.map((c) => (
+            <li key={c.id} className="px-3 py-2 text-[12.5px]">
+              <div className="whitespace-pre-wrap">{c.description}</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">{fmtDate(c.created_at)}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
