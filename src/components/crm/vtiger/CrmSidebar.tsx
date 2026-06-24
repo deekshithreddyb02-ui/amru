@@ -80,7 +80,7 @@ export default function CrmSidebar({ slug }: { slug: string }) {
     {hidden ? null : (
     <aside
       ref={wrapRef}
-      className="absolute left-0 top-0 bottom-0 z-40 flex flex-col bg-[#2c3e50] text-white/90 shadow-lg w-[230px]"
+      className="fixed left-0 top-[87px] bottom-0 z-40 flex flex-col bg-[#2c3e50] text-white/90 shadow-lg w-[230px]"
     >
       <nav className="flex-1 py-1 overflow-y-auto overflow-x-hidden">
         {PINNED.map((p) => {
