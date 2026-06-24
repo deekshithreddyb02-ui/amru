@@ -67,7 +67,7 @@
     --chart-5: 0 72% 51%;
 
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-    --font-serif: 'DM Serif Display', ui-serif, Georgia, serif;
+    --font-serif: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
     --shadow-2xs: 0 1px 2px hsl(0 0% 0% / 0.03);
