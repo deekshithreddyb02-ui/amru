@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, IdCard, MapPin, ChevronLeft, ChevronRight, ChevronDown,
   Mail, Calendar, FileText, Inbox, Megaphone, Briefcase, Box, MessageSquare,
-  Pencil, Check, X,
+  Pencil, Check, X, Plus, Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
