@@ -66,7 +66,7 @@ function EditableCell({
       if (opt.onSave) {
         await opt.onSave(next);
       } else if (opt.field) {
-        const { error } = await supabase.from("crm_leads").update({ [opt.field]: next }).eq("id", leadId);
+        const { error } = await supabase.from("crm_leads").update({ [opt.field]: next } as any).eq("id", leadId);
         if (error) throw error;
         onUpdated({ [opt.field]: next });
       }
@@ -623,7 +623,7 @@ function LeadCommentsPanel({ leadId, workspaceId }: { leadId: string; workspaceI
     setLoading(true);
     const { data } = await supabase
       .from("crm_activities")
-      .select("id,description,created_at,owner_id")
+      .select("id,description,created_at,created_by")
       .eq("lead_id", leadId)
       .eq("activity_type", "note")
       .eq("subject", "Comment")
@@ -646,9 +646,9 @@ function LeadCommentsPanel({ leadId, workspaceId }: { leadId: string; workspaceI
       activity_type: "note",
       subject: "Comment",
       description: body,
-      status: "completed",
-      owner_id: u?.user?.id ?? null,
-    }).select("id,description,created_at,owner_id").single();
+      status: "done",
+      created_by: u?.user?.id ?? null,
+    }).select("id,description,created_at,created_by").single();
     setPosting(false);
     if (error) {
       toast({ title: "Could not post comment", description: error.message, variant: "destructive" });

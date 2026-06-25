@@ -479,7 +479,7 @@ function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: s
     setLoading(true);
     const { data } = await supabase
       .from("crm_activities")
-      .select("id,description,created_at,owner_id")
+      .select("id,description,created_at,created_by")
       .eq("deal_id", dealId)
       .eq("activity_type", "note")
       .eq("subject", "Comment")
@@ -502,9 +502,9 @@ function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: s
       activity_type: "note",
       subject: "Comment",
       description: body,
-      status: "completed",
-      owner_id: u?.user?.id ?? null,
-    }).select("id,description,created_at,owner_id").single();
+      status: "done",
+      created_by: u?.user?.id ?? null,
+    }).select("id,description,created_at,created_by").single();
     setPosting(false);
     if (error) {
       const { toast } = await import("@/hooks/use-toast");
