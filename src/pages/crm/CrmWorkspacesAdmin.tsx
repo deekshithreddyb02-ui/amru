@@ -218,7 +218,7 @@ const CrmWorkspacesAdmin = () => {
     setPerms((prev) => prev.map((p) => (p.id === row.id ? { ...p, [key]: next } : p)));
     const { error } = await supabase
       .from("crm_role_permissions")
-      .update({ [key]: next })
+      .update({ [key]: next } as any)
       .eq("id", row.id);
     if (error) {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
