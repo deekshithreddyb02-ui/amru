@@ -25,8 +25,16 @@ async function sendGmail(to: string, subject: string, body: string) {
   const lovKey = Deno.env.get("LOVABLE_API_KEY");
   const gmailKey = Deno.env.get("GOOGLE_MAIL_API_KEY");
   if (!lovKey || !gmailKey) return { ok: false, skipped: "gmail_not_connected" };
+  // Strip CR/LF to prevent RFC 2822 header injection (e.g., injected Bcc).
+  const sanitizeHeader = (v: string) => String(v ?? "").replace(/[\r\n]+/g, " ").trim();
+  const safeTo = sanitizeHeader(to);
+  const safeSubject = sanitizeHeader(subject);
+  // Validate recipient as a single RFC 5321-ish address with no newlines.
+  if (!safeTo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeTo)) {
+    return { ok: false, error: "invalid_to_address" };
+  }
   const raw = btoa(
-    [`To: ${to}`, `Subject: ${subject}`, 'Content-Type: text/html; charset="UTF-8"', "", body].join("\r\n")
+    [`To: ${safeTo}`, `Subject: ${safeSubject}`, 'Content-Type: text/html; charset="UTF-8"', "", body].join("\r\n")
   ).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const r = await fetch(`${GW}/google_mail/gmail/v1/users/me/messages/send`, {
     method: "POST",

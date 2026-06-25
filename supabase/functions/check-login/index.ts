@@ -32,13 +32,19 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (!profiles?.user_id) {
-        // Return generic "not allowed" to avoid username enumeration
+        // Return generic "allowed" response to prevent username enumeration.
+        // The downstream admin-signin call returns a generic error for unknown users.
+        const { data: maxSetting } = await supabaseAdmin
+          .from("site_settings")
+          .select("value")
+          .eq("key", "max_login_attempts")
+          .maybeSingle();
+        const max = maxSetting?.value ? Number(maxSetting.value) : 3;
         return new Response(
           JSON.stringify({
-            allowed: false,
-            attempts_remaining: 0,
-            max_attempts: 3,
-            email: null,
+            allowed: true,
+            attempts_remaining: max,
+            max_attempts: max,
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -47,12 +53,17 @@ Deno.serve(async (req) => {
       // Lookup email from auth.users via admin client
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(profiles.user_id);
       if (!userData?.user?.email) {
+        const { data: maxSetting } = await supabaseAdmin
+          .from("site_settings")
+          .select("value")
+          .eq("key", "max_login_attempts")
+          .maybeSingle();
+        const max = maxSetting?.value ? Number(maxSetting.value) : 3;
         return new Response(
           JSON.stringify({
-            allowed: false,
-            attempts_remaining: 0,
-            max_attempts: 3,
-            email: null,
+            allowed: true,
+            attempts_remaining: max,
+            max_attempts: max,
           }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
