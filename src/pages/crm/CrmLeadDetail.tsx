@@ -66,7 +66,7 @@ function EditableCell({
       if (opt.onSave) {
         await opt.onSave(next);
       } else if (opt.field) {
-        const { error } = await supabase.from("crm_leads").update({ [opt.field]: next }).eq("id", leadId);
+        const { error } = await supabase.from("crm_leads").update({ [opt.field]: next } as any).eq("id", leadId);
         if (error) throw error;
         onUpdated({ [opt.field]: next });
       }
