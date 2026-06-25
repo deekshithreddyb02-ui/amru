@@ -100,7 +100,7 @@ const CrmSupportTickets = () => {
   const updateStatus = async (id: string, status: string) => {
     const patch: Record<string, unknown> = { status };
     if (status === "resolved" || status === "closed") patch.resolved_at = new Date().toISOString();
-    const { error } = await supabase.from("crm_support_tickets").update(patch).eq("id", id);
+    const { error } = await supabase.from("crm_support_tickets").update(patch as any).eq("id", id);
     if (error) { toast.error(error.message); return; }
     setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status, resolved_at: (patch.resolved_at as string) ?? t.resolved_at } : t)));
   };
