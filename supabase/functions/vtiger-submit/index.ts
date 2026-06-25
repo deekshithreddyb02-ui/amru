@@ -89,14 +89,29 @@ serve(async (req) => {
     // Rate limiting by email/phone
     const email = formData.email ? String(formData.email) : (dbRecord?.email || null);
     const rateLimitEmail = email && email.includes('@') && !email.endsWith('@enquiry.amrutageo.com') ? email : null;
-    const rateLimitKey = dbRecord?.whatsapp || dbRecord?.phone || rateLimitEmail;
+    const rawRateLimitKey = dbRecord?.whatsapp || dbRecord?.phone || rateLimitEmail;
+    // Sanitize to prevent PostgREST filter injection: only allow safe chars
+    // for phone/email values (alphanum, @, ., _, -, +). Reject anything else
+    // by treating it as "no rate-limit key" rather than building a malformed filter.
+    const rateLimitKey = rawRateLimitKey && /^[A-Za-z0-9@._+\-]{1,255}$/.test(String(rawRateLimitKey))
+      ? String(rawRateLimitKey)
+      : null;
     if (rateLimitKey) {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { count } = await supabase
+      const { count, error: rlError } = await supabase
         .from('contact_messages')
         .select('*', { count: 'exact', head: true })
         .or(`whatsapp.eq.${rateLimitKey},phone.eq.${rateLimitKey},email.eq.${rateLimitKey}`)
         .gte('created_at', oneHourAgo);
+
+      // Fail closed: if the rate-limit query errors, block the submission
+      // instead of silently allowing it through.
+      if (rlError) {
+        return new Response(
+          JSON.stringify({ success: false, message: "Unable to verify submission rate. Please try again later." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
       if (count !== null && count >= 5) {
         return new Response(
