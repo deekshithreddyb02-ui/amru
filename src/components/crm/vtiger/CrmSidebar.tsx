@@ -4,6 +4,17 @@ import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Mail, FolderOpe
 import { PINNED, GROUPS } from "./navConfig";
 
 const STORAGE_KEY = "crm.sidebar.collapsed";
+const OPEN_DELAY_KEY = "crm.sidebar.openDelay";
+const CLOSE_DELAY_KEY = "crm.sidebar.closeDelay";
+const DEFAULT_OPEN_DELAY = 120;
+const DEFAULT_CLOSE_DELAY = 250;
+
+const readDelay = (key: string, fallback: number): number => {
+  if (typeof window === "undefined") return fallback;
+  const raw = window.localStorage.getItem(key);
+  const n = raw == null ? NaN : Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+};
 
 const groupIcon = (label: string): LucideIcon => {
   const m = GROUPS.find((g) => g.label === label);
@@ -12,7 +23,17 @@ const groupIcon = (label: string): LucideIcon => {
 
 const resolveTo = (slug: string, to: string) => (to.startsWith("/") ? to : `/crm/${slug}/${to}`);
 
-export default function CrmSidebar({ slug }: { slug: string }) {
+export default function CrmSidebar({
+  slug,
+  openDelayMs,
+  closeDelayMs,
+}: {
+  slug: string;
+  /** Delay (ms) before sidebar opens when cursor enters the edge. Default: persisted value or 120ms. */
+  openDelayMs?: number;
+  /** Delay (ms) before sidebar closes after cursor leaves. Default: persisted value or 250ms. */
+  closeDelayMs?: number;
+}) {
   const loc = useLocation();
   const isActiveModule = (to: string) => loc.pathname.startsWith(resolveTo(slug, to));
 
@@ -75,18 +96,47 @@ export default function CrmSidebar({ slug }: { slug: string }) {
 
   const flyoutItems = flyout ? GROUPS.find((g) => g.label === flyout)?.items ?? [] : [];
 
+  const effectiveOpenDelay = openDelayMs ?? readDelay(OPEN_DELAY_KEY, DEFAULT_OPEN_DELAY);
+  const effectiveCloseDelay = closeDelayMs ?? readDelay(CLOSE_DELAY_KEY, DEFAULT_CLOSE_DELAY);
+
+  // Allow runtime tuning from anywhere via window events:
+  //   window.dispatchEvent(new CustomEvent('crm:set-sidebar-delays', { detail: { openMs: 80, closeMs: 400 } }))
+  useEffect(() => {
+    const onSet = (e: Event) => {
+      const detail = (e as CustomEvent<{ openMs?: number; closeMs?: number }>).detail || {};
+      if (typeof detail.openMs === "number" && detail.openMs >= 0) {
+        window.localStorage.setItem(OPEN_DELAY_KEY, String(detail.openMs));
+      }
+      if (typeof detail.closeMs === "number" && detail.closeMs >= 0) {
+        window.localStorage.setItem(CLOSE_DELAY_KEY, String(detail.closeMs));
+      }
+    };
+    window.addEventListener("crm:set-sidebar-delays", onSet);
+    return () => window.removeEventListener("crm:set-sidebar-delays", onSet);
+  }, []);
+
+  const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
-  const handleEnter = () => {
+  const clearTimers = () => {
+    if (openTimer.current) { window.clearTimeout(openTimer.current); openTimer.current = null; }
     if (closeTimer.current) { window.clearTimeout(closeTimer.current); closeTimer.current = null; }
-    if (collapsed) setCollapsed(false);
+  };
+  const handleEnter = () => {
+    clearTimers();
+    if (!collapsed) return;
+    if (effectiveOpenDelay <= 0) { setCollapsed(false); return; }
+    openTimer.current = window.setTimeout(() => setCollapsed(false), effectiveOpenDelay);
   };
   const handleLeave = () => {
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    clearTimers();
+    if (effectiveCloseDelay <= 0) { setCollapsed(true); setFlyout(null); return; }
     closeTimer.current = window.setTimeout(() => {
       setCollapsed(true);
       setFlyout(null);
-    }, 200);
+    }, effectiveCloseDelay);
   };
+  useEffect(() => () => clearTimers(), []);
+
 
   return (
     <div className="hidden md:block relative w-0 shrink-0">
