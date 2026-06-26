@@ -155,7 +155,18 @@ Deno.serve(async (req) => {
       ? [{ type: "text", text: userMessageText }, ...photoParts]
       : userMessageText;
 
-    const model = body.model_override || tpl.default_model || "google/gemini-2.5-flash";
+    const ALLOWED_MODELS = new Set([
+      "google/gemini-2.5-flash",
+      "google/gemini-2.5-pro",
+      "google/gemini-2.5-flash-lite",
+      "google/gemini-3-flash-preview",
+      "google/gemini-3-pro-preview",
+    ]);
+    if (body.model_override && !ALLOWED_MODELS.has(body.model_override)) {
+      return json(400, { error: "Model not permitted" });
+    }
+    const candidateModel = body.model_override || tpl.default_model || "google/gemini-2.5-flash";
+    const model = ALLOWED_MODELS.has(candidateModel) ? candidateModel : "google/gemini-2.5-flash";
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
