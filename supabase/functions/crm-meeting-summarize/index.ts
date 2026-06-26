@@ -40,6 +40,10 @@ Deno.serve(async (req) => {
     if (!body.workspace_id || !body.title || !body.source_type) {
       return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const MAX_TRANSCRIPT_LEN = 100_000;
+    if (body.transcript && body.transcript.length > MAX_TRANSCRIPT_LEN) {
+      return new Response(JSON.stringify({ error: `Transcript too long (max ${MAX_TRANSCRIPT_LEN} chars)` }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     // Verify membership
     const { data: member } = await supabase
@@ -102,7 +106,7 @@ Deno.serve(async (req) => {
       });
       if (!tResp.ok) throw new Error(`Transcription failed: ${tResp.status}`);
       const tData = await tResp.json();
-      transcript = tData.choices?.[0]?.message?.content || "";
+      transcript = (tData.choices?.[0]?.message?.content || "").slice(0, MAX_TRANSCRIPT_LEN);
       await supabase.from("crm_meeting_summaries").update({ transcript }).eq("id", row.id);
     }
 
