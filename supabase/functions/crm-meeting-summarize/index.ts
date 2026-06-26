@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       });
       if (!tResp.ok) throw new Error(`Transcription failed: ${tResp.status}`);
       const tData = await tResp.json();
-      transcript = tData.choices?.[0]?.message?.content || "";
+      transcript = (tData.choices?.[0]?.message?.content || "").slice(0, MAX_TRANSCRIPT_LEN);
       await supabase.from("crm_meeting_summaries").update({ transcript }).eq("id", row.id);
     }
 
