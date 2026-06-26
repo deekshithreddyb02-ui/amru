@@ -75,13 +75,35 @@ export default function CrmSidebar({ slug }: { slug: string }) {
 
   const flyoutItems = flyout ? GROUPS.find((g) => g.label === flyout)?.items ?? [] : [];
 
+  const closeTimer = useRef<number | null>(null);
+  const handleEnter = () => {
+    if (closeTimer.current) { window.clearTimeout(closeTimer.current); closeTimer.current = null; }
+    if (collapsed) setCollapsed(false);
+  };
+  const handleLeave = () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => {
+      setCollapsed(true);
+      setFlyout(null);
+    }, 200);
+  };
+
   return (
     <div className="hidden md:block relative w-0 shrink-0">
+    {/* Hover-activation strip on the left edge — always present so moving the cursor there opens the sidebar */}
+    <div
+      aria-hidden
+      onMouseEnter={handleEnter}
+      className="fixed left-0 top-[87px] bottom-0 z-30 w-2"
+    />
     {hidden ? null : (
     <aside
       ref={wrapRef}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
       className="fixed left-0 top-[87px] bottom-0 z-40 flex flex-col bg-[#2c3e50] text-white/90 shadow-lg w-[230px]"
     >
+
       <nav className="flex-1 py-1 overflow-y-auto overflow-x-hidden">
         {PINNED.map((p) => {
           const active = isActiveModule(p.to);
