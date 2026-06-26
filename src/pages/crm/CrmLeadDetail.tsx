@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import ConvertLeadDialog from "@/components/crm/ConvertLeadDialog";
+import Bulleted from "@/components/crm/Bulleted";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
