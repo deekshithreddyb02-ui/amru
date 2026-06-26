@@ -287,7 +287,7 @@ export default function CrmDealDetail() {
               ["Street", lead?.street || org?.street || "", L("street") || O("street")],
               ["City", (lead?.city || org?.city) ? <span className="text-primary">{lead?.city || org?.city}</span> : "", L("city") || O("city")],
               ["State", (lead?.state || org?.state) ? <span className="text-primary">{lead?.state || org?.state}</span> : "", L("state") || O("state")],
-              ["Description", deal.description || lead?.notes || "", D("description", "textarea")],
+              ["Description", <Bulleted text={deal.description || lead?.notes || ""} />, D("description", "textarea")],
             ]}
             activities={activities}
             contactName={contactName}
