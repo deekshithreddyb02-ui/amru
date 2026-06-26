@@ -41,9 +41,9 @@ Deno.serve(async (req) => {
     }
 
     const sel = entity === "crm_organizations"
-      ? "id, name, email, phone, website, gst_number, created_at"
+      ? "id, name, email, phone, website, created_at"
       : entity === "crm_contacts"
-      ? "id, full_name, email, phone, mobile, organization_id, created_at"
+      ? "id, full_name, email, phone, whatsapp, organization_id, created_at"
       : "id, full_name, email, phone, whatsapp, city, created_at";
 
     const { data, error } = await sb.from(entity).select(sel).eq("workspace_id", workspace_id).limit(2000);
