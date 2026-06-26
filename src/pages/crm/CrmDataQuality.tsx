@@ -74,7 +74,7 @@ export default function CrmDataQuality() {
                     <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 p-2 rounded border">
                       <div className="text-sm">
                         <div className="font-medium">{r[nameField] || "(no name)"} {i === 0 && <Badge className="ml-2" variant="default">Primary</Badge>}</div>
-                        <div className="text-xs text-muted-foreground">{r.email || r.phone || r.mobile || r.whatsapp || r.id}</div>
+                        <div className="text-xs text-muted-foreground">{r.email || r.phone || r.whatsapp || r.id}</div>
                       </div>
                       {i > 0 && isAdmin && (
                         <Button size="sm" variant="outline" disabled={merging === r.id} onClick={() => merge(g.rows[0].id, r.id)}>
