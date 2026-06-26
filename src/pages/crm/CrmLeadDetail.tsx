@@ -545,7 +545,7 @@ function LeadSummaryView({
     ["Street", lead.street],
     ["City", lead.city ? <span className="text-primary">{lead.city}</span> : ""],
     ["State", lead.state ? <span className="text-primary">{lead.state}</span> : ""],
-    ["Description", lead.notes || lead.description],
+    ["Description", <Bulleted text={lead.notes || lead.description} />],
   ];
 
   return (
