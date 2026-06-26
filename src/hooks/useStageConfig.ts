@@ -81,7 +81,7 @@ export function useStageConfig(workspaceId: string | undefined) {
   useEffect(() => {
     if (!workspaceId) return;
     const ch = supabase
-      .channel(`stage-config-${workspaceId}`)
+      .channel(`stage-config-${workspaceId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "crm_stage_configs", filter: `workspace_id=eq.${workspaceId}` },
