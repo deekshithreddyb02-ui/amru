@@ -23,7 +23,17 @@ const groupIcon = (label: string): LucideIcon => {
 
 const resolveTo = (slug: string, to: string) => (to.startsWith("/") ? to : `/crm/${slug}/${to}`);
 
-export default function CrmSidebar({ slug }: { slug: string }) {
+export default function CrmSidebar({
+  slug,
+  openDelayMs,
+  closeDelayMs,
+}: {
+  slug: string;
+  /** Delay (ms) before sidebar opens when cursor enters the edge. Default: persisted value or 120ms. */
+  openDelayMs?: number;
+  /** Delay (ms) before sidebar closes after cursor leaves. Default: persisted value or 250ms. */
+  closeDelayMs?: number;
+}) {
   const loc = useLocation();
   const isActiveModule = (to: string) => loc.pathname.startsWith(resolveTo(slug, to));
 
