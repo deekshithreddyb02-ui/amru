@@ -138,21 +138,36 @@ export default function CrmSidebar({
   useEffect(() => () => clearTimers(), []);
 
 
+  // Track active interaction (scroll/drag) inside the sidebar so we don't auto-close mid-action.
+  const interactingRef = useRef(false);
+  const interactionEndTimer = useRef<number | null>(null);
+  const markInteracting = () => {
+    interactingRef.current = true;
+    clearTimers(); // cancel any pending close while interacting
+    if (interactionEndTimer.current) window.clearTimeout(interactionEndTimer.current);
+    interactionEndTimer.current = window.setTimeout(() => {
+      interactingRef.current = false;
+    }, 400);
+  };
+  const safeLeave = () => {
+    if (interactingRef.current) return; // ignore mouseleave while scrolling/dragging
+    handleLeave();
+  };
+
   return (
     <div className="hidden md:block relative w-0 shrink-0">
-    {/* Hover-activation strip on the left edge — always present so moving the cursor there opens the sidebar */}
-    <div
-      aria-hidden
-      onMouseEnter={handleEnter}
-      className="fixed left-0 top-[87px] bottom-0 z-30 w-2"
-    />
     {hidden ? null : (
     <aside
       ref={wrapRef}
       onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+      onMouseLeave={safeLeave}
+      onWheel={markInteracting}
+      onScrollCapture={markInteracting}
+      onPointerDown={markInteracting}
+      onDragStart={markInteracting}
       className="fixed left-0 top-[87px] bottom-0 z-40 flex flex-col bg-[#2c3e50] text-white/90 shadow-lg w-[230px]"
     >
+
 
       <nav className="flex-1 py-1 overflow-y-auto overflow-x-hidden">
         {PINNED.map((p) => {
