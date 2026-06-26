@@ -4,6 +4,17 @@ import { ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Mail, FolderOpe
 import { PINNED, GROUPS } from "./navConfig";
 
 const STORAGE_KEY = "crm.sidebar.collapsed";
+const OPEN_DELAY_KEY = "crm.sidebar.openDelay";
+const CLOSE_DELAY_KEY = "crm.sidebar.closeDelay";
+const DEFAULT_OPEN_DELAY = 120;
+const DEFAULT_CLOSE_DELAY = 250;
+
+const readDelay = (key: string, fallback: number): number => {
+  if (typeof window === "undefined") return fallback;
+  const raw = window.localStorage.getItem(key);
+  const n = raw == null ? NaN : Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+};
 
 const groupIcon = (label: string): LucideIcon => {
   const m = GROUPS.find((g) => g.label === label);
