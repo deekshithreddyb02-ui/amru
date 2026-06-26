@@ -135,7 +135,7 @@ export default function DealSidePanel({
     ["State", lead?.state || org?.state],
     ["Probability", deal.probability != null ? `${deal.probability}%` : ""],
     ["Sales Stage", deal?.id && wsId ? <StageSelect workspaceId={wsId} dealId={deal.id} value={stageKey} /> : <StageBadge workspaceId={wsId} stageKey={stageKey} />],
-    ["Description", deal.description || lead?.notes],
+    ["Description", <Bulleted text={deal.description || lead?.notes} />],
   ] : [];
 
   return (
