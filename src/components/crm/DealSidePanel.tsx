@@ -5,6 +5,7 @@ import { X, ChevronLeft, ChevronRight, Loader2, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import StageSelect from "@/components/crm/StageSelect";
 import StageBadge from "@/components/crm/StageBadge";
+import Bulleted from "@/components/crm/Bulleted";
 
 type Props = {
   dealId: string | null;
@@ -134,7 +135,7 @@ export default function DealSidePanel({
     ["State", lead?.state || org?.state],
     ["Probability", deal.probability != null ? `${deal.probability}%` : ""],
     ["Sales Stage", deal?.id && wsId ? <StageSelect workspaceId={wsId} dealId={deal.id} value={stageKey} /> : <StageBadge workspaceId={wsId} stageKey={stageKey} />],
-    ["Description", deal.description || lead?.notes],
+    ["Description", <Bulleted text={deal.description || lead?.notes} />],
   ] : [];
 
   return (

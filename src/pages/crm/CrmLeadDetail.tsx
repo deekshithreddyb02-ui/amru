@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import ConvertLeadDialog from "@/components/crm/ConvertLeadDialog";
+import Bulleted from "@/components/crm/Bulleted";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 
 type Ctx = { workspace: CrmWorkspace; myRole: string };
@@ -376,7 +377,7 @@ export default function CrmLeadDetail() {
   ];
 
   const descRows: Row[] = [
-    ["Description", lead.notes || lead.description, { field: "notes", type: "textarea", raw: lead.notes || lead.description || "" }],
+    ["Description", <Bulleted text={lead.notes || lead.description} />, { field: "notes", type: "textarea", raw: lead.notes || lead.description || "" }],
   ];
 
   const mapsLink = lead.maps_location || (lead.latitude && lead.longitude
@@ -544,7 +545,7 @@ function LeadSummaryView({
     ["Street", lead.street],
     ["City", lead.city ? <span className="text-primary">{lead.city}</span> : ""],
     ["State", lead.state ? <span className="text-primary">{lead.state}</span> : ""],
-    ["Description", lead.notes || lead.description],
+    ["Description", <Bulleted text={lead.notes || lead.description} />],
   ];
 
   return (

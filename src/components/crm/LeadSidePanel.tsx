@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight, MapPin, Loader2, IdCard } from "lucide-react";
 import { Link } from "react-router-dom";
+import Bulleted from "@/components/crm/Bulleted";
 
 type Props = {
   leadId: string | null;
@@ -93,7 +94,7 @@ export default function LeadSidePanel({
     ["City", lead.city],
     ["State", lead.state],
     ["Maps Location", lead.maps_location],
-    ["Description", lead.description || lead.notes],
+    ["Description", <Bulleted text={lead.description || lead.notes} />],
   ] : [];
 
   return (
