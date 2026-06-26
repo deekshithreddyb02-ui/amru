@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight, MapPin, Loader2, IdCard } from "lucide-react";
 import { Link } from "react-router-dom";
+import Bulleted from "@/components/crm/Bulleted";
 
 type Props = {
   leadId: string | null;
