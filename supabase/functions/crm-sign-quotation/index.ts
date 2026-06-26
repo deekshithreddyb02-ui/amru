@@ -27,6 +27,20 @@ Deno.serve(async (req) => {
     if (!token || !signer_name || !signature_data_url) {
       return new Response(JSON.stringify({ error: "missing fields" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
     }
+    if (typeof signer_name !== "string" || signer_name.length > 200) {
+      return new Response(JSON.stringify({ error: "signer_name invalid or too long (max 200)" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+    }
+    if (signer_email !== undefined && signer_email !== null && signer_email !== "") {
+      if (typeof signer_email !== "string" || signer_email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signer_email)) {
+        return new Response(JSON.stringify({ error: "signer_email invalid" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      }
+    }
+    if (signer_company !== undefined && signer_company !== null && (typeof signer_company !== "string" || signer_company.length > 200)) {
+      return new Response(JSON.stringify({ error: "signer_company too long (max 200)" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+    }
+    if (typeof signature_data_url !== "string" || !signature_data_url.startsWith("data:image/") || signature_data_url.length > 512_000) {
+      return new Response(JSON.stringify({ error: "signature_data_url invalid or too large (max 512KB image data URL)" }), { status: 413, headers: { ...cors, "Content-Type": "application/json" } });
+    }
     const { data: tk } = await sb.from("crm_signing_tokens").select("*").eq("token", token).maybeSingle();
     if (!tk) return new Response(JSON.stringify({ error: "invalid token" }), { status: 404, headers: { ...cors, "Content-Type": "application/json" } });
     if (tk.used_at) return new Response(JSON.stringify({ error: "already signed" }), { status: 409, headers: { ...cors, "Content-Type": "application/json" } });
