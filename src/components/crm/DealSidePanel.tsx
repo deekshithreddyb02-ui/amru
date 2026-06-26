@@ -5,6 +5,7 @@ import { X, ChevronLeft, ChevronRight, Loader2, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import StageSelect from "@/components/crm/StageSelect";
 import StageBadge from "@/components/crm/StageBadge";
+import Bulleted from "@/components/crm/Bulleted";
 
 type Props = {
   dealId: string | null;
