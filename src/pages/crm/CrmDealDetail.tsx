@@ -15,6 +15,7 @@ import { useCrmPermissions } from "@/hooks/useCrmPermissions";
 import StageSelect from "@/components/crm/StageSelect";
 import StageBadge from "@/components/crm/StageBadge";
 import DealStageHistory from "@/components/crm/DealStageHistory";
+import Bulleted from "@/components/crm/Bulleted";
 
 
 
