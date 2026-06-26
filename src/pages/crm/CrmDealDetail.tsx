@@ -192,7 +192,7 @@ export default function CrmDealDetail() {
   ];
 
   const description: [string, ReactNode, EditableValueConfig?][] = [
-    ["Description", deal.description || lead?.notes || "", D("description", "textarea")],
+    ["Description", <Bulleted text={deal.description || lead?.notes || ""} />, D("description", "textarea")],
   ];
 
 
