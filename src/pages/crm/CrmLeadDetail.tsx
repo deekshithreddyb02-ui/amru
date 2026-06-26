@@ -377,7 +377,7 @@ export default function CrmLeadDetail() {
   ];
 
   const descRows: Row[] = [
-    ["Description", lead.notes || lead.description, { field: "notes", type: "textarea", raw: lead.notes || lead.description || "" }],
+    ["Description", <Bulleted text={lead.notes || lead.description} />, { field: "notes", type: "textarea", raw: lead.notes || lead.description || "" }],
   ];
 
   const mapsLink = lead.maps_location || (lead.latitude && lead.longitude
