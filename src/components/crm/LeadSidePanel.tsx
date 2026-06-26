@@ -94,7 +94,7 @@ export default function LeadSidePanel({
     ["City", lead.city],
     ["State", lead.state],
     ["Maps Location", lead.maps_location],
-    ["Description", lead.description || lead.notes],
+    ["Description", <Bulleted text={lead.description || lead.notes} />],
   ] : [];
 
   return (
