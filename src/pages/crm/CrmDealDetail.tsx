@@ -20,6 +20,7 @@ import StageSelect from "@/components/crm/StageSelect";
 import StageBadge from "@/components/crm/StageBadge";
 import DealStageHistory from "@/components/crm/DealStageHistory";
 import Bulleted from "@/components/crm/Bulleted";
+import DealUpdatesFeed from "@/components/crm/DealUpdatesFeed";
 
 
 
@@ -343,20 +344,7 @@ export default function CrmDealDetail() {
 
         {tab === "updates" && (
           <div className="bg-white border rounded">
-            <div className="px-4 py-2 font-semibold text-[13px] border-b">Updates</div>
-            {activities.length === 0 ? (
-              <div className="p-6 text-center text-[12px] text-muted-foreground">No updates yet.</div>
-            ) : (
-              <ul className="divide-y">
-                {activities.map((a) => (
-                  <li key={a.id} className="px-4 py-2 text-[12.5px]">
-                    <div className="font-medium">{a.subject || a.activity_type}</div>
-                    <div className="text-muted-foreground text-[11.5px]">{fmtDateTime(a.created_at)} · {a.status || a.activity_type}</div>
-                    {a.description && <div className="mt-1 text-muted-foreground whitespace-pre-wrap">{a.description}</div>}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <DealUpdatesFeed dealId={deal.id} workspaceId={workspace.id} />
           </div>
         )}
         {tab === "history" && (
