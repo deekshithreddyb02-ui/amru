@@ -20,6 +20,7 @@ import StageSelect from "@/components/crm/StageSelect";
 import StageBadge from "@/components/crm/StageBadge";
 import DealStageHistory from "@/components/crm/DealStageHistory";
 import Bulleted from "@/components/crm/Bulleted";
+import DealUpdatesFeed from "@/components/crm/DealUpdatesFeed";
 
 
 
