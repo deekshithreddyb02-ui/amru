@@ -66,6 +66,28 @@ export default function CrmDealDetail() {
   const [reloadKey, setReloadKey] = useState(0);
   const reload = () => setReloadKey((k) => k + 1);
 
+  const handleDeleteOpportunity = async () => {
+    if (!deal?.id) return;
+    if (!confirm(`Delete opportunity "${deal.title}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("crm_deals").delete().eq("id", deal.id);
+    if (error) { toast({ title: "Delete failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Opportunity deleted" });
+    navigate(`/crm/${workspace.slug}/deals`);
+  };
+
+  const handleDuplicate = async () => {
+    if (!deal?.id) return;
+    const { id: _id, created_at, updated_at, ...rest } = deal;
+    const { data, error } = await supabase
+      .from("crm_deals")
+      .insert({ ...rest, title: `${deal.title} (Copy)` })
+      .select("id")
+      .single();
+    if (error) { toast({ title: "Duplicate failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Opportunity duplicated" });
+    navigate(`/crm/${workspace.slug}/deals/${(data as any).id}`);
+  };
+
   const [deal, setDeal] = useState<any>(null);
 
   const [lead, setLead] = useState<any>(null);
