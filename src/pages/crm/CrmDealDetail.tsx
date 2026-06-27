@@ -7,6 +7,10 @@ import {
   MessageSquare, Mail, Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import { useCrmLabels } from "@/hooks/useCrmLabels";
 import EditableLabel from "@/components/crm/EditableLabel";
