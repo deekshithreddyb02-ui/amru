@@ -350,7 +350,17 @@ export default function CrmDealDetail() {
         {tab === "history" && (
           <DealStageHistory dealId={deal.id} workspaceId={workspace.id} />
         )}
-        {!["details", "summary", "updates", "history"].includes(tab) && (
+        {tab === "contacts" && (
+          <DealContactsPanel
+            dealId={deal.id}
+            workspaceId={workspace.id}
+            workspaceSlug={workspace.slug}
+            organizationId={deal.organization_id}
+            primaryContactId={deal.contact_id}
+            onChanged={reload}
+          />
+        )}
+        {!["details", "summary", "updates", "history", "contacts"].includes(tab) && (
           <div className="bg-white border rounded p-10 text-center text-[12px] text-muted-foreground">Nothing here yet.</div>
         )}
       </div>
