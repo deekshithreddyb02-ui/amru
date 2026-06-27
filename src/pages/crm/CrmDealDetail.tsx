@@ -7,6 +7,10 @@ import {
   MessageSquare, Mail, Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
 import type { CrmWorkspace } from "@/hooks/useCrmWorkspaces";
 import { useCrmLabels } from "@/hooks/useCrmLabels";
 import EditableLabel from "@/components/crm/EditableLabel";
@@ -61,6 +65,28 @@ export default function CrmDealDetail() {
   const [tab, setTab] = useState("details");
   const [reloadKey, setReloadKey] = useState(0);
   const reload = () => setReloadKey((k) => k + 1);
+
+  const handleDeleteOpportunity = async () => {
+    if (!deal?.id) return;
+    if (!confirm(`Delete opportunity "${deal.title}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("crm_deals").delete().eq("id", deal.id);
+    if (error) { toast({ title: "Delete failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Opportunity deleted" });
+    navigate(`/crm/${workspace.slug}/deals`);
+  };
+
+  const handleDuplicate = async () => {
+    if (!deal?.id) return;
+    const { id: _id, created_at, updated_at, ...rest } = deal;
+    const { data, error } = await supabase
+      .from("crm_deals")
+      .insert({ ...rest, title: `${deal.title} (Copy)` })
+      .select("id")
+      .single();
+    if (error) { toast({ title: "Duplicate failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Opportunity duplicated" });
+    navigate(`/crm/${workspace.slug}/deals/${(data as any).id}`);
+  };
 
   const [deal, setDeal] = useState<any>(null);
 
@@ -235,7 +261,21 @@ export default function CrmDealDetail() {
           <Button size="sm" variant="outline" className="h-7 text-[12px]">Edit</Button>
           <Button size="sm" variant="outline" className="h-7 text-[12px]">Send Email</Button>
           <Button size="sm" variant="outline" className="h-7 text-[12px]">Create Project</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[12px]">More <ChevronDown className="h-3 w-3 ml-1" /></Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" className="h-7 text-[12px]">More <ChevronDown className="h-3 w-3 ml-1" /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 rounded-none p-0">
+              <DropdownMenuItem onClick={handleDeleteOpportunity} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Delete Opportunity</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDuplicate} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Duplicate</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/crm/${workspace.slug}/invoices?deal=${deal.id}`)} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Create Invoice</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/crm/${workspace.slug}/quotations?deal=${deal.id}`)} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Create Quote</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/crm/${workspace.slug}/sales-orders?deal=${deal.id}`)} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Create Sales Order</DropdownMenuItem>
+              <DropdownMenuSeparator className="my-0" />
+              <DropdownMenuItem onClick={() => navigate(`/crm/${workspace.slug}/calendar?deal=${deal.id}&type=event`)} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Add Event</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/crm/${workspace.slug}/activities?deal=${deal.id}&type=task`)} className="rounded-none text-[13px] text-primary hover:underline cursor-pointer">Add Task</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div className="inline-flex border rounded overflow-hidden ml-1">
             <button onClick={() => goto(prevId)} disabled={!prevId} className="h-7 w-7 flex items-center justify-center hover:bg-muted disabled:opacity-40"><ChevronLeft className="h-3.5 w-3.5" /></button>
             <button onClick={() => goto(nextId)} disabled={!nextId} className="h-7 w-7 flex items-center justify-center border-l hover:bg-muted disabled:opacity-40"><ChevronRight className="h-3.5 w-3.5" /></button>
