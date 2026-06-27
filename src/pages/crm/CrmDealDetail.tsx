@@ -603,4 +603,188 @@ function CommentsPanel({ dealId, workspaceId }: { dealId: string; workspaceId: s
   );
 }
 
+function DealContactsPanel({
+  dealId, workspaceId, workspaceSlug, organizationId, primaryContactId, onChanged,
+}: {
+  dealId: string;
+  workspaceId: string;
+  workspaceSlug: string;
+  organizationId: string | null;
+  primaryContactId: string | null;
+  onChanged: () => void;
+}) {
+  const navigate = useNavigate();
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [available, setAvailable] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    const ids = new Set<string>();
+    if (primaryContactId) ids.add(primaryContactId);
+    let orgContacts: any[] = [];
+    if (organizationId) {
+      const { data } = await supabase
+        .from("crm_contacts")
+        .select("id,full_name,title,email,phone,organization_id")
+        .eq("organization_id", organizationId)
+        .order("full_name");
+      orgContacts = data || [];
+      orgContacts.forEach((c) => ids.add(c.id));
+    }
+    let primary: any = null;
+    if (primaryContactId && !orgContacts.find((c) => c.id === primaryContactId)) {
+      const { data } = await supabase
+        .from("crm_contacts")
+        .select("id,full_name,title,email,phone,organization_id")
+        .eq("id", primaryContactId)
+        .maybeSingle();
+      primary = data;
+    } else {
+      primary = orgContacts.find((c) => c.id === primaryContactId) || null;
+    }
+    const list = [
+      ...(primary ? [{ ...primary, _primary: true }] : []),
+      ...orgContacts.filter((c) => c.id !== primaryContactId),
+    ];
+    setRows(list);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [dealId, organizationId, primaryContactId]);
+
+  const openPicker = async () => {
+    setPickerOpen(true);
+    const { data } = await supabase
+      .from("crm_contacts")
+      .select("id,full_name,title,email,phone,organization_id,organization:crm_organizations(name)")
+      .eq("workspace_id", workspaceId)
+      .order("full_name")
+      .limit(200);
+    setAvailable((data as any[]) || []);
+  };
+
+  const setAsPrimary = async (contactId: string) => {
+    const update: any = { contact_id: contactId };
+    const picked = available.find((c) => c.id === contactId) || rows.find((c) => c.id === contactId);
+    if (picked?.organization_id && !organizationId) update.organization_id = picked.organization_id;
+    const { error } = await supabase.from("crm_deals").update(update).eq("id", dealId);
+    if (error) { toast({ title: "Failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Contact linked" });
+    setPickerOpen(false);
+    onChanged();
+  };
+
+  const filtered = available.filter((c) => {
+    const q = search.toLowerCase().trim();
+    if (!q) return true;
+    return (c.full_name || "").toLowerCase().includes(q)
+      || (c.email || "").toLowerCase().includes(q)
+      || (c.phone || "").toLowerCase().includes(q)
+      || (c.organization?.name || "").toLowerCase().includes(q);
+  });
+
+  return (
+    <div className="bg-white border rounded">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b">
+        <div className="text-[13px] font-medium">Related Contacts {rows.length > 0 && <span className="text-muted-foreground">({rows.length})</span>}</div>
+        <Button size="sm" variant="outline" className="h-7 text-[12px] gap-1" onClick={openPicker}>
+          <Plus className="h-3 w-3" />Add Contact
+        </Button>
+      </div>
+      {loading ? (
+        <div className="p-6 text-center"><Loader2 className="h-4 w-4 animate-spin text-primary inline" /></div>
+      ) : rows.length === 0 ? (
+        <div className="p-8 text-center text-[12px] text-muted-foreground">No related contacts.</div>
+      ) : (
+        <table className="w-full text-[12.5px]">
+          <thead className="bg-muted/40 text-[11px] uppercase text-muted-foreground">
+            <tr>
+              <th className="text-left px-4 py-2 font-medium">Name</th>
+              <th className="text-left px-4 py-2 font-medium">Title</th>
+              <th className="text-left px-4 py-2 font-medium">Email</th>
+              <th className="text-left px-4 py-2 font-medium">Phone</th>
+              <th className="text-right px-4 py-2 font-medium">Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((c) => (
+              <tr key={c.id} className="border-t hover:bg-muted/20">
+                <td className="px-4 py-2">
+                  <button
+                    onClick={() => navigate(`/crm/${workspaceSlug}/contacts/${c.id}`)}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    {c.full_name}
+                  </button>
+                </td>
+                <td className="px-4 py-2">{c.title || "—"}</td>
+                <td className="px-4 py-2">
+                  {c.email ? <a href={`mailto:${c.email}`} className="text-primary hover:underline">{c.email}</a> : "—"}
+                </td>
+                <td className="px-4 py-2">
+                  {c.phone ? <a href={`tel:${c.phone}`} className="text-primary hover:underline">{c.phone}</a> : "—"}
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {c._primary ? (
+                    <span className="inline-block bg-primary/10 text-primary text-[11px] px-2 py-0.5 rounded">Primary</span>
+                  ) : (
+                    <button onClick={() => setAsPrimary(c.id)} className="text-[11px] text-muted-foreground hover:text-primary">
+                      Set as primary
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {pickerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setPickerOpen(false)}>
+          <div className="bg-white rounded-md shadow-lg w-full max-w-lg max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="px-4 py-3 border-b">
+              <div className="text-[13px] font-medium mb-2">Link contact to opportunity</div>
+              <input
+                autoFocus
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search contacts..."
+                className="w-full border rounded px-2.5 py-1.5 text-[12.5px] outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="overflow-y-auto flex-1">
+              {filtered.length === 0 ? (
+                <div className="p-6 text-center text-[12px] text-muted-foreground">No contacts found.</div>
+              ) : (
+                <ul className="divide-y">
+                  {filtered.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        onClick={() => setAsPrimary(c.id)}
+                        className="w-full text-left px-4 py-2 hover:bg-muted/30"
+                      >
+                        <div className="text-[12.5px] font-medium">{c.full_name}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {[c.title, c.organization?.name, c.email].filter(Boolean).join(" · ")}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="px-4 py-2 border-t flex justify-end">
+              <Button variant="outline" size="sm" className="h-7 text-[12px]" onClick={() => setPickerOpen(false)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 
