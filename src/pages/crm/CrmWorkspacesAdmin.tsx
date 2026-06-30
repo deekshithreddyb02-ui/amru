@@ -110,6 +110,12 @@ const CrmWorkspacesAdmin = () => {
   const [newRole, setNewRole] = useState<string>("crm_sales_rep");
   const [adding, setAdding] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  // Inline create-employee fields (shown when user not found)
+  const [needsCreate, setNeedsCreate] = useState(false);
+  const [createFullName, setCreateFullName] = useState("");
+  const [createUsername, setCreateUsername] = useState("");
+  const [createPhone, setCreatePhone] = useState("");
+  const [createTempPassword, setCreateTempPassword] = useState("");
 
   useEffect(() => {
     if (!roleLoading && role !== "super_admin") {
@@ -142,28 +148,78 @@ const CrmWorkspacesAdmin = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
+  const resetAddForm = () => {
+    setNewEmail("");
+    setNeedsCreate(false);
+    setCreateFullName("");
+    setCreateUsername("");
+    setCreatePhone("");
+    setCreateTempPassword("");
+  };
+
   const addMember = async () => {
     if (!selected || !newEmail.trim()) return;
     setAdding(true);
     try {
-      // Find user by email
-      const userId = Object.entries(emails).find(
+      // Find user by email (case-insensitive)
+      let userId = Object.entries(emails).find(
         ([, e]) => e.toLowerCase() === newEmail.trim().toLowerCase()
       )?.[0];
+
+      // If not found, create the employee inline (requires create fields)
       if (!userId) {
-        toast({
-          title: "User not found",
-          description: "That user must sign up first. Use Super Admin → Employees to create them.",
-          variant: "destructive",
+        if (!needsCreate) {
+          setNeedsCreate(true);
+          // Suggest defaults
+          const local = newEmail.split("@")[0] || "";
+          setCreateUsername((u) => u || local.toLowerCase());
+          setCreateFullName((n) => n || local);
+          toast({
+            title: "User not found",
+            description: "Fill in the details below to create this employee and add them.",
+          });
+          return;
+        }
+        if (!createFullName.trim() || !createUsername.trim() || !createTempPassword.trim()) {
+          toast({
+            title: "Missing fields",
+            description: "Full name, username, and temporary password are required.",
+            variant: "destructive",
+          });
+          return;
+        }
+        if (createTempPassword.length < 8) {
+          toast({
+            title: "Weak password",
+            description: "Temporary password must be at least 8 characters.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const { data: cre, error: ceErr } = await supabase.functions.invoke("create-employee", {
+          body: {
+            email: newEmail.trim(),
+            full_name: createFullName.trim(),
+            username: createUsername.trim().toLowerCase(),
+            phone: createPhone.trim(),
+            temp_password: createTempPassword,
+            role: "employee",
+          },
         });
-        return;
+        if (ceErr) throw ceErr;
+        if (!cre?.success || !cre?.user_id) {
+          throw new Error(cre?.error || "Failed to create employee");
+        }
+        userId = cre.user_id as string;
+        toast({ title: "Employee created", description: "Adding to workspace…" });
       }
+
       const { error } = await supabase
         .from("crm_workspace_members")
         .insert({ workspace_id: selected, user_id: userId, crm_role: newRole as never });
       if (error) throw error;
       toast({ title: "Member added" });
-      setNewEmail("");
+      resetAddForm();
       setAddOpen(false);
       load();
     } catch (e) {
@@ -290,7 +346,13 @@ const CrmWorkspacesAdmin = () => {
               <CardTitle className="text-sm">
                 Members{selectedWs ? ` · ${selectedWs.name}` : ""}
               </CardTitle>
-              <Dialog open={addOpen} onOpenChange={setAddOpen}>
+              <Dialog
+                open={addOpen}
+                onOpenChange={(o) => {
+                  setAddOpen(o);
+                  if (!o) resetAddForm();
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-2">
                     <UserPlus className="h-4 w-4" /> Add
@@ -308,10 +370,13 @@ const CrmWorkspacesAdmin = () => {
                         type="email"
                         placeholder="user@example.com"
                         value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
+                        onChange={(e) => {
+                          setNewEmail(e.target.value);
+                          setNeedsCreate(false);
+                        }}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        User must already have an account. Create them in Super Admin → Employees first.
+                        If the user doesn't exist, you can create them right here.
                       </p>
                     </div>
                     <div>
@@ -329,14 +394,68 @@ const CrmWorkspacesAdmin = () => {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {needsCreate && (
+                      <div className="space-y-3 rounded-md border border-dashed p-3 bg-muted/30">
+                        <p className="text-xs font-medium">
+                          New employee details (account will be created)
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="c_name">Full name *</Label>
+                            <Input
+                              id="c_name"
+                              value={createFullName}
+                              onChange={(e) => setCreateFullName(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="c_user">Username *</Label>
+                            <Input
+                              id="c_user"
+                              value={createUsername}
+                              onChange={(e) => setCreateUsername(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="c_phone">Phone</Label>
+                            <Input
+                              id="c_phone"
+                              value={createPhone}
+                              onChange={(e) => setCreatePhone(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="c_pwd">Temp password *</Label>
+                            <Input
+                              id="c_pwd"
+                              type="text"
+                              value={createTempPassword}
+                              onChange={(e) => setCreateTempPassword(e.target.value)}
+                              placeholder="min 8 chars"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                          The user will be required to change this password on first login.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <DialogFooter>
                     <Button onClick={addMember} disabled={adding || !newEmail.trim()}>
-                      {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
+                      {adding ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : needsCreate ? (
+                        "Create & Add"
+                      ) : (
+                        "Add"
+                      )}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+
             </CardHeader>
             <CardContent className="p-0">
               {wsMembers.length === 0 ? (
