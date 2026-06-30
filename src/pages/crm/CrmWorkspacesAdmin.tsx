@@ -373,15 +373,34 @@ const CrmWorkspacesAdmin = () => {
                         type="email"
                         placeholder="user@example.com"
                         value={newEmail}
-                        onChange={(e) => {
-                          setNewEmail(e.target.value);
-                          setNeedsCreate(false);
-                        }}
+                        onChange={(e) => setNewEmail(e.target.value)}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        If the user doesn't exist, you can create them right here.
+                        Enter an existing user's email, or enable "Create new employee" below to provision a new account.
                       </p>
                     </div>
+                    <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer hover:bg-accent/40">
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        checked={needsCreate}
+                        onChange={(e) => {
+                          const on = e.target.checked;
+                          setNeedsCreate(on);
+                          if (on) {
+                            const local = newEmail.split("@")[0] || "";
+                            setCreateUsername((u) => u || local.toLowerCase());
+                            setCreateFullName((n) => n || local);
+                          }
+                        }}
+                      />
+                      <div>
+                        <div className="text-sm font-medium">Create new employee</div>
+                        <div className="text-xs text-muted-foreground">
+                          As super admin, create a brand-new employee account and add them to this workspace in one step.
+                        </div>
+                      </div>
+                    </label>
                     <div>
                       <Label htmlFor="role">CRM role</Label>
                       <Select value={newRole} onValueChange={setNewRole}>
