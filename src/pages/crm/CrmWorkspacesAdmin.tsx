@@ -166,17 +166,13 @@ const CrmWorkspacesAdmin = () => {
         ([, e]) => e.toLowerCase() === newEmail.trim().toLowerCase()
       )?.[0];
 
-      // If not found, create the employee inline (requires create fields)
-      if (!userId) {
-        if (!needsCreate) {
-          setNeedsCreate(true);
-          // Suggest defaults
-          const local = newEmail.split("@")[0] || "";
-          setCreateUsername((u) => u || local.toLowerCase());
-          setCreateFullName((n) => n || local);
+      // Super admin chose to create a new employee account directly
+      if (needsCreate) {
+        if (userId) {
           toast({
-            title: "User not found",
-            description: "Fill in the details below to create this employee and add them.",
+            title: "User already exists",
+            description: "An account with this email already exists. Uncheck 'Create new employee' to add them.",
+            variant: "destructive",
           });
           return;
         }
@@ -212,6 +208,13 @@ const CrmWorkspacesAdmin = () => {
         }
         userId = cre.user_id as string;
         toast({ title: "Employee created", description: "Adding to workspace…" });
+      } else if (!userId) {
+        toast({
+          title: "User not found",
+          description: "Enable 'Create new employee' to create an account for this email.",
+          variant: "destructive",
+        });
+        return;
       }
 
       const { error } = await supabase
@@ -370,15 +373,34 @@ const CrmWorkspacesAdmin = () => {
                         type="email"
                         placeholder="user@example.com"
                         value={newEmail}
-                        onChange={(e) => {
-                          setNewEmail(e.target.value);
-                          setNeedsCreate(false);
-                        }}
+                        onChange={(e) => setNewEmail(e.target.value)}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        If the user doesn't exist, you can create them right here.
+                        Enter an existing user's email, or enable "Create new employee" below to provision a new account.
                       </p>
                     </div>
+                    <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer hover:bg-accent/40">
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        checked={needsCreate}
+                        onChange={(e) => {
+                          const on = e.target.checked;
+                          setNeedsCreate(on);
+                          if (on) {
+                            const local = newEmail.split("@")[0] || "";
+                            setCreateUsername((u) => u || local.toLowerCase());
+                            setCreateFullName((n) => n || local);
+                          }
+                        }}
+                      />
+                      <div>
+                        <div className="text-sm font-medium">Create new employee</div>
+                        <div className="text-xs text-muted-foreground">
+                          As super admin, create a brand-new employee account and add them to this workspace in one step.
+                        </div>
+                      </div>
+                    </label>
                     <div>
                       <Label htmlFor="role">CRM role</Label>
                       <Select value={newRole} onValueChange={setNewRole}>
