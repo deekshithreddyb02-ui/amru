@@ -346,7 +346,13 @@ const CrmWorkspacesAdmin = () => {
               <CardTitle className="text-sm">
                 Members{selectedWs ? ` · ${selectedWs.name}` : ""}
               </CardTitle>
-              <Dialog open={addOpen} onOpenChange={setAddOpen}>
+              <Dialog
+                open={addOpen}
+                onOpenChange={(o) => {
+                  setAddOpen(o);
+                  if (!o) resetAddForm();
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-2">
                     <UserPlus className="h-4 w-4" /> Add
@@ -364,10 +370,13 @@ const CrmWorkspacesAdmin = () => {
                         type="email"
                         placeholder="user@example.com"
                         value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
+                        onChange={(e) => {
+                          setNewEmail(e.target.value);
+                          setNeedsCreate(false);
+                        }}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        User must already have an account. Create them in Super Admin → Employees first.
+                        If the user doesn't exist, you can create them right here.
                       </p>
                     </div>
                     <div>
@@ -385,14 +394,68 @@ const CrmWorkspacesAdmin = () => {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {needsCreate && (
+                      <div className="space-y-3 rounded-md border border-dashed p-3 bg-muted/30">
+                        <p className="text-xs font-medium">
+                          New employee details (account will be created)
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="c_name">Full name *</Label>
+                            <Input
+                              id="c_name"
+                              value={createFullName}
+                              onChange={(e) => setCreateFullName(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="c_user">Username *</Label>
+                            <Input
+                              id="c_user"
+                              value={createUsername}
+                              onChange={(e) => setCreateUsername(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="c_phone">Phone</Label>
+                            <Input
+                              id="c_phone"
+                              value={createPhone}
+                              onChange={(e) => setCreatePhone(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="c_pwd">Temp password *</Label>
+                            <Input
+                              id="c_pwd"
+                              type="text"
+                              value={createTempPassword}
+                              onChange={(e) => setCreateTempPassword(e.target.value)}
+                              placeholder="min 8 chars"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                          The user will be required to change this password on first login.
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <DialogFooter>
                     <Button onClick={addMember} disabled={adding || !newEmail.trim()}>
-                      {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
+                      {adding ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : needsCreate ? (
+                        "Create & Add"
+                      ) : (
+                        "Add"
+                      )}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+
             </CardHeader>
             <CardContent className="p-0">
               {wsMembers.length === 0 ? (
