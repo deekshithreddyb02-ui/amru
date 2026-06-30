@@ -110,6 +110,12 @@ const CrmWorkspacesAdmin = () => {
   const [newRole, setNewRole] = useState<string>("crm_sales_rep");
   const [adding, setAdding] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  // Inline create-employee fields (shown when user not found)
+  const [needsCreate, setNeedsCreate] = useState(false);
+  const [createFullName, setCreateFullName] = useState("");
+  const [createUsername, setCreateUsername] = useState("");
+  const [createPhone, setCreatePhone] = useState("");
+  const [createTempPassword, setCreateTempPassword] = useState("");
 
   useEffect(() => {
     if (!roleLoading && role !== "super_admin") {
