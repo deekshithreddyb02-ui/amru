@@ -148,28 +148,78 @@ const CrmWorkspacesAdmin = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
+  const resetAddForm = () => {
+    setNewEmail("");
+    setNeedsCreate(false);
+    setCreateFullName("");
+    setCreateUsername("");
+    setCreatePhone("");
+    setCreateTempPassword("");
+  };
+
   const addMember = async () => {
     if (!selected || !newEmail.trim()) return;
     setAdding(true);
     try {
-      // Find user by email
-      const userId = Object.entries(emails).find(
+      // Find user by email (case-insensitive)
+      let userId = Object.entries(emails).find(
         ([, e]) => e.toLowerCase() === newEmail.trim().toLowerCase()
       )?.[0];
+
+      // If not found, create the employee inline (requires create fields)
       if (!userId) {
-        toast({
-          title: "User not found",
-          description: "That user must sign up first. Use Super Admin → Employees to create them.",
-          variant: "destructive",
+        if (!needsCreate) {
+          setNeedsCreate(true);
+          // Suggest defaults
+          const local = newEmail.split("@")[0] || "";
+          setCreateUsername((u) => u || local.toLowerCase());
+          setCreateFullName((n) => n || local);
+          toast({
+            title: "User not found",
+            description: "Fill in the details below to create this employee and add them.",
+          });
+          return;
+        }
+        if (!createFullName.trim() || !createUsername.trim() || !createTempPassword.trim()) {
+          toast({
+            title: "Missing fields",
+            description: "Full name, username, and temporary password are required.",
+            variant: "destructive",
+          });
+          return;
+        }
+        if (createTempPassword.length < 8) {
+          toast({
+            title: "Weak password",
+            description: "Temporary password must be at least 8 characters.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const { data: cre, error: ceErr } = await supabase.functions.invoke("create-employee", {
+          body: {
+            email: newEmail.trim(),
+            full_name: createFullName.trim(),
+            username: createUsername.trim().toLowerCase(),
+            phone: createPhone.trim(),
+            temp_password: createTempPassword,
+            role: "employee",
+          },
         });
-        return;
+        if (ceErr) throw ceErr;
+        if (!cre?.success || !cre?.user_id) {
+          throw new Error(cre?.error || "Failed to create employee");
+        }
+        userId = cre.user_id as string;
+        toast({ title: "Employee created", description: "Adding to workspace…" });
       }
+
       const { error } = await supabase
         .from("crm_workspace_members")
         .insert({ workspace_id: selected, user_id: userId, crm_role: newRole as never });
       if (error) throw error;
       toast({ title: "Member added" });
-      setNewEmail("");
+      resetAddForm();
       setAddOpen(false);
       load();
     } catch (e) {
