@@ -166,17 +166,13 @@ const CrmWorkspacesAdmin = () => {
         ([, e]) => e.toLowerCase() === newEmail.trim().toLowerCase()
       )?.[0];
 
-      // If not found, create the employee inline (requires create fields)
-      if (!userId) {
-        if (!needsCreate) {
-          setNeedsCreate(true);
-          // Suggest defaults
-          const local = newEmail.split("@")[0] || "";
-          setCreateUsername((u) => u || local.toLowerCase());
-          setCreateFullName((n) => n || local);
+      // Super admin chose to create a new employee account directly
+      if (needsCreate) {
+        if (userId) {
           toast({
-            title: "User not found",
-            description: "Fill in the details below to create this employee and add them.",
+            title: "User already exists",
+            description: "An account with this email already exists. Uncheck 'Create new employee' to add them.",
+            variant: "destructive",
           });
           return;
         }
@@ -212,6 +208,13 @@ const CrmWorkspacesAdmin = () => {
         }
         userId = cre.user_id as string;
         toast({ title: "Employee created", description: "Adding to workspace…" });
+      } else if (!userId) {
+        toast({
+          title: "User not found",
+          description: "Enable 'Create new employee' to create an account for this email.",
+          variant: "destructive",
+        });
+        return;
       }
 
       const { error } = await supabase
