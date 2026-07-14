@@ -28,6 +28,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Amruta Hydrogeo Services — Water & Environmental Solutions</title>
+        <meta name="description" content="Integrated water and environmental solutions across India — EC consulting, rainwater harvesting, ground water surveys, and hydrogeology." />
+        <link rel="canonical" href="https://www.amrutageotech.com/" />
+        <meta property="og:title" content="Amruta Hydrogeo Services — Water & Environmental Solutions" />
+        <meta property="og:description" content="Integrated water and environmental solutions across India — EC consulting, rainwater harvesting, ground water surveys, and hydrogeology." />
+        <meta property="og:url" content="https://www.amrutageotech.com/" />
+      </Helmet>
       <Navbar />
       <Hero />
       <Suspense fallback={null}>
