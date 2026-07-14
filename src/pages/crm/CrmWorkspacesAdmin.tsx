@@ -98,7 +98,7 @@ const CrmWorkspacesAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
 
-  const [newRole] = useState<string>("crm_sales_rep");
+  const newRole: string = "crm_sales_rep";
 
   useEffect(() => {
     if (!roleLoading && role !== "super_admin") {
