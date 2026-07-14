@@ -245,134 +245,17 @@ const CrmWorkspacesAdmin = () => {
               <CardTitle className="text-sm">
                 Members{selectedWs ? ` · ${selectedWs.name}` : ""}
               </CardTitle>
-              <Dialog
-                open={addOpen}
-                onOpenChange={(o) => {
-                  setAddOpen(o);
-                  if (!o) resetAddForm();
-                }}
-              >
-                <DialogTrigger asChild>
-                  <Button size="sm" className="gap-2">
-                    <UserPlus className="h-4 w-4" /> Add
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add member to {selectedWs?.name}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-2">
-                    <div>
-                      <Label htmlFor="email">User email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="user@example.com"
-                        value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Enter an existing user's email, or enable "Create new employee" below to provision a new account.
-                      </p>
-                    </div>
-                    <label className="flex items-start gap-2 rounded-md border p-3 cursor-pointer hover:bg-accent/40">
-                      <input
-                        type="checkbox"
-                        className="mt-1"
-                        checked={needsCreate}
-                        onChange={(e) => {
-                          const on = e.target.checked;
-                          setNeedsCreate(on);
-                          if (on) {
-                            const local = newEmail.split("@")[0] || "";
-                            setCreateUsername((u) => u || local.toLowerCase());
-                            setCreateFullName((n) => n || local);
-                          }
-                        }}
-                      />
-                      <div>
-                        <div className="text-sm font-medium">Create new employee</div>
-                        <div className="text-xs text-muted-foreground">
-                          As super admin, create a brand-new employee account and add them to this workspace in one step.
-                        </div>
-                      </div>
-                    </label>
-                    <div>
-                      <Label htmlFor="role">CRM role</Label>
-                      <Select value={newRole} onValueChange={setNewRole}>
-                        <SelectTrigger id="role">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CRM_ROLES.map((r) => (
-                            <SelectItem key={r} value={r}>
-                              {ROLE_LABEL[r] || r}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {needsCreate && (
-                      <div className="space-y-3 rounded-md border border-dashed p-3 bg-muted/30">
-                        <p className="text-xs font-medium">
-                          New employee details (account will be created)
-                        </p>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor="c_name">Full name *</Label>
-                            <Input
-                              id="c_name"
-                              value={createFullName}
-                              onChange={(e) => setCreateFullName(e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="c_user">Username *</Label>
-                            <Input
-                              id="c_user"
-                              value={createUsername}
-                              onChange={(e) => setCreateUsername(e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="c_phone">Phone</Label>
-                            <Input
-                              id="c_phone"
-                              value={createPhone}
-                              onChange={(e) => setCreatePhone(e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="c_pwd">Temp password *</Label>
-                            <Input
-                              id="c_pwd"
-                              type="text"
-                              value={createTempPassword}
-                              onChange={(e) => setCreateTempPassword(e.target.value)}
-                              placeholder="min 8 chars"
-                            />
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground">
-                          The user will be required to change this password on first login.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={addMember} disabled={adding || !newEmail.trim()}>
-                      {adding ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : needsCreate ? (
-                        "Create & Add"
-                      ) : (
-                        "Add"
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              {selected && (
+                <AddMemberDialog
+                  workspaceId={selected}
+                  workspaceName={selectedWs?.name}
+                  isSuperAdmin={role === "super_admin"}
+                  emails={emails}
+                  crmRoles={CRM_ROLES}
+                  roleLabels={ROLE_LABEL}
+                  onAdded={load}
+                />
+              )}
 
             </CardHeader>
             <CardContent className="p-0">
