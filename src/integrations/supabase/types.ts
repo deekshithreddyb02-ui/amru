@@ -5970,6 +5970,16 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_employee_created_audit: {
+        Args: {
+          _email: string
+          _full_name: string
+          _target_user_id: string
+          _username: string
+          _workspace_id: string
+        }
+        Returns: boolean
+      }
       resolve_crm_workspace: {
         Args: { _country: string; _state: string }
         Returns: string
