@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import {
   Select,
   SelectContent,
@@ -98,7 +98,7 @@ const CrmWorkspacesAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<string | null>(null);
 
-  const newRole: string = "crm_sales_rep";
+  
 
   useEffect(() => {
     if (!roleLoading && role !== "super_admin") {
