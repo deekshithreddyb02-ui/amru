@@ -13,17 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash2, UserPlus, ArrowLeft } from "lucide-react";
+import { Loader2, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { AddMemberDialog } from "@/components/crm/AddMemberDialog";
 
 type Workspace = {
   id: string;
