@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, phone, temp_password, username, role } = await req.json();
+    const { email, full_name, phone, temp_password, username, role, workspace_id } = await req.json();
     const targetRole = role === "admin" ? "admin" : "employee";
 
     if (!email || !temp_password || !full_name || !username) {
