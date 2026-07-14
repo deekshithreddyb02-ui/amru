@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sanitizeError } from "@/lib/errors";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader2, Eye, EyeOff, User, Phone } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import logo from "@/assets/logo-optimized.webp";
 import { lovable } from "@/integrations/lovable/index";
 
@@ -109,6 +110,15 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center p-4">
+      <Helmet>
+        <title>Sign In — Amruta Hydrogeo Services</title>
+        <meta name="description" content="Sign in or create an account to access Amruta Hydrogeo Services." />
+        <link rel="canonical" href="https://www.amrutageotech.com/auth" />
+        <meta property="og:title" content="Sign In — Amruta Hydrogeo Services" />
+        <meta property="og:description" content="Sign in or create an account to access Amruta Hydrogeo Services." />
+        <meta property="og:url" content="https://www.amrutageotech.com/auth" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
