@@ -53,7 +53,7 @@ const Gallery = () => {
       <AnimatePresence>
         {selectedImage && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'hsl(var(--foreground) / 0.9)' }} onClick={() => setSelectedImage(null)}>
-            <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
+            <button onClick={() => setSelectedImage(null)} aria-label="Close" className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
             <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} src={selectedImage} alt="Gallery preview" className="max-w-full max-h-[90vh] object-contain rounded-2xl" onClick={(e) => e.stopPropagation()} />
           </motion.div>
         )}

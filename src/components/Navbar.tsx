@@ -110,7 +110,7 @@ const Navbar = () => {
             <div className="relative">
               <img
                 src={logoSrc}
-                alt="Logo"
+                alt="Amruta Integrated Water Solutions Logo"
                 width={44}
                 height={44}
                 className="w-10 h-10 md:w-11 md:h-11 object-contain rounded-full bg-white ring-2 ring-white/20 transition-all group-hover:ring-white/40"
