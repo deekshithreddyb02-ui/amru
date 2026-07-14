@@ -90,7 +90,7 @@ describe("AddMemberDialog", () => {
     // Clear auto-suggested fields and use bad values
     const username = dialog.getByLabelText(/username/i) as HTMLInputElement;
     await user.clear(username);
-    await user.type(username, "!!");
+    await user.type(username, "AB!");
     const pwd = dialog.getByLabelText(/temp password/i) as HTMLInputElement;
     await user.type(pwd, "short");
 
@@ -102,7 +102,7 @@ describe("AddMemberDialog", () => {
     expect(dialog.getByText(/at least 8 characters/i)).toBeInTheDocument();
     expect(invokeMock).not.toHaveBeenCalled();
     // Values retained for retry
-    expect(username.value).toBe("!!");
+    expect(username.value).toBe("AB!");
     expect(pwd.value).toBe("short");
   });
 
