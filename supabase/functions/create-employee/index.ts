@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, full_name, phone, temp_password, username, role } = await req.json();
+    const { email, full_name, phone, temp_password, username, role, workspace_id } = await req.json();
     const targetRole = role === "admin" ? "admin" : "employee";
 
     if (!email || !temp_password || !full_name || !username) {
@@ -99,6 +99,30 @@ Deno.serve(async (req) => {
       .from("profiles")
       .update({ must_change_password: true, username: username.trim().toLowerCase() })
       .eq("user_id", newUser.user.id);
+
+    // Best-effort audit log entry attributed to the calling super admin.
+    try {
+      const isSuper = (await anonClient.rpc("is_super_admin", { _user_id: caller.id })).data;
+      await adminClient.from("crm_audit_log").insert({
+        workspace_id: workspace_id ?? null,
+        actor_id: caller.id,
+        actor_email: caller.email ?? null,
+        action: "created",
+        entity_type: "employee",
+        entity_id: newUser.user.id,
+        entity_label: full_name || email || username,
+        changes: {
+          email,
+          full_name,
+          username: username.trim().toLowerCase(),
+          role: targetRole,
+          workspace_id: workspace_id ?? null,
+          created_by_super_admin: !!isSuper,
+        },
+      });
+    } catch (auditErr) {
+      console.error("Audit log failed:", auditErr);
+    }
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
