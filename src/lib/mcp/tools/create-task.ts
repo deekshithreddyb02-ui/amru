@@ -10,7 +10,7 @@ export default defineTool({
     workspace_id: z.string().uuid(),
     title: z.string().trim().min(1),
     description: z.string().max(4000).optional(),
-    due_date: z.string().datetime().optional().describe("ISO 8601 datetime for the due date."),
+    due_date: z.string().optional().describe("Due date (ISO date or datetime)."),
     priority: z.enum(["low", "medium", "high"]).default("medium"),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
@@ -27,7 +27,7 @@ export default defineTool({
         priority,
         status: "open",
         created_by: ctx.getUserId(),
-        assignee_id: ctx.getUserId(),
+        assigned_to: ctx.getUserId(),
       })
       .select("id, title, status, priority, due_date, created_at")
       .single();

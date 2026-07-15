@@ -8,28 +8,28 @@ export default defineTool({
   description: "Create a new lead in a CRM workspace for the signed-in user.",
   inputSchema: {
     workspace_id: z.string().uuid(),
-    name: z.string().trim().min(1),
+    full_name: z.string().trim().min(1),
     email: z.string().email().optional(),
     phone: z.string().trim().max(30).optional(),
-    source: z.string().trim().max(60).optional(),
+    lead_source: z.string().trim().max(60).optional(),
     notes: z.string().max(4000).optional(),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
-  handler: async ({ workspace_id, name, email, phone, source, notes }, ctx) => {
+  handler: async ({ workspace_id, full_name, email, phone, lead_source, notes }, ctx) => {
     if (!ctx.isAuthenticated()) return errorResult("Not authenticated");
     const sb = supabaseForUser(ctx);
     const { data, error } = await sb
       .from("crm_leads")
       .insert({
         workspace_id,
-        name,
+        full_name,
         email: email ?? null,
         phone: phone ?? null,
-        source: source ?? "mcp",
+        lead_source: lead_source ?? "mcp",
         notes: notes ?? null,
         created_by: ctx.getUserId(),
       })
-      .select("id, name, email, phone, status, source, created_at")
+      .select("id, full_name, email, phone, status, stage, lead_source, created_at")
       .single();
     if (error) return errorResult(error.message);
     return jsonResult({ lead: data });

@@ -74,15 +74,17 @@ var list_leads_default = defineTool3({
   description: "List CRM leads in a workspace. Results honor the signed-in user's access.",
   inputSchema: {
     workspace_id: z.string().uuid().describe("Workspace ID (from list_workspaces)."),
-    limit: z.number().int().min(1).max(100).default(25).describe("Maximum number of leads to return."),
-    status: z.string().optional().describe("Optional status filter (e.g. new, qualified).")
+    limit: z.number().int().min(1).max(100).default(25),
+    status: z.string().optional().describe("Optional status filter (e.g. new, qualified)."),
+    stage: z.string().optional().describe("Optional stage filter.")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ workspace_id, limit, status }, ctx) => {
+  handler: async ({ workspace_id, limit, status, stage }, ctx) => {
     if (!ctx.isAuthenticated()) return errorResult("Not authenticated");
     const sb = supabaseForUser(ctx);
-    let q = sb.from("crm_leads").select("id, name, email, phone, status, source, created_at").eq("workspace_id", workspace_id).order("created_at", { ascending: false }).limit(limit);
+    let q = sb.from("crm_leads").select("id, full_name, email, phone, status, stage, lead_source, city, state, created_at").eq("workspace_id", workspace_id).order("created_at", { ascending: false }).limit(limit);
     if (status) q = q.eq("status", status);
+    if (stage) q = q.eq("stage", stage);
     const { data, error } = await q;
     if (error) return errorResult(error.message);
     return jsonResult({ leads: data ?? [] });
@@ -105,7 +107,7 @@ var list_deals_default = defineTool4({
   handler: async ({ workspace_id, limit, stage }, ctx) => {
     if (!ctx.isAuthenticated()) return errorResult("Not authenticated");
     const sb = supabaseForUser(ctx);
-    let q = sb.from("crm_deals").select("id, title, amount, currency, stage, probability, close_date, created_at").eq("workspace_id", workspace_id).order("created_at", { ascending: false }).limit(limit);
+    let q = sb.from("crm_deals").select("id, title, amount, currency, stage, probability, expected_close, created_at").eq("workspace_id", workspace_id).order("created_at", { ascending: false }).limit(limit);
     if (stage) q = q.eq("stage", stage);
     const { data, error } = await q;
     if (error) return errorResult(error.message);
@@ -129,7 +131,7 @@ var list_tasks_default = defineTool5({
   handler: async ({ workspace_id, limit, status }, ctx) => {
     if (!ctx.isAuthenticated()) return errorResult("Not authenticated");
     const sb = supabaseForUser(ctx);
-    let q = sb.from("crm_tasks").select("id, title, status, priority, due_date, assignee_id, created_at").eq("workspace_id", workspace_id).order("created_at", { ascending: false }).limit(limit);
+    let q = sb.from("crm_tasks").select("id, title, status, priority, due_date, assigned_to, created_at").eq("workspace_id", workspace_id).order("created_at", { ascending: false }).limit(limit);
     if (status) q = q.eq("status", status);
     const { data, error } = await q;
     if (error) return errorResult(error.message);
@@ -146,25 +148,25 @@ var create_lead_default = defineTool6({
   description: "Create a new lead in a CRM workspace for the signed-in user.",
   inputSchema: {
     workspace_id: z4.string().uuid(),
-    name: z4.string().trim().min(1),
+    full_name: z4.string().trim().min(1),
     email: z4.string().email().optional(),
     phone: z4.string().trim().max(30).optional(),
-    source: z4.string().trim().max(60).optional(),
+    lead_source: z4.string().trim().max(60).optional(),
     notes: z4.string().max(4e3).optional()
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
-  handler: async ({ workspace_id, name, email, phone, source, notes }, ctx) => {
+  handler: async ({ workspace_id, full_name, email, phone, lead_source, notes }, ctx) => {
     if (!ctx.isAuthenticated()) return errorResult("Not authenticated");
     const sb = supabaseForUser(ctx);
     const { data, error } = await sb.from("crm_leads").insert({
       workspace_id,
-      name,
+      full_name,
       email: email ?? null,
       phone: phone ?? null,
-      source: source ?? "mcp",
+      lead_source: lead_source ?? "mcp",
       notes: notes ?? null,
       created_by: ctx.getUserId()
-    }).select("id, name, email, phone, status, source, created_at").single();
+    }).select("id, full_name, email, phone, status, stage, lead_source, created_at").single();
     if (error) return errorResult(error.message);
     return jsonResult({ lead: data });
   }
@@ -181,7 +183,7 @@ var create_task_default = defineTool7({
     workspace_id: z5.string().uuid(),
     title: z5.string().trim().min(1),
     description: z5.string().max(4e3).optional(),
-    due_date: z5.string().datetime().optional().describe("ISO 8601 datetime for the due date."),
+    due_date: z5.string().optional().describe("Due date (ISO date or datetime)."),
     priority: z5.enum(["low", "medium", "high"]).default("medium")
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
@@ -196,7 +198,7 @@ var create_task_default = defineTool7({
       priority,
       status: "open",
       created_by: ctx.getUserId(),
-      assignee_id: ctx.getUserId()
+      assigned_to: ctx.getUserId()
     }).select("id, title, status, priority, due_date, created_at").single();
     if (error) return errorResult(error.message);
     return jsonResult({ task: data });

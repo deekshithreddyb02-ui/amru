@@ -69,12 +69,15 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 100,
-              "default": 25,
-              "description": "Maximum number of leads to return."
+              "default": 25
             },
             "status": {
               "type": "string",
               "description": "Optional status filter (e.g. new, qualified)."
+            },
+            "stage": {
+              "type": "string",
+              "description": "Optional stage filter."
             }
           },
           "required": [
@@ -171,7 +174,7 @@
               "type": "string",
               "format": "uuid"
             },
-            "name": {
+            "full_name": {
               "type": "string",
               "minLength": 1
             },
@@ -183,7 +186,7 @@
               "type": "string",
               "maxLength": 30
             },
-            "source": {
+            "lead_source": {
               "type": "string",
               "maxLength": 60
             },
@@ -194,7 +197,7 @@
           },
           "required": [
             "workspace_id",
-            "name"
+            "full_name"
           ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
@@ -227,8 +230,7 @@
             },
             "due_date": {
               "type": "string",
-              "format": "date-time",
-              "description": "ISO 8601 datetime for the due date."
+              "description": "Due date (ISO date or datetime)."
             },
             "priority": {
               "type": "string",

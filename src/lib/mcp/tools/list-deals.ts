@@ -17,7 +17,7 @@ export default defineTool({
     const sb = supabaseForUser(ctx);
     let q = sb
       .from("crm_deals")
-      .select("id, title, amount, currency, stage, probability, close_date, created_at")
+      .select("id, title, amount, currency, stage, probability, expected_close, created_at")
       .eq("workspace_id", workspace_id)
       .order("created_at", { ascending: false })
       .limit(limit);

@@ -17,7 +17,7 @@ export default defineTool({
     const sb = supabaseForUser(ctx);
     let q = sb
       .from("crm_tasks")
-      .select("id, title, status, priority, due_date, assignee_id, created_at")
+      .select("id, title, status, priority, due_date, assigned_to, created_at")
       .eq("workspace_id", workspace_id)
       .order("created_at", { ascending: false })
       .limit(limit);
