@@ -99,7 +99,7 @@ const Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${window.location.origin}${postAuthTarget}`,
             data: { full_name: fullName.trim(), phone: phone.trim() },
           }
         });
@@ -283,7 +283,7 @@ const Auth = () => {
                     setLoading(true);
                     try {
                       const { error } = await lovable.auth.signInWithOAuth("google", {
-                        redirect_uri: window.location.origin,
+                        redirect_uri: `${window.location.origin}${postAuthTarget}`,
                       });
                       if (error) throw error;
                     } catch (error: any) {
