@@ -80,6 +80,7 @@ const CrmLeadConversionMapping = lazy(() => import("./pages/crm/CrmLeadConversio
 const CrmStageManagement = lazy(() => import("./pages/crm/CrmStageManagement"));
 const QuotationSign = lazy(() => import("./pages/QuotationSign"));
 const FeedbackResponse = lazy(() => import("./pages/FeedbackResponse"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 
 const queryClient = new QueryClient();
 
@@ -108,6 +109,8 @@ const App = () => {
           <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path=".lovable/oauth/consent" element={<OAuthConsent />} />
+              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Navigate to="/crm" replace />} />
               <Route path="/super-admin" element={<Navigate to="/crm" replace />} />

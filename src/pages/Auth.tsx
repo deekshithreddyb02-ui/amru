@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,33 +23,38 @@ const Auth = () => {
   const [forgotMode, setForgotMode] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  // Preserve a same-origin ?next= redirect (used by the OAuth consent route).
+  const rawNext = searchParams.get("next");
+  const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const postAuthTarget = nextPath ?? "/";
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'TOKEN_REFRESHED' && session?.user) {
-          navigate("/");
-        } else if (event === 'SIGNED_IN' && session?.user) {
-          navigate("/");
+        if ((event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') && session?.user) {
+          if (nextPath) window.location.href = nextPath;
+          else navigate("/");
         }
       }
     );
 
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
-        // Clear stale session if refresh fails
         console.warn("Session expired, clearing stale session");
         supabase.auth.signOut();
         return;
       }
       if (session?.user) {
-        navigate("/");
+        if (nextPath) window.location.href = nextPath;
+        else navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, nextPath]);
 
   const validateForm = () => {
     if (!isLogin && !fullName.trim()) {
